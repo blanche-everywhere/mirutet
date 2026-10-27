@@ -128,13 +128,15 @@
       : sorry ? 'M93 125 Q110 126 123 116 M177 116 Q190 126 207 125'
       : 'M93 120 Q107 113 122 119 M178 119 Q193 113 207 120';
     const mouth = happy
-      ? '<path d="M137 194 Q150 199 163 194 Q161 214 150 215 Q139 214 137 194Z" fill="#a9607b"/><path d="M142 209 Q150 203 158 209 Q150 217 142 209Z" fill="#f9a9b8"/>'
+      ? '<path d="M140 195 Q150 199 160 195 C159 205 155 211 150 211 C145 211 141 205 140 195Z" fill="#a9607b"/><path d="M145 207 Q150 203 155 207 Q150 212 145 207Z" fill="#f9a9b8"/>'
       : surprised ? '<ellipse cx="150" cy="202" rx="7" ry="9" fill="#b66d85"/><ellipse cx="150" cy="206" rx="4" ry="3" fill="#ffc0c7"/>'
       : thinking ? '<path d="M144 201 Q149 198 155 201" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/>'
       : sorry ? '<path d="M141 205 Q150 197 159 205" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/>'
       : '<path d="M140 198 Q150 208 160 198" fill="none" stroke="#a96780" stroke-width="2.5" stroke-linecap="round"/>';
 
-    const closedEyes = `<path d="M91 160 Q109 ${happy ? 136 : 171} 128 160 M172 160 Q191 ${happy ? 136 : 171} 209 160"
+    const closedEyes = happy
+      ? '<path d="M93 159 C101 148 116 146 126 156 M174 156 C184 146 199 148 207 159" fill="none" stroke="#5d4965" stroke-width="3.6" stroke-linecap="round"/><path d="M94 157 Q90 157 88 153 M206 157 Q210 157 212 153" fill="none" stroke="#5d4965" stroke-width="2.3" stroke-linecap="round"/>'
+      : `<path d="M91 160 Q109 171 128 160 M172 160 Q191 171 209 160"
       fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>
       <path d="M93 158 l-5-4 M207 158 l5-4" fill="none" stroke="#57465f" stroke-width="2.5" stroke-linecap="round"/>`;
     const accents = [
@@ -220,8 +222,8 @@
           <g data-part="eyes">
             ${happy ? `<g class="mirufi-happy-eyes">${closedEyes}</g>` : `<g class="mirufi-eyes-open">${eye(109, 'left')}${eye(191, 'right')}</g><g class="mirufi-eyes-closed" opacity="0">${closedEyes}</g>`}
           </g>
-          <g data-part="cheeks">
-            <ellipse cx="92" cy="187" rx="23" ry="13" fill="${paint('blush')}"/><ellipse cx="208" cy="187" rx="23" ry="13" fill="${paint('blush')}"/>
+          <g data-part="cheeks"${happy ? ' transform="translate(0 -3)"' : ''}>
+            <ellipse cx="92" cy="187" rx="${happy ? 21 : 23}" ry="${happy ? 12 : 13}" fill="${paint('blush')}"/><ellipse cx="208" cy="187" rx="${happy ? 21 : 23}" ry="${happy ? 12 : 13}" fill="${paint('blush')}"/>
             <path d="M83 186 l-1 4 M90 187 l-1 4 M97 187 l-1 4 M203 187 l-1 4 M210 187 l-1 4 M217 186 l-1 4" stroke="#e7a3b4" stroke-width="1.4" stroke-linecap="round"/>
           </g>
           <path d="M149 182 q-3 4 1 4" fill="none" stroke="#ddb7b8" stroke-width="1.4" stroke-linecap="round"/>
