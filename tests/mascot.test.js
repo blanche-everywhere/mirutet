@@ -64,7 +64,7 @@ test('all five expressions are well-formed standalone SVGs with self-contained p
     assert.equal(root.attrs.role, 'img');
     assert.ok(elements.some(el => el.name === 'title'));
     assert.ok(elements.some(el => el.name === 'desc'));
-    assert.match(svg, /<desc[^>]*>ミルテト学園の案内役、ミルフィ。/);
+    assert.match(svg, /<desc[^>]*>ミルテト学園の先輩、ミルフィ。/);
     const ids = new Set(elements.filter(el => el.attrs.id).map(el => el.attrs.id));
     assert.equal(ids.size, elements.filter(el => el.attrs.id).length);
     for (const id of ids) { assert.ok(!seenIDs.has(id), 'IDs unique across inline instances'); seenIDs.add(id); }
@@ -157,7 +157,7 @@ test('classic scripts attach MiruTet.mascot while preserving every frozen engine
 
 test('Japanese dialogue has enough varied praise, milestones, piece lines, and finesse tips', () => {
   assert.equal(M.name, 'ミルフィ');
-  assert.ok(M.WELCOME_LINES.some(line => line.includes('ミルテト学園')));
+  assert.match(M.WELCOME_LINES[0], /ミルテト学園.*あなたの先輩、ミルフィですっ/);
   assert.ok(M.PRAISE_LINES.length >= 15);
   assert.ok(M.TIPS.length >= 25);
   for (const lines of [M.PRAISE_LINES, M.TIPS, M.MISS_LINES, M.ENCOURAGEMENT_LINES, M.WELCOME_LINES]) {
@@ -172,11 +172,20 @@ test('Japanese dialogue has enough varied praise, milestones, piece lines, and f
   }
   assert.equal(M.DIALOGUE.tips, M.TIPS);
   assert.ok(Object.isFrozen(M.DIALOGUE.perPiece.I));
+  const dialogue = JSON.stringify(M.DIALOGUE);
+  assert.match(dialogue, /わたし/);
+  assert.match(dialogue, /ミルフィーユ/);
+  assert.doesNotMatch(dialogue, /案内役|ガイド|ミルフィも|ミルフィが|ミルフィ、/);
+  for (const line of M.MISS_LINES) {
+    assert.match(line, /^…/);
+    assert.doesNotMatch(line, /です|ます|ましょう|ください|♪/);
+  }
 });
 
 test('fault hints include piece, actual count, optimal count and supplied labels, including zero-input targets', () => {
   const hint = M.hintText('T', 5, 2, ['180', '← DAS']);
-  for (const text of ['Tミノ', '今回5回', '最短は2回', 'あと3回', '180 → ← DAS']) assert.ok(hint.includes(text));
+  for (const text of ['Tミノ', '今の5回', '最短は2回', '3回多い', '遠回りしないで', '180 → ← DAS']) assert.ok(hint.includes(text));
+  assert.doesNotMatch(hint, /です|ます|ましょう|ください|♪/);
   const zero = M.hintText('O', 2, 0, []);
   assert.match(zero, /0回/); assert.match(zero, /ハードドロップだけ/);
   assert.ok(!zero.includes('undefined'));
@@ -318,6 +327,7 @@ test('preview tool writes all five inline SVGs with no external resources at the
   const preview = fs.readFileSync(outputPath, 'utf8');
   assert.equal((preview.match(/<svg\b/g) || []).length, 5);
   assert.match(preview, /<html lang="ja">/);
+  assert.doesNotMatch(preview, /案内役|ガイド/);
   assert.ok(!/<(?:link|script|img|iframe)\b/i.test(preview));
   assert.ok(!/\b(?:src|href)\s*=|@import|url\((?!#)/i.test(preview));
   for (const expression of M.EXPRESSIONS) assert.ok(preview.includes(`data-expression="${expression}"`));

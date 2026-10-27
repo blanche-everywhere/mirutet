@@ -134,6 +134,8 @@ async function main() {
     // Keep subsequent reloads intact: do not use an init script that clears data.
     await page.evaluate(() => localStorage.clear()); await page.reload();
     await waitScreen('menu'); await checkViewport('menu', ['.menu-buttons', '.first-note', '.menu-art .speech', '.menu-art .mirufi', '.mascot-caption', '.footer']);
+    assert.equal(await page.locator('.menu-art .speaker').innerText(), 'ミルフィ');
+    assert.match(await page.locator('.menu-art .bubble-text').innerText(), /あなたの先輩、ミルフィですっ/);
     await checkText(); await shot('menu'); clean();
 
     // Start the first lesson using the focused menu button, then use genuine
@@ -148,9 +150,15 @@ async function main() {
     assert.equal((await state()).paused, true); assert.deepEqual((await state()).held, []);
     await page.keyboard.up('ArrowLeft'); await page.keyboard.press('Enter'); await ready();
     await page.keyboard.press('KeyR'); await ready();
-    await checkLesson(); await pressAction('hardDrop');
+    await checkLesson();
+    await pressAction('cw'); await pressAction('hardDrop');
+    const lessonFault = await state();
+    assert.equal(lessonFault.lastResult.status, 'fault'); assert.equal(lessonFault.tryIndex, 0);
+    assert.equal(lessonFault.bubble, '…今の1入力。最短は0入力。1入力多い。遠回りしないで。');
+    await ready(); await pressAction('hardDrop');
     await page.waitForFunction(() => window.__mirutet.getState().tryDone);
     assert.ok((await state()).progress.completed.includes(0));
+    assert.match((await state()).bubble, /大成功ですっ！あなた、最短の操作/);
     await checkLesson();
     await page.locator('[data-act=next-lesson]').focus(); await page.keyboard.press('Enter'); assert.equal((await state()).lessonIndex, 1);
     await page.keyboard.press('ArrowRight'); assert.equal((await state()).lessonIndex, 2);
@@ -170,6 +178,7 @@ async function main() {
     for (let i = 0; i < 3; i++) {
       await placeOptimal();
       await page.waitForFunction(index => window.__mirutet.getState().tryIndex === index + 1, i);
+      assert.match((await state()).bubble, i === 2 ? /大成功ですっ/ : /パーフェクトですっ/);
     }
     assert.ok((await state()).progress.completed.includes(4)); clean();
     await checkLesson();
@@ -246,6 +255,8 @@ async function main() {
     s = await state();
     assert.equal(s.lastResult.status, 'fault'); assert.equal(s.lastResult.extra, 1); assert.equal(s.stats.faults, 1);
     assert.equal(s.stats.streak, 0); assert.equal(s.expression, 'thinking');
+    assert.match(s.bubble, /…Oミノ、今の1回。最短は0回。1回多い。遠回りしないで。/);
+    assert.match(s.bubble, /ハードドロップだけ。/);
     await page.keyboard.press('KeyH'); assert.equal((await state()).hint, true);
     assert.equal(await page.locator('#hint-route').isVisible(), true);
     await page.waitForTimeout(350);
@@ -263,6 +274,7 @@ async function main() {
     const targetKey = (await state()).round.target.key;
     await page.keyboard.press('Space'); s = await state();
     assert.equal(s.lastResult.status, 'miss'); assert.equal(s.stats.faults, 1);
+    assert.match(s.bubble, /^…/); assert.doesNotMatch(s.bubble, /です|ます|ましょう|ください|♪/);
     assert.equal(s.round.target.key, targetKey);
     await page.keyboard.press('KeyR'); assert.equal((await state()).round.target.key, targetKey);
 
@@ -458,6 +470,7 @@ async function main() {
       // Notifications stay in the header, expire, and disappear on navigation.
       await defaultPage.locator('[data-act=reset-handling]').click();
       assert.equal(await defaultPage.locator('#toast.visible').count(), 1);
+      assert.equal(await defaultPage.locator('#toast').innerText(), 'ハンドリング、初期値に戻せましたっ。');
       assert.ok(await defaultPage.evaluate(() => document.querySelector('#toast').getBoundingClientRect().bottom <= document.querySelector('.topbar').getBoundingClientRect().bottom));
       await defaultPage.waitForFunction(() => getComputedStyle(document.querySelector('#toast')).visibility === 'hidden', null, { timeout: 5500 });
       await defaultPage.locator('[data-act=reset-handling]').click();

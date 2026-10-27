@@ -145,7 +145,7 @@
   }
   function footer() { return '<footer class="footer"><span>ミルテト学園 · 小さな一手で、もっと楽しく。</span><span>ORIGINAL ART & SYNTHESIZED SOUND · NO NETWORK</span></footer>'; }
   function menuHTML() {
-    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><p class="menu-mode"><span class="tag">フィネス編</span></p><nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>FREE PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p><p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech('ミルテト学園へようこそ！ミルフィです♪\nいっしょに、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
+    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><p class="menu-mode"><span class="tag">フィネス編</span></p><nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>FREE PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p><p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
   }
   function mini(type, extra = '') { return `<canvas class="mini-piece" data-piece="${type || ''}" width="144" height="108" aria-label="${type || '空'}ミノ" ${extra}></canvas>`; }
   function boardHTML() {
@@ -170,7 +170,7 @@
   function demoVariants(lesson) { return lesson.demo.examples || lesson.demo.variants || [lesson.demo]; }
   function tutorialHTML() {
     const lesson = lessons[lessonIndex], variants = demoVariants(lesson);
-    return `<main class="page lesson-page"><div class="page-heading lesson-heading"><div><div class="eyebrow">LESSON ${String(lessonIndex + 1).padStart(2, '0')} / 12</div><h2 style="margin-top:5px">${escape(lesson.title)}</h2></div><div class="row"><nav class="lesson-steps" aria-label="レッスン選択">${lessons.map((l, i) => `<button data-act="lesson" data-index="${i}" title="${escape(l.title)}" class="${i === lessonIndex ? 'active' : progress.completed.includes(i) ? 'done' : ''}">${i + 1}</button>`).join('')}</nav><button class="small" data-act="lessons">一覧</button></div></div><div class="lesson-grid"><aside class="lesson-coach">${speech(lesson.lines[0], 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${lesson.expression}">${mascot(lesson.expression, 'lesson')}</div><p class="tiny" style="text-align:center">ミルフィのフィネス教室</p></aside><section class="lesson-board">${boardHTML()}<div id="demo-keys" class="sequence"></div><p id="demo-caption" class="tiny" style="text-align:center;margin:8px 0">実演を準備しています…</p><div id="tutorial-result" class="lesson-status" aria-live="polite">${escape(lessonMessage)}</div></section><section class="lesson-details" aria-label="レッスンの説明と操作"><div class="lesson-content" tabindex="0" aria-label="レッスンの説明と最短表"><span class="tag ${tryMode ? 'mint-tag' : ''}">${tryMode ? 'YOUR TURN / 自分でチャレンジ' : 'WATCH / キーの光り方を見てみよう'}</span><div class="lesson-text">${lesson.lines.slice(1).map(line => `<p>${escape(line)}</p>`).join('')}</div><div class="demo-tabs">${variants.map((v, i) => `<button class="${demoVariant === i && !tryMode ? 'active' : ''}" data-act="demo" data-index="${i}">${lesson.demo.type === 'compare-sequences' ? i === 0 ? 'タップ × 4' : 'DAS × 1' : v.type === 'irs' ? 'IRSの実演' : v.type === 'ihs' ? 'IHSの実演' : '実演 ' + (i + 1)}</button>`).join('')}<button data-act="settings">操作の設定 ↗</button></div><div class="try-box"><h3>✧ やってみましょう</h3><p>${lesson.tryIt.requireIRS ? 'ARE中に回転キーを長押しして、IRSで置いてみましょう。' : '目標の輪郭に、最少の回数で置いてみましょう。別の最短手順でもOKです。'}<br>移動・回転で合わせ、${escape(friendly(bindings.hardDrop[0]))} で落下 / ${escape(friendly(bindings.retry[0]))} でもう一度</p><button class="small ${tryMode ? '' : 'primary'}" data-act="try-it">${tryDone ? 'もう一度チャレンジ' : tryMode ? `目標 ${Math.min(tryIndex + 1, lesson.tryIt.targets.length)} / ${lesson.tryIt.targets.length} · 最初から` : `${lesson.tryIt.targets.length}つの目標にチャレンジ`}</button></div>${lesson.demo.placementGroups ? `<h3 style="margin-bottom:7px">${lesson.demo.piece}ミノの最短ルート表</h3><p class="tiny">列を選ぶと実演します。0 / R / 2 / L は回転の向きです。</p><table class="lesson-table"><thead><tr><th>向き・左端の列</th><th>最短入力</th></tr></thead><tbody>${lesson.demo.placementGroups.map((group, i) => `<tr><td><button data-act="table-demo" data-index="${i}">${group.placements.map(p => `${p.rotationLabel}・${p.column}`).join(' / ')}</button></td><td><div class="sequence">${route(group.actions)}</div></td></tr>`).join('')}</tbody></table>` : ''}</div><nav class="lesson-nav" aria-label="前後のレッスン"><button class="small" data-act="previous-lesson" ${lessonIndex === 0 ? 'disabled' : ''}>← 前へ</button><button class="primary small" data-act="next-lesson">${lessonIndex === 11 ? 'ドリルへ →' : '次のレッスン →'}</button></nav><p class="tiny lesson-shortcuts">実演中: Enter / Space / → で次へ · ← で前へ · Esc でタイトル</p></section></div></main>`;
+    return `<main class="page lesson-page"><div class="page-heading lesson-heading"><div><div class="eyebrow">LESSON ${String(lessonIndex + 1).padStart(2, '0')} / 12</div><h2 style="margin-top:5px">${escape(lesson.title)}</h2></div><div class="row"><nav class="lesson-steps" aria-label="レッスン選択">${lessons.map((l, i) => `<button data-act="lesson" data-index="${i}" title="${escape(l.title)}" class="${i === lessonIndex ? 'active' : progress.completed.includes(i) ? 'done' : ''}">${i + 1}</button>`).join('')}</nav><button class="small" data-act="lessons">一覧</button></div></div><div class="lesson-grid"><aside class="lesson-coach">${speech(lesson.lines[0], 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${lesson.expression}">${mascot(lesson.expression, 'lesson')}</div><p class="tiny" style="text-align:center">ミルフィのフィネス教室</p></aside><section class="lesson-board">${boardHTML()}<div id="demo-keys" class="sequence"></div><p id="demo-caption" class="tiny" style="text-align:center;margin:8px 0">実演を準備しています…</p><div id="tutorial-result" class="lesson-status" aria-live="polite">${escape(lessonMessage)}</div></section><section class="lesson-details" aria-label="レッスンの説明と操作"><div class="lesson-content" tabindex="0" aria-label="レッスンの説明と最短表"><span class="tag ${tryMode ? 'mint-tag' : ''}">${tryMode ? 'YOUR TURN / 自分でチャレンジ' : 'WATCH / キーの光り方を見てみよう'}</span><div class="lesson-text">${lesson.lines.slice(1).map(line => `<p>${escape(line)}</p>`).join('')}</div><div class="demo-tabs">${variants.map((v, i) => `<button class="${demoVariant === i && !tryMode ? 'active' : ''}" data-act="demo" data-index="${i}">${lesson.demo.type === 'compare-sequences' ? i === 0 ? 'タップ × 4' : 'DAS × 1' : v.type === 'irs' ? 'IRSの実演' : v.type === 'ihs' ? 'IHSの実演' : '実演 ' + (i + 1)}</button>`).join('')}<button data-act="settings">操作の設定 ↗</button></div><div class="try-box"><h3>✧ やってみましょう</h3><p>${lesson.tryIt.requireIRS ? 'ARE中に回転キーを長押しして、IRSで置いてみましょうね。' : '目標の輪郭に、最少の回数で置いてみましょうね。別の最短手順でもOKですっ。'}<br>移動・回転で合わせ、${escape(friendly(bindings.hardDrop[0]))} で落下 / ${escape(friendly(bindings.retry[0]))} でもう一度</p><button class="small ${tryMode ? '' : 'primary'}" data-act="try-it">${tryDone ? 'もう一度チャレンジ' : tryMode ? `目標 ${Math.min(tryIndex + 1, lesson.tryIt.targets.length)} / ${lesson.tryIt.targets.length} · 最初から` : `${lesson.tryIt.targets.length}つの目標にチャレンジ`}</button></div>${lesson.demo.placementGroups ? `<h3 style="margin-bottom:7px">${lesson.demo.piece}ミノの最短ルート表</h3><p class="tiny">列を選ぶと実演します。0 / R / 2 / L は回転の向きです。</p><table class="lesson-table"><thead><tr><th>向き・左端の列</th><th>最短入力</th></tr></thead><tbody>${lesson.demo.placementGroups.map((group, i) => `<tr><td><button data-act="table-demo" data-index="${i}">${group.placements.map(p => `${p.rotationLabel}・${p.column}`).join(' / ')}</button></td><td><div class="sequence">${route(group.actions)}</div></td></tr>`).join('')}</tbody></table>` : ''}</div><nav class="lesson-nav" aria-label="前後のレッスン"><button class="small" data-act="previous-lesson" ${lessonIndex === 0 ? 'disabled' : ''}>← 前へ</button><button class="primary small" data-act="next-lesson">${lessonIndex === 11 ? 'ドリルへ →' : '次のレッスン →'}</button></nav><p class="tiny lesson-shortcuts">実演中: Enter / Space / → で次へ · ← で前へ · Esc でタイトル</p></section></div></main>`;
   }
   function handlingRow(key, title, note, step = 1) {
     const [min, max] = E.SETTING_LIMITS[key];
@@ -188,7 +188,7 @@
     return `<main class="page"><div class="page-heading"><div><div class="eyebrow">A LITTLE BETTER EVERY DAY</div><h2 style="margin-top:5px">練習の記録</h2><p>${statsScope === 'session' ? 'このセッションの記録です。' : 'このブラウザに保存した、これまでの練習です。'} フォルトと置き場所のミスは別々に集計します。</p></div><div class="row">${session ? `<button class="small" data-act="stats-scope">${statsScope === 'session' ? '通算記録へ' : 'セッション記録へ'}</button><button class="primary small" data-act="return-play">練習に戻る</button>` : ''}<button class="small danger" data-act="reset-stats">記録をリセット</button></div></div><section class="panel big-stats">${[['試行数',stats.attempts,'回'],['正確率',stats.accuracy.toFixed(1),'%'],['最高連続',stats.bestStreak,'回'],['フォルト',stats.faults,'回'],['置き場所ミス',stats.misses,'回'],['平均入力 / 最短',stats.averageInputs.toFixed(2) + ' / ' + stats.averageOptimal.toFixed(2),'']].map(([label,value,unit]) => `<div class="stat"><label>${label}</label><strong class="accent">${value}</strong><small> ${unit}</small></div>`).join('')}</section><div class="stats-full" style="margin-top:20px"><section class="panel"><h3>ミノごとの記録</h3><table class="full-table"><thead><tr><th>ミノ</th><th>試行</th><th>最短成功</th><th>フォルト</th><th>ミス</th></tr></thead><tbody>${E.PIECE_TYPES.map(type => { const p=stats.byPiece[type]; return `<tr><td>${type}</td><td>${p.attempts}</td><td>${p.perfect}</td><td>${p.faults}</td><td>${p.misses}</td></tr>`; }).join('')}</tbody></table></section><section class="panel"><h3>スプリントのベストタイム</h3><table class="full-table"><thead><tr><th>目標数</th><th>ベストタイム</th></tr></thead><tbody>${Object.entries(totalStats.bestTimes).map(([length, time]) => `<tr><td>${length} 個</td><td>${timeText(time)}</td></tr>`).join('') || '<tr><td colspan="2">まだ記録がありません。スプリントに挑戦しましょう♪</td></tr>'}</tbody></table><p class="handling-note">正確率 = Perfect ÷ 全試行。PPS = 成功した配置数 ÷ 秒数。<br>ゼロフォルトでは余分な入力のあった配置は進捗に入りません。</p></section></div></main>${footer()}`;
   }
   function sprintHTML() {
-    return `<main class="page"><div class="page-heading"><div><div class="eyebrow">FIND YOUR RHYTHM</div><h2 style="margin-top:5px">スプリント</h2></div><span class="tag">タイマーは最初の操作から</span></div><div class="sprint-setup"><div>${speech('正確さとリズムを大切に♪ 目標の数だけ置いて、自己ベストに挑戦しましょうね。')}<div class="mascot-wrap">${mascot('surprised','sprint')}</div></div><section class="panel"><h2>今日は何個、置きますか？</h2><p class="handling-note">正しい場所への配置が目標数に達するとゴールです。<br>操作・ミノ・列の設定はドリルと共通です。</p><div class="sprint-choices"><button data-act="start-sprint" data-length="40">40<small class="tiny"> 個</small></button><button data-act="start-sprint" data-length="100">100<small class="tiny"> 個</small></button></div><div class="custom-sprint"><label for="custom-length">カスタム</label><input id="custom-length" type="number" min="1" max="9999" value="20"><button class="primary small" data-act="custom-sprint">スタート →</button></div><p class="best-line">40個 ${totalStats.bestTimes[40] === undefined ? '—' : timeText(totalStats.bestTimes[40])} / 100個 ${totalStats.bestTimes[100] === undefined ? '—' : timeText(totalStats.bestTimes[100])}</p>${toggle('zeroFault','ゼロフォルト：最短成功だけで進む')}</section></div></main>${footer()}`;
+    return `<main class="page"><div class="page-heading"><div><div class="eyebrow">FIND YOUR RHYTHM</div><h2 style="margin-top:5px">スプリント</h2></div><span class="tag">タイマーは最初の操作から</span></div><div class="sprint-setup"><div>${speech('正確さとリズムが大切ですっ♪ 目標の数だけ置いて、あなたの自己ベストに挑戦しましょうね。')}<div class="mascot-wrap">${mascot('surprised','sprint')}</div></div><section class="panel"><h2>今日は何個、置きますか？</h2><p class="handling-note">正しい場所への配置が目標数に達するとゴールです。<br>操作・ミノ・列の設定はドリルと共通です。</p><div class="sprint-choices"><button data-act="start-sprint" data-length="40">40<small class="tiny"> 個</small></button><button data-act="start-sprint" data-length="100">100<small class="tiny"> 個</small></button></div><div class="custom-sprint"><label for="custom-length">カスタム</label><input id="custom-length" type="number" min="1" max="9999" value="20"><button class="primary small" data-act="custom-sprint">スタート →</button></div><p class="best-line">40個 ${totalStats.bestTimes[40] === undefined ? '—' : timeText(totalStats.bestTimes[40])} / 100個 ${totalStats.bestTimes[100] === undefined ? '—' : timeText(totalStats.bestTimes[100])}</p>${toggle('zeroFault','ゼロフォルト：最短成功だけで進む')}</section></div></main>${footer()}`;
   }
   function resultHTML() {
     const r = sprintResult;
@@ -210,7 +210,7 @@
     if (screen === 'tutorial' && tryMode) {
       const exercise = lessons[lessonIndex].tryIt;
       $('#demo-keys').innerHTML = route(exercise.targets[Math.min(tryIndex, exercise.targets.length - 1)].actions);
-      $('#demo-caption').textContent = tryDone ? 'チャレンジ達成！花まるです♪' : `チャレンジ ${tryIndex + 1} / ${exercise.targets.length}`;
+      $('#demo-caption').textContent = tryDone ? 'チャレンジ達成！花まるですっ♪' : `チャレンジ ${tryIndex + 1} / ${exercise.targets.length}`;
     }
     drawMinis();
     fitLessonBoard();
@@ -282,7 +282,7 @@
     releaseAll(); sessionEventQueue = []; demo = null; tryMode = false; tryDone = false;
     session = newSession({ ...sessionOptions(), sprintLength: length });
     lastResult = null; particles = []; hint = false; irsUntil = 0; irsCount = 0; lastTipAttempt = 0;
-    setCoach('目標の輪郭へ、最短ルートでどうぞ♪ 迷ったらヒントを見てくださいね。');
+    setCoach('目標の輪郭へ、最短ルートですっ♪ 迷ったらヒントをどうぞ。わたしもついていますよ。');
     screen = 'play'; session.start(now()); window.scrollTo(0, 0); render(); processEvents();
   }
   function updatePractice(next) {
@@ -296,7 +296,7 @@
     const opts = { ...next, area: next.area === 'custom' ? 'all' : next.area,
       columnRange: next.area === 'custom' ? [next.minColumn - 1, next.maxColumn - 1] : null };
     try { new E.DrillSession({ ...opts, settings, time: now() }); }
-    catch (_) { toast('この条件では置ける目標がありません。列の範囲を広げてください。'); $('#practice-wrap').innerHTML = practiceHTML(); restoreFocus(); return; }
+    catch (_) { toast('この条件では置ける目標がないんですっ。列の範囲を広げてくださいね。'); $('#practice-wrap').innerHTML = practiceHTML(); restoreFocus(); return; }
     releaseAll(); practice = next; save();
     if (session && screen === 'play') {
       session.pieces = [...practice.pieces]; session.area = opts.area; session.columnRange = opts.columnRange;
@@ -368,19 +368,24 @@
             if (tryIndex >= lessons[lessonIndex].tryIt.targets.length) {
               tryDone = true; pauseSession();
               if (!progress.completed.includes(lessonIndex)) progress.completed.push(lessonIndex);
-              lessonMessage = '✔ チャレンジ達成！次のレッスンへ進めます♪';
-              setCoach('大成功です！最短の操作、覚えられましたね♪', 'happy');
+              lessonMessage = '✔ チャレンジ達成ですっ！次のレッスンへどうぞ♪';
+              setCoach('大成功ですっ！あなた、最短の操作を覚えられましたね♪', 'happy');
             } else {
-              lessonMessage = `✔ パーフェクト！ ${tryIndex} / ${lessons[lessonIndex].tryIt.targets.length} 達成。次の目標です♪`;
+              lessonMessage = `✔ パーフェクトですっ！ ${tryIndex} / ${lessons[lessonIndex].tryIt.targets.length} 達成。次の目標ですよ♪`;
+              setCoach('パーフェクトですっ♪ 次の目標も、落ち着いてどうぞ。', 'happy');
               choosePracticeTarget();
             }
           } else {
-            lessonMessage = requiresIRS && r.status === 'perfect' ? '出現前の待ち時間に回転を長押ししてみましょう。' : `${r.status === 'miss' ? '置き場所をもう一度♪' : 'もう少し短くできますよ♪'} 最短 ${r.optimal}入力`;
+            lessonMessage = requiresIRS && r.status === 'perfect'
+              ? '出現前の待ち時間に、回転を長押ししてみましょうね。'
+              : r.status === 'miss' ? `…目標と違う。輪郭を確認して。最短は${r.optimal}入力。`
+                : `…今の${r.used}入力。最短は${r.optimal}入力。${r.extra}入力多い。遠回りしないで。`;
+            setCoach(lessonMessage, r.status === 'miss' ? 'sorry' : 'thinking');
             choosePracticeTarget();
           }
           $('#tutorial-result').textContent = lessonMessage;
           const exercise = lessons[lessonIndex].tryIt;
-          $('#demo-caption').textContent = tryDone ? 'チャレンジ達成！花まるです♪' : `チャレンジ ${tryIndex + 1} / ${exercise.targets.length} · 最短 ${exercise.targets[tryIndex].count} 入力`;
+          $('#demo-caption').textContent = tryDone ? 'チャレンジ達成！花まるですっ♪' : `チャレンジ ${tryIndex + 1} / ${exercise.targets.length} · 最短 ${exercise.targets[tryIndex].count} 入力`;
           $('[data-act=try-it]').textContent = tryDone ? 'もう一度チャレンジ' : `目標 ${tryIndex + 1} / ${exercise.targets.length} · 最初から`;
           $('#demo-keys').innerHTML = route(lessons[lessonIndex].tryIt.targets[Math.min(tryIndex, lessons[lessonIndex].tryIt.targets.length - 1)].actions);
           fitLessonBoard();
@@ -442,7 +447,7 @@
     const exercise = lessons[lessonIndex].tryIt;
     session = newSession({ pieces: [exercise.piece], settings: { ...settings, ...exercise.settings },
       totalStats: new E.Stats(), zeroFault: true, repeatOnFault: true, repeatOnMiss: true });
-    session.start(now(), exercise.targets[0]); lessonMessage = '輪郭に重ねてハードドロップしてみましょう♪'; render();
+    session.start(now(), exercise.targets[0]); lessonMessage = '輪郭に重ねて、ハードドロップですっ♪'; render();
     $('#demo-keys').innerHTML = route(exercise.targets[0].actions);
     $('#demo-caption').textContent = `チャレンジ 1 / ${exercise.targets.length} · 最短 ${exercise.targets[0].count} 入力`;
     fitLessonBoard();
@@ -610,7 +615,7 @@
     if (conflict) { capture.code = code; capture.conflict = conflict; captureHTML(); return; }
     try { bindings = E.rebindKeys(bindings, capture.action, capture.index, code); }
     catch (error) { toast(error.message); return; }
-    save(); endCapture(true); toast('キー設定を保存しました。');
+    save(); endCapture(true); toast('キー設定の保存、完了ですっ。');
   }
   function clickAction(button) {
     const act = button.dataset.act;
@@ -637,7 +642,7 @@
     else if (act === 'resume') resumePlay();
     else if (act === 'retry') { releaseAll(); session.retry(now()); processEvents(); }
     else if (act === 'skip') { releaseAll(); session.skip(now()); processEvents(); }
-    else if (act === 'hint') { hint = !hint; updateHint(); if (hint) setCoach(`この目標は${session.round.optimal}入力です♪ ` + session.round.target.actions.map(actionLabel).join(' → '), 'thinking'); }
+    else if (act === 'hint') { hint = !hint; updateHint(); if (hint) setCoach(`この目標は${session.round.optimal}入力ですっ♪ ` + session.round.target.actions.map(actionLabel).join(' → '), 'thinking'); }
     else if (act === 'records' || act === 'records-session') {
       pauseSession(); statsScope = act === 'records-session' ? 'session' : 'total'; screen = 'records'; render();
     } else if (act === 'stats-scope') { statsScope = statsScope === 'total' ? 'session' : 'total'; render(); }
@@ -647,12 +652,12 @@
     else if (act === 'custom-sprint') {
       const input = $('#custom-length'), length = Number(input.value);
       if (Number.isInteger(length) && length >= 1 && length <= 9999) startPlay(length);
-      else { input.reportValidity(); toast('目標数は1〜9999の整数にしてください。'); }
-    } else if (act === 'reset-handling') { updateSettings(E.DEFAULT_SETTINGS); render(false); toast('ハンドリングを初期値に戻しました。'); }
+      else { input.reportValidity(); toast('目標数は1〜9999の整数でお願いしますね。'); }
+    } else if (act === 'reset-handling') { updateSettings(E.DEFAULT_SETTINGS); render(false); toast('ハンドリング、初期値に戻せましたっ。'); }
     else if (act === 'reset-keys') { bindings = copy(DEFAULT_KEYS); save(); render(false); }
     else if (act === 'reset-settings') {
       settings = { ...E.DEFAULT_SETTINGS }; ui = { ...UI_DEFAULTS }; bindings = copy(DEFAULT_KEYS);
-      updateSettings(settings); updateOptions(); render(false); toast('すべての設定を初期化しました。');
+      updateSettings(settings); updateOptions(); render(false); toast('すべての設定、初期化できましたっ。');
     } else if (act === 'export') {
       $('#settings-json').value = JSON.stringify({ version: 1, settings, ui, bindings }, null, 2);
       $('#settings-json').focus(); $('#settings-json').select(); $('#import-status').textContent = '選択したJSONをコピーしてください。';
@@ -663,14 +668,14 @@
         $('#import-status').textContent = '✓ インポートして保存しました。';
       } catch (error) { $('#import-status').textContent = '読み込めませんでした：' + error.message; }
     } else if (act === 'reset-stats') {
-      totalStats.reset(); if (session) session.stats.reset(); save(); render(false); toast('練習の記録をリセットしました。');
+      totalStats.reset(); if (session) session.stats.reset(); save(); render(false); toast('練習の記録、リセットできましたっ。');
     } else if (act === 'capture') { capture = { action: button.dataset.action, index: button.dataset.index === undefined ? null : Number(button.dataset.index) }; captureHTML(); }
     else if (act === 'cancel-capture') endCapture();
     else if (act === 'bind-escape') acceptKey('Escape');
     else if (act === 'bind-tab') acceptKey('Tab');
     else if (act === 'swap-key') {
       bindings = E.rebindKeys(bindings, capture.action, capture.index, capture.code);
-      save(); endCapture(true); toast('キーを入れ替えました。');
+      save(); endCapture(true); toast('キーの入れ替え、完了ですっ。');
     } else if (act === 'remove-key') { bindings[button.dataset.action].splice(Number(button.dataset.index), 1); save(); render(false); }
   }
   document.addEventListener('click', event => { const button = event.target.closest('button[data-act]'); if (button && !button.disabled) clickAction(button); });
@@ -693,12 +698,12 @@
     else if (input.dataset.setting) input.value = settings[input.dataset.setting];
     else if (input.dataset.pieceFilter) {
       const pieces = $$('[data-piece-filter]:checked').map(el => el.dataset.pieceFilter);
-      if (!pieces.length) { input.checked = true; toast('ミノを1種類以上選んでください。'); }
+      if (!pieces.length) { input.checked = true; toast('ミノは1種類以上、選んでくださいね。'); }
       else updatePractice({ ...practice, pieces });
     } else if (input.id === 'area') updatePractice({ ...practice, area: input.value });
     else if (input.id === 'min-column' || input.id === 'max-column') {
       const min = Number($('#min-column').value), max = Number($('#max-column').value);
-      if (!Number.isInteger(min) || !Number.isInteger(max) || min < 1 || max > 10 || min > max) { toast('列は1〜10で、開始列≦終了列にしてください。'); $('#practice-wrap').innerHTML = practiceHTML(); }
+      if (!Number.isInteger(min) || !Number.isInteger(max) || min < 1 || max > 10 || min > max) { toast('列は1〜10、開始列≦終了列でお願いしますね。'); $('#practice-wrap').innerHTML = practiceHTML(); }
       else updatePractice({ ...practice, minColumn: min, maxColumn: max });
     } else if (input.dataset.practice) updatePractice({ ...practice, [input.dataset.practice]: input.checked });
   });

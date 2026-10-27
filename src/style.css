@@ -1523,7 +1523,8 @@ canvas.board {
   visibility:hidden;
   opacity:0;
   pointer-events:none;
-  transition:.2s
+  /* Visibility must change immediately; transitioning it hides text at t=0. */
+  transition:opacity .2s,transform .2s
 }
 
 #toast.visible {
