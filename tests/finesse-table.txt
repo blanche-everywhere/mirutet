@@ -1,0 +1,104 @@
+Moe Tet finesse table — empty 10×40 board; y up; target x = occupied left column.
+Hard drop costs 0. Tap / DAS / rotation cost 1. IRS costs 1.
+Strict Guideline SRS 90°; TETR.IO SRS+ 180 extension (separate I table).
+Each cost independently checked by top-down matrix iterative-deepening search.
+The rows include all four rotation names; duplicate landing shapes share a cost.
+
+I — 180 ON — 17 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 1 [DAS→]
+  R  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CCW] | x=2: 2 [DAS← CW] | x=3: 2 [CCW ←] | x=4: 1 [CCW] | x=5: 1 [CW] | x=6: 2 [CW →] | x=7: 2 [DAS→ CCW] | x=8: 2 [DAS→ CW] | x=9: 2 [CW DAS→]
+  2  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 1 [DAS→]
+  L  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CCW] | x=2: 2 [DAS← CW] | x=3: 2 [CCW ←] | x=4: 1 [CCW] | x=5: 1 [CW] | x=6: 2 [CW →] | x=7: 2 [DAS→ CCW] | x=8: 2 [DAS→ CW] | x=9: 2 [CW DAS→]
+  MAX 2
+
+O — 180 ON — 9 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [DAS← →] | x=2: 2 [← ←] | x=3: 1 [←] | x=4: 0 [] | x=5: 1 [→] | x=6: 2 [→ →] | x=7: 2 [DAS→ ←] | x=8: 1 [DAS→]
+  R  x=0: 1 [DAS←] | x=1: 2 [DAS← →] | x=2: 2 [← ←] | x=3: 1 [←] | x=4: 0 [] | x=5: 1 [→] | x=6: 2 [→ →] | x=7: 2 [DAS→ ←] | x=8: 1 [DAS→]
+  2  x=0: 1 [DAS←] | x=1: 2 [DAS← →] | x=2: 2 [← ←] | x=3: 1 [←] | x=4: 0 [] | x=5: 1 [→] | x=6: 2 [→ →] | x=7: 2 [DAS→ ←] | x=8: 1 [DAS→]
+  L  x=0: 1 [DAS←] | x=1: 2 [DAS← →] | x=2: 2 [← ←] | x=3: 1 [←] | x=4: 0 [] | x=5: 1 [→] | x=6: 2 [→ →] | x=7: 2 [DAS→ ←] | x=8: 1 [DAS→]
+  MAX 2
+
+T — 180 ON — 34 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  R  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 3 [CW ← ←] | x=3: 2 [CW ←] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 3 [CW DAS→ ←] | x=8: 2 [CW DAS→]
+  2  x=0: 2 [180 DAS←] | x=1: 3 [180 ← ←] | x=2: 2 [180 ←] | x=3: 1 [180] | x=4: 2 [180 →] | x=5: 3 [180 → →] | x=6: 3 [180 DAS→ ←] | x=7: 2 [180 DAS→]
+  L  x=0: 2 [CCW DAS←] | x=1: 3 [CCW ← ←] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 2 [CCW →] | x=5: 3 [CCW → →] | x=6: 3 [DAS→ CCW ←] | x=7: 2 [DAS→ CCW] | x=8: 2 [CCW DAS→]
+  MAX 3
+
+S — 180 ON — 17 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  R  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 2 [DAS→ CCW] | x=8: 2 [CW DAS→]
+  2  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  L  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 2 [DAS→ CCW] | x=8: 2 [CW DAS→]
+  MAX 3
+
+Z — 180 ON — 17 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  R  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 2 [DAS→ CCW] | x=8: 2 [CW DAS→]
+  2  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  L  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 2 [DAS→ CCW] | x=8: 2 [CW DAS→]
+  MAX 3
+
+J — 180 ON — 34 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  R  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 3 [CW ← ←] | x=3: 2 [CW ←] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 3 [CW DAS→ ←] | x=8: 2 [CW DAS→]
+  2  x=0: 2 [180 DAS←] | x=1: 3 [180 ← ←] | x=2: 2 [180 ←] | x=3: 1 [180] | x=4: 2 [180 →] | x=5: 3 [180 → →] | x=6: 3 [180 DAS→ ←] | x=7: 2 [180 DAS→]
+  L  x=0: 2 [CCW DAS←] | x=1: 3 [CCW ← ←] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 2 [CCW →] | x=5: 3 [CCW → →] | x=6: 3 [DAS→ CCW ←] | x=7: 2 [DAS→ CCW] | x=8: 2 [CCW DAS→]
+  MAX 3
+
+L — 180 ON — 34 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  R  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 3 [CW ← ←] | x=3: 2 [CW ←] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 3 [CW DAS→ ←] | x=8: 2 [CW DAS→]
+  2  x=0: 2 [180 DAS←] | x=1: 3 [180 ← ←] | x=2: 2 [180 ←] | x=3: 1 [180] | x=4: 2 [180 →] | x=5: 3 [180 → →] | x=6: 3 [180 DAS→ ←] | x=7: 2 [180 DAS→]
+  L  x=0: 2 [CCW DAS←] | x=1: 3 [CCW ← ←] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 2 [CCW →] | x=5: 3 [CCW → →] | x=6: 3 [DAS→ CCW ←] | x=7: 2 [DAS→ CCW] | x=8: 2 [CCW DAS→]
+  MAX 3
+
+I — 180 OFF — 17 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 1 [DAS→]
+  R  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CCW] | x=2: 2 [DAS← CW] | x=3: 2 [CCW ←] | x=4: 1 [CCW] | x=5: 1 [CW] | x=6: 2 [CW →] | x=7: 2 [DAS→ CCW] | x=8: 2 [DAS→ CW] | x=9: 2 [CW DAS→]
+  2  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 1 [DAS→]
+  L  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CCW] | x=2: 2 [DAS← CW] | x=3: 2 [CCW ←] | x=4: 1 [CCW] | x=5: 1 [CW] | x=6: 2 [CW →] | x=7: 2 [DAS→ CCW] | x=8: 2 [DAS→ CW] | x=9: 2 [CW DAS→]
+  MAX 2
+
+O — 180 OFF — 9 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [DAS← →] | x=2: 2 [← ←] | x=3: 1 [←] | x=4: 0 [] | x=5: 1 [→] | x=6: 2 [→ →] | x=7: 2 [DAS→ ←] | x=8: 1 [DAS→]
+  R  x=0: 1 [DAS←] | x=1: 2 [DAS← →] | x=2: 2 [← ←] | x=3: 1 [←] | x=4: 0 [] | x=5: 1 [→] | x=6: 2 [→ →] | x=7: 2 [DAS→ ←] | x=8: 1 [DAS→]
+  2  x=0: 1 [DAS←] | x=1: 2 [DAS← →] | x=2: 2 [← ←] | x=3: 1 [←] | x=4: 0 [] | x=5: 1 [→] | x=6: 2 [→ →] | x=7: 2 [DAS→ ←] | x=8: 1 [DAS→]
+  L  x=0: 1 [DAS←] | x=1: 2 [DAS← →] | x=2: 2 [← ←] | x=3: 1 [←] | x=4: 0 [] | x=5: 1 [→] | x=6: 2 [→ →] | x=7: 2 [DAS→ ←] | x=8: 1 [DAS→]
+  MAX 2
+
+T — 180 OFF — 34 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  R  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 3 [CW ← ←] | x=3: 2 [CW ←] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 3 [CW DAS→ ←] | x=8: 2 [CW DAS→]
+  2  x=0: 3 [CW CW DAS←] | x=1: 4 [CW CW ← ←] | x=2: 3 [CW CW ←] | x=3: 2 [CW CW] | x=4: 3 [CW CW →] | x=5: 4 [CW CW → →] | x=6: 4 [CW CW DAS→ ←] | x=7: 3 [CW CW DAS→]
+  L  x=0: 2 [CCW DAS←] | x=1: 3 [CCW ← ←] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 2 [CCW →] | x=5: 3 [CCW → →] | x=6: 3 [DAS→ CCW ←] | x=7: 2 [DAS→ CCW] | x=8: 2 [CCW DAS→]
+  MAX 4
+
+S — 180 OFF — 17 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  R  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 2 [DAS→ CCW] | x=8: 2 [CW DAS→]
+  2  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  L  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 2 [DAS→ CCW] | x=8: 2 [CW DAS→]
+  MAX 3
+
+Z — 180 OFF — 17 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  R  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 2 [DAS→ CCW] | x=8: 2 [CW DAS→]
+  2  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  L  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 2 [DAS→ CCW] | x=8: 2 [CW DAS→]
+  MAX 3
+
+J — 180 OFF — 34 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  R  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 3 [CW ← ←] | x=3: 2 [CW ←] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 3 [CW DAS→ ←] | x=8: 2 [CW DAS→]
+  2  x=0: 3 [CW CW DAS←] | x=1: 4 [CW CW ← ←] | x=2: 3 [CW CW ←] | x=3: 2 [CW CW] | x=4: 3 [CW CW →] | x=5: 4 [CW CW → →] | x=6: 4 [CW CW DAS→ ←] | x=7: 3 [CW CW DAS→]
+  L  x=0: 2 [CCW DAS←] | x=1: 3 [CCW ← ←] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 2 [CCW →] | x=5: 3 [CCW → →] | x=6: 3 [DAS→ CCW ←] | x=7: 2 [DAS→ CCW] | x=8: 2 [CCW DAS→]
+  MAX 4
+
+L — 180 OFF — 34 distinct placements
+  0  x=0: 1 [DAS←] | x=1: 2 [← ←] | x=2: 1 [←] | x=3: 0 [] | x=4: 1 [→] | x=5: 2 [→ →] | x=6: 2 [DAS→ ←] | x=7: 1 [DAS→]
+  R  x=0: 2 [CW DAS←] | x=1: 2 [DAS← CW] | x=2: 3 [CW ← ←] | x=3: 2 [CW ←] | x=4: 1 [CW] | x=5: 2 [CW →] | x=6: 3 [CW → →] | x=7: 3 [CW DAS→ ←] | x=8: 2 [CW DAS→]
+  2  x=0: 3 [CW CW DAS←] | x=1: 4 [CW CW ← ←] | x=2: 3 [CW CW ←] | x=3: 2 [CW CW] | x=4: 3 [CW CW →] | x=5: 4 [CW CW → →] | x=6: 4 [CW CW DAS→ ←] | x=7: 3 [CW CW DAS→]
+  L  x=0: 2 [CCW DAS←] | x=1: 3 [CCW ← ←] | x=2: 2 [CCW ←] | x=3: 1 [CCW] | x=4: 2 [CCW →] | x=5: 3 [CCW → →] | x=6: 3 [DAS→ CCW ←] | x=7: 2 [DAS→ CCW] | x=8: 2 [CCW DAS→]
+  MAX 4
+
