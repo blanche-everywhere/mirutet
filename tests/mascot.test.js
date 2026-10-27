@@ -7,6 +7,35 @@ const vm = require('node:vm');
 const E = require('../src/engine.js');
 const M = require('../src/mascot.js');
 
+test('three hair skins cover every expression with safe IDs and unchanged facial features', () => {
+  assert.deepEqual(M.HAIR_SKINS, ['side', 'center', 'intake']);
+  assert.equal(M.DEFAULT_HAIR_SKIN, 'center');
+  const normalize = s => s.replace(/mirufi-skin-\d+/g, 'mirufi-skin');
+  const withoutHair = s => normalize(s).replace(/ data-hair-skin="[^"]+"/, '')
+    .replace(/<g data-part="front-hair"[\s\S]*?<\/g>/, '')
+    .replace(/<path data-part="hairline-shadow"[^>]*\/>/, '');
+  const seen = new Set();
+  for (const expr of M.EXPRESSIONS) {
+    const outlines = new Set();
+    const base = M.mascotSVG(expr, { idPrefix: 'skin' });
+    for (const hairSkin of M.HAIR_SKINS) {
+      const svg = M.mascotSVG(expr, { idPrefix: 'skin', hairSkin });
+      const elements = parseXML(svg);
+      const ids = new Set(elements.map(e => e.attrs.id).filter(Boolean));
+      for (const id of ids) { assert(!seen.has(id)); seen.add(id); }
+      for (const match of svg.matchAll(/url\(#([^)]+)\)/g)) assert(ids.has(match[1]));
+      assert.equal(withoutHair(svg), withoutHair(base));
+      assert(svg.includes(`data-hair-skin="${hairSkin}"`));
+      outlines.add(svg.match(/<g data-part="front-hair"[\s\S]*?<path d="([^"]+)"/)[1]);
+    }
+    assert.equal(outlines.size, 3, 'each selection has a distinct silhouette');
+  }
+  for (const value of [null, 'lifted', 'original', '<script>', 42, {}]) {
+    assert.equal(M.normalizeHairSkin(value), 'center');
+    assert(M.mascotSVG('normal', { hairSkin: value }).includes('data-hair-skin="center"'));
+  }
+});
+
 // A small, independent XML-subset parser. A tag stack alone misses malformed
 // attributes, bare ampersands, duplicate attributes, and text outside the root.
 // The generator uses no comments, CDATA, DTDs, or processing instructions.

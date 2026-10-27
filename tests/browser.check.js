@@ -14,7 +14,7 @@ async function main() {
   const urls = html.match(/https?:\/\/[^\s"'<>`\\)]+/gi) || [];
   assert.deepEqual(urls.filter(url => !['http://www.w3.org/2000/svg', 'http://www.w3.org/1999/xlink'].includes(url)), [], 'Unexpected URL in offline HTML');
   fs.mkdirSync(path.join(root, 'screens'), { recursive: true });
-  const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', headless: true, args: ['--no-sandbox'] });
+  const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome', headless: true, args: ['--no-sandbox'] });
   try {
     // Mutated preferences and reload/persistence checks stay in this context.
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 });

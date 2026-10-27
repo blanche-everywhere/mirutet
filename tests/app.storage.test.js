@@ -15,7 +15,7 @@ assert.ok(startupEnd > 0);
 
 function load(entries = {}, failure = '') {
   const values = new Map(Object.entries(entries)), calls = [];
-  const context = { MiruTet: E, localStorage: {
+  const context = { MiruTet: { ...E, mascot: require('../src/mascot.js') }, localStorage: {
     getItem(key) {
       calls.push(['get', key]);
       if (failure === 'get' || failure === 'all' || failure === 'legacy-get' && key === legacyKey) throw new Error('storage unavailable');
@@ -183,5 +183,30 @@ test('unavailable storage leaves usable defaults without throwing', () => {
     assert.equal(values.has(storageKey), failure !== 'all');
     if (values.has(storageKey)) assert.deepEqual(JSON.parse(values.get(storageKey)).settings, E.DEFAULT_SETTINGS);
     assert.equal(values.get(legacyKey), raw);
+  }
+});
+
+test('hair choice persists without changing records, handling, keys or progress', () => {
+  for (const hairSkin of ['side', 'center', 'intake']) {
+    const saved = profile(); saved.ui.hairSkin = hairSkin;
+    const loaded = load({ [storageKey]: JSON.stringify(saved) });
+    assertProfile(loaded.state, saved);
+    assert.equal(loaded.state.ui.hairSkin, hairSkin);
+    loaded.save();
+    const reloaded = load(Object.fromEntries(loaded.values));
+    assert.equal(reloaded.state.ui.hairSkin, hairSkin);
+    assertProfile(reloaded.state, saved);
+  }
+});
+
+test('missing or invalid cosmetic choice falls back without losing an existing profile', () => {
+  for (const hairSkin of [undefined, null, '', 'original', 'lifted', '<svg>', false, 7, {}, []]) {
+    const saved = profile(); saved.ui.hairSkin = hairSkin;
+    for (const key of [storageKey, legacyKey]) {
+      const loaded = load({ [key]: JSON.stringify(saved) });
+      assert.equal(loaded.state.ui.hairSkin, 'center');
+      assert.equal(loaded.state.storageOK, true);
+      assertProfile(loaded.state, saved);
+    }
   }
 });

@@ -67,6 +67,52 @@
   .mirufi .mirufi-eyes-closed { opacity: 0; }
 }`;
 
+
+  const HAIR_SKINS = Object.freeze(['side', 'center', 'intake']);
+  const DEFAULT_HAIR_SKIN = 'center';
+  const HAIR_SKIN_LABELS = Object.freeze({ side: '7:3', center: '真ん中分け', intake: '控えめインテーク' });
+  const HAIR_DESIGNS = deepFreeze({
+  "side": {
+    "outline": "M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 214 125 C199 122 190 108 182 92 C173 104 150 116 126 118 Q105 121 86 123 Q88 153 77 179 Q66 165 70 138Z",
+    "strands": "M181 34 C188 51 188 71 182 92 M164 37 C159 59 153 88 126 109 M141 37 C123 54 117 89 94 118 M198 48 C209 67 214 90 217 111 M91 61 Q76 91 78 121 M222 88 L224 123",
+    "highlights": "M82 86 Q87 70 98 62 Q94 72 92 84Z M103 60 Q123 45 146 44 Q137 50 132 62 L124 76 L119 68Z M151 44 Q162 39 174 42 Q173 52 167 63 L159 74 L155 65Z M192 49 Q209 60 217 83 L205 76 Q201 63 192 60Z",
+    "glints": "M107 84 Q112 75 118 70 M151 79 Q158 71 161 64 M203 84 L207 94",
+    "shadow": "M86 123 Q105 121 126 118 C150 116 173 104 182 92 C190 108 199 122 214 125 L214 128 C199 125 190 111 182 95 C173 107 150 119 126 121 Q105 124 86 126Z"
+  },
+  "center": {
+    "outline": "M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 214 125 C191 132 164 111 150 89 C137 108 109 124 86 125 Q88 153 77 179 Q66 165 70 138Z",
+    "strands": "M150 32 C146 50 147 68 150 89 M132 39 C116 58 115 89 94 113 M168 39 C184 58 185 89 206 113 M91 61 Q76 91 78 121 M222 88 L224 123",
+    "highlights": "M82 86 Q87 70 98 62 Q94 72 92 84Z M104 60 Q119 47 139 44 Q130 52 126 65 L120 78 L116 69Z M160 44 Q181 45 195 59 L202 75 Q185 62 171 64Z M207 72 Q217 83 220 98 L211 92Z",
+    "glints": "M108 82 Q112 73 116 68 M176 67 Q190 70 200 82",
+    "shadow": "M86 125 C109 124 137 108 150 89 C164 111 191 132 214 125 L214 128 C191 135 164 114 150 92 C137 111 109 127 86 128Z"
+  },
+  "intake": {
+    "outline": "M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 214 125 C193 130 178 115 173 96 C169 80 158 76 150 86 C142 76 131 80 127 96 C122 115 107 130 86 125 Q88 153 77 179 Q66 165 70 138Z",
+    "strands": "M150 32 C146 48 148 65 150 79 M147 77 C140 59 125 57 115 70 C106 83 105 101 94 113 M153 77 C160 59 175 57 185 70 C194 83 195 101 206 113 M91 61 Q76 91 78 121 M222 88 L224 123",
+    "pockets": "M150 85 C143 68 130 65 122 75 C132 71 142 78 150 85Z M150 85 C157 68 170 65 178 75 C168 71 158 78 150 85Z",
+    "highlights": "M82 86 Q87 70 98 62 Q94 72 92 84Z M105 68 C117 47 137 47 143 64 C133 55 120 58 113 74 L109 82Z M157 64 C163 47 183 47 195 68 L191 82 L187 74 C180 58 167 55 157 64Z M207 72 Q217 83 220 98 L211 92Z",
+    "glints": "M116 62 Q127 54 136 60 M164 60 Q175 54 184 63",
+    "shadow": "M86 125 C107 130 122 115 127 96 C131 80 142 76 150 86 C158 76 169 80 173 96 C178 115 193 130 214 125 L214 128 C193 133 178 118 173 99 C169 83 158 79 150 89 C142 79 131 83 127 99 C122 118 107 133 86 128Z",
+    "opacity": ".30"
+  }
+});
+  function normalizeHairSkin(value) {
+    return HAIR_SKINS.includes(value) ? value : DEFAULT_HAIR_SKIN;
+  }
+  function frontHairSVG(skin, id, paint) {
+    const v = HAIR_DESIGNS[skin], clip = id + '-intake-clip';
+    const clipped = skin === 'intake' ? ` clip-path="url(#${clip})"` : '';
+    return `<g data-part="front-hair" stroke="#929cc3" stroke-width="1.65">
+      ${skin === 'intake' ? `<defs><clipPath id="${clip}"><path d="${v.outline}"/></clipPath></defs>` : ''}
+      <path d="${v.outline}" fill="${paint('hair')}"/>
+      <path d="${v.strands}" fill="none" opacity=".65"${clipped}/>
+      ${skin === 'intake' ? `<path data-part="intake-root-shadow" d="${v.pockets}" fill="#929cc3" opacity="${v.opacity}" stroke="none"${clipped}/>` : ''}
+      <path d="${v.highlights}" fill="#f5fff8" stroke="none" opacity=".82"${clipped}/>
+      <path d="${v.glints}" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".75" fill="none"${clipped}/>
+      <path d="M148 28 Q143 16 155 11 Q150 20 160 26" fill="${paint('hair')}" stroke-linecap="round"/>
+    </g>`;
+  }
+
   function xml(text) {
     return String(text).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;',
       '>': '&gt;', '"': '&quot;', "'": '&apos;' })[char]);
@@ -74,13 +120,15 @@
   let svgSerial = 0;
 
   /** Chest-up original vector art, 300 × 328. opts: width, height (positive
-   * numbers), title, idPrefix, animated (default true), halo (default true).
+   * numbers), title, idPrefix, animated (default true), halo (default true),
+   * hairSkin (side, center, intake; missing/unknown values use center).
    * Each call scopes all paint/clip/title IDs, including when idPrefix repeats.
    * The uniform continues below the viewport for a natural portrait crop.
    * data-part groups keep the face, hair, and effect marks independently swappable.
    */
   function mascotSVG(expression = 'normal', opts = {}) {
     if (!EXPRESSIONS.includes(expression)) throw new RangeError('Unknown expression: ' + expression);
+    const hairSkin = normalizeHairSkin(opts.hairSkin);
     const width = opts.width ?? 300, height = opts.height ?? 328;
     if (![width, height].every(n => Number.isFinite(n) && n > 0)) {
       throw new RangeError('Mascot dimensions must be positive numbers');
@@ -149,7 +197,7 @@
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 300 328" overflow="hidden"
       class="mirufi mirufi--${expression}${opts.animated === false ? '' : ' mirufi--animated'}" role="img"
-      aria-labelledby="${id}-title ${id}-desc" focusable="false" data-expression="${expression}">
+      aria-labelledby="${id}-title ${id}-desc" focusable="false" data-expression="${expression}" data-hair-skin="${hairSkin}">
       <title id="${id}-title">${xml(title)}</title>
       <desc id="${id}-desc">ミルテト学園の案内役、ミルフィ。ミントとライラックのツインテール、きらきらした瞳、ブロックの髪飾りと桃色の制服です。</desc>
       <defs>
@@ -215,7 +263,7 @@
           <ellipse cx="76" cy="168" rx="11" ry="17" fill="${paint('skin')}" stroke="#c9a3ac" stroke-width="1.5"/>
           <ellipse cx="224" cy="168" rx="11" ry="17" fill="${paint('skin')}" stroke="#c9a3ac" stroke-width="1.5"/>
           <path d="M76 117 C75 83 99 65 150 65 C201 65 225 83 224 117 L224 166 C223 195 194 226 150 233 C106 226 77 195 76 166Z" fill="${paint('skin')}" stroke="#bd9aa9" stroke-width="1.6"/>
-          <path d="M79 133 Q96 99 125 105 Q153 92 181 106 Q208 106 222 134 L222 111 Q209 71 151 72 Q93 72 78 110Z" fill="#e7c6cb" opacity=".24"/>
+          <path data-part="hairline-shadow" d="${HAIR_DESIGNS[hairSkin].shadow}" fill="#e7c6cb" opacity=".24"/>
         </g>
         <g class="mirufi-expression" data-expression="${expression}">
           <g data-part="eyebrows"><path d="${brows}" fill="none" stroke="#a092b3" stroke-width="2.8" stroke-linecap="round"/></g>
@@ -229,13 +277,7 @@
           <path d="M149 182 q-3 4 1 4" fill="none" stroke="#ddb7b8" stroke-width="1.4" stroke-linecap="round"/>
           <g data-part="mouth">${mouth}</g>
         </g>
-        <g data-part="front-hair" stroke="#929cc3" stroke-width="1.65">
-          <path d="M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 213 117 C196 117 177 99 166 79 Q168 109 180 128 Q146 121 131 86 Q130 113 115 130 Q110 110 109 105 Q94 131 78 143 L77 179 Q66 165 70 138Z" fill="${paint('hair')}"/>
-          <path d="M129 40 C113 49 105 70 109 105 M164 39 C156 50 159 69 166 79 M180 42 C208 61 216 88 213 117 M91 61 Q76 91 78 121 M222 88 L224 123" fill="none" opacity=".65"/>
-          <path d="M82 86 Q87 70 98 62 Q94 72 92 84Z M103 59 Q120 46 140 47 Q127 53 119 66 L112 76 L108 69Z M149 45 Q175 40 194 58 L202 71 Q180 57 158 61Z M207 72 Q217 83 220 98 L211 92Z" fill="#f5fff8" stroke="none" opacity=".82"/>
-          <path d="M102 81 Q104 73 108 68 M172 61 Q190 62 201 73" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".75" fill="none"/>
-          <path d="M148 28 Q143 16 155 11 Q150 20 160 26" fill="${paint('hair')}" stroke-linecap="round"/>
-        </g>
+        ${frontHairSVG(hairSkin, id, paint)}
         <g data-part="block-clip" transform="rotate(-17 91 88)" stroke="#b09ab3" stroke-width="1.5">
           <path d="M74 79 h12 v-12 h12 v12 h12 v12 H74Z" fill="#fff0c8"/>
           <path d="M76 81 h8 v8 h-8Z M88 69 h8 v8 h-8Z M88 81 h8 v8 h-8Z M100 81 h8 v8 h-8Z" fill="#f5cedf" stroke="none"/>
@@ -541,6 +583,7 @@
   const LESSONS = createLessons();
 
   return Object.freeze({ name: 'ミルフィ', EXPRESSIONS, EXPRESSION_LABELS, MASCOT_CSS, mascotSVG,
+    HAIR_SKINS, DEFAULT_HAIR_SKIN, HAIR_SKIN_LABELS, normalizeHairSkin,
     DIALOGUE, PRAISE_LINES, STREAK_LINES, PIECE_PRAISE, MISS_LINES, ENCOURAGEMENT_LINES,
     WELCOME_LINES, TIPS, SPRINT_COMMENTS, hintText, sprintComment,
     LESSONS, createLessons, lessonPlacementGroups });
