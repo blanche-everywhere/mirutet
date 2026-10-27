@@ -1,6 +1,6 @@
-# ミルテト フィネス編
+# ミルテト
 
-ミルテト学園のミルフィと、テトリミノを最短の操作で置く練習をするデスクトップ用アプリです。日本語UI・キーボード操作対応。オリジナルSVGイラストと合成効果音を使用します。
+ミルテト学園のミルフィと、テトリミノの操作を学ぶデスクトップ向けのブラウザゲームシリーズです。現在のモード「フィネス編」では、最短の操作でミノを置く練習ができます。日本語UI・キーボード操作対応。オリジナルSVGイラストと合成効果音を使用します。
 
 v2（2.0.0）でシリーズ名を「ミルテト」に改称しました。旧版の設定・キー・進捗・通算記録は、新しい保存先にデータ形式を変えず自動移行します（新しい保存先にデータがある場合はそちらを優先します）。保存キーのデータ形式は引き続き `.v1` です。
 
@@ -55,4 +55,4 @@ Idea: pre-show a target shadow and place the piece there with the optimal input 
 
 ## English
 
-An offline, Japanese finesse trainer with original mascot ミルフィ. Run `npm run build`, then open `dist/mirutet.html` directly. Everything is inlined; no server or network is required. `npm test` runs the independent engine/mascot checks. `npm run test:browser` runs system Chrome through playwright-core and saves screenshots in `screens/`. The UI includes engine-driven lessons, filtered drills, sprint, handling/key settings, persistent statistics, and synthesized audio with graceful fallbacks.
+An offline, Japanese tetromino practice game series with original mascot ミルフィ. The current mode, フィネス編, teaches minimum-input placement. Run `npm run build`, then open `dist/mirutet.html` directly. Everything is inlined; no server or network is required. `npm test` runs the independent engine/mascot checks. `npm run test:browser` runs system Chrome through playwright-core and saves screenshots in `screens/`. The current mode includes engine-driven lessons, filtered drills, sprint, handling/key settings, persistent statistics, and synthesized audio with graceful fallbacks.

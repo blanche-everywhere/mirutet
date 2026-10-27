@@ -63,8 +63,8 @@ function renderMascotPreview() {
   <main>
     <header>
       <div><p class="eyebrow">MIRUTET · CHARACTER STUDY</p><h1>ミルフィの表情ノート</h1>
-        <p class="intro">ミルテト学園の案内役です♪ いっしょに、最短ルートを覚えましょう。</p></div>
-      <span class="badge">ミルテト フィネス編</span>
+        <p class="intro">ミルテト学園の案内役です♪ いっしょに、少しずつ練習しましょう。</p></div>
+      <span class="badge">ミルテト</span>
     </header>
     <section class="gallery" aria-label="ミルフィの5つの表情">${cards}
     </section>

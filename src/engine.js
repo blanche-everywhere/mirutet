@@ -1,4 +1,4 @@
-/* Miru Tet: Finesse Edition — DOM-free, dependency-free engine.
+/* Miru Tet — DOM-free, dependency-free engine.
  * Classic script: globalThis.MiruTet; Node: require('./src/engine.js').
  *
  * Coordinates are integer cells, x right, y UP. Board rows are bottom first.
