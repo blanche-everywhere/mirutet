@@ -248,7 +248,15 @@ async function main() {
     assert.equal(s.stats.streak, 0); assert.equal(s.expression, 'thinking');
     await page.keyboard.press('KeyH'); assert.equal((await state()).hint, true);
     assert.equal(await page.locator('#hint-route').isVisible(), true);
-    await checkDrill(); await page.waitForTimeout(350); await shot('drill-fault'); clean();
+    await page.waitForTimeout(350);
+    for (const viewport of [{ width: 1920, height: 1080 }, { width: 1280, height: 720 }]) {
+      await page.setViewportSize(viewport);
+      await checkDrill();
+      await checkViewport(`drill fault ${viewport.width}x${viewport.height}`, ['#result-panel', '#hint-route']);
+      const result = await page.locator('#result-panel').evaluate(el => ({ scrollHeight: el.scrollHeight, clientHeight: el.clientHeight }));
+      assert.ok(result.scrollHeight <= result.clientHeight, `Drill fault result clipped at ${viewport.width}x${viewport.height}: ${JSON.stringify(result)}`);
+    }
+    await shot('drill-fault'); clean();
 
     // A miss is separate from finesse faults and repeats the same cell target.
     await target('O', 0, 0); await ready();
