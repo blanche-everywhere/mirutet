@@ -24,7 +24,7 @@ function build() {
   let html = read('index.template.html');
   const replacements = {
     APP_STYLES: read('style.css').replace('/* MASCOT_CSS */', MASCOT_CSS),
-    ENGINE_SCRIPT: read('engine.js'), MASCOT_SCRIPT: read('mascot.js'), APP_SCRIPT: read('app.js')
+    ENGINE_SCRIPT: read('engine.js'), AUDIO_SCRIPT: read('audio.js'), MASCOT_SCRIPT: read('mascot.js'), APP_SCRIPT: read('app.js')
   };
   for (const [key, value] of Object.entries(replacements)) {
     // A literal closing script in a future dialogue must not break the bundle.

@@ -270,6 +270,23 @@ async function main() {
     // validation, and persistent settings/bindings survive file:// reload.
     await settingsOpen();
     await checkSettings('settings'); await checkText();
+    assert.equal((await state()).ui.pieceCueTiming, 'next');
+    assert.equal((await state()).ui.pieceCueVolume, 60);
+    assert.equal(await page.locator('[data-act=preview-cue]').count(), 7);
+    // Native controls remain keyboard reachable; slider change must not be
+    // mistaken for a boolean checkbox by the delegated settings handler.
+    await page.locator('[data-ui=pieceCueTiming]').selectOption('current');
+    await page.locator('[data-ui=pieceCueVolume]').focus();
+    await page.keyboard.press('ArrowRight');
+    assert.equal((await state()).ui.pieceCueVolume, 61);
+    await tabTo('[data-act=preview-cue][data-piece=I]');
+    for (const type of ['I', 'O', 'T', 'S', 'Z', 'J', 'L']) {
+      assert.equal(await page.locator(`[data-act=preview-cue][data-piece=${type}]`).evaluate(el => el === document.activeElement), true);
+      await page.keyboard.press('Enter'); await page.keyboard.press('Tab');
+    }
+    await page.locator('[data-ui=pieceCueTiming]').selectOption('off');
+    assert.equal((await state()).ui.pieceCueTiming, 'off');
+    await page.locator('[data-ui=pieceCueTiming]').selectOption('current');
     await setNumber('das', 300); await setNumber('arr', 0); await setNumber('are', 400);
     await setNumber('sdf', 41); await setNumber('sdf', 40);
     await setNumber('dcd', 120); await setNumber('dcd', 0);
@@ -290,6 +307,8 @@ async function main() {
     await click('export');
     const exported = JSON.parse(await page.locator('#settings-json').inputValue());
     assert.equal(exported.settings.das, 300);
+    assert.equal(exported.ui.pieceCueTiming, 'current');
+    assert.equal(exported.ui.pieceCueVolume, 61);
     await page.locator('#settings-json').fill('{bad JSON'); await click('import');
     assert.match(await page.locator('#import-status').innerText(), /読み込めません/);
     assert.equal((await state()).settings.das, 300);
@@ -302,6 +321,7 @@ async function main() {
     assert.equal((await state()).screen, 'play'); await click('resume');
     await page.reload(); await waitScreen('menu');
     s = await state(); assert.equal(s.settings.das, 300); assert.equal(s.settings.arr, 0); assert.equal(s.settings.are, 400);
+    assert.equal(s.ui.pieceCueTiming, 'current'); assert.equal(s.ui.pieceCueVolume, 61);
     assert.equal(s.bindings.cw[0], 'KeyQ'); assert.ok(s.progress.completed.includes(4)); assert.ok(s.totalStats.faults >= 1);
     await click('drill'); await ready();
 
@@ -418,6 +438,9 @@ async function main() {
       assert.deepEqual(defaults.bindings.cw, ['ArrowUp', 'KeyX']);
       assert.deepEqual(defaults.bindings.hold, ['ShiftLeft', 'KeyC']);
       assert.equal(defaults.settings.das, 110); assert.equal(defaults.settings.are, 80);
+      assert.equal(defaults.ui.pieceCueTiming, 'next'); assert.equal(defaults.ui.pieceCueVolume, 60);
+      assert.equal(await defaultPage.locator('[data-ui=pieceCueTiming]').inputValue(), 'next');
+      assert.equal(await defaultPage.locator('[data-ui=pieceCueVolume]').inputValue(), '60');
       assert.deepEqual(await defaultPage.locator('[data-act=capture][data-action=cw][data-index]').allTextContents(), ['↑', 'X']);
       assert.deepEqual(await defaultPage.locator('[data-act=capture][data-action=hold][data-index]').allTextContents(), ['Shift(左)', 'C']);
       assert.equal(await defaultPage.locator('#setting-das').inputValue(), '110');
@@ -492,6 +515,8 @@ async function main() {
             for (const key of ['das', 'arr', 'are']) assert.equal(profile.settings[key], expected.settings[key], `${label} settings.${key}`);
             assert.equal(profile.ui.sound, expected.ui.sound, `${label} ui.sound`);
             assert.equal(profile.ui.volume, expected.ui.volume, `${label} ui.volume`);
+            assert.equal(profile.ui.pieceCueTiming, 'next', `${label} ui.pieceCueTiming`);
+            assert.equal(profile.ui.pieceCueVolume, 60, `${label} ui.pieceCueVolume`);
             assert.deepEqual(profile.practice, expected.practice, `${label} practice`);
             assert.deepEqual(profile.progress, expected.progress, `${label} progress`);
             for (const key of ['attempts', 'placements', 'perfect', 'faults', 'misses', 'bestStreak']) {

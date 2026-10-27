@@ -4,7 +4,7 @@
  */
 (function () {
   'use strict';
-  const E = globalThis.MiruTet, M = E.mascot;
+  const E = globalThis.MiruTet, M = E.mascot, A = globalThis.MiruTetAudio;
   const $ = (s, root = document) => root.querySelector(s);
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
   const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -22,7 +22,8 @@
     cw: '右回転 CW', ccw: '左回転 CCW', rotate180: '180°回転', hold: 'ホールド', retry: '同じ目標をリトライ',
     pause: '一時停止', skip: '次の目標', settings: '設定を開く', hint: 'ヒント切替' };
   const UI_DEFAULTS = { zeroFault: false, repeatOnFault: false, repeatOnMiss: true, showTarget: true,
-    showOptimal: true, showKeys: true, ghost: true, sound: true, volume: .3, bubbles: true };
+    showOptimal: true, showKeys: true, ghost: true, sound: true, volume: .3, bubbles: true,
+    pieceCueTiming: 'next', pieceCueVolume: 60 };
   const PRACTICE_DEFAULTS = { pieces: [...E.PIECE_TYPES], area: 'all', minColumn: 1, maxColumn: 10, weakSpot: false };
   let settings = { ...E.DEFAULT_SETTINGS }, ui = { ...UI_DEFAULTS }, bindings = copy(DEFAULT_KEYS);
   let practice = copy(PRACTICE_DEFAULTS), progress = { current: 0, completed: [] };
@@ -35,9 +36,12 @@
     const result = { settings: E.normalizeSettings(data.settings || {}), ui: { ...UI_DEFAULTS }, bindings: copy(DEFAULT_KEYS) };
     for (const key of Object.keys(UI_DEFAULTS)) if (data.ui && key in data.ui) {
       const value = data.ui[key];
-      if (key === 'volume') {
+      if (key === 'pieceCueTiming') {
+        if (!['next', 'current', 'off'].includes(value)) throw new Error('ミノの音は NEXT・現在のミノ・オフから選んでください。');
+        result.ui[key] = value;
+      } else if (key === 'volume' || key === 'pieceCueVolume') {
         if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error('音量は数値にしてください。');
-        result.ui.volume = Math.max(0, Math.min(1, value));
+        result.ui[key] = Math.max(0, Math.min(key === 'volume' ? 1 : 100, value));
       } else {
         if (typeof value !== 'boolean') throw new Error(key + ' は true / false にしてください。');
         result.ui[key] = value;
@@ -73,6 +77,9 @@
         progress.current = Math.max(0, Math.min(11, Number(saved.progress.current) || 0)) | 0;
         progress.completed = (Array.isArray(saved.progress.completed) ? saved.progress.completed : []).filter(i => Number.isInteger(i) && i >= 0 && i < 12);
       }
+      // Persist defaults added during loading before the first user action.
+      // Keep a failed migration's error state and recovery copies intact.
+      if (storageOK) save();
     }
   } catch (_) { storageOK = false; }
   function save() {
@@ -129,29 +136,10 @@
     }
   }
 
-  // WebAudio is created only after a user gesture. Unsupported, suspended or
-  // restricted audio is a silent fallback; it can never interrupt play.
-  let audioContext;
-  function sound(kind) {
-    if (!ui.sound || ui.volume === 0) return;
-    try {
-      const Audio = window.AudioContext || window.webkitAudioContext;
-      if (!Audio) return;
-      audioContext ||= new Audio();
-      if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
-      if (audioContext.state !== 'running') return;
-      const frequencies = kind === 'perfect' ? [660, 880, 1100] : kind === 'fault' ? [330, 260] : [440];
-      frequencies.forEach((frequency, i) => {
-        const oscillator = audioContext.createOscillator(), gain = audioContext.createGain();
-        const start = audioContext.currentTime + i * .065;
-        oscillator.type = 'sine'; oscillator.frequency.value = frequency;
-        gain.gain.setValueAtTime(0, start); gain.gain.linearRampToValueAtTime(ui.volume * .13, start + .008);
-        gain.gain.exponentialRampToValueAtTime(.0001, start + .13);
-        oscillator.connect(gain); gain.connect(audioContext.destination); oscillator.start(start); oscillator.stop(start + .15);
-        oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
-      });
-    } catch (_) { /* Audio is optional. */ }
-  }
+  const audio = A.createAudioEngine(() => ui);
+  const sound = kind => audio.sound(kind);
+  // Unlock on the gesture itself, before an ARE timer or a preview's click.
+  document.addEventListener('pointerdown', () => audio.unlock(), { passive: true });
   function header() {
     return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ミルテト <small>FINESSE EDITION / フィネス編</small></span></button><div class="top-actions">${screen !== 'menu' ? '<button class="quiet small" data-act="menu">タイトル</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
   }
@@ -189,8 +177,11 @@
     return `<div class="setting-row"><label for="setting-${key}">${title}<small>${note} · ${min}–${max}</small></label><input aria-label="${title} スライダー" data-setting="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${settings[key]}"><input id="setting-${key}" aria-label="${title}" data-setting="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${settings[key]}"></div>`;
   }
   function toggle(key, label, engine = false) { return `<label class="checkline"><input type="checkbox" ${engine ? 'data-engine-toggle' : 'data-ui'}="${key}" ${(engine ? settings : ui)[key] ? 'checked' : ''}>${label}</label>`; }
+  function cueSettingsHTML() {
+    return `<div class="cue-settings"><h3>ミノを音でお知らせ</h3><label class="filter-line">鳴らすタイミング<select data-ui="pieceCueTiming" aria-label="ミノの音のタイミング">${[['next', 'NEXT（次のミノ）'], ['current', '現在のミノ'], ['off', 'オフ']].map(([value, label]) => `<option value="${value}" ${ui.pieceCueTiming === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p class="tiny">出現時に、NEXTの先頭に来たミノをお知らせします♪<br>現在のミノにも切替できます。同じ目標のリトライやホールド交換では鳴りません。</p><label class="filter-line">ミノの音量<input aria-label="ミノの音量" data-ui="pieceCueVolume" type="range" min="0" max="100" step="1" value="${ui.pieceCueVolume}"><output id="cue-volume">${ui.pieceCueVolume}</output></label><div class="cue-preview" role="group" aria-label="ミノの音を試聴">${E.PIECE_TYPES.map(type => `<button class="small" data-act="preview-cue" data-piece="${type}" aria-label="${type}ミノの音を試聴">${type}</button>`).join('')}</div><p class="tiny">ミノを選んで試聴できます。効果音のオン・オフと全体の音量も反映します。</p></div>`;
+  }
   function settingsHTML() {
-    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">操作と表示の設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目"><div class="settings-grid"><section class="panel"><div class="row spread"><h3>ハンドリング</h3><button class="quiet small" data-act="reset-handling">初期値に戻す</button></div>${handlingRow('das','DAS','長押しの待ち時間 ms')}${handlingRow('arr','ARR','連続移動の間隔 ms')}${handlingRow('sdf','SDF','ソフト落下倍率 / 41 = ∞')}${handlingRow('dcd','DCD','自動移動の待機 ms')}${handlingRow('are','ARE','次の出現まで ms')}${handlingRow('gravity','重力 G','0 = なし / マス数（60分の1秒）',.1)}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('ghost','着地の影を表示')}${toggle('showOptimal','最短手順を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div><label class="filter-line" style="margin-top:17px">音量 <input aria-label="音量" data-ui="volume" type="range" min="0" max="1" step=".05" value="${ui.volume}"></label></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
+    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">操作と表示の設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目"><div class="settings-grid"><section class="panel"><div class="row spread"><h3>ハンドリング</h3><button class="quiet small" data-act="reset-handling">初期値に戻す</button></div>${handlingRow('das','DAS','長押しの待ち時間 ms')}${handlingRow('arr','ARR','連続移動の間隔 ms')}${handlingRow('sdf','SDF','ソフト落下倍率 / 41 = ∞')}${handlingRow('dcd','DCD','自動移動の待機 ms')}${handlingRow('are','ARE','次の出現まで ms')}${handlingRow('gravity','重力 G','0 = なし / マス数（60分の1秒）',.1)}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('ghost','着地の影を表示')}${toggle('showOptimal','最短手順を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div><label class="filter-line" style="margin-top:17px">音量 <input aria-label="音量" data-ui="volume" type="range" min="0" max="1" step=".05" value="${ui.volume}"></label>${cueSettingsHTML()}</section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
   }
   function statsHTML() {
     const stats = statsScope === 'session' && session ? session.stats.snapshot() : totalStats.snapshot();
@@ -240,10 +231,12 @@
     session.handler.releaseAll(now());
   }
   function pauseSession() {
+    audio.stopCues();
     if (!session?.running) return;
     session.pause(now()); releaseAll();
   }
   function go(screenName) {
+    audio.stopCues();
     releaseAll(); demo = null; selectedDemo = null;
     if (screenName === 'menu' || screenName === 'sprint' || screenName === 'lessons') {
       if (session?.running) session.pause(now());
@@ -266,6 +259,7 @@
     save();
   }
   function updateOptions() {
+    audio.configure();
     document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
     if (session) {
       session.zeroFault = ui.zeroFault; session.repeatOnFault = ui.repeatOnFault;
@@ -284,6 +278,7 @@
       weakSpot: practice.weakSpot, zeroFault: ui.zeroFault, repeatOnFault: ui.repeatOnFault, repeatOnMiss: ui.repeatOnMiss };
   }
   function startPlay(length = 0) {
+    audio.stopCues();
     releaseAll(); sessionEventQueue = []; demo = null; tryMode = false; tryDone = false;
     session = newSession({ ...sessionOptions(), sprintLength: length });
     lastResult = null; particles = []; hint = false; irsUntil = 0; irsCount = 0; lastTipAttempt = 0;
@@ -351,8 +346,14 @@
       trace.push({ kind: event.kind, t: event.t, type: event.type, status: event.result?.status });
       if (trace.length > 150) trace.shift();
       if (event.kind === 'target') updateHint();
+      if (event.kind === 'spawn' && source.running && source.pausedAt === null && !tryDone &&
+          (screen === 'play' || screen === 'tutorial' && tryMode)) {
+        const type = A.selectCue(event, ui.pieceCueTiming);
+        if (type) audio.piece(type);
+      }
       if (event.kind === 'spawn' && source.handler.inputs.some(input => input.irs)) { irsUntil = now() + 850; irsCount++; }
-      if (event.kind === 'pause') showPause();
+      if (event.kind === 'pause') { audio.stopCues(); showPause(); }
+      if (event.kind === 'blockout') audio.stopCues();
       if (event.kind === 'resume') $('.overlay')?.remove();
       if (event.kind === 'hint') { hint = !hint; updateHint(); }
       if (event.kind === 'settings') openSettings();
@@ -396,6 +397,7 @@
         }
       }
       if (event.kind === 'finish') {
+        audio.stopCues();
         sprintResult = event.result; save(); releaseAll(); screen = 'result'; render();
       }
     }
@@ -424,6 +426,7 @@
   }
 
   function startLesson(index) {
+    audio.stopCues();
     releaseAll(); session = null; sessionEventQueue = []; tryMode = false; tryDone = false; lessonMessage = '';
     lessonIndex = Math.max(0, Math.min(11, index)); progress.current = lessonIndex; save();
     lessons = M.createLessons(settings); demoVariant = 0; selectedDemo = null; irsUntil = 0;
@@ -434,11 +437,12 @@
     releaseAll(); session._newRound(target.type, target); session._schedule(now());
   }
   function startTryIt() {
+    audio.stopCues();
     demo = null; releaseAll(); sessionEventQueue = []; tryMode = true; tryIndex = 0; tryDone = false; lastResult = null;
     const exercise = lessons[lessonIndex].tryIt;
     session = newSession({ pieces: [exercise.piece], settings: { ...settings, ...exercise.settings },
       totalStats: new E.Stats(), zeroFault: true, repeatOnFault: true, repeatOnMiss: true });
-    session.start(now()); choosePracticeTarget(); lessonMessage = '輪郭に重ねてハードドロップしてみましょう♪'; render();
+    session.start(now(), exercise.targets[0]); lessonMessage = '輪郭に重ねてハードドロップしてみましょう♪'; render();
     $('#demo-keys').innerHTML = route(exercise.targets[0].actions);
     $('#demo-caption').textContent = `チャレンジ 1 / ${exercise.targets.length} · 最短 ${exercise.targets[0].count} 入力`;
     fitLessonBoard();
@@ -618,6 +622,7 @@
     else if (act === 'next-lesson') lessonIndex === 11 ? startPlay() : startLesson(lessonIndex + 1);
     else if (act === 'previous-lesson') startLesson(lessonIndex - 1);
     else if (act === 'demo' || act === 'table-demo') {
+      audio.stopCues();
       releaseAll(); session = null; tryMode = false; lessonMessage = ''; demoVariant = Number(button.dataset.index); selectedDemo = null;
       if (act === 'table-demo') {
         const group = lessons[lessonIndex].demo.placementGroups[demoVariant];
@@ -627,6 +632,7 @@
     } else if (act === 'try-it') startTryIt();
     else if (act === 'settings') openSettings();
     else if (act === 'close-settings') closeSettings();
+    else if (act === 'preview-cue') audio.piece(button.dataset.piece);
     else if (act === 'pause') { pauseSession(); showPause(); }
     else if (act === 'resume') resumePlay();
     else if (act === 'retry') { releaseAll(); session.retry(now()); processEvents(); }
@@ -674,12 +680,16 @@
       if (!input.value || !Number.isFinite(Number(input.value))) return;
       const key = input.dataset.setting, value = Number(input.value); updateSettings({ [key]: value });
       for (const other of $$(`[data-setting="${key}"]`)) if (other !== input) other.value = settings[key];
-    } else if (input.dataset.ui === 'volume') { ui.volume = Number(input.value); save(); }
+    } else if (['volume', 'pieceCueVolume'].includes(input.dataset.ui)) {
+      ui[input.dataset.ui] = Number(input.value); audio.configure(); save();
+      if (input.dataset.ui === 'pieceCueVolume') $('#cue-volume').textContent = input.value;
+    }
   });
   document.addEventListener('change', event => {
     const input = event.target;
     if (input.dataset.engineToggle) updateSettings({ [input.dataset.engineToggle]: input.checked });
-    else if (input.dataset.ui && input.dataset.ui !== 'volume') { ui[input.dataset.ui] = input.checked; updateOptions(); }
+    else if (input.dataset.ui === 'pieceCueTiming') { ui.pieceCueTiming = input.value; audio.stopCues(); save(); }
+    else if (input.dataset.ui && !['volume', 'pieceCueVolume'].includes(input.dataset.ui)) { ui[input.dataset.ui] = input.checked; updateOptions(); }
     else if (input.dataset.setting) input.value = settings[input.dataset.setting];
     else if (input.dataset.pieceFilter) {
       const pieces = $$('[data-piece-filter]:checked').map(el => el.dataset.pieceFilter);
@@ -705,6 +715,7 @@
     }
   }
   document.addEventListener('keydown', event => {
+    audio.unlock();
     if (capture) {
       if (event.code === 'Escape') { event.preventDefault(); if (!event.repeat) endCapture(); return; }
       const modal = $('.capture-overlay');

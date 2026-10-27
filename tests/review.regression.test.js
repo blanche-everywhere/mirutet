@@ -81,11 +81,11 @@ test('built artifact is a self-contained classic-script HTML and both outputs ma
   const root = path.resolve(__dirname, '..'), html = fs.readFileSync(path.join(root, 'dist/mirutet.html'), 'utf8');
   assertOfflineHTML(html);
   assert.equal(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), html);
-  assert.equal((html.match(/<script>/g) || []).length, 3);
+  assert.equal((html.match(/<script>/g) || []).length, 4);
   assert.match(html, /<title>ミルテト フィネス編<\/title>/);
   assert.match(html, /<meta name="description" content="ミルテト フィネス編。/);
   assert.match(html, /<meta property="og:description" content="ミルテト フィネス編。/);
   assert.match(html, /<h1 class="logo">ミル<span>テト<\/span><small>フィネス編<\/small><\/h1>/);
   assert.match(html, /WELCOME TO MIRUTET ACADEMY/);
-  assert.doesNotMatch(html, /type=["']module|APP_STYLES|ENGINE_SCRIPT|MASCOT_SCRIPT|APP_SCRIPT/);
+  assert.doesNotMatch(html, /type=["']module|APP_STYLES|ENGINE_SCRIPT|AUDIO_SCRIPT|MASCOT_SCRIPT|APP_SCRIPT/);
 });

@@ -38,8 +38,11 @@ function load(entries = {}, failure = '') {
     globalThis.inspect = () => JSON.stringify({ storageKey: STORAGE, settings, ui,
       bindings, practice, progress, totalStats: totalStats.snapshot(), storageOK });
     globalThis.persist = save;
+    globalThis.validate = data => JSON.stringify(validatePreferences(data));
   })();`, context);
-  return { values, calls, state: JSON.parse(context.inspect()), save() {
+  return { values, calls, state: JSON.parse(context.inspect()), validate(data) {
+    return JSON.parse(context.validate(data));
+  }, save() {
     context.persist();
     return JSON.parse(context.inspect());
   } };
@@ -76,7 +79,7 @@ test('storage migration restores the complete v1 profile across saving and reloa
   assert.equal(state.storageKey, storageKey);
   assertProfile(JSON.parse(values.get(storageKey)), saved);
   assert.equal(values.has(legacyKey), false);
-  assert.deepEqual(calls, [['get', storageKey], ['get', legacyKey], ['set', storageKey], ['remove', legacyKey]]);
+  assert.deepEqual(calls, [['get', storageKey], ['get', legacyKey], ['set', storageKey], ['remove', legacyKey], ['set', storageKey]]);
   assert.equal(state.storageOK, true);
   assertProfile(state, saved);
   assert.deepEqual(loaded.save(), state);
@@ -87,7 +90,7 @@ test('storage migration restores the complete v1 profile across saving and reloa
   assert.deepEqual(calls.at(-1), ['set', storageKey]);
   const reloaded = load(Object.fromEntries(values));
   assert.deepEqual(reloaded.state, state);
-  assert.deepEqual(reloaded.calls, [['get', storageKey]]);
+  assert.deepEqual(reloaded.calls, [['get', storageKey], ['set', storageKey]]);
 });
 
 test('an existing new profile takes priority without reading or changing the legacy profile', () => {
@@ -97,27 +100,90 @@ test('an existing new profile takes priority without reading or changing the leg
   const raw = JSON.stringify(saved);
   const loaded = load({ [storageKey]: raw, [legacyKey]: legacy }), { state, values, calls } = loaded;
   assertProfile(state, saved);
-  assert.deepEqual(calls, [['get', storageKey]]);
+  assert.deepEqual(calls, [['get', storageKey], ['set', storageKey]]);
   assert.deepEqual(loaded.save(), state);
   assertProfile(JSON.parse(values.get(storageKey)), saved);
   assert.equal(values.get(legacyKey), legacy);
-  assert.deepEqual(calls, [['get', storageKey], ['set', storageKey]]);
+  assert.deepEqual(calls, [['get', storageKey], ['set', storageKey], ['set', storageKey]]);
   const reloaded = load(Object.fromEntries(values));
   assertProfile(reloaded.state, saved);
   assert.equal(reloaded.values.get(legacyKey), legacy);
-  assert.deepEqual(reloaded.calls, [['get', storageKey]]);
+  assert.deepEqual(reloaded.calls, [['get', storageKey], ['set', storageKey]]);
 });
 
 test('a fresh profile uses defaults and creates the new key on save', () => {
   const loaded = load(), { state, values, calls } = loaded;
   assert.equal(state.storageKey, storageKey);
   assert.equal(state.settings.das, E.DEFAULT_SETTINGS.das);
+  assert.equal(state.ui.pieceCueTiming, 'next');
+  assert.equal(state.ui.pieceCueVolume, 60);
   assert.equal(state.storageOK, true);
   assert.equal(values.size, 0);
   assert.deepEqual(calls, [['get', storageKey], ['get', legacyKey]]);
   assert.deepEqual(loaded.save(), state);
   assert.deepEqual(JSON.parse(values.get(storageKey)).settings, state.settings);
   assert.equal(values.has(legacyKey), false);
+});
+
+test('old current and legacy profiles persist normalized defaults on load without losing their preferences', () => {
+  for (const key of [storageKey, legacyKey]) {
+    const saved = profile(), loaded = load({ [key]: JSON.stringify(saved) });
+    assertProfile(loaded.state, saved);
+    assert.equal(loaded.state.ui.pieceCueTiming, 'next');
+    assert.equal(loaded.state.ui.pieceCueVolume, 60);
+    // Inspect storage before a user action or explicit save can hide a missing
+    // startup write, as the browser migration check does.
+    const persisted = JSON.parse(loaded.values.get(storageKey));
+    assert.equal(persisted.ui.pieceCueTiming, 'next');
+    assert.equal(persisted.ui.pieceCueVolume, 60);
+    assert.deepEqual(persisted.ui, loaded.state.ui);
+    assert.deepEqual(persisted.settings, loaded.state.settings);
+    assertProfile(persisted, saved);
+    assert.equal(persisted.version, 1);
+    const reloaded = load(Object.fromEntries(loaded.values));
+    assert.deepEqual(reloaded.state, loaded.state);
+    assert.deepEqual(JSON.parse(reloaded.values.get(storageKey)), persisted);
+  }
+});
+
+test('cue preferences survive migration, export/import validation, save and reload', () => {
+  for (const timing of ['next', 'current', 'off']) for (const volume of [0, 37, 100]) {
+    const saved = profile();
+    Object.assign(saved.ui, { pieceCueTiming: timing, pieceCueVolume: volume });
+    const loaded = load({ [legacyKey]: JSON.stringify(saved) });
+    assert.equal(loaded.state.ui.pieceCueTiming, timing);
+    assert.equal(loaded.state.ui.pieceCueVolume, volume);
+    assert.deepEqual(JSON.parse(loaded.values.get(storageKey)).ui, loaded.state.ui);
+    loaded.save();
+    const persisted = JSON.parse(loaded.values.get(storageKey));
+    assert.deepEqual(loaded.validate(persisted).ui, loaded.state.ui);
+    assert.deepEqual(load(Object.fromEntries(loaded.values)).state, loaded.state);
+  }
+});
+
+test('profiles without ui preferences persist the complete defaults on load', () => {
+  const defaults = load().state.ui;
+  for (const key of [storageKey, legacyKey]) {
+    const saved = profile();
+    delete saved.ui;
+    const loaded = load({ [key]: JSON.stringify(saved) });
+    assert.deepEqual(loaded.state.ui, defaults);
+    assert.deepEqual(JSON.parse(loaded.values.get(storageKey)).ui, defaults);
+  }
+});
+
+test('cue import validates timing and numeric volume atomically and clamps the volume range', () => {
+  const loaded = load();
+  for (const timing of ['', 'NEXT', 'other', true, null, 0]) {
+    assert.throws(() => loaded.validate({ ui: { pieceCueTiming: timing } }), /NEXT/);
+  }
+  for (const volume of ['50', null, true, NaN, Infinity]) {
+    assert.throws(() => loaded.validate({ ui: { pieceCueVolume: volume } }), /音量/);
+  }
+  assert.equal(loaded.validate({ ui: { pieceCueVolume: -10 } }).ui.pieceCueVolume, 0);
+  assert.equal(loaded.validate({ ui: { pieceCueVolume: 150 } }).ui.pieceCueVolume, 100);
+  assert.equal(loaded.validate({}).ui.pieceCueTiming, 'next');
+  assert.deepEqual(loaded.state, load().state);
 });
 
 test('empty or malformed values respect new-key priority and save usable defaults', () => {
@@ -154,6 +220,17 @@ test('failed migration writes keep legacy data and still load preferences for th
   assert.ok(!calls.some(([operation]) => operation === 'remove'));
 });
 
+test('failed normalization writes keep the existing profile and usable session preferences', () => {
+  const saved = profile(), raw = JSON.stringify(saved);
+  const { state, values, calls } = load({ [storageKey]: raw }, 'set');
+  assertProfile(state, saved);
+  assert.equal(state.ui.pieceCueTiming, 'next');
+  assert.equal(state.ui.pieceCueVolume, 60);
+  assert.equal(state.storageOK, false);
+  assert.equal(values.get(storageKey), raw);
+  assert.deepEqual(calls, [['get', storageKey], ['set', storageKey]]);
+});
+
 test('failed legacy cleanup keeps both copies and still restores the profile', () => {
   const saved = profile(), raw = JSON.stringify(saved);
   const loaded = load({ [legacyKey]: raw }, 'remove'), { state, values } = loaded;
@@ -166,7 +243,7 @@ test('failed legacy cleanup keeps both copies and still restores the profile', (
   const reloaded = load(Object.fromEntries(values));
   assertProfile(reloaded.state, saved);
   assert.equal(reloaded.state.storageOK, true);
-  assert.deepEqual(reloaded.calls, [['get', storageKey]]);
+  assert.deepEqual(reloaded.calls, [['get', storageKey], ['set', storageKey]]);
 });
 
 test('unavailable storage leaves usable defaults without throwing', () => {

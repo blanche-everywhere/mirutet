@@ -513,7 +513,7 @@
       }
       this.fallAt = !instant && moved ? this.time + this._interval() : Infinity;
     }
-    _spawn(type, { initialHold = true, holdUsed = false, ihs = false } = {}) {
+    _spawn(type, { initialHold = true, holdUsed = false, ihs = false, queueDrawn = false } = {}) {
       const bufferedHold = this.initialHoldBuffered;
       this.initialHoldBuffered = false;
       this.pending = null; this.pieceId++;
@@ -534,7 +534,7 @@
       }
       if (this.settings.spawnDrop) this.active = movePiece(this.board, this.active, 0, -1) || this.active;
       this._cut();
-      this._emit('spawn', { type, state: { ...this.active }, ihs });
+      this._emit('spawn', { type, state: { ...this.active }, ihs, queueDrawn });
       if (this.callbacks.onSpawn) this.callbacks.onSpawn(this.active, this);
       const direction = this._direction();
       if (direction && !this.paused) {
@@ -545,11 +545,12 @@
     }
     _hold(initial) {
       if (!this.active || this.holdUsed || !this.holdEnabled) return false;
+      const queueDrawn = !this.heldPiece;
       const from = this.active.type, to = this.heldPiece || pieceType(this.pieceProvider());
       this.heldPiece = from;
       const event = this._emit('hold', { from, to, initial });
       if (this.callbacks.onHold) this.callbacks.onHold(event, this);
-      this._spawn(to, { initialHold: false, holdUsed: true, ihs: initial });
+      this._spawn(to, { initialHold: false, holdUsed: true, ihs: initial, queueDrawn });
       return true;
     }
     _lock() {
@@ -772,6 +773,7 @@
       this.completed = 0; this.startedAt = null; this.endedAt = null;
       this.pausedAt = null; this.pausedDuration = 0;
       this.round = null; this.lastResult = null; this.running = false; this.serial = 0;
+      this.cueDrawPending = false;
       this.onEvent = options.onEvent;
       this.handler = new InputHandler({ clock: this.clock, time: options.time, settings: this.settings,
         board: this.boardTemplate.clone(), bag: this.bag, autoNext: false,
@@ -789,7 +791,18 @@
           else if (action === 'pause') this.pausedAt === null ? this.pause(t) : this.resume(t);
           else this._emit(action, { t });
         },
-        onEvent: event => this._emit(event.kind, event)
+        onEvent: event => {
+          if (event.kind === 'spawn') {
+            // Capture NEXT before callbacks or further input can change the bag.
+            // A full IHS swap still announces the draw that entered this ARE.
+            const queueDrawn = this.cueDrawPending || event.queueDrawn;
+            this.cueDrawPending = false;
+            this._emit('spawn', { ...event, queueDrawn, nextType: this.bag.peek(1)[0] });
+          } else {
+            if (event.kind === 'blockout') this.cueDrawPending = false;
+            this._emit(event.kind, event);
+          }
+        }
       });
       // Fail before play if ANY selected piece has no target under the filter.
       for (const type of this.pieces) if (!this._candidates(type).length) throw new RangeError('No targets for ' + type);
@@ -822,9 +835,13 @@
       this.handler.board = this.boardTemplate.clone();
       this.handler.scheduleSpawn(this.round.type, t, this.settings.are);
     }
-    start(t = this.clock()) {
+    _drawRound(target) {
+      this.cueDrawPending = true;
+      this._newRound(this.bag.next(), target);
+    }
+    start(t = this.clock(), target) {
       if (this.running || this.endedAt !== null) throw new Error('Session already started');
-      this.running = true; this._newRound(this.bag.next()); this._schedule(t); return this;
+      this.running = true; this._drawRound(target); this._schedule(t); return this;
     }
     _onLock(lock) {
       const correct = sameCells(lock.cells, this.round.target.cells);
@@ -844,7 +861,7 @@
       }
       const repeat = status === 'miss' && this.repeatOnMiss || status === 'fault' && (this.zeroFault || this.repeatOnFault);
       if (repeat) this._newRound(this.round.type, this.round.target);
-      else this._newRound(this.bag.next());
+      else this._drawRound();
       this._schedule(lock.t);
     }
     retry(t = this.clock()) {
@@ -857,7 +874,7 @@
       this.update(t);
       if (!this.running || this.pausedAt !== null) return false;
       this.stats.skips++; this.totalStats.skips++;
-      this._newRound(this.bag.next()); this._schedule(t); return true;
+      this._drawRound(); this._schedule(t); return true;
     }
     setSettings(patch, t = this.clock()) {
       this.update(t); this.settings = normalizeSettings(patch, this.settings);

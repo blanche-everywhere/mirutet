@@ -1172,6 +1172,13 @@ canvas.board {
 }
 
 /* Settings / records / results */
+.cue-settings { margin-top:20px; }
+.cue-settings h3 { margin-bottom:10px; }
+.cue-settings .filter-line { margin:10px 0; }
+.cue-settings .filter-line select { width:auto; }
+.cue-settings output { min-width:3ch; text-align:right; }
+.cue-preview { display:flex; flex-wrap:wrap; gap:6px; margin:12px 0 8px; }
+.cue-preview button { min-width:36px; }
 .settings-page {
   max-width:1140px
 }
