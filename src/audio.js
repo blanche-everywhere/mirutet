@@ -6,18 +6,60 @@
   else root.MiruTetAudio = api;
 })(globalThis, function () {
   'use strict';
-  // Each voice: waveform, Hz, offset, duration, attack, relative level, end Hz.
-  // Soft attacks and zero-ended releases keep these small motifs comfortable
-  // at piece cadence. Pitch ranges, contours and overtone balance differ.
-  const CUES = Object.freeze(Object.fromEntries(Object.entries({
-    I: [['sine', 880, 0, .110, .008, 1, 1174.66]],
-    O: [['sine', 523.25, 0, .145, .006, .85], ['sine', 1046.5, 0, .070, .005, .25]],
-    T: [['triangle', 659.25, 0, .120, .016, .85], ['sine', 1318.5, 0, .045, .008, .16]],
-    S: [['triangle', 587.33, 0, .075, .007, .8], ['triangle', 783.99, .050, .075, .007, .8]],
-    Z: [['sine', 739.99, 0, .075, .007, .9], ['sine', 554.37, .050, .075, .007, .9]],
-    J: [['triangle', 349.23, 0, .135, .005, 1, 329.63], ['sine', 698.46, 0, .055, .005, .18]],
-    L: [['triangle', 440, 0, .100, .012, .85], ['sine', 660, .055, .095, .012, .65]]
-  }).map(([type, voices]) => [type, Object.freeze(voices.map(Object.freeze))])));
+  // Original miniature mallet instruments: [partial ratio, level, decay scale].
+  // Faint upper partials give a sugar-glass/celesta colour without a buzzy
+  // waveform, pitch slide or noise transient. Feedback uses the decay scales;
+  // piece figures sustain these soft partials until the next pitch step.
+  const GLASS = [[1, 1, 1], [2.76, .18, .48], [4.07, .055, .28]];
+  const CELESTA = [[1, 1, 1], [2, .25, .55], [3, .07, .30]];
+  const WOOD = [[1, 1, 1], [3, .14, .42], [5, .025, .24]];
+  function mallet(hz, offset, duration, level, partials) {
+    // Keep the public voice tuple: waveform, Hz, offset, duration, attack,
+    // relative level, optional end Hz. All new voices keep a fixed pitch.
+    return partials.map(([ratio, weight, decay], i) =>
+      ['sine', hz * ratio, offset, duration * decay, i ? .001 : .0015, level * weight]);
+  }
+  const freezeBank = bank => Object.freeze(Object.fromEntries(Object.entries(bank)
+    .map(([type, voices]) => [type, Object.freeze(voices.map(Object.freeze))])));
+  const FRAME = 1 / 60;
+  function figure(notes, partials, passes = 4, level = .72) {
+    const frames = notes.reduce((sum, [, length]) => sum + length, 0);
+    // Equalise the additive instruments' energy, keeping headroom for feedback
+    // and the previous cue's cancellation fade. Echoes are finite, not feedback.
+    const balance = level / Math.sqrt(partials.reduce((sum, [, weight]) => sum + weight * weight, 0));
+    return Array.from({ length: passes }, (_, pass) => {
+      let frame = pass * frames;
+      return notes.flatMap(([hz, length]) => {
+        const offset = frame * FRAME;
+        frame += length;
+        return partials.map(([ratio, weight]) =>
+          ['sine', hz * ratio, offset, length * FRAME, .0005, balance * weight * .1 ** pass]);
+      });
+    }).flat();
+  }
+  // Newly composed figures: independent registers, contours and rhythms.
+  // One pass is 12–13 frames; each echo is 20 dB below the preceding pass.
+  // Public voice tuples and cue selection stay the same as for feedback.
+  const CUES = freezeBank({
+    I: figure([[1318.51, 2], [1661.22, 1], [1975.53, 2], [1661.22, 1],
+               [1760, 2], [1479.98, 1], [1661.22, 2], [1975.53, 2]], GLASS),
+    O: figure([[246.94, 4], [293.66, 4], [261.63, 4]], CELESTA, 3),
+    T: figure([[659.25, 2], [880, 1], [1046.5, 2], [783.99, 1],
+               [1046.5, 2], [880, 1], [698.46, 1], [659.25, 2]], CELESTA),
+    S: figure([[783.99, 3], [987.77, 3], [880, 3], [1174.66, 3]], GLASS),
+    Z: figure([[932.33, 3], [698.46, 3], [554.37, 3], [415.30, 3]], CELESTA),
+    J: figure([[392, 4], [329.63, 4], [440, 4]], WOOD),
+    L: figure([[440, 4], [554.37, 4], [659.25, 4]], WOOD)
+  });
+  // Feedback shares the same dry, sweet palette, with quieter strikes so it
+  // supports rather than masks the piece announcement on the independent bus.
+  const FEEDBACK = freezeBank({
+    perfect: [...mallet(1046.5, 0, .050, .55, CELESTA),
+              ...mallet(1318.51, .032, .060, .55, GLASS)],
+    fault: [...mallet(493.88, 0, .048, .55, WOOD),
+            ...mallet(392, .030, .058, .55, WOOD)],
+    other: mallet(659.25, 0, .065, .65, WOOD)
+  });
 
   function selectCue(event, timing = 'next') {
     if (event?.kind !== 'spawn' || !event.queueDrawn) return null;
@@ -40,10 +82,24 @@
       if (!context) return;
       const t = context.currentTime;
       for (const voice of voices) {
-        const { oscillator, gain } = voice;
+        const { oscillator, gain, start } = voice;
         try {
+          if (start >= t) {
+            // Future notes/echoes have never sounded. Silence and detach them
+            // now: holding a GainNode's default value could otherwise let a
+            // note starting inside the fade window leak through at full gain.
+            gain.gain.cancelScheduledValues(t);
+            gain.gain.setValueAtTime(0, t);
+            oscillator.stop(t);
+            oscillator.disconnect(); gain.disconnect(); activeVoices.delete(voice);
+            continue;
+          }
           if (gain.gain.cancelAndHoldAtTime) gain.gain.cancelAndHoldAtTime(t);
-          else gain.gain.cancelScheduledValues(t);
+          else {
+            const held = gain.gain.value;
+            gain.gain.cancelScheduledValues(t);
+            gain.gain.setValueAtTime(held, t);
+          }
           gain.gain.setTargetAtTime(0, t, .002);
           oscillator.stop(t + .012);
           if (context.state !== 'running') {
@@ -56,7 +112,8 @@
     }
     function stopCues() { stop(cueVoices); cueVoices = []; }
     function unlock() {
-      if (!getOptions().sound || getOptions().volume === 0) return;
+      const options = getOptions();
+      if (!options.sound || options.volume === 0) return;
       if (context?.state === 'running') return;
       try {
         if (!context) {
@@ -64,7 +121,9 @@
           if (!Audio) return;
           context = new Audio({ latencyHint: 'interactive' });
           master = context.createGain(); pieceBus = context.createGain();
-          master.gain.value = 0; pieceBus.gain.value = 0;
+          // No voices exist yet. Start at the requested levels so bus smoothing
+          // cannot soften the first audition's sub-millisecond attack.
+          master.gain.value = options.volume; pieceBus.gain.value = options.pieceCueVolume / 100;
           pieceBus.connect(master); master.connect(context.destination);
         }
         configure();
@@ -94,13 +153,14 @@
           const start = t + offset, end = start + duration;
           oscillator.type = wave;
           oscillator.frequency.setValueAtTime(frequency, start);
-          oscillator.frequency.exponentialRampToValueAtTime(endFrequency, end);
+          if (endFrequency !== frequency) oscillator.frequency.exponentialRampToValueAtTime(endFrequency, end);
           gain.gain.setValueAtTime(0, start);
           gain.gain.linearRampToValueAtTime(.13 * level, start + attack);
-          gain.gain.exponentialRampToValueAtTime(.0001, end - .005);
+          if (piece) gain.gain.setValueAtTime(.13 * level, end - .0005);
+          else gain.gain.exponentialRampToValueAtTime(.0001, end - .005);
           gain.gain.linearRampToValueAtTime(0, end);
           oscillator.connect(gain); gain.connect(piece ? pieceBus : master);
-          const voice = { oscillator, gain };
+          const voice = { oscillator, gain, start };
           activeVoices.add(voice);
           if (piece) cueVoices.push(voice);
           else feedbackVoices.push(voice);
@@ -118,8 +178,7 @@
       unlock, configure, stopCues,
       piece(type) { if (Object.hasOwn(CUES, type)) play(CUES[type], true); },
       sound(kind) {
-        const frequencies = kind === 'perfect' ? [660, 880, 1100] : kind === 'fault' ? [330, 260] : [440];
-        play(frequencies.map((frequency, i) => ['sine', frequency, i * .065, .15, .008, 1]));
+        play(FEEDBACK[kind === 'perfect' ? 'perfect' : kind === 'fault' ? 'fault' : 'other']);
       }
     };
   }
