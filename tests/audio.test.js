@@ -482,3 +482,84 @@ test('suspended first previews schedule without awaiting resume; rejected resume
   const muted = audioRig(); muted.options.sound = false; muted.audio.unlock();
   assert.equal(muted.contexts.length, 0);
 });
+
+test('combo uses immutable fixed-pitch mallets rising on a capped pentatonic ladder', () => {
+  assert.ok(Object.isFrozen(A.COMBO_PITCHES));
+  for (let count = 2; count <= 12; count++) {
+    const voices = A.comboCue(count), hz = voices[0][1];
+    assert.equal(hz, A.COMBO_PITCHES[count - 2]);
+    if (count > 2) assert.ok(hz > A.comboCue(count - 1)[0][1]);
+    assert.ok(Object.isFrozen(voices)); assert.equal(voices.length, 6);
+    for (const voice of voices) {
+      assert.ok(Object.isFrozen(voice));
+      const [wave, pitch, offset, duration, attack, level, endPitch = pitch] = voice;
+      assert.equal(voice.length, 6); assert.equal(wave, 'sine');
+      assert.ok([pitch, offset, duration, attack, level].every(Number.isFinite));
+      assert.equal(pitch, endPitch, 'sample-free fixed pitch without sweeps');
+      assert.ok(pitch >= 440 && pitch <= 8500);
+      assert.ok(offset >= .04 && offset <= .105);
+      assert.ok(attack > 0 && attack <= .0015 && attack < duration - .005);
+      assert.ok(level > 0 && level <= .22, 'quiet supporting cue');
+    }
+    close(Math.max(...voices.map(v => v[2] + v[3])), .195, 'short 195 ms cue including the offset');
+  }
+  for (const count of [13, 20, 50, 10000, Number.MAX_SAFE_INTEGER]) assert.equal(A.comboCue(count), A.comboCue(12));
+  for (const count of [0, 1, -1, 2.5, NaN, Infinity, '5', null]) assert.deepEqual(A.comboCue(count), []);
+});
+
+test('combo respects live sound/master volume, stays lazy and mixes without cancelling feedback or piece cues', () => {
+  const r = audioRig();
+  r.audio.combo(5); assert.equal(r.contexts.length, 0);
+  r.options.sound = false; r.audio.unlock(); r.audio.combo(5); assert.equal(r.contexts.length, 0);
+  r.options.sound = true; r.options.volume = 0; r.audio.unlock(); assert.equal(r.contexts.length, 0);
+  r.options.volume = .3; r.audio.unlock();
+  const c = r.contexts[0];
+  r.audio.piece('T'); r.audio.sound('perfect');
+  const existing = c.oscillators.slice();
+  r.options.pieceCueVolume = 0; r.audio.combo(2);
+  const combo = c.oscillators.slice(existing.length);
+  assert.equal(combo.length, 6, 'combo follows feedback settings, independently of piece-cue volume');
+  assert.ok(existing.every(o => o.stops.length === 1), 'Perfect and piece cue remain scheduled');
+  for (const o of combo) {
+    assert.equal(o.to.to, c.gains[0], 'master volume applies to combo');
+    assert.equal(o.frequency.events.length, 1);
+  }
+  assert.equal(c.gains[0].gain.events.at(-1)[1], .3);
+  r.options.volume = .7; r.audio.combo(3);
+  assert.equal(c.gains[0].gain.events.at(-1)[1], .7);
+  assert.ok(combo.every(o => o.disconnected), 'replacement removes future combo strikes');
+  const count = c.oscillators.length;
+  r.options.sound = false; r.audio.combo(5);
+  assert.equal(c.oscillators.length, count);
+  r.options.sound = true; r.options.volume = 0; r.audio.combo(5);
+  assert.equal(c.oscillators.length, count);
+  r.audio.stopCombo();
+  assert.ok(c.oscillators.slice(existing.length).every(o => o.disconnected));
+  assert.ok(existing.every(o => o.stops.length === 1), 'combo reset leaves other channels alone');
+  r.options.volume = .3; r.audio.combo(5);
+  const ended = c.oscillators.slice(count);
+  for (const o of ended) { o.onended(); assert.ok(o.disconnected && o.to.disconnected); }
+  r.audio.stopCombo(); assert.ok(ended.every(o => o.stops.length === 1), 'ended nodes leave cancellation lists');
+  const unsupported = A.createAudioEngine(() => r.options, () => undefined);
+  assert.doesNotThrow(() => { unsupported.unlock(); unsupported.combo(50); unsupported.stopCombo(); });
+});
+
+test('combo leaves phase-independent clipping margin with Perfect, every piece cue and replacement fades', () => {
+  let comboBound = 0, cueBound = 0, feedbackBound = 0;
+  for (let count = 2; count <= 12; count++) {
+    const r = audioRig(); r.options.volume = 1; r.options.pieceCueVolume = 100;
+    r.audio.unlock(); r.audio.combo(count);
+    const metrics = renderMetrics(r.contexts[0].oscillators, { duration: .25 });
+    assert.ok(metrics.rms > .002 && metrics.rms < .015, 'quiet mallet supporting the other cues');
+    comboBound = Math.max(comboBound, metrics.envelopePeak);
+  }
+  for (const type of E.PIECE_TYPES) {
+    const r = audioRig(); r.audio.unlock(); r.audio.piece(type);
+    cueBound = Math.max(cueBound, renderMetrics(r.contexts[0].oscillators).envelopePeak);
+  }
+  for (const kind of ['perfect', 'fault', 'other']) {
+    const r = audioRig(); r.audio.unlock(); r.audio.sound(kind);
+    feedbackBound = Math.max(feedbackBound, renderMetrics(r.contexts[0].oscillators).envelopePeak);
+  }
+  assert.ok(2 * (cueBound + feedbackBound + comboBound) < .6, 'same generous margin including both old/new combo voices');
+});

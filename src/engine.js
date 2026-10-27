@@ -680,6 +680,21 @@
     }
   }
 
+  // Finesse-mode feedback only; independent of persisted lifetime statistics.
+  const COMBO_MILESTONES = Object.freeze([5, 10, 20, 50]);
+  class ComboTracker {
+    constructor() { this.reset(); }
+    reset() { this.count = 0; return this.snapshot(); }
+    snapshot() {
+      return { count: this.count, tier: COMBO_MILESTONES.filter(n => n <= this.count).at(-1) || 0 };
+    }
+    next(result) {
+      if (!['perfect', 'fault', 'miss'].includes(result?.status)) throw new RangeError('Invalid combo result');
+      this.count = result.status === 'perfect' ? this.count + 1 : 0;
+      return { ...this.snapshot(), milestone: COMBO_MILESTONES.includes(this.count) ? this.count : 0 };
+    }
+  }
+
   function emptyCounters() {
     return { attempts: 0, placements: 0, perfect: 0, faults: 0, misses: 0,
       usedInputs: 0, optimalInputs: 0, softDropAttempts: 0 };
@@ -769,6 +784,7 @@
       this.sprintLength = options.sprintLength || 0;
       if (!Number.isInteger(this.sprintLength) || this.sprintLength < 0) throw new RangeError('Invalid sprint length');
       this.stats = new Stats();
+      this.combo = new ComboTracker();
       this.totalStats = options.totalStats instanceof Stats ? options.totalStats : new Stats(options.totalStats);
       this.completed = 0; this.startedAt = null; this.endedAt = null;
       this.pausedAt = null; this.pausedDuration = 0;
@@ -850,6 +866,7 @@
       const result = { ...lock, status, optimal: this.round.optimal, targetKey: this.round.target.key,
         targetCells: this.round.target.cells.map(c => c.slice()),
         optimalSequence: this.round.target.sequence.slice(), extra: Math.max(0, lock.used - this.round.optimal), advanced };
+      result.combo = this.combo.next(result);
       this.stats.record(result); this.totalStats.record(result); this.lastResult = result;
       if (advanced) this.completed++;
       this._emit('result', { result });
@@ -868,6 +885,7 @@
       this.update(t);
       if (!this.running || this.pausedAt !== null) return false;
       this.stats.retries++; this.totalStats.retries++;
+      this.combo.reset();
       this._newRound(this.round.type, this.round.target); this._schedule(t); return true;
     }
     skip(t = this.clock()) {
@@ -920,5 +938,5 @@
     cells, cellsKey, sameCells, bounds, Board, spawnPiece, movePiece, rotatePiece,
     slidePiece, hardDrop, createRNG, Bag, ACTION_LABELS, applyAction, placementFor,
     finesseFor, allPlacements, DEFAULT_SETTINGS, SETTING_LIMITS, normalizeSettings,
-    INPUT_ACTIONS, validateBindings, rebindKeys, InputHandler, Stats, DrillSession });
+    INPUT_ACTIONS, validateBindings, rebindKeys, InputHandler, COMBO_MILESTONES, ComboTracker, Stats, DrillSession });
 });

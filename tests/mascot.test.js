@@ -224,6 +224,23 @@ test('fault hints include piece, actual count, optimal count and supplied labels
   }
 });
 
+test('combo milestones are warm polite lines; mistake feedback keeps the blunt voice', () => {
+  assert.deepEqual(Object.keys(M.COMBO_LINES).map(Number), E.COMBO_MILESTONES);
+  assert.equal(M.DIALOGUE.combo, M.COMBO_LINES);
+  for (const [count, lines] of Object.entries(M.COMBO_LINES)) {
+    assert.ok(Object.isFrozen(lines));
+    for (const line of lines) {
+      for (const marker of [count + ' COMBO', 'わたし', 'あなた', 'ですっ']) assert.ok(line.includes(marker), line);
+      assert.ok(line.length <= 40, 'brief milestone feedback');
+      assert.doesNotMatch(line, /えらい|後輩|教えてあげ|やればでき/);
+    }
+  }
+  for (const line of [...M.MISS_LINES, M.hintText('O', 1, 0, [])]) {
+    assert.match(line, /^…/);
+    assert.doesNotMatch(line, /です|ます|ましょう|ください|♪/);
+  }
+});
+
 test('sprint comments respond independently to accuracy and PPS, including exact tier boundaries', () => {
   for (const accuracyTier of M.SPRINT_COMMENTS.accuracy) for (const ppsTier of M.SPRINT_COMMENTS.pps) {
     const comment = M.sprintComment(accuracyTier.min, ppsTier.min);

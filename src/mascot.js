@@ -355,6 +355,12 @@
     25: ['25連続パーフェクトですっ。あなたの落ち着いた操作、すてきですね。'],
     50: ['50連続ですっ！わたし、感激です♪ 少し休憩もどうぞ。']
   });
+  const COMBO_LINES = deepFreeze({
+    5: ['5 COMBO！あなたのリズム、わたしもうれしいですっ♪'],
+    10: ['10 COMBO！あなたの一手、わたしも拍手ですっ♪'],
+    20: ['20 COMBO！あなたの上達、わたしの自慢ですっ♪'],
+    50: ['50 COMBO！あなたとお祝い、わたしも感激ですっ♪']
+  });
   const PIECE_PRAISE = deepFreeze({
     I: ['Iミノ、すらっと到着ですっ！縦も横もお見事ですね♪', 'Iミノの長さ、上手に生かせましたね。花まるですっ！'],
     O: ['Oミノ、ころんと着地ですっ♪ 移動だけでばっちりですね。', 'Oミノの最短移動、お見事ですっ！'],
@@ -459,7 +465,7 @@
     return SPRINT_COMMENTS.accuracy.find(tier => accuracy >= tier.min).text +
       ' ' + SPRINT_COMMENTS.pps.find(tier => pps >= tier.min).text;
   }
-  const DIALOGUE = deepFreeze({ welcome: WELCOME_LINES, praise: PRAISE_LINES, streak: STREAK_LINES,
+  const DIALOGUE = deepFreeze({ welcome: WELCOME_LINES, praise: PRAISE_LINES, streak: STREAK_LINES, combo: COMBO_LINES,
     perPiece: PIECE_PRAISE, miss: MISS_LINES, encouragement: ENCOURAGEMENT_LINES,
     tips: TIPS, sprint: SPRINT_COMMENTS });
 
@@ -626,7 +632,7 @@
   return Object.freeze({ name: 'ミルフィ', EXPRESSIONS, EXPRESSION_LABELS, MASCOT_CSS, mascotSVG,
     HAIR_SKINS, DEFAULT_HAIR_SKIN, HAIR_SKIN_LABELS, normalizeHairSkin,
     OUTFIT_SKINS, DEFAULT_OUTFIT_SKIN, OUTFIT_SKIN_LABELS, normalizeOutfitSkin,
-    DIALOGUE, PRAISE_LINES, STREAK_LINES, PIECE_PRAISE, MISS_LINES, ENCOURAGEMENT_LINES,
+    DIALOGUE, PRAISE_LINES, STREAK_LINES, COMBO_LINES, PIECE_PRAISE, MISS_LINES, ENCOURAGEMENT_LINES,
     WELCOME_LINES, TIPS, SPRINT_COMMENTS, hintText, sprintComment,
     LESSONS, createLessons, lessonPlacementGroups });
 });

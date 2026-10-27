@@ -17,6 +17,8 @@ npm run test:browser
 
 ドリルでは破線が目標、薄いミノが着地点です。ホールドはスキップ扱いで、1種類だけ選んだ練習では無効です。最短入力で置くとPerfect、余分な入力があるとフォルト、違う場所ならミスです。ゼロフォルトでは最短成功するまで同じ目標に再挑戦します。スプリントは40・100・任意の配置数に対応します。タイマーは最初の操作から開始し、一時停止時間は除きます。ベストタイムは配置数ごとに保存します（練習条件による区分はありません）。
 
+フィネス編のドリル・スプリント・レッスンのチャレンジでは、Perfectが2回続くとCOMBOが表示されます。5・10・20・50回で彩りと弾みが増え、ドリル・スプリントではミルフィもひとことお祝いします。レッスンでは説明・達成のフィードバックを優先し、IRSなどの追加条件を満たさなくてもフィネスのPerfectはCOMBOに数えます。スクリーンリーダーへのCOMBO通知は5・10・20・50回だけです。柔らかいマレット音は回数とともに上がり、12回で音程が上限になります（約195 ms、ミノの合図と重ねて再生）。効果音・全体音量・吹き出しの設定を反映し、動きを減らす設定では静かに表示します。フォルト・ミス、リトライ、練習条件の変更、再スタート、別画面への移動でCOMBOはリセットされ、一時停止中は保たれます。COMBO自体は保存しません。
+
 初期キー：←→ 移動、↓ ソフト落下、Space 固定、↑/X 右回転、Z 左回転、A 半回転、左Shift/C ホールド、R 同じ目標、N 次の目標、H ヒント、Esc 一時停止、`,` 設定。設定画面ですべて変更・追加できます。重複したキーは入れ替えできます。タイトルは矢印で選択・Enterで決定。実演レッスンはEnter/Space/→で次へ、←で戻り、Escでタイトルへ戻れます。
 
 操作設定はスライダーと数値入力を同期して即時適用します。ARR=0はDAS完了時に壁まで移動、SDF=41は固定なしの瞬間落下、重力0は落下なしです。DCDは出現・回転・ハードドロップ後の自動横移動にだけ適用されます。左右同時押しは最後に押した方向が優先され、以前の方向のDASチャージも維持します。IRSは出現時に回転キーを長押し、IHSはARE中のホールド入力を使用します。
@@ -43,7 +45,7 @@ npm run test:browser
 
 ソルバーは回転・タップ・DASを同じ1入力として幅優先探索します。着地セルの一致で対称形を同一視し、同点なら回転を先に選びます。空フィールドの配置数はI=17、O=9、T/J/L=34、S/Z=17。180°有効時の空フィールド全配置では最大3入力です（I/Oは最大2）。180°無効時はT/J/Lで最大4入力になり、両設定を独立参照テストで検証します。スタック上の意図的な下降を必要とする潜り込みはソルバーの探索対象外です。全表は `tests/finesse-table.txt` を参照してください。
 
-`tests/browser.check.js` はplaywright-coreと `/usr/bin/google-chrome`（headless、`--no-sandbox`）を使用します。file://で起動し、コンソールエラー・ページ例外・外部通信を検出します。レッスン実演と練習、通常キー入力、Perfect/フォルト/ミス、DAS/ARR、実キー長押しによるARE・IRSの1入力判定、設定保存とJSON、キー競合のキーボード決定、一時停止、フィルター、短いスプリントと保存禁止時の動作を確認します。1280×720のタイトル・全12レッスン・ドリル・設定で文書全体のはみ出しを検査します。各レッスンの全実演とチャレンジで前後ボタンの矩形を測り、説明パネルをスクロールしてもボタン・盤面・マスコットが画面内に残ることを確認します。ドリルの各操作ボタン、設定の保存して戻るボタン、盤面下の列番号・説明の切れと文字サイズも確認します。ドリルは1920×1080での拡大も検査します。`screens/` にタイトル（title/menu）、通常レッスン、IRSレッスン、Tミノの最短表、固定前の目標、1080pドリル、成功、フォルト＋ヒント、設定、スプリント結果の11枚を保存します。title.pngとsettings.pngは保存テストとは別の新しいブラウザコンテキストで撮影し、CWの↑/X、ホールドの左Shift/C、DAS 110、ARE 80を確認します。トーストの自動消去と画面切替時の消去も検査します。ビルドのURL検査はSVG名前空間以外を拒否します。Chromeが起動できないサンドボックスでは、起動エラーを表示して失敗します。
+`tests/browser.check.js` はplaywright-coreと `/usr/bin/google-chrome`（headless、`--no-sandbox`）を使用します。file://で起動し、コンソールエラー・ページ例外・外部通信を検出します。レッスン実演と練習、通常キー入力、Perfect/フォルト/ミス、DAS/ARR、実キー長押しによるARE・IRSの1入力判定、設定保存とJSON、キー競合のキーボード決定、一時停止、フィルター、短いスプリントと保存禁止時の動作を確認します。1280×720のタイトル・全12レッスン・ドリル・設定で文書全体のはみ出しを検査します。各レッスンの全実演とチャレンジで前後ボタンの矩形を測り、説明パネルをスクロールしてもボタン・盤面・マスコットが画面内に残ることを確認します。ドリルの各操作ボタン、設定の保存して戻るボタン、盤面下の列番号・説明の切れと文字サイズも確認します。ドリルは1920×1080での拡大も検査します。`screens/` にタイトル（title/menu）、通常レッスン、IRSレッスン、Tミノの最短表、固定前の目標、1080pドリル、成功、5 COMBO、フォルト＋ヒント、設定、スプリント結果の12枚を保存します。title.pngとsettings.pngは保存テストとは別の新しいブラウザコンテキストで撮影し、CWの↑/X、ホールドの左Shift/C、DAS 110、ARE 80を確認します。トーストの自動消去と画面切替時の消去も検査します。ビルドのURL検査はSVG名前空間以外を拒否します。Chromeが起動できないサンドボックスでは、起動エラーを表示して失敗します。
 
 ブラウザテスト用に `window.__mirutet.getState()`、`chooseTarget(type, {rot,x}, {delay})`、`dispatch(code, down)` を公開します。`chooseTarget` のxは占有セルの左端（0始まり）です。キーは通常の `KeyboardEvent` と同じ経路を通り、デバッグ操作で結果や入力数を書き換えません。
 
@@ -64,3 +66,5 @@ Idea: pre-show a target shadow and place the piece there with the optimal input 
 ## English
 
 An offline, Japanese tetromino practice game series with original mascot ミルフィ. The current mode, フィネス編, teaches minimum-input placement. Run `npm run build`, then open `dist/mirutet.html` directly. Everything is inlined; no server or network is required. `npm test` runs the independent engine/mascot checks. `npm run test:browser` runs system Chrome through playwright-core and saves screenshots in `screens/`. The current mode includes engine-driven lessons, filtered drills, sprint, handling/key settings, persistent statistics, and synthesized audio with graceful fallbacks.
+
+Consecutive Perfects show COMBO from two placements, with milestone visuals and screen-reader announcements at 5/10/20/50 and a quiet rising mallet cue. Milestone dialogue appears in drills and sprints; lesson feedback takes priority in challenges, while finesse-Perfect still counts even without required IRS. Mistakes, retries, practice-condition changes and leaving play reset it. The browser check saves a deterministic five-COMBO view to `screens/combo.png`.

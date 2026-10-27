@@ -60,6 +60,17 @@
             ...mallet(392, .030, .058, .55, WOOD)],
     other: mallet(659.25, 0, .065, .65, WOOD)
   });
+  // A major pentatonic ladder, A4–A6; count 12 and above share the top step.
+  // Two quiet, fixed-pitch taps follow Perfect by 40 ms and finish at 195 ms.
+  const COMBO_PITCHES = Object.freeze([440, 493.88, 554.37, 659.25, 739.99, 880,
+    987.77, 1108.73, 1318.51, 1479.98, 1760]);
+  const COMBOS = COMBO_PITCHES.map(hz => Object.freeze([
+    ...mallet(hz, .040, .120, .22, CELESTA),
+    ...mallet(hz, .105, .090, .10, GLASS)
+  ].map(Object.freeze)));
+  function comboCue(count) {
+    return Number.isSafeInteger(count) && count >= 2 ? COMBOS[Math.min(count - 2, COMBOS.length - 1)] : [];
+  }
 
   function selectCue(event, timing = 'next') {
     if (event?.kind !== 'spawn' || !event.queueDrawn) return null;
@@ -68,7 +79,7 @@
   }
 
   function createAudioEngine(getOptions, getAudioClass = () => globalThis.AudioContext || globalThis.webkitAudioContext) {
-    let context, master, pieceBus, resuming = false, cueVoices = [], feedbackVoices = [];
+    let context, master, pieceBus, resuming = false, cueVoices = [], feedbackVoices = [], comboVoices = [];
     const activeVoices = new Set();
     function configure() {
       if (!context || !master || !pieceBus) return;
@@ -130,12 +141,13 @@
         if (context.state === 'suspended' && !resuming) {
           resuming = true;
           context.resume().catch(() => {
-            stop(activeVoices); cueVoices = []; feedbackVoices = [];
+            stop(activeVoices); cueVoices = []; feedbackVoices = []; comboVoices = [];
           }).finally(() => { resuming = false; });
         }
       } catch (_) { resuming = false; stop(activeVoices); }
     }
-    function play(voices, piece = false) {
+    function play(voices, channel = 'feedback') {
+      const piece = channel === 'piece';
       const options = getOptions();
       if (!options.sound || options.volume === 0 || piece && options.pieceCueVolume === 0) return;
       // Scheduling while resume is pending preserves the very first preview.
@@ -146,6 +158,7 @@
       try {
         configure();
         if (piece) stopCues();
+        else if (channel === 'combo') { stop(comboVoices); comboVoices = []; }
         else { stop(feedbackVoices); feedbackVoices = []; }
         const t = context.currentTime;
         for (const [wave, frequency, offset, duration, attack, level, endFrequency = frequency] of voices) {
@@ -163,12 +176,14 @@
           const voice = { oscillator, gain, start };
           activeVoices.add(voice);
           if (piece) cueVoices.push(voice);
+          else if (channel === 'combo') comboVoices.push(voice);
           else feedbackVoices.push(voice);
           oscillator.onended = () => {
             oscillator.disconnect(); gain.disconnect();
             activeVoices.delete(voice);
             cueVoices = cueVoices.filter(v => v !== voice);
             feedbackVoices = feedbackVoices.filter(v => v !== voice);
+            comboVoices = comboVoices.filter(v => v !== voice);
           };
           oscillator.start(start); oscillator.stop(end);
         }
@@ -176,11 +191,13 @@
     }
     return {
       unlock, configure, stopCues,
-      piece(type) { if (Object.hasOwn(CUES, type)) play(CUES[type], true); },
+      stopCombo() { stop(comboVoices); comboVoices = []; },
+      piece(type) { if (Object.hasOwn(CUES, type)) play(CUES[type], 'piece'); },
+      combo(count) { const voices = comboCue(count); if (voices.length) play(voices, 'combo'); },
       sound(kind) {
         play(FEEDBACK[kind === 'perfect' ? 'perfect' : kind === 'fault' ? 'fault' : 'other']);
       }
     };
   }
-  return Object.freeze({ CUES, selectCue, createAudioEngine });
+  return Object.freeze({ CUES, COMBO_PITCHES, comboCue, selectCue, createAudioEngine });
 });

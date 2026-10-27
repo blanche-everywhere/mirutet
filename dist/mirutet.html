@@ -774,6 +774,67 @@ canvas.board {
   min-height:22px
 }
 
+/* Finesse play screens reserve this space even below two successes. The pop
+   stays inside the queue/coach column, clear of the board and speech bubble. */
+.finesse-combo {
+  position:relative;
+  height:90px;
+  flex:0 0 90px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  pointer-events:none
+}
+
+.combo-announcement {
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip-path:inset(50%);
+  white-space:nowrap;
+  border:0
+}
+
+.combo-display {
+  --combo-scale:1.04;
+  --combo-turn:0deg;
+  --combo-duration:.32s;
+  position:relative;
+  width:68px;
+  padding:7px 2px;
+  border:1px solid #dfd2eb;
+  border-radius:18px;
+  background:linear-gradient(145deg,#fffdfd,#f2eaf9);
+  color:#9874b4;
+  text-align:center;
+  line-height:1.1;
+  box-shadow:0 3px 10px #b59acc20
+}
+
+.combo-display strong { display:block; font-size:26px; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.combo-display span { font-size:13px; font-weight:800; letter-spacing:.02em; }
+.combo-display[data-tier="5"] { --combo-scale:1.08; --combo-turn:-2deg; --combo-duration:.42s; border-color:#e6b8cc; color:#b87596; background:linear-gradient(145deg,#fffdfd,#fbe7f0); }
+.combo-display[data-tier="10"] { --combo-scale:1.1; --combo-turn:3deg; --combo-duration:.48s; border-color:#b5d8cc; color:#5c9988; background:linear-gradient(145deg,#fffef7,#e4f6ed); }
+.combo-display[data-tier="20"] { --combo-scale:1.12; --combo-turn:-4deg; --combo-duration:.55s; border-color:#cbb1e2; color:#9566b1; background:linear-gradient(145deg,#fff4f9,#eee2fc); }
+.combo-display[data-tier="50"] { --combo-scale:1.14; --combo-turn:4deg; --combo-duration:.65s; border-color:#e6c58b; color:#ac8051; background:linear-gradient(145deg,#fff7da,#fbe3ef); box-shadow:0 0 12px #e9c3d780; }
+.combo-display[data-tier="10"]:before,.combo-display[data-tier="20"]:before,.combo-display[data-tier="50"]:before {
+  content:"✧";
+  position:absolute;
+  top:2px;
+  right:3px;
+  font-size:13px
+}
+.combo-display.pop { animation:combo-pop var(--combo-duration) ease-out; }
+@keyframes combo-pop {
+  0% { transform:scale(.88); opacity:.6; }
+  35% { transform:scale(var(--combo-scale)) rotate(var(--combo-turn)); opacity:1; }
+  65% { transform:scale(.98) rotate(calc(-1 * var(--combo-turn))); }
+  100% { transform:scale(1); }
+}
+
 .irs-flash {
   position:absolute;
   top:47px;
@@ -2569,6 +2630,21 @@ kbd,.key-help kbd { font-size:13px; }
     }
   }
 
+  // Finesse-mode feedback only; independent of persisted lifetime statistics.
+  const COMBO_MILESTONES = Object.freeze([5, 10, 20, 50]);
+  class ComboTracker {
+    constructor() { this.reset(); }
+    reset() { this.count = 0; return this.snapshot(); }
+    snapshot() {
+      return { count: this.count, tier: COMBO_MILESTONES.filter(n => n <= this.count).at(-1) || 0 };
+    }
+    next(result) {
+      if (!['perfect', 'fault', 'miss'].includes(result?.status)) throw new RangeError('Invalid combo result');
+      this.count = result.status === 'perfect' ? this.count + 1 : 0;
+      return { ...this.snapshot(), milestone: COMBO_MILESTONES.includes(this.count) ? this.count : 0 };
+    }
+  }
+
   function emptyCounters() {
     return { attempts: 0, placements: 0, perfect: 0, faults: 0, misses: 0,
       usedInputs: 0, optimalInputs: 0, softDropAttempts: 0 };
@@ -2658,6 +2734,7 @@ kbd,.key-help kbd { font-size:13px; }
       this.sprintLength = options.sprintLength || 0;
       if (!Number.isInteger(this.sprintLength) || this.sprintLength < 0) throw new RangeError('Invalid sprint length');
       this.stats = new Stats();
+      this.combo = new ComboTracker();
       this.totalStats = options.totalStats instanceof Stats ? options.totalStats : new Stats(options.totalStats);
       this.completed = 0; this.startedAt = null; this.endedAt = null;
       this.pausedAt = null; this.pausedDuration = 0;
@@ -2739,6 +2816,7 @@ kbd,.key-help kbd { font-size:13px; }
       const result = { ...lock, status, optimal: this.round.optimal, targetKey: this.round.target.key,
         targetCells: this.round.target.cells.map(c => c.slice()),
         optimalSequence: this.round.target.sequence.slice(), extra: Math.max(0, lock.used - this.round.optimal), advanced };
+      result.combo = this.combo.next(result);
       this.stats.record(result); this.totalStats.record(result); this.lastResult = result;
       if (advanced) this.completed++;
       this._emit('result', { result });
@@ -2757,6 +2835,7 @@ kbd,.key-help kbd { font-size:13px; }
       this.update(t);
       if (!this.running || this.pausedAt !== null) return false;
       this.stats.retries++; this.totalStats.retries++;
+      this.combo.reset();
       this._newRound(this.round.type, this.round.target); this._schedule(t); return true;
     }
     skip(t = this.clock()) {
@@ -2809,7 +2888,7 @@ kbd,.key-help kbd { font-size:13px; }
     cells, cellsKey, sameCells, bounds, Board, spawnPiece, movePiece, rotatePiece,
     slidePiece, hardDrop, createRNG, Bag, ACTION_LABELS, applyAction, placementFor,
     finesseFor, allPlacements, DEFAULT_SETTINGS, SETTING_LIMITS, normalizeSettings,
-    INPUT_ACTIONS, validateBindings, rebindKeys, InputHandler, Stats, DrillSession });
+    INPUT_ACTIONS, validateBindings, rebindKeys, InputHandler, COMBO_MILESTONES, ComboTracker, Stats, DrillSession });
 });
 </script>
   <script>/* Original, sample-free Web Audio cues. No context or nodes until unlock(). */
@@ -2874,6 +2953,17 @@ kbd,.key-help kbd { font-size:13px; }
             ...mallet(392, .030, .058, .55, WOOD)],
     other: mallet(659.25, 0, .065, .65, WOOD)
   });
+  // A major pentatonic ladder, A4–A6; count 12 and above share the top step.
+  // Two quiet, fixed-pitch taps follow Perfect by 40 ms and finish at 195 ms.
+  const COMBO_PITCHES = Object.freeze([440, 493.88, 554.37, 659.25, 739.99, 880,
+    987.77, 1108.73, 1318.51, 1479.98, 1760]);
+  const COMBOS = COMBO_PITCHES.map(hz => Object.freeze([
+    ...mallet(hz, .040, .120, .22, CELESTA),
+    ...mallet(hz, .105, .090, .10, GLASS)
+  ].map(Object.freeze)));
+  function comboCue(count) {
+    return Number.isSafeInteger(count) && count >= 2 ? COMBOS[Math.min(count - 2, COMBOS.length - 1)] : [];
+  }
 
   function selectCue(event, timing = 'next') {
     if (event?.kind !== 'spawn' || !event.queueDrawn) return null;
@@ -2882,7 +2972,7 @@ kbd,.key-help kbd { font-size:13px; }
   }
 
   function createAudioEngine(getOptions, getAudioClass = () => globalThis.AudioContext || globalThis.webkitAudioContext) {
-    let context, master, pieceBus, resuming = false, cueVoices = [], feedbackVoices = [];
+    let context, master, pieceBus, resuming = false, cueVoices = [], feedbackVoices = [], comboVoices = [];
     const activeVoices = new Set();
     function configure() {
       if (!context || !master || !pieceBus) return;
@@ -2944,12 +3034,13 @@ kbd,.key-help kbd { font-size:13px; }
         if (context.state === 'suspended' && !resuming) {
           resuming = true;
           context.resume().catch(() => {
-            stop(activeVoices); cueVoices = []; feedbackVoices = [];
+            stop(activeVoices); cueVoices = []; feedbackVoices = []; comboVoices = [];
           }).finally(() => { resuming = false; });
         }
       } catch (_) { resuming = false; stop(activeVoices); }
     }
-    function play(voices, piece = false) {
+    function play(voices, channel = 'feedback') {
+      const piece = channel === 'piece';
       const options = getOptions();
       if (!options.sound || options.volume === 0 || piece && options.pieceCueVolume === 0) return;
       // Scheduling while resume is pending preserves the very first preview.
@@ -2960,6 +3051,7 @@ kbd,.key-help kbd { font-size:13px; }
       try {
         configure();
         if (piece) stopCues();
+        else if (channel === 'combo') { stop(comboVoices); comboVoices = []; }
         else { stop(feedbackVoices); feedbackVoices = []; }
         const t = context.currentTime;
         for (const [wave, frequency, offset, duration, attack, level, endFrequency = frequency] of voices) {
@@ -2977,12 +3069,14 @@ kbd,.key-help kbd { font-size:13px; }
           const voice = { oscillator, gain, start };
           activeVoices.add(voice);
           if (piece) cueVoices.push(voice);
+          else if (channel === 'combo') comboVoices.push(voice);
           else feedbackVoices.push(voice);
           oscillator.onended = () => {
             oscillator.disconnect(); gain.disconnect();
             activeVoices.delete(voice);
             cueVoices = cueVoices.filter(v => v !== voice);
             feedbackVoices = feedbackVoices.filter(v => v !== voice);
+            comboVoices = comboVoices.filter(v => v !== voice);
           };
           oscillator.start(start); oscillator.stop(end);
         }
@@ -2990,13 +3084,15 @@ kbd,.key-help kbd { font-size:13px; }
     }
     return {
       unlock, configure, stopCues,
-      piece(type) { if (Object.hasOwn(CUES, type)) play(CUES[type], true); },
+      stopCombo() { stop(comboVoices); comboVoices = []; },
+      piece(type) { if (Object.hasOwn(CUES, type)) play(CUES[type], 'piece'); },
+      combo(count) { const voices = comboCue(count); if (voices.length) play(voices, 'combo'); },
       sound(kind) {
         play(FEEDBACK[kind === 'perfect' ? 'perfect' : kind === 'fault' ? 'fault' : 'other']);
       }
     };
   }
-  return Object.freeze({ CUES, selectCue, createAudioEngine });
+  return Object.freeze({ CUES, COMBO_PITCHES, comboCue, selectCue, createAudioEngine });
 });
 </script>
   <script>/* ミルフィ — original art and Japanese teaching material for Miru Tet.
@@ -3356,6 +3452,12 @@ kbd,.key-help kbd { font-size:13px; }
     25: ['25連続パーフェクトですっ。あなたの落ち着いた操作、すてきですね。'],
     50: ['50連続ですっ！わたし、感激です♪ 少し休憩もどうぞ。']
   });
+  const COMBO_LINES = deepFreeze({
+    5: ['5 COMBO！あなたのリズム、わたしもうれしいですっ♪'],
+    10: ['10 COMBO！あなたの一手、わたしも拍手ですっ♪'],
+    20: ['20 COMBO！あなたの上達、わたしの自慢ですっ♪'],
+    50: ['50 COMBO！あなたとお祝い、わたしも感激ですっ♪']
+  });
   const PIECE_PRAISE = deepFreeze({
     I: ['Iミノ、すらっと到着ですっ！縦も横もお見事ですね♪', 'Iミノの長さ、上手に生かせましたね。花まるですっ！'],
     O: ['Oミノ、ころんと着地ですっ♪ 移動だけでばっちりですね。', 'Oミノの最短移動、お見事ですっ！'],
@@ -3460,7 +3562,7 @@ kbd,.key-help kbd { font-size:13px; }
     return SPRINT_COMMENTS.accuracy.find(tier => accuracy >= tier.min).text +
       ' ' + SPRINT_COMMENTS.pps.find(tier => pps >= tier.min).text;
   }
-  const DIALOGUE = deepFreeze({ welcome: WELCOME_LINES, praise: PRAISE_LINES, streak: STREAK_LINES,
+  const DIALOGUE = deepFreeze({ welcome: WELCOME_LINES, praise: PRAISE_LINES, streak: STREAK_LINES, combo: COMBO_LINES,
     perPiece: PIECE_PRAISE, miss: MISS_LINES, encouragement: ENCOURAGEMENT_LINES,
     tips: TIPS, sprint: SPRINT_COMMENTS });
 
@@ -3627,7 +3729,7 @@ kbd,.key-help kbd { font-size:13px; }
   return Object.freeze({ name: 'ミルフィ', EXPRESSIONS, EXPRESSION_LABELS, MASCOT_CSS, mascotSVG,
     HAIR_SKINS, DEFAULT_HAIR_SKIN, HAIR_SKIN_LABELS, normalizeHairSkin,
     OUTFIT_SKINS, DEFAULT_OUTFIT_SKIN, OUTFIT_SKIN_LABELS, normalizeOutfitSkin,
-    DIALOGUE, PRAISE_LINES, STREAK_LINES, PIECE_PRAISE, MISS_LINES, ENCOURAGEMENT_LINES,
+    DIALOGUE, PRAISE_LINES, STREAK_LINES, COMBO_LINES, PIECE_PRAISE, MISS_LINES, ENCOURAGEMENT_LINES,
     WELCOME_LINES, TIPS, SPRINT_COMMENTS, hintText, sprintComment,
     LESSONS, createLessons, lessonPlacementGroups });
 });
@@ -3778,6 +3880,38 @@ kbd,.key-help kbd { font-size:13px; }
 
   const audio = A.createAudioEngine(() => ui);
   const sound = kind => audio.sound(kind);
+  function comboHTML() {
+    return '<div class="finesse-combo"><div id="combo-display" class="combo-display" aria-live="off" data-count="0" data-tier="0" hidden></div><span id="combo-announcement" class="combo-announcement" role="status" aria-live="polite" aria-atomic="true"></span></div>';
+  }
+  function updateCombo(combo = session?.combo.snapshot(), animate = false) {
+    const display = $('#combo-display'); if (!display) return;
+    const count = combo?.count || 0, tier = combo?.tier || 0, hidden = count < 2;
+    const announcement = $('#combo-announcement');
+    if (hidden) {
+      audio.stopCombo();
+      if (announcement?.textContent) announcement.textContent = '';
+      if (Object.values(M.COMBO_LINES).some(lines => lines.includes(bubble))) setCoach(pick(M.ENCOURAGEMENT_LINES));
+    }
+    // A judged lock also queues a target event. Reuse this view on that event,
+    // skips and other target changes rather than rewriting an unchanged count.
+    if (display.dataset.count === String(count) && display.dataset.tier === String(tier) && display.hidden === hidden) return;
+    display.dataset.count = count; display.dataset.tier = tier; display.hidden = hidden;
+    if (hidden) {
+      if (display.textContent) display.textContent = '';
+      return;
+    }
+    display.innerHTML = `<strong>${count}</strong><span> COMBO</span>`;
+    // Only a new judged milestone speaks; rendering/target events never do.
+    if (animate && combo.milestone && announcement) announcement.textContent = `${combo.milestone} COMBO`;
+    if (animate && !reducedMotion) {
+      display.classList.remove('pop');
+      void display.offsetWidth;
+      display.classList.add('pop');
+    }
+  }
+  function resetCombo() {
+    session?.combo.reset(); audio.stopCombo(); updateCombo();
+  }
   // Unlock on the gesture itself, before an ARE timer or a preview's click.
   document.addEventListener('pointerdown', () => audio.unlock(), { passive: true });
   function header() {
@@ -3802,7 +3936,7 @@ kbd,.key-help kbd { font-size:13px; }
   }
   function playHTML() {
     const sprint = session.sprintLength;
-    return `<main class="play-page"><div class="row spread play-topline"><h1 class="play-title">${sprint ? 'スプリント' : 'フィネス・ドリル'}<span class="tag">${sprint ? sprint + ' PLACEMENTS' : 'FREE PRACTICE'}</span></h1><div class="row"><span id="sprint-time" class="sprint-time">00:00.00</span><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div></div><div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div id="practice-wrap">${practiceHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">ホールド</div><div id="hold-preview">${mini(null)}</div></div><p id="hold-note" class="hold-note">${session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効'}</p><div class="key-help">${['left', 'right', 'cw', 'ccw', 'rotate180'].map(a => `<kbd data-live-key="${a}" title="${ACTION_NAMES[a]}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><div class="queue-box"><div class="queue-title">次の5個</div><div id="next-preview"></div></div><p class="hold-note">${escape(friendly(bindings.hardDrop[0]))}<br>ハードドロップ</p></aside></section><aside class="right-stack"><section class="panel stats-panel"><div class="row spread panel-label"><span>SESSION / この練習</span><button class="quiet small" style="padding:0" data-act="records-session">全記録 ↗</button></div><div class="stats-main"><div class="stat"><label>連続パーフェクト</label><strong class="accent" id="streak">0</strong><small> 連続</small></div><div class="stat"><label>フィネス正確率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>最高 <b id="best-streak">0</b></span><span>PPS <b id="pps">0.00</b></span><span>成功 <b id="completed">0${sprint ? '/' + sprint : ''}</b></span></div>${sprint ? '<div class="sprint-progress"><div id="sprint-progress"></div></div>' : ''}<div class="stats-strip"><span>平均入力 <b id="average">0 / 0</b></span><span>ミス <b id="misses">0</b></span></div></section><section class="panel stats-panel"><div class="panel-label">フォルト / 試行 · ミノ別</div><div id="piece-bars" class="piece-bars">${pieceBars(session.stats)}</div></section><section id="result-panel" class="panel result-panel"></section><div class="play-buttons"><button data-act="retry">↻ 同じ目標</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の目標 →</button><button data-act="settings">操作の設定</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
+    return `<main class="play-page"><div class="row spread play-topline"><h1 class="play-title">${sprint ? 'スプリント' : 'フィネス・ドリル'}<span class="tag">${sprint ? sprint + ' PLACEMENTS' : 'FREE PRACTICE'}</span></h1><div class="row"><span id="sprint-time" class="sprint-time">00:00.00</span><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div></div><div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div id="practice-wrap">${practiceHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">ホールド</div><div id="hold-preview">${mini(null)}</div></div><p id="hold-note" class="hold-note">${session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効'}</p><div class="key-help">${['left', 'right', 'cw', 'ccw', 'rotate180'].map(a => `<kbd data-live-key="${a}" title="${ACTION_NAMES[a]}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><div class="queue-box"><div class="queue-title">次の5個</div><div id="next-preview"></div></div><p class="hold-note">${escape(friendly(bindings.hardDrop[0]))}<br>ハードドロップ</p>${comboHTML()}</aside></section><aside class="right-stack"><section class="panel stats-panel"><div class="row spread panel-label"><span>SESSION / この練習</span><button class="quiet small" style="padding:0" data-act="records-session">全記録 ↗</button></div><div class="stats-main"><div class="stat"><label>連続パーフェクト</label><strong class="accent" id="streak">0</strong><small> 連続</small></div><div class="stat"><label>フィネス正確率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>最高 <b id="best-streak">0</b></span><span>PPS <b id="pps">0.00</b></span><span>成功 <b id="completed">0${sprint ? '/' + sprint : ''}</b></span></div>${sprint ? '<div class="sprint-progress"><div id="sprint-progress"></div></div>' : ''}<div class="stats-strip"><span>平均入力 <b id="average">0 / 0</b></span><span>ミス <b id="misses">0</b></span></div></section><section class="panel stats-panel"><div class="panel-label">フォルト / 試行 · ミノ別</div><div id="piece-bars" class="piece-bars">${pieceBars(session.stats)}</div></section><section id="result-panel" class="panel result-panel"></section><div class="play-buttons"><button data-act="retry">↻ 同じ目標</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の目標 →</button><button data-act="settings">操作の設定</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
   }
   function lessonsHTML() {
     return `<main class="page"><div class="page-heading"><div><div class="eyebrow">FINESSE CLASSROOM</div><h2 style="margin-top:6px">レッスン一覧</h2><p>実演を見て、3つの目標で練習。好きなところから復習できます。</p></div><span class="tag mint-tag">${progress.completed.length} / 12 チャレンジ達成</span></div><div class="lesson-list">${lessons.map((lesson, i) => `<button class="lesson-card" data-act="lesson" data-index="${i}"><span class="eyebrow">LESSON ${String(i + 1).padStart(2, '0')} ${progress.completed.includes(i) ? ' · ✔' : ''}</span><b>${escape(lesson.title)}</b><span>${i >= 4 && i <= 10 ? 'ミノ別の最短表・実演・3つの目標' : '実演とミニチャレンジ'}</span></button>`).join('')}</div></main>${footer()}`;
@@ -3810,7 +3944,7 @@ kbd,.key-help kbd { font-size:13px; }
   function demoVariants(lesson) { return lesson.demo.examples || lesson.demo.variants || [lesson.demo]; }
   function tutorialHTML() {
     const lesson = lessons[lessonIndex], variants = demoVariants(lesson);
-    return `<main class="page lesson-page"><div class="page-heading lesson-heading"><div><div class="eyebrow">LESSON ${String(lessonIndex + 1).padStart(2, '0')} / 12</div><h2 style="margin-top:5px">${escape(lesson.title)}</h2></div><div class="row"><nav class="lesson-steps" aria-label="レッスン選択">${lessons.map((l, i) => `<button data-act="lesson" data-index="${i}" title="${escape(l.title)}" class="${i === lessonIndex ? 'active' : progress.completed.includes(i) ? 'done' : ''}">${i + 1}</button>`).join('')}</nav><button class="small" data-act="lessons">一覧</button></div></div><div class="lesson-grid"><aside class="lesson-coach">${speech(lesson.lines[0], 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${lesson.expression}">${mascot(lesson.expression, 'lesson')}</div><p class="tiny" style="text-align:center">ミルフィのフィネス教室</p></aside><section class="lesson-board">${boardHTML()}<div id="demo-keys" class="sequence"></div><p id="demo-caption" class="tiny" style="text-align:center;margin:8px 0">実演を準備しています…</p><div id="tutorial-result" class="lesson-status" aria-live="polite">${escape(lessonMessage)}</div></section><section class="lesson-details" aria-label="レッスンの説明と操作"><div class="lesson-content" tabindex="0" aria-label="レッスンの説明と最短表"><span class="tag ${tryMode ? 'mint-tag' : ''}">${tryMode ? 'YOUR TURN / 自分でチャレンジ' : 'WATCH / キーの光り方を見てみよう'}</span><div class="lesson-text">${lesson.lines.slice(1).map(line => `<p>${escape(line)}</p>`).join('')}</div><div class="demo-tabs">${variants.map((v, i) => `<button class="${demoVariant === i && !tryMode ? 'active' : ''}" data-act="demo" data-index="${i}">${lesson.demo.type === 'compare-sequences' ? i === 0 ? 'タップ × 4' : 'DAS × 1' : v.type === 'irs' ? 'IRSの実演' : v.type === 'ihs' ? 'IHSの実演' : '実演 ' + (i + 1)}</button>`).join('')}<button data-act="settings">操作の設定 ↗</button></div><div class="try-box"><h3>✧ やってみましょう</h3><p>${lesson.tryIt.requireIRS ? 'ARE中に回転キーを長押しして、IRSで置いてみましょうね。' : '目標の輪郭に、最少の回数で置いてみましょうね。別の最短手順でもOKですっ。'}<br>移動・回転で合わせ、${escape(friendly(bindings.hardDrop[0]))} で落下 / ${escape(friendly(bindings.retry[0]))} でもう一度</p><button class="small ${tryMode ? '' : 'primary'}" data-act="try-it">${tryDone ? 'もう一度チャレンジ' : tryMode ? `目標 ${Math.min(tryIndex + 1, lesson.tryIt.targets.length)} / ${lesson.tryIt.targets.length} · 最初から` : `${lesson.tryIt.targets.length}つの目標にチャレンジ`}</button></div>${lesson.demo.placementGroups ? `<h3 style="margin-bottom:7px">${lesson.demo.piece}ミノの最短ルート表</h3><p class="tiny">列を選ぶと実演します。0 / R / 2 / L は回転の向きです。</p><table class="lesson-table"><thead><tr><th>向き・左端の列</th><th>最短入力</th></tr></thead><tbody>${lesson.demo.placementGroups.map((group, i) => `<tr><td><button data-act="table-demo" data-index="${i}">${group.placements.map(p => `${p.rotationLabel}・${p.column}`).join(' / ')}</button></td><td><div class="sequence">${route(group.actions)}</div></td></tr>`).join('')}</tbody></table>` : ''}</div><nav class="lesson-nav" aria-label="前後のレッスン"><button class="small" data-act="previous-lesson" ${lessonIndex === 0 ? 'disabled' : ''}>← 前へ</button><button class="primary small" data-act="next-lesson">${lessonIndex === 11 ? 'ドリルへ →' : '次のレッスン →'}</button></nav><p class="tiny lesson-shortcuts">実演中: Enter / Space / → で次へ · ← で前へ · Esc でタイトル</p></section></div></main>`;
+    return `<main class="page lesson-page"><div class="page-heading lesson-heading"><div><div class="eyebrow">LESSON ${String(lessonIndex + 1).padStart(2, '0')} / 12</div><h2 style="margin-top:5px">${escape(lesson.title)}</h2></div><div class="row"><nav class="lesson-steps" aria-label="レッスン選択">${lessons.map((l, i) => `<button data-act="lesson" data-index="${i}" title="${escape(l.title)}" class="${i === lessonIndex ? 'active' : progress.completed.includes(i) ? 'done' : ''}">${i + 1}</button>`).join('')}</nav><button class="small" data-act="lessons">一覧</button></div></div><div class="lesson-grid"><aside class="lesson-coach">${speech(lesson.lines[0], 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${lesson.expression}">${mascot(lesson.expression, 'lesson')}</div><p class="tiny" style="text-align:center">ミルフィのフィネス教室</p>${tryMode ? comboHTML() : ''}</aside><section class="lesson-board">${boardHTML()}<div id="demo-keys" class="sequence"></div><p id="demo-caption" class="tiny" style="text-align:center;margin:8px 0">実演を準備しています…</p><div id="tutorial-result" class="lesson-status" aria-live="polite">${escape(lessonMessage)}</div></section><section class="lesson-details" aria-label="レッスンの説明と操作"><div class="lesson-content" tabindex="0" aria-label="レッスンの説明と最短表"><span class="tag ${tryMode ? 'mint-tag' : ''}">${tryMode ? 'YOUR TURN / 自分でチャレンジ' : 'WATCH / キーの光り方を見てみよう'}</span><div class="lesson-text">${lesson.lines.slice(1).map(line => `<p>${escape(line)}</p>`).join('')}</div><div class="demo-tabs">${variants.map((v, i) => `<button class="${demoVariant === i && !tryMode ? 'active' : ''}" data-act="demo" data-index="${i}">${lesson.demo.type === 'compare-sequences' ? i === 0 ? 'タップ × 4' : 'DAS × 1' : v.type === 'irs' ? 'IRSの実演' : v.type === 'ihs' ? 'IHSの実演' : '実演 ' + (i + 1)}</button>`).join('')}<button data-act="settings">操作の設定 ↗</button></div><div class="try-box"><h3>✧ やってみましょう</h3><p>${lesson.tryIt.requireIRS ? 'ARE中に回転キーを長押しして、IRSで置いてみましょうね。' : '目標の輪郭に、最少の回数で置いてみましょうね。別の最短手順でもOKですっ。'}<br>移動・回転で合わせ、${escape(friendly(bindings.hardDrop[0]))} で落下 / ${escape(friendly(bindings.retry[0]))} でもう一度</p><button class="small ${tryMode ? '' : 'primary'}" data-act="try-it">${tryDone ? 'もう一度チャレンジ' : tryMode ? `目標 ${Math.min(tryIndex + 1, lesson.tryIt.targets.length)} / ${lesson.tryIt.targets.length} · 最初から` : `${lesson.tryIt.targets.length}つの目標にチャレンジ`}</button></div>${lesson.demo.placementGroups ? `<h3 style="margin-bottom:7px">${lesson.demo.piece}ミノの最短ルート表</h3><p class="tiny">列を選ぶと実演します。0 / R / 2 / L は回転の向きです。</p><table class="lesson-table"><thead><tr><th>向き・左端の列</th><th>最短入力</th></tr></thead><tbody>${lesson.demo.placementGroups.map((group, i) => `<tr><td><button data-act="table-demo" data-index="${i}">${group.placements.map(p => `${p.rotationLabel}・${p.column}`).join(' / ')}</button></td><td><div class="sequence">${route(group.actions)}</div></td></tr>`).join('')}</tbody></table>` : ''}</div><nav class="lesson-nav" aria-label="前後のレッスン"><button class="small" data-act="previous-lesson" ${lessonIndex === 0 ? 'disabled' : ''}>← 前へ</button><button class="primary small" data-act="next-lesson">${lessonIndex === 11 ? 'ドリルへ →' : '次のレッスン →'}</button></nav><p class="tiny lesson-shortcuts">実演中: Enter / Space / → で次へ · ← で前へ · Esc でタイトル</p></section></div></main>`;
   }
   function handlingRow(key, title, note, step = 1) {
     const [min, max] = E.SETTING_LIMITS[key];
@@ -3851,6 +3985,7 @@ kbd,.key-help kbd { font-size:13px; }
     document.body.dataset.screen = screen;
     document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
     lastQueue = ''; lastHUD = 0;
+    updateCombo();
     if (screen === 'play') { updateResult(); updateHUD(now()); }
     if (screen === 'tutorial' && !tryMode) beginDemo();
     if (screen === 'tutorial' && tryMode) {
@@ -3882,6 +4017,7 @@ kbd,.key-help kbd { font-size:13px; }
     session.pause(now()); releaseAll();
   }
   function go(screenName) {
+    resetCombo();
     audio.stopCues();
     releaseAll(); demo = null; selectedDemo = null;
     if (screenName === 'menu' || screenName === 'sprint' || screenName === 'lessons') {
@@ -3892,6 +4028,7 @@ kbd,.key-help kbd { font-size:13px; }
   }
   function openSettings() {
     if (screen === 'settings') return;
+    resetCombo();
     settingsReturn = screen; pauseSession(); demo = null; screen = 'settings'; window.scrollTo(0, 0); render();
   }
   function closeSettings() {
@@ -3924,6 +4061,7 @@ kbd,.key-help kbd { font-size:13px; }
       weakSpot: practice.weakSpot, zeroFault: ui.zeroFault, repeatOnFault: ui.repeatOnFault, repeatOnMiss: ui.repeatOnMiss };
   }
   function startPlay(length = 0) {
+    resetCombo();
     audio.stopCues();
     releaseAll(); sessionEventQueue = []; demo = null; tryMode = false; tryDone = false;
     session = newSession({ ...sessionOptions(), sprintLength: length });
@@ -3945,6 +4083,7 @@ kbd,.key-help kbd { font-size:13px; }
     catch (_) { toast('この条件では置ける目標がないんですっ。列の範囲を広げてくださいね。'); $('#practice-wrap').innerHTML = practiceHTML(); restoreFocus(); return; }
     releaseAll(); practice = next; save();
     if (session && screen === 'play') {
+      resetCombo();
       session.pieces = [...practice.pieces]; session.area = opts.area; session.columnRange = opts.columnRange;
       session.weakSpot = practice.weakSpot; session.bag = new E.Bag({ pieces: practice.pieces, rng: session.rng });
       session.handler.bag = session.bag; session.handler.pieceProvider = () => session.bag.next();
@@ -3991,7 +4130,7 @@ kbd,.key-help kbd { font-size:13px; }
       if (source !== session) continue;
       trace.push({ kind: event.kind, t: event.t, type: event.type, status: event.result?.status });
       if (trace.length > 150) trace.shift();
-      if (event.kind === 'target') updateHint();
+      if (event.kind === 'target') { updateHint(); updateCombo(); }
       if (event.kind === 'spawn' && source.running && source.pausedAt === null && !tryDone &&
           (screen === 'play' || screen === 'tutorial' && tryMode)) {
         const type = A.selectCue(event, ui.pieceCueTiming);
@@ -4035,19 +4174,24 @@ kbd,.key-help kbd { font-size:13px; }
           $('[data-act=try-it]').textContent = tryDone ? 'もう一度チャレンジ' : `目標 ${tryIndex + 1} / ${exercise.targets.length} · 最初から`;
           $('#demo-keys').innerHTML = route(lessons[lessonIndex].tryIt.targets[Math.min(tryIndex, lessons[lessonIndex].tryIt.targets.length - 1)].actions);
           fitLessonBoard();
-          save(); sound(r.status === 'perfect' ? 'perfect' : 'fault');
+          save();
         } else {
           if (r.status === 'perfect') {
-            const streakLines = M.STREAK_LINES[source.stats.streak];
-            setCoach(streakLines ? pick(streakLines) : source.stats.streak % 3 === 0 ? pick(M.PIECE_PRAISE[r.type]) : pick(M.PRAISE_LINES), 'happy');
+            setCoach(source.stats.streak % 3 === 0 ? pick(M.PIECE_PRAISE[r.type]) : pick(M.PRAISE_LINES), 'happy');
             if (!reducedMotion) for (let i = 0; i < 28; i++) particles.push({ x: 5, y: 2, vx: (Math.random() - .5) * 10, vy: 2 + Math.random() * 9, start: now(), color: ['#d9a6ce','#b5ddc8','#c5ade1','#efcf95'][i % 4] });
           } else if (r.status === 'fault') {
             setCoach(M.hintText(r.type, r.used, r.optimal, resultActions.map(actionLabel)), 'thinking');
           } else setCoach(pick(M.MISS_LINES), 'sorry');
-          sound(r.status === 'perfect' ? 'perfect' : 'fault'); updateResult(); save();
+          updateResult(); save();
+          // Lesson corrections, progress and completion keep their own feedback.
+          if (r.combo.milestone && ui.bubbles) setCoach(pick(M.COMBO_LINES[r.combo.milestone]), 'happy');
         }
+        sound(r.status === 'perfect' ? 'perfect' : 'fault');
+        if (r.combo.count >= 2) audio.combo(r.combo.count); else audio.stopCombo();
+        updateCombo(r.combo, true);
       }
       if (event.kind === 'finish') {
+        resetCombo();
         audio.stopCues();
         sprintResult = event.result; save(); releaseAll(); screen = 'result'; render();
       }
@@ -4077,6 +4221,7 @@ kbd,.key-help kbd { font-size:13px; }
   }
 
   function startLesson(index) {
+    resetCombo();
     audio.stopCues();
     releaseAll(); session = null; sessionEventQueue = []; tryMode = false; tryDone = false; lessonMessage = '';
     lessonIndex = Math.max(0, Math.min(11, index)); progress.current = lessonIndex; save();
@@ -4088,6 +4233,7 @@ kbd,.key-help kbd { font-size:13px; }
     releaseAll(); session._newRound(target.type, target); session._schedule(now());
   }
   function startTryIt() {
+    resetCombo();
     audio.stopCues();
     demo = null; releaseAll(); sessionEventQueue = []; tryMode = true; tryIndex = 0; tryDone = false; lastResult = null;
     const exercise = lessons[lessonIndex].tryIt;
@@ -4273,6 +4419,7 @@ kbd,.key-help kbd { font-size:13px; }
     else if (act === 'next-lesson') lessonIndex === 11 ? startPlay() : startLesson(lessonIndex + 1);
     else if (act === 'previous-lesson') startLesson(lessonIndex - 1);
     else if (act === 'demo' || act === 'table-demo') {
+      resetCombo();
       audio.stopCues();
       releaseAll(); session = null; tryMode = false; lessonMessage = ''; demoVariant = Number(button.dataset.index); selectedDemo = null;
       if (act === 'table-demo') {
@@ -4290,6 +4437,7 @@ kbd,.key-help kbd { font-size:13px; }
     else if (act === 'skip') { releaseAll(); session.skip(now()); processEvents(); }
     else if (act === 'hint') { hint = !hint; updateHint(); if (hint) setCoach(`この目標は${session.round.optimal}入力ですっ♪ ` + session.round.target.actions.map(actionLabel).join(' → '), 'thinking'); }
     else if (act === 'records' || act === 'records-session') {
+      resetCombo();
       pauseSession(); statsScope = act === 'records-session' ? 'session' : 'total'; screen = 'records'; render();
     } else if (act === 'stats-scope') { statsScope = statsScope === 'total' ? 'session' : 'total'; render(); }
     else if (act === 'return-play') { screen = 'play'; render(); }
@@ -4314,6 +4462,7 @@ kbd,.key-help kbd { font-size:13px; }
         $('#import-status').textContent = '✓ インポートして保存しました。';
       } catch (error) { $('#import-status').textContent = '読み込めませんでした：' + error.message; }
     } else if (act === 'reset-stats') {
+      resetCombo();
       totalStats.reset(); if (session) session.stats.reset(); save(); render(false); toast('練習の記録、リセットできましたっ。');
     } else if (act === 'capture') { capture = { action: button.dataset.action, index: button.dataset.index === undefined ? null : Number(button.dataset.index) }; captureHTML(); }
     else if (act === 'cancel-capture') endCapture();
@@ -4347,7 +4496,10 @@ kbd,.key-help kbd { font-size:13px; }
       $('#appearance-storage').textContent = storageOK ? '見た目の選択を保存しました。' : '保存できないため、この起動中だけ選択を保持します。';
     } else if (input.dataset.engineToggle) updateSettings({ [input.dataset.engineToggle]: input.checked });
     else if (input.dataset.ui === 'pieceCueTiming') { ui.pieceCueTiming = input.value; audio.stopCues(); save(); }
-    else if (input.dataset.ui && !['volume', 'pieceCueVolume'].includes(input.dataset.ui)) { ui[input.dataset.ui] = input.checked; updateOptions(); }
+    else if (input.dataset.ui && !['volume', 'pieceCueVolume'].includes(input.dataset.ui)) {
+      if (input.dataset.ui === 'zeroFault' && ui.zeroFault !== input.checked && screen === 'play') resetCombo();
+      ui[input.dataset.ui] = input.checked; updateOptions();
+    }
     else if (input.dataset.setting) input.value = settings[input.dataset.setting];
     else if (input.dataset.pieceFilter) {
       const pieces = $$('[data-piece-filter]:checked').map(el => el.dataset.pieceFilter);
@@ -4477,7 +4629,7 @@ kbd,.key-help kbd { font-size:13px; }
     getState() {
       const handler = screen === 'tutorial' && !tryMode ? demo?.handler : session?.handler;
       return copy({ screen, settings, ui, bindings, practice, progress, lessonIndex, tryMode, tryIndex, tryDone,
-        expression, bubble, irsCount, storageOK, hint, lastResult, trace,
+        expression, bubble, irsCount, storageOK, hint, lastResult, trace, combo: session?.combo.snapshot(),
         round: session?.round, stats: session?.snapshot(), totalStats: totalStats.snapshot(),
         active: handler?.active, pending: handler?.pending, inputs: handler?.inputs, inputCount: handler?.inputCount,
         held: handler ? [...handler.held.keys()] : [], heldPiece: handler?.heldPiece, flags: handler?.flags,

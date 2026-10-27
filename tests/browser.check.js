@@ -122,6 +122,27 @@ async function main() {
         '.play-buttons', '.play-buttons button', '[data-act=pause]', '.play-footer']);
       await checkText();
     };
+    const checkCombo = async count => {
+      assert.equal((await state()).combo.count, count);
+      assert.equal(await page.locator('#combo-display').isVisible(), count >= 2);
+      assert.equal(await page.locator('#combo-display').getAttribute('aria-live'), 'off');
+      assert.equal(await page.locator('.finesse-combo').getAttribute('role'), null);
+      assert.equal(await page.locator('#combo-announcement').getAttribute('aria-live'), 'polite');
+      const milestone = [50, 20, 10, 5].find(value => value <= count);
+      assert.equal(await page.locator('#combo-announcement').textContent(), milestone ? `${milestone} COMBO` : '');
+      if (count < 2) return;
+      assert.equal((await page.locator('#combo-display').innerText()).replace(/\s+/g, ' ').trim(), `${count} COMBO`);
+      await checkViewport(`combo ${count}`, ['.finesse-combo', '#combo-display']);
+      const overlaps = await page.locator('#combo-display').evaluate(el => {
+        const r = el.getBoundingClientRect();
+        return [...document.querySelectorAll('.board-shell,.coach .speech,.coach .mirufi,.play-buttons')].some(other => {
+          const q = other.getBoundingClientRect();
+          return r.left < q.right && r.right > q.left && r.top < q.bottom && r.bottom > q.top;
+        });
+      });
+      assert.equal(overlaps, false, 'COMBO must stay clear of the board, mascot and controls');
+      assert.equal(await page.locator('.topbar #combo-display,.footer #combo-display').count(), 0);
+    };
     const checkLayout = async () => {
       const layout = await page.evaluate(() => {
         const board = document.querySelector('.board-shell').getBoundingClientRect();
@@ -263,10 +284,26 @@ async function main() {
     let s = await state();
     assert.equal(s.lastResult.status, 'perfect'); assert.equal(s.lastResult.used, 0); assert.equal(s.stats.streak, 1);
     assert.equal(s.expression, 'happy'); await checkDrill(); await page.waitForTimeout(350); await shot('drill-perfect');
+    await checkCombo(1);
+    const comboSlot = await page.locator('.finesse-combo').boundingBox();
+    for (let count = 2; count <= 5; count++) {
+      await target('O', 0, 4, 0); await ready(); await pressAction('hardDrop');
+      await checkCombo(count);
+      assert.deepEqual(await page.locator('.finesse-combo').boundingBox(), comboSlot, 'Combo pop must not move its reserved space');
+    }
+    assert.match((await state()).bubble, /5 COMBO.*あなた.*わたし.*ですっ/);
+    // Choose a known next board without changing the judged combo, then let
+    // the short pop settle for a repeatable five-COMBO capture.
+    await target('T', 0, 0, 0); await ready(); await page.waitForTimeout(700);
+    await checkCombo(5); await checkDrill(); await shot('combo');
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await checkCombo(5); await checkDrill();
+    await page.setViewportSize({ width: 1280, height: 720 });
     await target('O', 0, 4); await ready(); await page.keyboard.press('KeyX'); await page.keyboard.press('Space');
     s = await state();
     assert.equal(s.lastResult.status, 'fault'); assert.equal(s.lastResult.extra, 1); assert.equal(s.stats.faults, 1);
     assert.equal(s.stats.streak, 0); assert.equal(s.expression, 'thinking');
+    await checkCombo(0);
     assert.match(s.bubble, /…Oミノ、今の1回。最短は0回。1回多い。遠回りしないで。/);
     assert.match(s.bubble, /ハードドロップだけ。/);
     await page.keyboard.press('KeyH'); assert.equal((await state()).hint, true);
@@ -289,10 +326,20 @@ async function main() {
     assert.match(s.bubble, /^…/); assert.doesNotMatch(s.bubble, /です|ます|ましょう|ください|♪/);
     assert.equal(s.round.target.key, targetKey);
     await page.keyboard.press('KeyR'); assert.equal((await state()).round.target.key, targetKey);
+    for (let count = 1; count <= 2; count++) {
+      await target('O', 0, 4, 0); await ready(); await pressAction('hardDrop');
+    }
+    await checkCombo(2);
+    await pressAction('retry'); await checkCombo(0);
+    for (let count = 1; count <= 2; count++) {
+      await target('O', 0, 4, 0); await ready(); await pressAction('hardDrop');
+    }
 
     // Settings synchronization in both directions, conflict capture, JSON
     // validation, and persistent settings/bindings survive file:// reload.
     await settingsOpen();
+    assert.equal((await state()).combo.count, 0, 'Leaving finesse play for settings clears combo');
+    assert.equal(await page.locator('#combo-display').count(), 0);
     await checkSettings('settings'); await checkText();
     assert.equal((await state()).ui.pieceCueTiming, 'next');
     assert.equal((await state()).ui.pieceCueVolume, 60);
@@ -584,8 +631,8 @@ async function main() {
     await fallback.keyboard.press('Space');
     assert.equal(await fallback.evaluate(() => window.__mirutet.getState().lastResult.status), 'perfect');
     clean();
-    console.log('Browser checks passed: all 12 lessons (demo/try-it/internal scroll), drill buttons, perfect/fault/miss, handling, IRS, pause, filters, clean default settings, settings persistence/scroll, v1 storage migration/new-key priority, toast expiry, sprint, offline fallbacks.');
-    console.log('Screenshots: screens/{title,menu,tutorial,tutorial-irs,tutorial-t,drill-target,drill-1080,drill-perfect,drill-fault,settings,sprint-result}.png');
+    console.log('Browser checks passed: all 12 lessons (demo/try-it/internal scroll), drill buttons, perfect/fault/miss, combo counting/reset/layout, handling, IRS, pause, filters, clean default settings, settings persistence/scroll, v1 storage migration/new-key priority, toast expiry, sprint, offline fallbacks.');
+    console.log('Screenshots: screens/{title,menu,tutorial,tutorial-irs,tutorial-t,drill-target,drill-1080,drill-perfect,combo,drill-fault,settings,sprint-result}.png');
   } finally { await browser.close(); }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });
