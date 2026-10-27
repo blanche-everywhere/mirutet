@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ミルフィ — 表情プレビュー</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #65536f; background: #faf7fc;
+      background-image: radial-gradient(circle at 12% 10%, #e5f5ef 0, transparent 35%),
+        radial-gradient(circle at 88% 80%, #fbe5ed 0, transparent 38%);
+      font-family: "Hiragino Maru Gothic ProN", "Yu Gothic UI", "Meiryo", "Noto Sans CJK JP", sans-serif; }
+    main { padding: 30px 24px 24px; max-width: 1640px; margin: auto; }
+    header { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin: 0 6px 24px; }
+    .eyebrow { color: #9986ae; font-size: 11px; letter-spacing: .2em; margin: 0 0 7px; }
+    h1 { margin: 0; font-size: 28px; letter-spacing: .06em; }
+    .intro { margin: 8px 0 0; font-size: 13px; color: #928398; }
+    .badge { background: #fffafc; border: 1px solid #e6dae9; padding: 8px 13px; border-radius: 20px;
+      font-size: 12px; white-space: nowrap; }
+    .gallery { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+    .card { background: #fffdfede; border: 1px solid #e9dfea; border-radius: 22px;
+      padding: 17px 10px 14px; box-shadow: 0 8px 24px #8e6c9c0a; min-width: 0; }
+    .caption { display: flex; align-items: center; justify-content: space-between; padding: 0 8px; }
+    .caption h2 { margin: 0; font-size: 14px; font-weight: 600; }
+    .caption span { font-size: 10px; color: #ac9ab5; letter-spacing: .04em; }
+    .portrait { margin-top: 12px; min-height: 240px; display: flex; justify-content: center; }
+    .portrait svg { width: 100%; max-width: 300px; }
+    .bubble { position: relative; margin: 16px 4px 0; padding: 14px; min-height: 110px; border-radius: 15px;
+      background: #f6f0fa; color: #806b90; font-size: 12px; line-height: 1.9; }
+    .bubble::before { content: ""; position: absolute; top: -7px; left: calc(50% - 7px); border-width: 0 7px 8px;
+      border-style: solid; border-color: transparent transparent #f6f0fa; }
+    footer { margin: 20px 6px 0; color: #a08da9; font-size: 11px; line-height: 1.9; }
+    @media (max-width: 900px) { main { min-width: 900px; } }
+    
+.milfy { display: block; max-width: 100%; height: auto; overflow: visible; }
+.milfy .milfy-eyes-closed { opacity: 0; }
+.milfy--animated .milfy-bob { animation: milfy-bob 4s ease-in-out infinite; }
+.milfy--animated .milfy-eyes-open { animation: milfy-open 5.7s steps(1, end) infinite; }
+.milfy--animated .milfy-eyes-closed { animation: milfy-blink 5.7s steps(1, end) infinite; }
+.milfy--animated .milfy-sparkle { transform-box: fill-box; transform-origin: center;
+  animation: milfy-twinkle 3.2s ease-in-out infinite; }
+.milfy--animated .milfy-sparkle:nth-child(even) { animation-delay: -1.6s; }
+@keyframes milfy-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes milfy-open { 0%, 43%, 46%, 100% { opacity: 1; } 44%, 45% { opacity: 0; } }
+@keyframes milfy-blink { 0%, 43%, 46%, 100% { opacity: 0; } 44%, 45% { opacity: 1; } }
+@keyframes milfy-twinkle { 0%, 100% { opacity: .5; transform: scale(.88); }
+  50% { opacity: 1; transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) {
+  .milfy--animated .milfy-bob, .milfy--animated .milfy-eyes-open,
+  .milfy--animated .milfy-eyes-closed, .milfy--animated .milfy-sparkle { animation: none; }
+  .milfy .milfy-eyes-open { opacity: 1; }
+  .milfy .milfy-eyes-closed { opacity: 0; }
+}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div><p class="eyebrow">MOE TET · CHARACTER STUDY</p><h1>ミルフィの表情ノート</h1>
+        <p class="intro">テト学園の案内役です♪ いっしょに、最短ルートを覚えましょう。</p></div>
+      <span class="badge">萌えテト フィネス編</span>
+    </header>
+    <section class="gallery" aria-label="ミルフィの5つの表情">
+  <article class="card">
+    <div class="caption"><h2>にっこり</h2><span>normal</span></div>
+    <div class="portrait"><svg xmlns="http://www.w3.org/2000/svg" width="300" height="360" viewBox="0 0 300 360"
+      class="milfy milfy--normal milfy--animated" role="img"
+      aria-labelledby="milfy-preview-normal-10-title milfy-preview-normal-10-desc" focusable="false" data-expression="normal">
+      <title id="milfy-preview-normal-10-title">ミルフィ：にっこり</title>
+      <desc id="milfy-preview-normal-10-desc">テト学園の案内役、ミルフィ。ミントとライラックのツインテール、きらきらした瞳、ブロックの髪飾りと桃色の制服です。</desc>
+      <defs>
+        <linearGradient id="milfy-preview-normal-10-hair" x1=".15" y1="0" x2=".8" y2="1" gradientUnits="objectBoundingBox">
+          <stop stop-color="#edfff3"/><stop offset=".34" stop-color="#afe5d9"/><stop offset=".7" stop-color="#c6d4f1"/><stop offset="1" stop-color="#c6a9e3"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-normal-10-tail" x1="0" y1="0" x2=".8" y2="1">
+          <stop stop-color="#b7e9de"/><stop offset=".5" stop-color="#a7d9d6"/><stop offset=".82" stop-color="#c9b3e8"/><stop offset="1" stop-color="#eed5f4"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-normal-10-skin" x1="0" y1="0" x2=".3" y2="1">
+          <stop stop-color="#fff8ee"/><stop offset=".7" stop-color="#fff1e9"/><stop offset="1" stop-color="#f7d9d8"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-normal-10-iris" x1="0" y1="0" x2="0" y2="1">
+          <stop stop-color="#4e456e"/><stop offset=".4" stop-color="#8476b8"/><stop offset=".73" stop-color="#9bbae0"/><stop offset="1" stop-color="#b2f4df"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-normal-10-uniform" x1="0" y1="0" x2=".7" y2="1">
+          <stop stop-color="#fff4f7"/><stop offset=".6" stop-color="#f6d8e8"/><stop offset="1" stop-color="#dfc8e9"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-normal-10-ribbon" x1="0" y1="0" x2="1" y2="1">
+          <stop stop-color="#c1a4de"/><stop offset=".5" stop-color="#e6cdf3"/><stop offset="1" stop-color="#b49cd5"/>
+        </linearGradient>
+        <radialGradient id="milfy-preview-normal-10-blush"><stop stop-color="#f5a4b6" stop-opacity=".7"/><stop offset="1" stop-color="#ffb9c7" stop-opacity="0"/></radialGradient>
+        <radialGradient id="milfy-preview-normal-10-halo"><stop stop-color="#fcf4ff"/><stop offset=".8" stop-color="#edf9f5" stop-opacity=".7"/><stop offset="1" stop-color="#edf9f5" stop-opacity="0"/></radialGradient>
+        <clipPath id="milfy-preview-normal-10-eye-left"><path d="M87 142 Q109 119 131 143 Q133 178 109 182 Q86 178 87 142Z"/></clipPath><clipPath id="milfy-preview-normal-10-eye-right"><path d="M169 142 Q191 119 213 143 Q215 178 191 182 Q168 178 169 142Z"/></clipPath>
+      </defs>
+      <ellipse cx="150" cy="180" rx="144" ry="171" fill="url(#milfy-preview-normal-10-halo)"/>
+      <g class="milfy-bob" stroke-linejoin="round">
+        <g data-part="back-hair" stroke="#929cc3" stroke-width="1.8">
+          <path d="M72 88 C44 81 30 103 31 143 C33 182 10 212 17 258 C20 288 34 312 55 319 C41 291 61 270 63 242 C70 275 58 302 62 317 C89 296 91 262 82 224 C77 189 96 130 72 88Z" fill="url(#milfy-preview-normal-10-tail)"/>
+          <path d="M228 88 C256 81 270 103 269 143 C267 182 290 212 283 258 C280 288 266 312 245 319 C259 291 239 270 237 242 C230 275 242 302 238 317 C211 296 209 262 218 224 C223 189 204 130 228 88Z" fill="url(#milfy-preview-normal-10-tail)"/>
+          <path d="M62 117 C48 155 59 182 42 225 C31 258 37 281 45 294 M74 149 C66 189 77 221 71 254 M238 117 C252 155 241 182 258 225 C269 258 263 281 255 294 M226 149 C234 189 223 221 229 254" fill="none" opacity=".6"/>
+          <path d="M43 134 C48 106 54 105 58 110 C48 139 54 167 44 192 C47 168 40 156 43 134Z M257 134 C252 106 246 105 242 110 C252 139 246 167 256 192 C253 168 260 156 257 134Z" fill="#f3fff8" stroke="none" opacity=".65"/>
+          <path d="M67 136 C54 79 77 29 144 25 C214 19 251 68 234 141 L227 223 Q207 250 187 238 L109 238 Q78 249 67 220Z" fill="url(#milfy-preview-normal-10-hair)"/>
+        </g>
+        <g data-part="hair-ribbons" stroke="#a08cbd" stroke-width="1.5">
+          <path d="M66 100 Q39 74 34 91 L44 115 Q29 137 43 143 L68 121 L76 140 Q88 134 77 110Z M234 100 Q261 74 266 91 L256 115 Q271 137 257 143 L232 121 L224 140 Q212 134 223 110Z" fill="url(#milfy-preview-normal-10-ribbon)"/>
+          <path d="M46 96 L64 111 L45 133 M254 96 L236 111 L255 133" fill="none" stroke="#f5e6ff" stroke-width="2.5"/>
+          <ellipse cx="68" cy="112" rx="9" ry="12" fill="#e9d6f3"/><ellipse cx="232" cy="112" rx="9" ry="12" fill="#e9d6f3"/>
+        </g>
+        <g data-part="outfit" stroke="#b49ab8" stroke-width="1.8">
+          <path d="M136 213 L134 238 Q150 253 166 238 L164 213" fill="url(#milfy-preview-normal-10-skin)"/>
+          <path d="M134 227 Q150 236 166 227" stroke="#e7b8bd" fill="none"/>
+          <path d="M132 234 Q107 234 89 253 Q73 276 75 314 L88 324 L92 350 Q150 363 208 350 L212 324 L225 314 Q227 276 211 253 Q193 234 168 234 Q150 249 132 234Z" fill="url(#milfy-preview-normal-10-uniform)"/>
+          <path d="M107 241 L94 261 L119 293 L150 261 L181 293 L206 261 L193 241 L166 238 L150 255 L134 238Z" fill="#c4b5de"/>
+          <path d="M108 248 L101 260 L120 283 L144 260 M192 248 L199 260 L180 283 L156 260" stroke="#fff4fa" stroke-width="2.6" fill="none"/>
+          <path d="M93 279 Q101 294 94 315 M207 279 Q199 294 206 315 M108 316 L105 349 M192 316 L195 349" fill="none" stroke="#d8b5ce"/>
+          <path d="M76 305 L94 309 L93 324 L76 320Z M224 305 L206 309 L207 324 L224 320Z" fill="#fdf7ff"/>
+          <path d="M150 268 Q124 249 124 268 L127 287 Q142 284 150 275 Q158 284 173 287 L176 268 Q176 249 150 268Z" fill="url(#milfy-preview-normal-10-ribbon)"/>
+          <path d="M144 275 L137 301 L150 294 L163 301 L156 275" fill="#c6b0df"/>
+          <rect x="144" y="264" width="12" height="15" rx="5" fill="#fff2cf" stroke="#d6b8bb"/>
+          <path d="M150 309 L150 347" stroke="#e8c4d9"/><circle cx="150" cy="315" r="2.5" fill="#fdf7ff"/><circle cx="150" cy="336" r="2.5" fill="#fdf7ff"/>
+          <path d="M179 305 h12 v12 h-12Z M183 301 h4 v4" fill="#d0ece2" stroke="#a7c5bd" stroke-width="1.3"/>
+        </g>
+        <g data-part="face-base">
+          <ellipse cx="76" cy="168" rx="11" ry="17" fill="url(#milfy-preview-normal-10-skin)" stroke="#c9a3ac" stroke-width="1.5"/>
+          <ellipse cx="224" cy="168" rx="11" ry="17" fill="url(#milfy-preview-normal-10-skin)" stroke="#c9a3ac" stroke-width="1.5"/>
+          <path d="M76 117 C75 83 99 65 150 65 C201 65 225 83 224 117 L224 166 C223 195 194 226 150 233 C106 226 77 195 76 166Z" fill="url(#milfy-preview-normal-10-skin)" stroke="#bd9aa9" stroke-width="1.6"/>
+          <path d="M79 133 Q96 99 125 105 Q153 92 181 106 Q208 106 222 134 L222 111 Q209 71 151 72 Q93 72 78 110Z" fill="#e7c6cb" opacity=".24"/>
+        </g>
+        <g class="milfy-expression" data-expression="normal">
+          <g data-part="eyebrows"><path d="M93 120 Q107 113 122 119 M178 119 Q193 113 207 120" fill="none" stroke="#a092b3" stroke-width="2.8" stroke-linecap="round"/></g>
+          <g data-part="eyes">
+            <g class="milfy-eyes-open"><g class="milfy-eye milfy-eye--left">
+        <path d="M87 142 Q109 119 131 143
+          Q133 178 109 182 Q86 178 87 142Z"
+          fill="#fffafa"/>
+        <g clip-path="url(#milfy-preview-normal-10-eye-left)">
+          <ellipse cx="109" cy="157" rx="18" ry="26" fill="url(#milfy-preview-normal-10-iris)"/>
+          <ellipse cx="109" cy="155" rx="8" ry="17" fill="#453961"/>
+          <path d="M96 170 Q109 182 122 170"
+            fill="none" stroke="#9ff0d9" stroke-width="5" stroke-linecap="round"/>
+          <ellipse cx="103" cy="144" rx="7.2" ry="9" fill="#fff"/>
+          <circle cx="118" cy="163" r="4" fill="#fff"/>
+          <circle cx="102" cy="172" r="2" fill="#fff" opacity=".9"/>
+          <path d="M118 139 l1.3 3.2 3.2 1.3-3.2 1.3-1.3 3.2-1.3-3.2-3.2-1.3 3.2-1.3Z"
+            fill="#e5fff7"/>
+        </g>
+        <path d="M86 142 Q105 122 131 143"
+          fill="none" stroke="#57465f" stroke-width="5" stroke-linecap="round"/>
+        <path d="M90 139 l-7-7 M97 135 l-3-6"
+          fill="none" stroke="#57465f" stroke-width="3.1" stroke-linecap="round"
+          />
+        <path d="M95 180 Q109 186 122 180"
+          fill="none" stroke="#bb8d9e" stroke-width="1.5" stroke-linecap="round"/>
+      </g><g class="milfy-eye milfy-eye--right">
+        <path d="M169 142 Q191 119 213 143
+          Q215 178 191 182 Q168 178 169 142Z"
+          fill="#fffafa"/>
+        <g clip-path="url(#milfy-preview-normal-10-eye-right)">
+          <ellipse cx="191" cy="157" rx="18" ry="26" fill="url(#milfy-preview-normal-10-iris)"/>
+          <ellipse cx="191" cy="155" rx="8" ry="17" fill="#453961"/>
+          <path d="M178 170 Q191 182 204 170"
+            fill="none" stroke="#9ff0d9" stroke-width="5" stroke-linecap="round"/>
+          <ellipse cx="185" cy="144" rx="7.2" ry="9" fill="#fff"/>
+          <circle cx="200" cy="163" r="4" fill="#fff"/>
+          <circle cx="184" cy="172" r="2" fill="#fff" opacity=".9"/>
+          <path d="M200 139 l1.3 3.2 3.2 1.3-3.2 1.3-1.3 3.2-1.3-3.2-3.2-1.3 3.2-1.3Z"
+            fill="#e5fff7"/>
+        </g>
+        <path d="M168 142 Q187 122 213 143"
+          fill="none" stroke="#57465f" stroke-width="5" stroke-linecap="round"/>
+        <path d="M172 139 l-7-7 M179 135 l-3-6"
+          fill="none" stroke="#57465f" stroke-width="3.1" stroke-linecap="round"
+          transform="translate(382 0) scale(-1 1)"/>
+        <path d="M177 180 Q191 186 204 180"
+          fill="none" stroke="#bb8d9e" stroke-width="1.5" stroke-linecap="round"/>
+      </g></g><g class="milfy-eyes-closed" opacity="0"><path d="M91 160 Q109 171 128 160 M172 160 Q191 171 209 160"
+      fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>
+      <path d="M93 158 l-5-4 M207 158 l5-4" fill="none" stroke="#57465f" stroke-width="2.5" stroke-linecap="round"/></g>
+          </g>
+          <g data-part="cheeks">
+            <ellipse cx="92" cy="187" rx="23" ry="13" fill="url(#milfy-preview-normal-10-blush)"/><ellipse cx="208" cy="187" rx="23" ry="13" fill="url(#milfy-preview-normal-10-blush)"/>
+            <path d="M83 186 l-1 4 M90 187 l-1 4 M97 187 l-1 4 M203 187 l-1 4 M210 187 l-1 4 M217 186 l-1 4" stroke="#e7a3b4" stroke-width="1.4" stroke-linecap="round"/>
+          </g>
+          <path d="M149 182 q-3 4 1 4" fill="none" stroke="#ddb7b8" stroke-width="1.4" stroke-linecap="round"/>
+          <g data-part="mouth"><path d="M140 198 Q150 208 160 198" fill="none" stroke="#a96780" stroke-width="2.5" stroke-linecap="round"/></g>
+        </g>
+        <g data-part="front-hair" stroke="#929cc3" stroke-width="1.65">
+          <path d="M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 213 117 C196 117 177 99 166 79 Q168 109 180 128 Q146 121 131 86 Q130 113 115 130 Q110 110 109 105 Q94 131 78 143 L77 179 Q66 165 70 138Z" fill="url(#milfy-preview-normal-10-hair)"/>
+          <path d="M129 40 C113 49 105 70 109 105 M164 39 C156 50 159 69 166 79 M180 42 C208 61 216 88 213 117 M91 61 Q76 91 78 121 M222 88 L224 123" fill="none" opacity=".65"/>
+          <path d="M82 86 Q87 70 98 62 Q94 72 92 84Z M103 59 Q120 46 140 47 Q127 53 119 66 L112 76 L108 69Z M149 45 Q175 40 194 58 L202 71 Q180 57 158 61Z M207 72 Q217 83 220 98 L211 92Z" fill="#f5fff8" stroke="none" opacity=".82"/>
+          <path d="M102 81 Q104 73 108 68 M172 61 Q190 62 201 73" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".75" fill="none"/>
+          <path d="M148 28 Q143 16 155 11 Q150 20 160 26" fill="url(#milfy-preview-normal-10-hair)" stroke-linecap="round"/>
+        </g>
+        <g data-part="block-clip" transform="rotate(-17 91 88)" stroke="#b09ab3" stroke-width="1.5">
+          <path d="M74 79 h12 v-12 h12 v12 h12 v12 H74Z" fill="#fff0c8"/>
+          <path d="M76 81 h8 v8 h-8Z M88 69 h8 v8 h-8Z M88 81 h8 v8 h-8Z M100 81 h8 v8 h-8Z" fill="#f5cedf" stroke="none"/>
+          <path d="M78 83 h4 M90 71 h4 M90 83 h4 M102 83 h4" stroke="#fffaf0" stroke-linecap="round"/>
+        </g>
+        <g data-part="pose" stroke="#bc9aa9" stroke-width="1.7">
+          <path d="M93 324 Q110 326 129 315 Q139 308 149 317 Q160 309 170 315 Q190 326 207 324 L206 338 Q184 344 165 330 Q151 337 137 330 Q116 344 94 338Z" fill="url(#milfy-preview-normal-10-skin)"/><path d="M141 319 L151 325 L160 319 M135 325 L141 329 M165 325 L159 329" fill="none" stroke="#e0b7bc"/>
+        </g>
+        <g data-part="expression-accents" fill="none" stroke-linecap="round">
+          
+          
+          
+        </g>
+      </g>
+    </svg></div>
+    <p class="bubble">テト学園へようこそ！案内役のミルフィです♪</p>
+  </article>
+  <article class="card">
+    <div class="caption"><h2>大喜び</h2><span>happy</span></div>
+    <div class="portrait"><svg xmlns="http://www.w3.org/2000/svg" width="300" height="360" viewBox="0 0 300 360"
+      class="milfy milfy--happy milfy--animated" role="img"
+      aria-labelledby="milfy-preview-happy-11-title milfy-preview-happy-11-desc" focusable="false" data-expression="happy">
+      <title id="milfy-preview-happy-11-title">ミルフィ：大喜び</title>
+      <desc id="milfy-preview-happy-11-desc">テト学園の案内役、ミルフィ。ミントとライラックのツインテール、きらきらした瞳、ブロックの髪飾りと桃色の制服です。</desc>
+      <defs>
+        <linearGradient id="milfy-preview-happy-11-hair" x1=".15" y1="0" x2=".8" y2="1" gradientUnits="objectBoundingBox">
+          <stop stop-color="#edfff3"/><stop offset=".34" stop-color="#afe5d9"/><stop offset=".7" stop-color="#c6d4f1"/><stop offset="1" stop-color="#c6a9e3"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-happy-11-tail" x1="0" y1="0" x2=".8" y2="1">
+          <stop stop-color="#b7e9de"/><stop offset=".5" stop-color="#a7d9d6"/><stop offset=".82" stop-color="#c9b3e8"/><stop offset="1" stop-color="#eed5f4"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-happy-11-skin" x1="0" y1="0" x2=".3" y2="1">
+          <stop stop-color="#fff8ee"/><stop offset=".7" stop-color="#fff1e9"/><stop offset="1" stop-color="#f7d9d8"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-happy-11-iris" x1="0" y1="0" x2="0" y2="1">
+          <stop stop-color="#4e456e"/><stop offset=".4" stop-color="#8476b8"/><stop offset=".73" stop-color="#9bbae0"/><stop offset="1" stop-color="#b2f4df"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-happy-11-uniform" x1="0" y1="0" x2=".7" y2="1">
+          <stop stop-color="#fff4f7"/><stop offset=".6" stop-color="#f6d8e8"/><stop offset="1" stop-color="#dfc8e9"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-happy-11-ribbon" x1="0" y1="0" x2="1" y2="1">
+          <stop stop-color="#c1a4de"/><stop offset=".5" stop-color="#e6cdf3"/><stop offset="1" stop-color="#b49cd5"/>
+        </linearGradient>
+        <radialGradient id="milfy-preview-happy-11-blush"><stop stop-color="#f5a4b6" stop-opacity=".7"/><stop offset="1" stop-color="#ffb9c7" stop-opacity="0"/></radialGradient>
+        <radialGradient id="milfy-preview-happy-11-halo"><stop stop-color="#fcf4ff"/><stop offset=".8" stop-color="#edf9f5" stop-opacity=".7"/><stop offset="1" stop-color="#edf9f5" stop-opacity="0"/></radialGradient>
+        <clipPath id="milfy-preview-happy-11-eye-left"><path d="M87 142 Q109 119 131 143 Q133 178 109 182 Q86 178 87 142Z"/></clipPath><clipPath id="milfy-preview-happy-11-eye-right"><path d="M169 142 Q191 119 213 143 Q215 178 191 182 Q168 178 169 142Z"/></clipPath>
+      </defs>
+      <ellipse cx="150" cy="180" rx="144" ry="171" fill="url(#milfy-preview-happy-11-halo)"/>
+      <g class="milfy-bob" stroke-linejoin="round">
+        <g data-part="back-hair" stroke="#929cc3" stroke-width="1.8">
+          <path d="M72 88 C44 81 30 103 31 143 C33 182 10 212 17 258 C20 288 34 312 55 319 C41 291 61 270 63 242 C70 275 58 302 62 317 C89 296 91 262 82 224 C77 189 96 130 72 88Z" fill="url(#milfy-preview-happy-11-tail)"/>
+          <path d="M228 88 C256 81 270 103 269 143 C267 182 290 212 283 258 C280 288 266 312 245 319 C259 291 239 270 237 242 C230 275 242 302 238 317 C211 296 209 262 218 224 C223 189 204 130 228 88Z" fill="url(#milfy-preview-happy-11-tail)"/>
+          <path d="M62 117 C48 155 59 182 42 225 C31 258 37 281 45 294 M74 149 C66 189 77 221 71 254 M238 117 C252 155 241 182 258 225 C269 258 263 281 255 294 M226 149 C234 189 223 221 229 254" fill="none" opacity=".6"/>
+          <path d="M43 134 C48 106 54 105 58 110 C48 139 54 167 44 192 C47 168 40 156 43 134Z M257 134 C252 106 246 105 242 110 C252 139 246 167 256 192 C253 168 260 156 257 134Z" fill="#f3fff8" stroke="none" opacity=".65"/>
+          <path d="M67 136 C54 79 77 29 144 25 C214 19 251 68 234 141 L227 223 Q207 250 187 238 L109 238 Q78 249 67 220Z" fill="url(#milfy-preview-happy-11-hair)"/>
+        </g>
+        <g data-part="hair-ribbons" stroke="#a08cbd" stroke-width="1.5">
+          <path d="M66 100 Q39 74 34 91 L44 115 Q29 137 43 143 L68 121 L76 140 Q88 134 77 110Z M234 100 Q261 74 266 91 L256 115 Q271 137 257 143 L232 121 L224 140 Q212 134 223 110Z" fill="url(#milfy-preview-happy-11-ribbon)"/>
+          <path d="M46 96 L64 111 L45 133 M254 96 L236 111 L255 133" fill="none" stroke="#f5e6ff" stroke-width="2.5"/>
+          <ellipse cx="68" cy="112" rx="9" ry="12" fill="#e9d6f3"/><ellipse cx="232" cy="112" rx="9" ry="12" fill="#e9d6f3"/>
+        </g>
+        <g data-part="outfit" stroke="#b49ab8" stroke-width="1.8">
+          <path d="M136 213 L134 238 Q150 253 166 238 L164 213" fill="url(#milfy-preview-happy-11-skin)"/>
+          <path d="M134 227 Q150 236 166 227" stroke="#e7b8bd" fill="none"/>
+          <path d="M132 234 Q107 234 89 253 Q73 276 75 314 L88 324 L92 350 Q150 363 208 350 L212 324 L225 314 Q227 276 211 253 Q193 234 168 234 Q150 249 132 234Z" fill="url(#milfy-preview-happy-11-uniform)"/>
+          <path d="M107 241 L94 261 L119 293 L150 261 L181 293 L206 261 L193 241 L166 238 L150 255 L134 238Z" fill="#c4b5de"/>
+          <path d="M108 248 L101 260 L120 283 L144 260 M192 248 L199 260 L180 283 L156 260" stroke="#fff4fa" stroke-width="2.6" fill="none"/>
+          <path d="M93 279 Q101 294 94 315 M207 279 Q199 294 206 315 M108 316 L105 349 M192 316 L195 349" fill="none" stroke="#d8b5ce"/>
+          <path d="M76 305 L94 309 L93 324 L76 320Z M224 305 L206 309 L207 324 L224 320Z" fill="#fdf7ff"/>
+          <path d="M150 268 Q124 249 124 268 L127 287 Q142 284 150 275 Q158 284 173 287 L176 268 Q176 249 150 268Z" fill="url(#milfy-preview-happy-11-ribbon)"/>
+          <path d="M144 275 L137 301 L150 294 L163 301 L156 275" fill="#c6b0df"/>
+          <rect x="144" y="264" width="12" height="15" rx="5" fill="#fff2cf" stroke="#d6b8bb"/>
+          <path d="M150 309 L150 347" stroke="#e8c4d9"/><circle cx="150" cy="315" r="2.5" fill="#fdf7ff"/><circle cx="150" cy="336" r="2.5" fill="#fdf7ff"/>
+          <path d="M179 305 h12 v12 h-12Z M183 301 h4 v4" fill="#d0ece2" stroke="#a7c5bd" stroke-width="1.3"/>
+        </g>
+        <g data-part="face-base">
+          <ellipse cx="76" cy="168" rx="11" ry="17" fill="url(#milfy-preview-happy-11-skin)" stroke="#c9a3ac" stroke-width="1.5"/>
+          <ellipse cx="224" cy="168" rx="11" ry="17" fill="url(#milfy-preview-happy-11-skin)" stroke="#c9a3ac" stroke-width="1.5"/>
+          <path d="M76 117 C75 83 99 65 150 65 C201 65 225 83 224 117 L224 166 C223 195 194 226 150 233 C106 226 77 195 76 166Z" fill="url(#milfy-preview-happy-11-skin)" stroke="#bd9aa9" stroke-width="1.6"/>
+          <path d="M79 133 Q96 99 125 105 Q153 92 181 106 Q208 106 222 134 L222 111 Q209 71 151 72 Q93 72 78 110Z" fill="#e7c6cb" opacity=".24"/>
+        </g>
+        <g class="milfy-expression" data-expression="happy">
+          <g data-part="eyebrows"><path d="M92 119 Q107 109 121 119 M179 119 Q193 109 208 119" fill="none" stroke="#a092b3" stroke-width="2.8" stroke-linecap="round"/></g>
+          <g data-part="eyes">
+            <g class="milfy-happy-eyes"><path d="M91 160 Q109 136 128 160 M172 160 Q191 136 209 160"
+      fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>
+      <path d="M93 158 l-5-4 M207 158 l5-4" fill="none" stroke="#57465f" stroke-width="2.5" stroke-linecap="round"/></g>
+          </g>
+          <g data-part="cheeks">
+            <ellipse cx="92" cy="187" rx="23" ry="13" fill="url(#milfy-preview-happy-11-blush)"/><ellipse cx="208" cy="187" rx="23" ry="13" fill="url(#milfy-preview-happy-11-blush)"/>
+            <path d="M83 186 l-1 4 M90 187 l-1 4 M97 187 l-1 4 M203 187 l-1 4 M210 187 l-1 4 M217 186 l-1 4" stroke="#e7a3b4" stroke-width="1.4" stroke-linecap="round"/>
+          </g>
+          <path d="M149 182 q-3 4 1 4" fill="none" stroke="#ddb7b8" stroke-width="1.4" stroke-linecap="round"/>
+          <g data-part="mouth"><path d="M137 194 Q150 199 163 194 Q161 214 150 215 Q139 214 137 194Z" fill="#a9607b"/><path d="M142 209 Q150 203 158 209 Q150 217 142 209Z" fill="#f9a9b8"/></g>
+        </g>
+        <g data-part="front-hair" stroke="#929cc3" stroke-width="1.65">
+          <path d="M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 213 117 C196 117 177 99 166 79 Q168 109 180 128 Q146 121 131 86 Q130 113 115 130 Q110 110 109 105 Q94 131 78 143 L77 179 Q66 165 70 138Z" fill="url(#milfy-preview-happy-11-hair)"/>
+          <path d="M129 40 C113 49 105 70 109 105 M164 39 C156 50 159 69 166 79 M180 42 C208 61 216 88 213 117 M91 61 Q76 91 78 121 M222 88 L224 123" fill="none" opacity=".65"/>
+          <path d="M82 86 Q87 70 98 62 Q94 72 92 84Z M103 59 Q120 46 140 47 Q127 53 119 66 L112 76 L108 69Z M149 45 Q175 40 194 58 L202 71 Q180 57 158 61Z M207 72 Q217 83 220 98 L211 92Z" fill="#f5fff8" stroke="none" opacity=".82"/>
+          <path d="M102 81 Q104 73 108 68 M172 61 Q190 62 201 73" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".75" fill="none"/>
+          <path d="M148 28 Q143 16 155 11 Q150 20 160 26" fill="url(#milfy-preview-happy-11-hair)" stroke-linecap="round"/>
+        </g>
+        <g data-part="block-clip" transform="rotate(-17 91 88)" stroke="#b09ab3" stroke-width="1.5">
+          <path d="M74 79 h12 v-12 h12 v12 h12 v12 H74Z" fill="#fff0c8"/>
+          <path d="M76 81 h8 v8 h-8Z M88 69 h8 v8 h-8Z M88 81 h8 v8 h-8Z M100 81 h8 v8 h-8Z" fill="#f5cedf" stroke="none"/>
+          <path d="M78 83 h4 M90 71 h4 M90 83 h4 M102 83 h4" stroke="#fffaf0" stroke-linecap="round"/>
+        </g>
+        <g data-part="pose" stroke="#bc9aa9" stroke-width="1.7">
+          <path d="M87 296 L69 266 Q58 261 58 251 L56 238 Q57 230 64 234 L68 245 Q68 228 75 230 Q80 231 79 241 Q86 235 91 242 Q96 248 89 261 L103 281Z M213 296 L231 266 Q242 261 242 251 L244 238 Q243 230 236 234 L232 245 Q232 228 225 230 Q220 231 221 241 Q214 235 209 242 Q204 248 211 261 L197 281Z" fill="url(#milfy-preview-happy-11-skin)"/><path d="M80 282 L99 271 L110 292 L91 305Z M220 282 L201 271 L190 292 L209 305Z" fill="url(#milfy-preview-happy-11-uniform)"/><path d="M65 250 Q73 246 83 251 M235 250 Q227 246 217 251" fill="none" stroke="#e0b7bc"/>
+        </g>
+        <g data-part="expression-accents" fill="none" stroke-linecap="round">
+          <g class="milfy-sparkle" fill="#fff0bc" stroke="#d6b7c2" stroke-width="1.1"><path d="M32 166 l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z"/></g><g class="milfy-sparkle" fill="#e2d2fa" stroke="#b3a1cf" stroke-width="1.1"><path d="M263 46 l3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/></g><path d="M24 206 l-4 7 M276 206 l4 7" stroke="#d7badc" stroke-width="2.5"/>
+          
+          
+        </g>
+      </g>
+    </svg></div>
+    <p class="bubble">10連続です！両手にいっぱい花まるを贈りますね♪</p>
+  </article>
+  <article class="card">
+    <div class="caption"><h2>応援</h2><span>surprised</span></div>
+    <div class="portrait"><svg xmlns="http://www.w3.org/2000/svg" width="300" height="360" viewBox="0 0 300 360"
+      class="milfy milfy--surprised milfy--animated" role="img"
+      aria-labelledby="milfy-preview-surprised-12-title milfy-preview-surprised-12-desc" focusable="false" data-expression="surprised">
+      <title id="milfy-preview-surprised-12-title">ミルフィ：応援</title>
+      <desc id="milfy-preview-surprised-12-desc">テト学園の案内役、ミルフィ。ミントとライラックのツインテール、きらきらした瞳、ブロックの髪飾りと桃色の制服です。</desc>
+      <defs>
+        <linearGradient id="milfy-preview-surprised-12-hair" x1=".15" y1="0" x2=".8" y2="1" gradientUnits="objectBoundingBox">
+          <stop stop-color="#edfff3"/><stop offset=".34" stop-color="#afe5d9"/><stop offset=".7" stop-color="#c6d4f1"/><stop offset="1" stop-color="#c6a9e3"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-surprised-12-tail" x1="0" y1="0" x2=".8" y2="1">
+          <stop stop-color="#b7e9de"/><stop offset=".5" stop-color="#a7d9d6"/><stop offset=".82" stop-color="#c9b3e8"/><stop offset="1" stop-color="#eed5f4"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-surprised-12-skin" x1="0" y1="0" x2=".3" y2="1">
+          <stop stop-color="#fff8ee"/><stop offset=".7" stop-color="#fff1e9"/><stop offset="1" stop-color="#f7d9d8"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-surprised-12-iris" x1="0" y1="0" x2="0" y2="1">
+          <stop stop-color="#4e456e"/><stop offset=".4" stop-color="#8476b8"/><stop offset=".73" stop-color="#9bbae0"/><stop offset="1" stop-color="#b2f4df"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-surprised-12-uniform" x1="0" y1="0" x2=".7" y2="1">
+          <stop stop-color="#fff4f7"/><stop offset=".6" stop-color="#f6d8e8"/><stop offset="1" stop-color="#dfc8e9"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-surprised-12-ribbon" x1="0" y1="0" x2="1" y2="1">
+          <stop stop-color="#c1a4de"/><stop offset=".5" stop-color="#e6cdf3"/><stop offset="1" stop-color="#b49cd5"/>
+        </linearGradient>
+        <radialGradient id="milfy-preview-surprised-12-blush"><stop stop-color="#f5a4b6" stop-opacity=".7"/><stop offset="1" stop-color="#ffb9c7" stop-opacity="0"/></radialGradient>
+        <radialGradient id="milfy-preview-surprised-12-halo"><stop stop-color="#fcf4ff"/><stop offset=".8" stop-color="#edf9f5" stop-opacity=".7"/><stop offset="1" stop-color="#edf9f5" stop-opacity="0"/></radialGradient>
+        <clipPath id="milfy-preview-surprised-12-eye-left"><path d="M87 140 Q109 114 131 141 Q133 176 109 180 Q86 176 87 140Z"/></clipPath><clipPath id="milfy-preview-surprised-12-eye-right"><path d="M169 140 Q191 114 213 141 Q215 176 191 180 Q168 176 169 140Z"/></clipPath>
+      </defs>
+      <ellipse cx="150" cy="180" rx="144" ry="171" fill="url(#milfy-preview-surprised-12-halo)"/>
+      <g class="milfy-bob" stroke-linejoin="round">
+        <g data-part="back-hair" stroke="#929cc3" stroke-width="1.8">
+          <path d="M72 88 C44 81 30 103 31 143 C33 182 10 212 17 258 C20 288 34 312 55 319 C41 291 61 270 63 242 C70 275 58 302 62 317 C89 296 91 262 82 224 C77 189 96 130 72 88Z" fill="url(#milfy-preview-surprised-12-tail)"/>
+          <path d="M228 88 C256 81 270 103 269 143 C267 182 290 212 283 258 C280 288 266 312 245 319 C259 291 239 270 237 242 C230 275 242 302 238 317 C211 296 209 262 218 224 C223 189 204 130 228 88Z" fill="url(#milfy-preview-surprised-12-tail)"/>
+          <path d="M62 117 C48 155 59 182 42 225 C31 258 37 281 45 294 M74 149 C66 189 77 221 71 254 M238 117 C252 155 241 182 258 225 C269 258 263 281 255 294 M226 149 C234 189 223 221 229 254" fill="none" opacity=".6"/>
+          <path d="M43 134 C48 106 54 105 58 110 C48 139 54 167 44 192 C47 168 40 156 43 134Z M257 134 C252 106 246 105 242 110 C252 139 246 167 256 192 C253 168 260 156 257 134Z" fill="#f3fff8" stroke="none" opacity=".65"/>
+          <path d="M67 136 C54 79 77 29 144 25 C214 19 251 68 234 141 L227 223 Q207 250 187 238 L109 238 Q78 249 67 220Z" fill="url(#milfy-preview-surprised-12-hair)"/>
+        </g>
+        <g data-part="hair-ribbons" stroke="#a08cbd" stroke-width="1.5">
+          <path d="M66 100 Q39 74 34 91 L44 115 Q29 137 43 143 L68 121 L76 140 Q88 134 77 110Z M234 100 Q261 74 266 91 L256 115 Q271 137 257 143 L232 121 L224 140 Q212 134 223 110Z" fill="url(#milfy-preview-surprised-12-ribbon)"/>
+          <path d="M46 96 L64 111 L45 133 M254 96 L236 111 L255 133" fill="none" stroke="#f5e6ff" stroke-width="2.5"/>
+          <ellipse cx="68" cy="112" rx="9" ry="12" fill="#e9d6f3"/><ellipse cx="232" cy="112" rx="9" ry="12" fill="#e9d6f3"/>
+        </g>
+        <g data-part="outfit" stroke="#b49ab8" stroke-width="1.8">
+          <path d="M136 213 L134 238 Q150 253 166 238 L164 213" fill="url(#milfy-preview-surprised-12-skin)"/>
+          <path d="M134 227 Q150 236 166 227" stroke="#e7b8bd" fill="none"/>
+          <path d="M132 234 Q107 234 89 253 Q73 276 75 314 L88 324 L92 350 Q150 363 208 350 L212 324 L225 314 Q227 276 211 253 Q193 234 168 234 Q150 249 132 234Z" fill="url(#milfy-preview-surprised-12-uniform)"/>
+          <path d="M107 241 L94 261 L119 293 L150 261 L181 293 L206 261 L193 241 L166 238 L150 255 L134 238Z" fill="#c4b5de"/>
+          <path d="M108 248 L101 260 L120 283 L144 260 M192 248 L199 260 L180 283 L156 260" stroke="#fff4fa" stroke-width="2.6" fill="none"/>
+          <path d="M93 279 Q101 294 94 315 M207 279 Q199 294 206 315 M108 316 L105 349 M192 316 L195 349" fill="none" stroke="#d8b5ce"/>
+          <path d="M76 305 L94 309 L93 324 L76 320Z M224 305 L206 309 L207 324 L224 320Z" fill="#fdf7ff"/>
+          <path d="M150 268 Q124 249 124 268 L127 287 Q142 284 150 275 Q158 284 173 287 L176 268 Q176 249 150 268Z" fill="url(#milfy-preview-surprised-12-ribbon)"/>
+          <path d="M144 275 L137 301 L150 294 L163 301 L156 275" fill="#c6b0df"/>
+          <rect x="144" y="264" width="12" height="15" rx="5" fill="#fff2cf" stroke="#d6b8bb"/>
+          <path d="M150 309 L150 347" stroke="#e8c4d9"/><circle cx="150" cy="315" r="2.5" fill="#fdf7ff"/><circle cx="150" cy="336" r="2.5" fill="#fdf7ff"/>
+          <path d="M179 305 h12 v12 h-12Z M183 301 h4 v4" fill="#d0ece2" stroke="#a7c5bd" stroke-width="1.3"/>
+        </g>
+        <g data-part="face-base">
+          <ellipse cx="76" cy="168" rx="11" ry="17" fill="url(#milfy-preview-surprised-12-skin)" stroke="#c9a3ac" stroke-width="1.5"/>
+          <ellipse cx="224" cy="168" rx="11" ry="17" fill="url(#milfy-preview-surprised-12-skin)" stroke="#c9a3ac" stroke-width="1.5"/>
+          <path d="M76 117 C75 83 99 65 150 65 C201 65 225 83 224 117 L224 166 C223 195 194 226 150 233 C106 226 77 195 76 166Z" fill="url(#milfy-preview-surprised-12-skin)" stroke="#bd9aa9" stroke-width="1.6"/>
+          <path d="M79 133 Q96 99 125 105 Q153 92 181 106 Q208 106 222 134 L222 111 Q209 71 151 72 Q93 72 78 110Z" fill="#e7c6cb" opacity=".24"/>
+        </g>
+        <g class="milfy-expression" data-expression="surprised">
+          <g data-part="eyebrows"><path d="M92 116 Q105 104 121 112 M179 112 Q195 104 208 116" fill="none" stroke="#a092b3" stroke-width="2.8" stroke-linecap="round"/></g>
+          <g data-part="eyes">
+            <g class="milfy-eyes-open"><g class="milfy-eye milfy-eye--left">
+        <path d="M87 140 Q109 114 131 141
+          Q133 176 109 180 Q86 176 87 140Z"
+          fill="#fffafa"/>
+        <g clip-path="url(#milfy-preview-surprised-12-eye-left)">
+          <ellipse cx="109" cy="155" rx="18" ry="29" fill="url(#milfy-preview-surprised-12-iris)"/>
+          <ellipse cx="109" cy="153" rx="8" ry="17" fill="#453961"/>
+          <path d="M96 168 Q109 180 122 168"
+            fill="none" stroke="#9ff0d9" stroke-width="5" stroke-linecap="round"/>
+          <ellipse cx="103" cy="142" rx="7.2" ry="9" fill="#fff"/>
+          <circle cx="118" cy="161" r="4" fill="#fff"/>
+          <circle cx="102" cy="170" r="2" fill="#fff" opacity=".9"/>
+          <path d="M118 137 l1.3 3.2 3.2 1.3-3.2 1.3-1.3 3.2-1.3-3.2-3.2-1.3 3.2-1.3Z"
+            fill="#e5fff7"/>
+        </g>
+        <path d="M86 140 Q105 117 131 141"
+          fill="none" stroke="#57465f" stroke-width="5" stroke-linecap="round"/>
+        <path d="M90 137 l-7-7 M97 133 l-3-6"
+          fill="none" stroke="#57465f" stroke-width="3.1" stroke-linecap="round"
+          />
+        <path d="M95 178 Q109 184 122 178"
+          fill="none" stroke="#bb8d9e" stroke-width="1.5" stroke-linecap="round"/>
+      </g><g class="milfy-eye milfy-eye--right">
+        <path d="M169 140 Q191 114 213 141
+          Q215 176 191 180 Q168 176 169 140Z"
+          fill="#fffafa"/>
+        <g clip-path="url(#milfy-preview-surprised-12-eye-right)">
+          <ellipse cx="191" cy="155" rx="18" ry="29" fill="url(#milfy-preview-surprised-12-iris)"/>
+          <ellipse cx="191" cy="153" rx="8" ry="17" fill="#453961"/>
+          <path d="M178 168 Q191 180 204 168"
+            fill="none" stroke="#9ff0d9" stroke-width="5" stroke-linecap="round"/>
+          <ellipse cx="185" cy="142" rx="7.2" ry="9" fill="#fff"/>
+          <circle cx="200" cy="161" r="4" fill="#fff"/>
+          <circle cx="184" cy="170" r="2" fill="#fff" opacity=".9"/>
+          <path d="M200 137 l1.3 3.2 3.2 1.3-3.2 1.3-1.3 3.2-1.3-3.2-3.2-1.3 3.2-1.3Z"
+            fill="#e5fff7"/>
+        </g>
+        <path d="M168 140 Q187 117 213 141"
+          fill="none" stroke="#57465f" stroke-width="5" stroke-linecap="round"/>
+        <path d="M172 137 l-7-7 M179 133 l-3-6"
+          fill="none" stroke="#57465f" stroke-width="3.1" stroke-linecap="round"
+          transform="translate(382 0) scale(-1 1)"/>
+        <path d="M177 178 Q191 184 204 178"
+          fill="none" stroke="#bb8d9e" stroke-width="1.5" stroke-linecap="round"/>
+      </g></g><g class="milfy-eyes-closed" opacity="0"><path d="M91 160 Q109 171 128 160 M172 160 Q191 171 209 160"
+      fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>
+      <path d="M93 158 l-5-4 M207 158 l5-4" fill="none" stroke="#57465f" stroke-width="2.5" stroke-linecap="round"/></g>
+          </g>
+          <g data-part="cheeks">
+            <ellipse cx="92" cy="187" rx="23" ry="13" fill="url(#milfy-preview-surprised-12-blush)"/><ellipse cx="208" cy="187" rx="23" ry="13" fill="url(#milfy-preview-surprised-12-blush)"/>
+            <path d="M83 186 l-1 4 M90 187 l-1 4 M97 187 l-1 4 M203 187 l-1 4 M210 187 l-1 4 M217 186 l-1 4" stroke="#e7a3b4" stroke-width="1.4" stroke-linecap="round"/>
+          </g>
+          <path d="M149 182 q-3 4 1 4" fill="none" stroke="#ddb7b8" stroke-width="1.4" stroke-linecap="round"/>
+          <g data-part="mouth"><ellipse cx="150" cy="202" rx="7" ry="9" fill="#b66d85"/><ellipse cx="150" cy="206" rx="4" ry="3" fill="#ffc0c7"/></g>
+        </g>
+        <g data-part="front-hair" stroke="#929cc3" stroke-width="1.65">
+          <path d="M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 213 117 C196 117 177 99 166 79 Q168 109 180 128 Q146 121 131 86 Q130 113 115 130 Q110 110 109 105 Q94 131 78 143 L77 179 Q66 165 70 138Z" fill="url(#milfy-preview-surprised-12-hair)"/>
+          <path d="M129 40 C113 49 105 70 109 105 M164 39 C156 50 159 69 166 79 M180 42 C208 61 216 88 213 117 M91 61 Q76 91 78 121 M222 88 L224 123" fill="none" opacity=".65"/>
+          <path d="M82 86 Q87 70 98 62 Q94 72 92 84Z M103 59 Q120 46 140 47 Q127 53 119 66 L112 76 L108 69Z M149 45 Q175 40 194 58 L202 71 Q180 57 158 61Z M207 72 Q217 83 220 98 L211 92Z" fill="#f5fff8" stroke="none" opacity=".82"/>
+          <path d="M102 81 Q104 73 108 68 M172 61 Q190 62 201 73" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".75" fill="none"/>
+          <path d="M148 28 Q143 16 155 11 Q150 20 160 26" fill="url(#milfy-preview-surprised-12-hair)" stroke-linecap="round"/>
+        </g>
+        <g data-part="block-clip" transform="rotate(-17 91 88)" stroke="#b09ab3" stroke-width="1.5">
+          <path d="M74 79 h12 v-12 h12 v12 h12 v12 H74Z" fill="#fff0c8"/>
+          <path d="M76 81 h8 v8 h-8Z M88 69 h8 v8 h-8Z M88 81 h8 v8 h-8Z M100 81 h8 v8 h-8Z" fill="#f5cedf" stroke="none"/>
+          <path d="M78 83 h4 M90 71 h4 M90 83 h4 M102 83 h4" stroke="#fffaf0" stroke-linecap="round"/>
+        </g>
+        <g data-part="pose" stroke="#bc9aa9" stroke-width="1.7">
+          <path d="M87 296 L69 266 Q58 261 58 251 L56 238 Q57 230 64 234 L68 245 Q68 228 75 230 Q80 231 79 241 Q86 235 91 242 Q96 248 89 261 L103 281Z M213 296 L231 266 Q242 261 242 251 L244 238 Q243 230 236 234 L232 245 Q232 228 225 230 Q220 231 221 241 Q214 235 209 242 Q204 248 211 261 L197 281Z" fill="url(#milfy-preview-surprised-12-skin)"/><path d="M80 282 L99 271 L110 292 L91 305Z M220 282 L201 271 L190 292 L209 305Z" fill="url(#milfy-preview-surprised-12-uniform)"/><path d="M65 250 Q73 246 83 251 M235 250 Q227 246 217 251" fill="none" stroke="#e0b7bc"/>
+        </g>
+        <g data-part="expression-accents" fill="none" stroke-linecap="round">
+          <g class="milfy-sparkle" fill="#fff0bc" stroke="#d6b7c2" stroke-width="1.1"><path d="M32 166 l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z"/></g><g class="milfy-sparkle" fill="#e2d2fa" stroke="#b3a1cf" stroke-width="1.1"><path d="M263 46 l3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/></g><path d="M24 206 l-4 7 M276 206 l4 7" stroke="#d7badc" stroke-width="2.5"/>
+          
+          
+        </g>
+      </g>
+    </svg></div>
+    <p class="bubble">ひとつ覚えられたら、それだけで前進です！</p>
+  </article>
+  <article class="card">
+    <div class="caption"><h2>ヒント</h2><span>thinking</span></div>
+    <div class="portrait"><svg xmlns="http://www.w3.org/2000/svg" width="300" height="360" viewBox="0 0 300 360"
+      class="milfy milfy--thinking milfy--animated" role="img"
+      aria-labelledby="milfy-preview-thinking-13-title milfy-preview-thinking-13-desc" focusable="false" data-expression="thinking">
+      <title id="milfy-preview-thinking-13-title">ミルフィ：ヒント</title>
+      <desc id="milfy-preview-thinking-13-desc">テト学園の案内役、ミルフィ。ミントとライラックのツインテール、きらきらした瞳、ブロックの髪飾りと桃色の制服です。</desc>
+      <defs>
+        <linearGradient id="milfy-preview-thinking-13-hair" x1=".15" y1="0" x2=".8" y2="1" gradientUnits="objectBoundingBox">
+          <stop stop-color="#edfff3"/><stop offset=".34" stop-color="#afe5d9"/><stop offset=".7" stop-color="#c6d4f1"/><stop offset="1" stop-color="#c6a9e3"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-thinking-13-tail" x1="0" y1="0" x2=".8" y2="1">
+          <stop stop-color="#b7e9de"/><stop offset=".5" stop-color="#a7d9d6"/><stop offset=".82" stop-color="#c9b3e8"/><stop offset="1" stop-color="#eed5f4"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-thinking-13-skin" x1="0" y1="0" x2=".3" y2="1">
+          <stop stop-color="#fff8ee"/><stop offset=".7" stop-color="#fff1e9"/><stop offset="1" stop-color="#f7d9d8"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-thinking-13-iris" x1="0" y1="0" x2="0" y2="1">
+          <stop stop-color="#4e456e"/><stop offset=".4" stop-color="#8476b8"/><stop offset=".73" stop-color="#9bbae0"/><stop offset="1" stop-color="#b2f4df"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-thinking-13-uniform" x1="0" y1="0" x2=".7" y2="1">
+          <stop stop-color="#fff4f7"/><stop offset=".6" stop-color="#f6d8e8"/><stop offset="1" stop-color="#dfc8e9"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-thinking-13-ribbon" x1="0" y1="0" x2="1" y2="1">
+          <stop stop-color="#c1a4de"/><stop offset=".5" stop-color="#e6cdf3"/><stop offset="1" stop-color="#b49cd5"/>
+        </linearGradient>
+        <radialGradient id="milfy-preview-thinking-13-blush"><stop stop-color="#f5a4b6" stop-opacity=".7"/><stop offset="1" stop-color="#ffb9c7" stop-opacity="0"/></radialGradient>
+        <radialGradient id="milfy-preview-thinking-13-halo"><stop stop-color="#fcf4ff"/><stop offset=".8" stop-color="#edf9f5" stop-opacity=".7"/><stop offset="1" stop-color="#edf9f5" stop-opacity="0"/></radialGradient>
+        <clipPath id="milfy-preview-thinking-13-eye-left"><path d="M87 142 Q109 119 131 143 Q133 178 109 182 Q86 178 87 142Z"/></clipPath><clipPath id="milfy-preview-thinking-13-eye-right"><path d="M169 142 Q191 122 213 143 Q215 178 191 182 Q168 178 169 142Z"/></clipPath>
+      </defs>
+      <ellipse cx="150" cy="180" rx="144" ry="171" fill="url(#milfy-preview-thinking-13-halo)"/>
+      <g class="milfy-bob" stroke-linejoin="round">
+        <g data-part="back-hair" stroke="#929cc3" stroke-width="1.8">
+          <path d="M72 88 C44 81 30 103 31 143 C33 182 10 212 17 258 C20 288 34 312 55 319 C41 291 61 270 63 242 C70 275 58 302 62 317 C89 296 91 262 82 224 C77 189 96 130 72 88Z" fill="url(#milfy-preview-thinking-13-tail)"/>
+          <path d="M228 88 C256 81 270 103 269 143 C267 182 290 212 283 258 C280 288 266 312 245 319 C259 291 239 270 237 242 C230 275 242 302 238 317 C211 296 209 262 218 224 C223 189 204 130 228 88Z" fill="url(#milfy-preview-thinking-13-tail)"/>
+          <path d="M62 117 C48 155 59 182 42 225 C31 258 37 281 45 294 M74 149 C66 189 77 221 71 254 M238 117 C252 155 241 182 258 225 C269 258 263 281 255 294 M226 149 C234 189 223 221 229 254" fill="none" opacity=".6"/>
+          <path d="M43 134 C48 106 54 105 58 110 C48 139 54 167 44 192 C47 168 40 156 43 134Z M257 134 C252 106 246 105 242 110 C252 139 246 167 256 192 C253 168 260 156 257 134Z" fill="#f3fff8" stroke="none" opacity=".65"/>
+          <path d="M67 136 C54 79 77 29 144 25 C214 19 251 68 234 141 L227 223 Q207 250 187 238 L109 238 Q78 249 67 220Z" fill="url(#milfy-preview-thinking-13-hair)"/>
+        </g>
+        <g data-part="hair-ribbons" stroke="#a08cbd" stroke-width="1.5">
+          <path d="M66 100 Q39 74 34 91 L44 115 Q29 137 43 143 L68 121 L76 140 Q88 134 77 110Z M234 100 Q261 74 266 91 L256 115 Q271 137 257 143 L232 121 L224 140 Q212 134 223 110Z" fill="url(#milfy-preview-thinking-13-ribbon)"/>
+          <path d="M46 96 L64 111 L45 133 M254 96 L236 111 L255 133" fill="none" stroke="#f5e6ff" stroke-width="2.5"/>
+          <ellipse cx="68" cy="112" rx="9" ry="12" fill="#e9d6f3"/><ellipse cx="232" cy="112" rx="9" ry="12" fill="#e9d6f3"/>
+        </g>
+        <g data-part="outfit" stroke="#b49ab8" stroke-width="1.8">
+          <path d="M136 213 L134 238 Q150 253 166 238 L164 213" fill="url(#milfy-preview-thinking-13-skin)"/>
+          <path d="M134 227 Q150 236 166 227" stroke="#e7b8bd" fill="none"/>
+          <path d="M132 234 Q107 234 89 253 Q73 276 75 314 L88 324 L92 350 Q150 363 208 350 L212 324 L225 314 Q227 276 211 253 Q193 234 168 234 Q150 249 132 234Z" fill="url(#milfy-preview-thinking-13-uniform)"/>
+          <path d="M107 241 L94 261 L119 293 L150 261 L181 293 L206 261 L193 241 L166 238 L150 255 L134 238Z" fill="#c4b5de"/>
+          <path d="M108 248 L101 260 L120 283 L144 260 M192 248 L199 260 L180 283 L156 260" stroke="#fff4fa" stroke-width="2.6" fill="none"/>
+          <path d="M93 279 Q101 294 94 315 M207 279 Q199 294 206 315 M108 316 L105 349 M192 316 L195 349" fill="none" stroke="#d8b5ce"/>
+          <path d="M76 305 L94 309 L93 324 L76 320Z M224 305 L206 309 L207 324 L224 320Z" fill="#fdf7ff"/>
+          <path d="M150 268 Q124 249 124 268 L127 287 Q142 284 150 275 Q158 284 173 287 L176 268 Q176 249 150 268Z" fill="url(#milfy-preview-thinking-13-ribbon)"/>
+          <path d="M144 275 L137 301 L150 294 L163 301 L156 275" fill="#c6b0df"/>
+          <rect x="144" y="264" width="12" height="15" rx="5" fill="#fff2cf" stroke="#d6b8bb"/>
+          <path d="M150 309 L150 347" stroke="#e8c4d9"/><circle cx="150" cy="315" r="2.5" fill="#fdf7ff"/><circle cx="150" cy="336" r="2.5" fill="#fdf7ff"/>
+          <path d="M179 305 h12 v12 h-12Z M183 301 h4 v4" fill="#d0ece2" stroke="#a7c5bd" stroke-width="1.3"/>
+        </g>
+        <g data-part="face-base">
+          <ellipse cx="76" cy="168" rx="11" ry="17" fill="url(#milfy-preview-thinking-13-skin)" stroke="#c9a3ac" stroke-width="1.5"/>
+          <ellipse cx="224" cy="168" rx="11" ry="17" fill="url(#milfy-preview-thinking-13-skin)" stroke="#c9a3ac" stroke-width="1.5"/>
+          <path d="M76 117 C75 83 99 65 150 65 C201 65 225 83 224 117 L224 166 C223 195 194 226 150 233 C106 226 77 195 76 166Z" fill="url(#milfy-preview-thinking-13-skin)" stroke="#bd9aa9" stroke-width="1.6"/>
+          <path d="M79 133 Q96 99 125 105 Q153 92 181 106 Q208 106 222 134 L222 111 Q209 71 151 72 Q93 72 78 110Z" fill="#e7c6cb" opacity=".24"/>
+        </g>
+        <g class="milfy-expression" data-expression="thinking">
+          <g data-part="eyebrows"><path d="M93 124 Q108 119 122 121 M179 115 Q195 111 207 119" fill="none" stroke="#a092b3" stroke-width="2.8" stroke-linecap="round"/></g>
+          <g data-part="eyes">
+            <g class="milfy-eyes-open"><g class="milfy-eye milfy-eye--left">
+        <path d="M87 142 Q109 119 131 143
+          Q133 178 109 182 Q86 178 87 142Z"
+          fill="#fffafa"/>
+        <g clip-path="url(#milfy-preview-thinking-13-eye-left)">
+          <ellipse cx="113" cy="157" rx="18" ry="26" fill="url(#milfy-preview-thinking-13-iris)"/>
+          <ellipse cx="113" cy="155" rx="8" ry="17" fill="#453961"/>
+          <path d="M100 170 Q113 182 126 170"
+            fill="none" stroke="#9ff0d9" stroke-width="5" stroke-linecap="round"/>
+          <ellipse cx="107" cy="144" rx="7.2" ry="9" fill="#fff"/>
+          <circle cx="122" cy="163" r="4" fill="#fff"/>
+          <circle cx="106" cy="172" r="2" fill="#fff" opacity=".9"/>
+          <path d="M122 139 l1.3 3.2 3.2 1.3-3.2 1.3-1.3 3.2-1.3-3.2-3.2-1.3 3.2-1.3Z"
+            fill="#e5fff7"/>
+        </g>
+        <path d="M86 142 Q105 122 131 143"
+          fill="none" stroke="#57465f" stroke-width="5" stroke-linecap="round"/>
+        <path d="M90 139 l-7-7 M97 135 l-3-6"
+          fill="none" stroke="#57465f" stroke-width="3.1" stroke-linecap="round"
+          />
+        <path d="M95 180 Q109 186 122 180"
+          fill="none" stroke="#bb8d9e" stroke-width="1.5" stroke-linecap="round"/>
+      </g><g class="milfy-eye milfy-eye--right">
+        <path d="M169 142 Q191 122 213 143
+          Q215 178 191 182 Q168 178 169 142Z"
+          fill="#fffafa"/>
+        <g clip-path="url(#milfy-preview-thinking-13-eye-right)">
+          <ellipse cx="195" cy="157" rx="18" ry="23" fill="url(#milfy-preview-thinking-13-iris)"/>
+          <ellipse cx="195" cy="155" rx="8" ry="17" fill="#453961"/>
+          <path d="M182 170 Q195 182 208 170"
+            fill="none" stroke="#9ff0d9" stroke-width="5" stroke-linecap="round"/>
+          <ellipse cx="189" cy="144" rx="7.2" ry="9" fill="#fff"/>
+          <circle cx="204" cy="163" r="4" fill="#fff"/>
+          <circle cx="188" cy="172" r="2" fill="#fff" opacity=".9"/>
+          <path d="M204 139 l1.3 3.2 3.2 1.3-3.2 1.3-1.3 3.2-1.3-3.2-3.2-1.3 3.2-1.3Z"
+            fill="#e5fff7"/>
+        </g>
+        <path d="M168 142 Q187 125 213 143"
+          fill="none" stroke="#57465f" stroke-width="5" stroke-linecap="round"/>
+        <path d="M172 139 l-7-7 M179 135 l-3-6"
+          fill="none" stroke="#57465f" stroke-width="3.1" stroke-linecap="round"
+          transform="translate(382 0) scale(-1 1)"/>
+        <path d="M177 180 Q191 186 204 180"
+          fill="none" stroke="#bb8d9e" stroke-width="1.5" stroke-linecap="round"/>
+      </g></g><g class="milfy-eyes-closed" opacity="0"><path d="M91 160 Q109 171 128 160 M172 160 Q191 171 209 160"
+      fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>
+      <path d="M93 158 l-5-4 M207 158 l5-4" fill="none" stroke="#57465f" stroke-width="2.5" stroke-linecap="round"/></g>
+          </g>
+          <g data-part="cheeks">
+            <ellipse cx="92" cy="187" rx="23" ry="13" fill="url(#milfy-preview-thinking-13-blush)"/><ellipse cx="208" cy="187" rx="23" ry="13" fill="url(#milfy-preview-thinking-13-blush)"/>
+            <path d="M83 186 l-1 4 M90 187 l-1 4 M97 187 l-1 4 M203 187 l-1 4 M210 187 l-1 4 M217 186 l-1 4" stroke="#e7a3b4" stroke-width="1.4" stroke-linecap="round"/>
+          </g>
+          <path d="M149 182 q-3 4 1 4" fill="none" stroke="#ddb7b8" stroke-width="1.4" stroke-linecap="round"/>
+          <g data-part="mouth"><path d="M144 201 Q149 198 155 201" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/></g>
+        </g>
+        <g data-part="front-hair" stroke="#929cc3" stroke-width="1.65">
+          <path d="M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 213 117 C196 117 177 99 166 79 Q168 109 180 128 Q146 121 131 86 Q130 113 115 130 Q110 110 109 105 Q94 131 78 143 L77 179 Q66 165 70 138Z" fill="url(#milfy-preview-thinking-13-hair)"/>
+          <path d="M129 40 C113 49 105 70 109 105 M164 39 C156 50 159 69 166 79 M180 42 C208 61 216 88 213 117 M91 61 Q76 91 78 121 M222 88 L224 123" fill="none" opacity=".65"/>
+          <path d="M82 86 Q87 70 98 62 Q94 72 92 84Z M103 59 Q120 46 140 47 Q127 53 119 66 L112 76 L108 69Z M149 45 Q175 40 194 58 L202 71 Q180 57 158 61Z M207 72 Q217 83 220 98 L211 92Z" fill="#f5fff8" stroke="none" opacity=".82"/>
+          <path d="M102 81 Q104 73 108 68 M172 61 Q190 62 201 73" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".75" fill="none"/>
+          <path d="M148 28 Q143 16 155 11 Q150 20 160 26" fill="url(#milfy-preview-thinking-13-hair)" stroke-linecap="round"/>
+        </g>
+        <g data-part="block-clip" transform="rotate(-17 91 88)" stroke="#b09ab3" stroke-width="1.5">
+          <path d="M74 79 h12 v-12 h12 v12 h12 v12 H74Z" fill="#fff0c8"/>
+          <path d="M76 81 h8 v8 h-8Z M88 69 h8 v8 h-8Z M88 81 h8 v8 h-8Z M100 81 h8 v8 h-8Z" fill="#f5cedf" stroke="none"/>
+          <path d="M78 83 h4 M90 71 h4 M90 83 h4 M102 83 h4" stroke="#fffaf0" stroke-linecap="round"/>
+        </g>
+        <g data-part="pose" stroke="#bc9aa9" stroke-width="1.7">
+          <path d="M212 303 Q194 286 177 241 L171 222 Q168 213 174 210 Q181 207 183 219 L187 232 Q193 225 198 231 L205 248 Q215 270 226 287Z" fill="url(#milfy-preview-thinking-13-skin)"/><path d="M208 285 L225 278 L233 299 L216 310Z" fill="url(#milfy-preview-thinking-13-uniform)"/><path d="M182 225 L186 238 M191 233 L195 241" fill="none" stroke="#e0b7bc"/>
+        </g>
+        <g data-part="expression-accents" fill="none" stroke-linecap="round">
+          
+          <path d="M257 71 Q256 60 265 59 Q276 59 275 68 Q275 73 266 77 L266 82 M266 90 v1" stroke="#b29cce" stroke-width="3.5"/>
+          
+        </g>
+      </g>
+    </svg></div>
+    <p class="bubble">Tミノは今回4回、最短は2回です。あと2回、入力を減らせますね♪ こうすると2回で置けますよ：180 → DAS←。最後はハードドロップです。</p>
+  </article>
+  <article class="card">
+    <div class="caption"><h2>もう一度</h2><span>sorry</span></div>
+    <div class="portrait"><svg xmlns="http://www.w3.org/2000/svg" width="300" height="360" viewBox="0 0 300 360"
+      class="milfy milfy--sorry milfy--animated" role="img"
+      aria-labelledby="milfy-preview-sorry-14-title milfy-preview-sorry-14-desc" focusable="false" data-expression="sorry">
+      <title id="milfy-preview-sorry-14-title">ミルフィ：もう一度</title>
+      <desc id="milfy-preview-sorry-14-desc">テト学園の案内役、ミルフィ。ミントとライラックのツインテール、きらきらした瞳、ブロックの髪飾りと桃色の制服です。</desc>
+      <defs>
+        <linearGradient id="milfy-preview-sorry-14-hair" x1=".15" y1="0" x2=".8" y2="1" gradientUnits="objectBoundingBox">
+          <stop stop-color="#edfff3"/><stop offset=".34" stop-color="#afe5d9"/><stop offset=".7" stop-color="#c6d4f1"/><stop offset="1" stop-color="#c6a9e3"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-sorry-14-tail" x1="0" y1="0" x2=".8" y2="1">
+          <stop stop-color="#b7e9de"/><stop offset=".5" stop-color="#a7d9d6"/><stop offset=".82" stop-color="#c9b3e8"/><stop offset="1" stop-color="#eed5f4"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-sorry-14-skin" x1="0" y1="0" x2=".3" y2="1">
+          <stop stop-color="#fff8ee"/><stop offset=".7" stop-color="#fff1e9"/><stop offset="1" stop-color="#f7d9d8"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-sorry-14-iris" x1="0" y1="0" x2="0" y2="1">
+          <stop stop-color="#4e456e"/><stop offset=".4" stop-color="#8476b8"/><stop offset=".73" stop-color="#9bbae0"/><stop offset="1" stop-color="#b2f4df"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-sorry-14-uniform" x1="0" y1="0" x2=".7" y2="1">
+          <stop stop-color="#fff4f7"/><stop offset=".6" stop-color="#f6d8e8"/><stop offset="1" stop-color="#dfc8e9"/>
+        </linearGradient>
+        <linearGradient id="milfy-preview-sorry-14-ribbon" x1="0" y1="0" x2="1" y2="1">
+          <stop stop-color="#c1a4de"/><stop offset=".5" stop-color="#e6cdf3"/><stop offset="1" stop-color="#b49cd5"/>
+        </linearGradient>
+        <radialGradient id="milfy-preview-sorry-14-blush"><stop stop-color="#f5a4b6" stop-opacity=".7"/><stop offset="1" stop-color="#ffb9c7" stop-opacity="0"/></radialGradient>
+        <radialGradient id="milfy-preview-sorry-14-halo"><stop stop-color="#fcf4ff"/><stop offset=".8" stop-color="#edf9f5" stop-opacity=".7"/><stop offset="1" stop-color="#edf9f5" stop-opacity="0"/></radialGradient>
+        <clipPath id="milfy-preview-sorry-14-eye-left"><path d="M87 145 Q109 122 131 146 Q133 181 109 185 Q86 181 87 145Z"/></clipPath><clipPath id="milfy-preview-sorry-14-eye-right"><path d="M169 145 Q191 122 213 146 Q215 181 191 185 Q168 181 169 145Z"/></clipPath>
+      </defs>
+      <ellipse cx="150" cy="180" rx="144" ry="171" fill="url(#milfy-preview-sorry-14-halo)"/>
+      <g class="milfy-bob" stroke-linejoin="round">
+        <g data-part="back-hair" stroke="#929cc3" stroke-width="1.8">
+          <path d="M72 88 C44 81 30 103 31 143 C33 182 10 212 17 258 C20 288 34 312 55 319 C41 291 61 270 63 242 C70 275 58 302 62 317 C89 296 91 262 82 224 C77 189 96 130 72 88Z" fill="url(#milfy-preview-sorry-14-tail)"/>
+          <path d="M228 88 C256 81 270 103 269 143 C267 182 290 212 283 258 C280 288 266 312 245 319 C259 291 239 270 237 242 C230 275 242 302 238 317 C211 296 209 262 218 224 C223 189 204 130 228 88Z" fill="url(#milfy-preview-sorry-14-tail)"/>
+          <path d="M62 117 C48 155 59 182 42 225 C31 258 37 281 45 294 M74 149 C66 189 77 221 71 254 M238 117 C252 155 241 182 258 225 C269 258 263 281 255 294 M226 149 C234 189 223 221 229 254" fill="none" opacity=".6"/>
+          <path d="M43 134 C48 106 54 105 58 110 C48 139 54 167 44 192 C47 168 40 156 43 134Z M257 134 C252 106 246 105 242 110 C252 139 246 167 256 192 C253 168 260 156 257 134Z" fill="#f3fff8" stroke="none" opacity=".65"/>
+          <path d="M67 136 C54 79 77 29 144 25 C214 19 251 68 234 141 L227 223 Q207 250 187 238 L109 238 Q78 249 67 220Z" fill="url(#milfy-preview-sorry-14-hair)"/>
+        </g>
+        <g data-part="hair-ribbons" stroke="#a08cbd" stroke-width="1.5">
+          <path d="M66 100 Q39 74 34 91 L44 115 Q29 137 43 143 L68 121 L76 140 Q88 134 77 110Z M234 100 Q261 74 266 91 L256 115 Q271 137 257 143 L232 121 L224 140 Q212 134 223 110Z" fill="url(#milfy-preview-sorry-14-ribbon)"/>
+          <path d="M46 96 L64 111 L45 133 M254 96 L236 111 L255 133" fill="none" stroke="#f5e6ff" stroke-width="2.5"/>
+          <ellipse cx="68" cy="112" rx="9" ry="12" fill="#e9d6f3"/><ellipse cx="232" cy="112" rx="9" ry="12" fill="#e9d6f3"/>
+        </g>
+        <g data-part="outfit" stroke="#b49ab8" stroke-width="1.8">
+          <path d="M136 213 L134 238 Q150 253 166 238 L164 213" fill="url(#milfy-preview-sorry-14-skin)"/>
+          <path d="M134 227 Q150 236 166 227" stroke="#e7b8bd" fill="none"/>
+          <path d="M132 234 Q107 234 89 253 Q73 276 75 314 L88 324 L92 350 Q150 363 208 350 L212 324 L225 314 Q227 276 211 253 Q193 234 168 234 Q150 249 132 234Z" fill="url(#milfy-preview-sorry-14-uniform)"/>
+          <path d="M107 241 L94 261 L119 293 L150 261 L181 293 L206 261 L193 241 L166 238 L150 255 L134 238Z" fill="#c4b5de"/>
+          <path d="M108 248 L101 260 L120 283 L144 260 M192 248 L199 260 L180 283 L156 260" stroke="#fff4fa" stroke-width="2.6" fill="none"/>
+          <path d="M93 279 Q101 294 94 315 M207 279 Q199 294 206 315 M108 316 L105 349 M192 316 L195 349" fill="none" stroke="#d8b5ce"/>
+          <path d="M76 305 L94 309 L93 324 L76 320Z M224 305 L206 309 L207 324 L224 320Z" fill="#fdf7ff"/>
+          <path d="M150 268 Q124 249 124 268 L127 287 Q142 284 150 275 Q158 284 173 287 L176 268 Q176 249 150 268Z" fill="url(#milfy-preview-sorry-14-ribbon)"/>
+          <path d="M144 275 L137 301 L150 294 L163 301 L156 275" fill="#c6b0df"/>
+          <rect x="144" y="264" width="12" height="15" rx="5" fill="#fff2cf" stroke="#d6b8bb"/>
+          <path d="M150 309 L150 347" stroke="#e8c4d9"/><circle cx="150" cy="315" r="2.5" fill="#fdf7ff"/><circle cx="150" cy="336" r="2.5" fill="#fdf7ff"/>
+          <path d="M179 305 h12 v12 h-12Z M183 301 h4 v4" fill="#d0ece2" stroke="#a7c5bd" stroke-width="1.3"/>
+        </g>
+        <g data-part="face-base">
+          <ellipse cx="76" cy="168" rx="11" ry="17" fill="url(#milfy-preview-sorry-14-skin)" stroke="#c9a3ac" stroke-width="1.5"/>
+          <ellipse cx="224" cy="168" rx="11" ry="17" fill="url(#milfy-preview-sorry-14-skin)" stroke="#c9a3ac" stroke-width="1.5"/>
+          <path d="M76 117 C75 83 99 65 150 65 C201 65 225 83 224 117 L224 166 C223 195 194 226 150 233 C106 226 77 195 76 166Z" fill="url(#milfy-preview-sorry-14-skin)" stroke="#bd9aa9" stroke-width="1.6"/>
+          <path d="M79 133 Q96 99 125 105 Q153 92 181 106 Q208 106 222 134 L222 111 Q209 71 151 72 Q93 72 78 110Z" fill="#e7c6cb" opacity=".24"/>
+        </g>
+        <g class="milfy-expression" data-expression="sorry">
+          <g data-part="eyebrows"><path d="M93 125 Q110 126 123 116 M177 116 Q190 126 207 125" fill="none" stroke="#a092b3" stroke-width="2.8" stroke-linecap="round"/></g>
+          <g data-part="eyes">
+            <g class="milfy-eyes-open"><g class="milfy-eye milfy-eye--left">
+        <path d="M87 145 Q109 122 131 146
+          Q133 181 109 185 Q86 181 87 145Z"
+          fill="#fffafa"/>
+        <g clip-path="url(#milfy-preview-sorry-14-eye-left)">
+          <ellipse cx="109" cy="160" rx="18" ry="26" fill="url(#milfy-preview-sorry-14-iris)"/>
+          <ellipse cx="109" cy="158" rx="8" ry="17" fill="#453961"/>
+          <path d="M96 173 Q109 185 122 173"
+            fill="none" stroke="#9ff0d9" stroke-width="5" stroke-linecap="round"/>
+          <ellipse cx="103" cy="147" rx="7.2" ry="9" fill="#fff"/>
+          <circle cx="118" cy="166" r="4" fill="#fff"/>
+          <circle cx="102" cy="175" r="2" fill="#fff" opacity=".9"/>
+          <path d="M118 142 l1.3 3.2 3.2 1.3-3.2 1.3-1.3 3.2-1.3-3.2-3.2-1.3 3.2-1.3Z"
+            fill="#e5fff7"/>
+        </g>
+        <path d="M86 145 Q105 125 131 146"
+          fill="none" stroke="#57465f" stroke-width="5" stroke-linecap="round"/>
+        <path d="M90 142 l-7-7 M97 138 l-3-6"
+          fill="none" stroke="#57465f" stroke-width="3.1" stroke-linecap="round"
+          />
+        <path d="M95 183 Q109 189 122 183"
+          fill="none" stroke="#bb8d9e" stroke-width="1.5" stroke-linecap="round"/>
+      </g><g class="milfy-eye milfy-eye--right">
+        <path d="M169 145 Q191 122 213 146
+          Q215 181 191 185 Q168 181 169 145Z"
+          fill="#fffafa"/>
+        <g clip-path="url(#milfy-preview-sorry-14-eye-right)">
+          <ellipse cx="191" cy="160" rx="18" ry="26" fill="url(#milfy-preview-sorry-14-iris)"/>
+          <ellipse cx="191" cy="158" rx="8" ry="17" fill="#453961"/>
+          <path d="M178 173 Q191 185 204 173"
+            fill="none" stroke="#9ff0d9" stroke-width="5" stroke-linecap="round"/>
+          <ellipse cx="185" cy="147" rx="7.2" ry="9" fill="#fff"/>
+          <circle cx="200" cy="166" r="4" fill="#fff"/>
+          <circle cx="184" cy="175" r="2" fill="#fff" opacity=".9"/>
+          <path d="M200 142 l1.3 3.2 3.2 1.3-3.2 1.3-1.3 3.2-1.3-3.2-3.2-1.3 3.2-1.3Z"
+            fill="#e5fff7"/>
+        </g>
+        <path d="M168 145 Q187 125 213 146"
+          fill="none" stroke="#57465f" stroke-width="5" stroke-linecap="round"/>
+        <path d="M172 142 l-7-7 M179 138 l-3-6"
+          fill="none" stroke="#57465f" stroke-width="3.1" stroke-linecap="round"
+          transform="translate(382 0) scale(-1 1)"/>
+        <path d="M177 183 Q191 189 204 183"
+          fill="none" stroke="#bb8d9e" stroke-width="1.5" stroke-linecap="round"/>
+      </g></g><g class="milfy-eyes-closed" opacity="0"><path d="M91 160 Q109 171 128 160 M172 160 Q191 171 209 160"
+      fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>
+      <path d="M93 158 l-5-4 M207 158 l5-4" fill="none" stroke="#57465f" stroke-width="2.5" stroke-linecap="round"/></g>
+          </g>
+          <g data-part="cheeks">
+            <ellipse cx="92" cy="187" rx="23" ry="13" fill="url(#milfy-preview-sorry-14-blush)"/><ellipse cx="208" cy="187" rx="23" ry="13" fill="url(#milfy-preview-sorry-14-blush)"/>
+            <path d="M83 186 l-1 4 M90 187 l-1 4 M97 187 l-1 4 M203 187 l-1 4 M210 187 l-1 4 M217 186 l-1 4" stroke="#e7a3b4" stroke-width="1.4" stroke-linecap="round"/>
+          </g>
+          <path d="M149 182 q-3 4 1 4" fill="none" stroke="#ddb7b8" stroke-width="1.4" stroke-linecap="round"/>
+          <g data-part="mouth"><path d="M141 205 Q150 197 159 205" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/></g>
+        </g>
+        <g data-part="front-hair" stroke="#929cc3" stroke-width="1.65">
+          <path d="M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 213 117 C196 117 177 99 166 79 Q168 109 180 128 Q146 121 131 86 Q130 113 115 130 Q110 110 109 105 Q94 131 78 143 L77 179 Q66 165 70 138Z" fill="url(#milfy-preview-sorry-14-hair)"/>
+          <path d="M129 40 C113 49 105 70 109 105 M164 39 C156 50 159 69 166 79 M180 42 C208 61 216 88 213 117 M91 61 Q76 91 78 121 M222 88 L224 123" fill="none" opacity=".65"/>
+          <path d="M82 86 Q87 70 98 62 Q94 72 92 84Z M103 59 Q120 46 140 47 Q127 53 119 66 L112 76 L108 69Z M149 45 Q175 40 194 58 L202 71 Q180 57 158 61Z M207 72 Q217 83 220 98 L211 92Z" fill="#f5fff8" stroke="none" opacity=".82"/>
+          <path d="M102 81 Q104 73 108 68 M172 61 Q190 62 201 73" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".75" fill="none"/>
+          <path d="M148 28 Q143 16 155 11 Q150 20 160 26" fill="url(#milfy-preview-sorry-14-hair)" stroke-linecap="round"/>
+        </g>
+        <g data-part="block-clip" transform="rotate(-17 91 88)" stroke="#b09ab3" stroke-width="1.5">
+          <path d="M74 79 h12 v-12 h12 v12 h12 v12 H74Z" fill="#fff0c8"/>
+          <path d="M76 81 h8 v8 h-8Z M88 69 h8 v8 h-8Z M88 81 h8 v8 h-8Z M100 81 h8 v8 h-8Z" fill="#f5cedf" stroke="none"/>
+          <path d="M78 83 h4 M90 71 h4 M90 83 h4 M102 83 h4" stroke="#fffaf0" stroke-linecap="round"/>
+        </g>
+        <g data-part="pose" stroke="#bc9aa9" stroke-width="1.7">
+          <path d="M93 324 Q110 326 129 315 Q139 308 149 317 Q160 309 170 315 Q190 326 207 324 L206 338 Q184 344 165 330 Q151 337 137 330 Q116 344 94 338Z" fill="url(#milfy-preview-sorry-14-skin)"/><path d="M141 319 L151 325 L160 319 M135 325 L141 329 M165 325 L159 329" fill="none" stroke="#e0b7bc"/>
+        </g>
+        <g data-part="expression-accents" fill="none" stroke-linecap="round">
+          
+          
+          <path d="M239 157 Q231 169 236 173 Q243 178 245 170 Q245 165 239 157Z" fill="#c5e4f3" stroke="#a5bedb" stroke-width="1.3"/>
+        </g>
+      </g>
+    </svg></div>
+    <p class="bubble">少し違う場所でしたね。輪郭をもう一度見て、ゆっくり試しましょう。</p>
+  </article>
+    </section>
+    <footer>オリジナルキャラクター「ミルフィ」 · ミントとライラックのツインテール／ブロックの髪飾り<br />
+      インラインSVGのみ・外部リソースなし。静止画の撮影は「動きを減らす」設定でアニメーションを停止できます。</footer>
+  </main>
+</body>
+</html>
