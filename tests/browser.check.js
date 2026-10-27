@@ -16,15 +16,19 @@ async function main() {
   fs.mkdirSync(path.join(root, 'screens'), { recursive: true });
   const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', headless: true, args: ['--no-sandbox'] });
   try {
+    // Mutated preferences and reload/persistence checks stay in this context.
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 });
     const page = await context.newPage(), errors = [], requests = [];
-    page.on('pageerror', error => errors.push(error.stack || error.message));
-    page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
-    page.on('request', request => { if (!request.url().startsWith('file:') && !request.url().startsWith('data:')) requests.push(request.url()); });
+    const observe = targetPage => {
+      targetPage.on('pageerror', error => errors.push(error.stack || error.message));
+      targetPage.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+      targetPage.on('request', request => { if (!request.url().startsWith('file:') && !request.url().startsWith('data:')) requests.push(request.url()); });
+    };
+    observe(page);
     const state = () => page.evaluate(() => window.__moetet.getState());
     const waitScreen = screen => page.waitForFunction(value => window.__moetet.getState().screen === value, screen);
     const ready = () => page.waitForFunction(() => !!window.__moetet.getState().active && !window.__moetet.getState().paused);
-    const shot = name => page.screenshot({ path: path.join(root, 'screens', name + '.png') });
+    const shot = (name, targetPage = page) => targetPage.screenshot({ path: path.join(root, 'screens', name + '.png') });
     const click = act => page.locator(`[data-act="${act}"]`).first().click();
     const tabTo = async selector => {
       const control = page.locator(selector).first();
@@ -64,27 +68,46 @@ async function main() {
       await click('close-settings');
       if ((await state()).screen === 'play') { await click('resume'); await ready(); }
     };
-    const checkViewport = async (screenName, selectors = []) => {
+    const checkViewport = async (screenName, selectors = [], targetPage = page) => {
       // A document check alone can miss content clipped by overflow:hidden.
-      const layout = await page.evaluate(selectors => {
+      const layout = await targetPage.evaluate(selectors => {
         const scrolling = document.scrollingElement;
         return { width: innerWidth, height: innerHeight, scrollWidth: scrolling.scrollWidth, scrollHeight: scrolling.scrollHeight,
           elements: selectors.flatMap(selector => [...document.querySelectorAll(selector)].map(el => {
             const r = el.getBoundingClientRect();
-            return { selector, top: r.top, bottom: r.bottom, left: r.left, right: r.right };
+            return { selector, top: r.top, bottom: r.bottom, left: r.left, right: r.right, button: el.matches('button'),
+              scrollWidth: el.scrollWidth, clientWidth: el.clientWidth };
           })) };
       }, selectors);
       assert.ok(layout.scrollHeight <= layout.height && layout.scrollWidth <= layout.width, `${screenName}: ${JSON.stringify(layout)}`);
-      for (const r of layout.elements) assert.ok(r.top >= 0 && r.bottom <= layout.height + 1 && r.left >= 0 && r.right <= layout.width + 1, `${screenName}: clipped ${JSON.stringify(r)}`);
+      for (const selector of selectors) assert.ok(layout.elements.some(el => el.selector === selector), `${screenName}: missing ${selector}`);
+      for (const r of layout.elements) {
+        assert.ok(r.top >= 0 && r.bottom <= layout.height && r.left >= 0 && r.right <= layout.width, `${screenName}: clipped ${JSON.stringify(r)}`);
+        assert.ok(r.scrollWidth <= r.clientWidth, `${screenName}: horizontal overflow ${JSON.stringify(r)}`);
+        if (r.button) assert.ok(r.bottom > r.top && r.right > r.left, `${screenName}: hidden button ${JSON.stringify(r)}`);
+      }
       return layout;
     };
-    const checkText = async () => {
-      const sizes = await page.evaluate(() => [...document.querySelectorAll('.bubble-text,.tiny,.handling-note,.stat label,.route-label,.piece-bar')]
+    const checkText = async (targetPage = page) => {
+      const sizes = await targetPage.evaluate(() => [...document.querySelectorAll('.bubble-text,.tiny,.handling-note,.stat label,.route-label,.piece-bar')]
         .filter(el => el.getClientRects().length).map(el => ({ text: el.textContent.slice(0, 45), size: parseFloat(getComputedStyle(el).fontSize), bubble: el.matches('.bubble-text') })));
       for (const entry of sizes) assert.ok(entry.size >= (entry.bubble ? 15 : 13), JSON.stringify(entry));
     };
     const checkLesson = async () => {
-      await checkViewport('lesson', ['.lesson-heading', '.lesson-board .board-shell', '.lesson-board .column-labels', '#demo-keys', '#demo-caption', '#tutorial-result', '.lesson-content']);
+      const s = await state();
+      await checkViewport(`lesson ${s.lessonIndex + 1} ${s.tryMode ? 'try-it' : 'demo'}`, [
+        '.lesson-heading', '.lesson-coach .milfy', '.lesson-board .board-shell', '.lesson-board .column-labels',
+        '#demo-keys', '#demo-caption', '#tutorial-result', '.lesson-content', '.lesson-nav',
+        '[data-act=previous-lesson]', '[data-act=next-lesson]', '.lesson-shortcuts'
+      ]);
+      await checkText();
+    };
+    const checkSettings = (label, targetPage = page) => checkViewport(label,
+      ['.page-heading', '[data-act=close-settings]', '.settings-content', '.footer'], targetPage);
+    const checkDrill = async () => {
+      await checkLayout();
+      await checkViewport('drill', ['.board-shell', '.column-labels', '.board-note', '.practice-options',
+        '.play-buttons', '.play-buttons button', '[data-act=pause]', '.play-footer']);
       await checkText();
     };
     const checkLayout = async () => {
@@ -128,6 +151,7 @@ async function main() {
     await checkLesson(); await pressAction('hardDrop');
     await page.waitForFunction(() => window.__moetet.getState().tryDone);
     assert.ok((await state()).progress.completed.includes(0));
+    await checkLesson();
     await page.locator('[data-act=next-lesson]').focus(); await page.keyboard.press('Enter'); assert.equal((await state()).lessonIndex, 1);
     await page.keyboard.press('ArrowRight'); assert.equal((await state()).lessonIndex, 2);
     await page.keyboard.press('ArrowRight'); assert.equal((await state()).lessonIndex, 3);
@@ -148,10 +172,48 @@ async function main() {
       await page.waitForFunction(index => window.__moetet.getState().tryIndex === index + 1, i);
     }
     assert.ok((await state()).progress.completed.includes(4)); clean();
+    await checkLesson();
+
+    // Every lesson must keep both nav buttons on screen in every demo and in
+    // try-it mode, even when the explanation/table is scrolled to its end.
+    // Check actual button rectangles; document overflow alone misses clipping.
+    const checkLessonScroll = async () => {
+      const navBefore = await page.locator('.lesson-nav').boundingBox();
+      await page.locator('.lesson-content').evaluate(el => { el.scrollTop = el.scrollHeight; });
+      await checkLesson();
+      assert.deepEqual(await page.locator('.lesson-nav').boundingBox(), navBefore, 'Lesson scroll moved navigation');
+      assert.equal(await page.evaluate(() => document.scrollingElement.scrollTop), 0);
+      await page.locator('.lesson-content').evaluate(el => { el.scrollTop = 0; });
+      await checkLesson();
+    };
+    for (let lessonIndex = 0; lessonIndex < 12; lessonIndex++) {
+      await page.locator(`.lesson-steps [data-index="${lessonIndex}"]`).click();
+      assert.equal((await state()).lessonIndex, lessonIndex);
+      await checkLessonScroll();
+      const demos = page.locator('.demo-tabs [data-act=demo]');
+      for (let demoIndex = 0; demoIndex < await demos.count(); demoIndex++) {
+        await demos.nth(demoIndex).click();
+        await checkLessonScroll();
+      }
+      const tableRows = page.locator('.lesson-table [data-act=table-demo]');
+      if (await tableRows.count()) {
+        await tableRows.first().click(); await checkLessonScroll();
+        await tableRows.last().click(); await checkLessonScroll();
+      }
+      if (lessonIndex === 6) {
+        assert.equal(await page.locator('.lesson-heading h2').innerText(), 'Tミノのレッスン');
+        assert.ok(await tableRows.count() > 5);
+        // Show the placement table, along with the mascot, board and nav.
+        await page.locator('.lesson-table').evaluate(el => el.scrollIntoView({ block: 'start' }));
+        await checkLesson(); await shot('tutorial-t');
+      }
+      await click('try-it'); await ready(); await checkLessonScroll();
+    }
+    clean();
 
     await page.keyboard.press('Escape'); await waitScreen('menu');
     await click('drill'); await waitScreen('play'); await ready();
-    await checkLayout(); await checkViewport('drill', ['.board-shell', '.column-labels', '.board-note', '.practice-options', '.play-buttons', '.play-footer']); await checkText();
+    await checkDrill();
     assert.equal(await page.locator('#next-preview canvas').count(), 5);
     await target('T', 0, 0, 0); await ready();
     assert.equal((await state()).active.y, 19); assert.equal((await state()).inputCount, 0);
@@ -172,20 +234,21 @@ async function main() {
     const largeBoard = await page.locator('.board-shell').boundingBox();
     assert.ok(largeBoard.height > smallBoard.height * 1.3); await shot('drill-1080');
     await page.setViewportSize({ width: 1280, height: 720 });
+    await checkDrill();
 
     // Known case: flat O at spawn is zero inputs. O rotation is visibly a no-op
     // but still counts, which gives a deterministic finesse fault at that target.
     await target('O', 0, 4); await ready(); await page.keyboard.press('Space');
     let s = await state();
     assert.equal(s.lastResult.status, 'perfect'); assert.equal(s.lastResult.used, 0); assert.equal(s.stats.streak, 1);
-    assert.equal(s.expression, 'happy'); await shot('drill-perfect');
+    assert.equal(s.expression, 'happy'); await checkDrill(); await page.waitForTimeout(350); await shot('drill-perfect');
     await target('O', 0, 4); await ready(); await page.keyboard.press('KeyX'); await page.keyboard.press('Space');
     s = await state();
     assert.equal(s.lastResult.status, 'fault'); assert.equal(s.lastResult.extra, 1); assert.equal(s.stats.faults, 1);
     assert.equal(s.stats.streak, 0); assert.equal(s.expression, 'thinking');
     await page.keyboard.press('KeyH'); assert.equal((await state()).hint, true);
     assert.equal(await page.locator('#hint-route').isVisible(), true);
-    await checkLayout(); await shot('drill-fault'); clean();
+    await checkDrill(); await page.waitForTimeout(350); await shot('drill-fault'); clean();
 
     // A miss is separate from finesse faults and repeats the same cell target.
     await target('O', 0, 0); await ready();
@@ -198,7 +261,7 @@ async function main() {
     // Settings synchronization in both directions, conflict capture, JSON
     // validation, and persistent settings/bindings survive file:// reload.
     await settingsOpen();
-    await checkViewport('settings', ['.page-heading', '.settings-content', '.footer']); await checkText();
+    await checkSettings('settings'); await checkText();
     await setNumber('das', 300); await setNumber('arr', 0); await setNumber('are', 400);
     await setNumber('sdf', 41); await setNumber('sdf', 40);
     await setNumber('dcd', 120); await setNumber('dcd', 0);
@@ -225,7 +288,7 @@ async function main() {
     await page.locator('#settings-json').fill(JSON.stringify(exported)); await click('import');
     assert.match(await page.locator('#import-status').innerText(), /保存しました/);
     await page.locator('.settings-content').evaluate(el => { el.scrollTop = 0; });
-    await checkViewport('settings after import', ['.page-heading', '.settings-content', '.footer']); await shot('settings');
+    await checkSettings('settings after import');
     // Esc also exits while a native number field has focus.
     await page.locator('#setting-das').focus(); await page.keyboard.press('Escape');
     assert.equal((await state()).screen, 'play'); await click('resume');
@@ -324,15 +387,57 @@ async function main() {
     await page.keyboard.press('Escape'); await waitScreen('menu');
     await tabTo('[data-act=settings]'); await page.keyboard.press('Enter'); await waitScreen('settings');
     await tabTo('[data-act=reset-settings]');
-    await checkViewport('settings keyboard scroll', ['.page-heading', '.settings-content', '.footer']);
+    await checkSettings('settings keyboard scroll');
     await page.keyboard.press('Escape'); await waitScreen('menu');
     await checkViewport('menu after keyboard tour', ['.menu-buttons', '.footer']); clean();
+
+    // Capture defaults from a genuinely fresh profile, isolated from all the
+    // edits/reloads above. Resetting the persistence profile would hide leaks.
+    const defaultContext = await browser.newContext({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 });
+    try {
+      const defaultPage = await defaultContext.newPage();
+      observe(defaultPage);
+      await defaultPage.goto(pathToFileURL(path.join(root, 'dist', 'moetet-finesse.html')).href);
+      await defaultPage.waitForFunction(() => !!window.__moetet);
+      assert.equal(await defaultPage.evaluate(() => localStorage.getItem(window.__moetet.storageKey)), null);
+      await checkViewport('clean title', ['.menu-buttons', '.menu-buttons button', '.first-note', '.menu-art .speech', '.footer'], defaultPage);
+      await checkText(defaultPage); await shot('title', defaultPage);
+      await defaultPage.locator('.topbar [data-act=settings]').click();
+      await defaultPage.waitForFunction(() => window.__moetet.getState().screen === 'settings');
+      const defaults = await defaultPage.evaluate(() => window.__moetet.getState());
+      assert.deepEqual(defaults.bindings.cw, ['ArrowUp', 'KeyX']);
+      assert.deepEqual(defaults.bindings.hold, ['ShiftLeft', 'KeyC']);
+      assert.equal(defaults.settings.das, 110); assert.equal(defaults.settings.are, 80);
+      assert.deepEqual(await defaultPage.locator('[data-act=capture][data-action=cw][data-index]').allTextContents(), ['↑', 'X']);
+      assert.deepEqual(await defaultPage.locator('[data-act=capture][data-action=hold][data-index]').allTextContents(), ['Shift(左)', 'C']);
+      assert.equal(await defaultPage.locator('#setting-das').inputValue(), '110');
+      assert.equal(await defaultPage.locator('#setting-are').inputValue(), '80');
+      await checkSettings('default settings', defaultPage); await checkText(defaultPage);
+      const saveBefore = await defaultPage.locator('[data-act=close-settings]').boundingBox();
+      await defaultPage.locator('[data-act=reset-settings]').focus();
+      assert.ok(await defaultPage.locator('.settings-content').evaluate(el => el.scrollTop > 0), 'Settings should scroll internally');
+      await checkSettings('default settings scrolled to last control', defaultPage);
+      assert.deepEqual(await defaultPage.locator('[data-act=close-settings]').boundingBox(), saveBefore, 'Settings scroll moved save button');
+      assert.equal(await defaultPage.evaluate(() => document.scrollingElement.scrollTop), 0);
+      await defaultPage.locator('.settings-content').evaluate(el => { el.scrollTop = 0; });
+      await shot('settings', defaultPage);
+
+      // Notifications stay in the header, expire, and disappear on navigation.
+      await defaultPage.locator('[data-act=reset-handling]').click();
+      assert.equal(await defaultPage.locator('#toast.visible').count(), 1);
+      assert.ok(await defaultPage.evaluate(() => document.querySelector('#toast').getBoundingClientRect().bottom <= document.querySelector('.topbar').getBoundingClientRect().bottom));
+      await defaultPage.waitForFunction(() => getComputedStyle(document.querySelector('#toast')).visibility === 'hidden', null, { timeout: 5500 });
+      await defaultPage.locator('[data-act=reset-handling]').click();
+      await defaultPage.locator('[data-act=close-settings]').click();
+      assert.equal(await defaultPage.locator('#toast.visible').count(), 0);
+      assert.equal(await defaultPage.evaluate(() => window.__moetet.getState().screen), 'menu');
+      clean();
+    } finally { await defaultContext.close(); }
 
     // Graceful fallbacks for unavailable storage and AudioContext are covered
     // in a separate page, without altering the persistence tests above.
     const fallback = await context.newPage();
-    fallback.on('pageerror', error => errors.push(error.message));
-    fallback.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+    observe(fallback);
     await fallback.addInitScript(() => {
       Object.defineProperty(window, 'localStorage', { get() { throw new Error('storage unavailable'); } });
       Object.defineProperty(window, 'AudioContext', { value: undefined });
@@ -345,8 +450,8 @@ async function main() {
     await fallback.keyboard.press('Space');
     assert.equal(await fallback.evaluate(() => window.__moetet.getState().lastResult.status), 'perfect');
     clean();
-    console.log('Browser checks passed: tutorial, perfect/fault/miss, handling, IRS, pause, filters, settings persistence, sprint, offline fallbacks.');
-    console.log('Screenshots: screens/{menu,tutorial,tutorial-irs,drill-target,drill-1080,drill-perfect,drill-fault,settings,sprint-result}.png');
+    console.log('Browser checks passed: all 12 lessons (demo/try-it/internal scroll), drill buttons, perfect/fault/miss, handling, IRS, pause, filters, clean default settings, settings persistence/scroll, toast expiry, sprint, offline fallbacks.');
+    console.log('Screenshots: screens/{title,menu,tutorial,tutorial-irs,tutorial-t,drill-target,drill-1080,drill-perfect,drill-fault,settings,sprint-result}.png');
   } finally { await browser.close(); }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });

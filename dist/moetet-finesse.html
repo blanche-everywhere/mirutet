@@ -1515,9 +1515,10 @@ canvas.board {
 
 #toast {
   position:fixed;
-  bottom:24px;
+  top:10px;
   left:50%;
-  transform:translateX(-50%) translateY(20px);
+  max-width:min(560px,calc(100vw - 48px));
+  transform:translateX(-50%) translateY(-8px);
   padding:11px 20px;
   border:1px solid #dfcee9;
   background:#fffcff;
@@ -1526,12 +1527,14 @@ canvas.board {
   z-index:30;
   font-size:13px;
   color:#9d7cb0;
+  visibility:hidden;
   opacity:0;
   pointer-events:none;
   transition:.2s
 }
 
 #toast.visible {
+  visibility:visible;
   opacity:1;
   transform:translateX(-50%) translateY(0)
 }
@@ -1741,7 +1744,7 @@ body:is([data-screen=menu],[data-screen=tutorial],[data-screen=settings],[data-s
 .lesson-page { flex:1; min-height:0; width:100%; max-width:1500px; display:flex; flex-direction:column; padding:16px 24px; }
 .lesson-heading { margin-bottom:14px; }
 .lesson-steps button { width:28px; height:28px; }
-.lesson-grid { flex:1; min-height:0; grid-template-columns:minmax(230px,1fr) minmax(220px,310px) minmax(420px,1.65fr); gap:22px; }
+.lesson-grid { flex:1; min-height:0; grid-template-columns:minmax(230px,1fr) minmax(220px,310px) minmax(420px,1.65fr); grid-template-rows:minmax(0,1fr); align-items:stretch; gap:22px; }
 .lesson-coach { height:100%; min-height:0; display:flex; flex-direction:column; gap:10px; }
 .lesson-coach .speech { min-height:0; flex:0 0 auto; }
 .lesson-coach .mascot-wrap { flex:1; min-height:0; width:100%; max-width:310px; }
@@ -1751,14 +1754,27 @@ body:is([data-screen=menu],[data-screen=tutorial],[data-screen=settings],[data-s
 .lesson-board .column-labels { width:calc(var(--cell)*10); }
 .lesson-board .sequence { margin-top:8px; min-height:30px; }
 .lesson-board #demo-caption,.lesson-status { font-size:13px; line-height:1.5; }
-.lesson-content { height:100%; min-height:0; max-height:none; padding-right:10px; overflow:auto; }
+.lesson-details { display:flex; flex-direction:column; min-width:0; min-height:0; }
+.lesson-content { flex:1; min-width:0; min-height:0; max-height:none; padding-right:10px; overflow:auto; }
+.lesson-nav { flex-shrink:0; margin-top:12px; padding:8px 0 0; border-top:1px solid var(--line); }
+.lesson-shortcuts { flex-shrink:0; margin-top:8px; line-height:1.5; }
 .lesson-text { margin:10px 0; line-height:1.8; }
 .lesson-text p+p { margin-top:8px; }
 .try-box { padding:12px; margin:12px 0; }
 .lesson-table,.lesson-table button,.lesson-table kbd { font-size:13px; }
 .settings-page { flex:1; min-height:0; width:100%; max-width:1450px; display:flex; flex-direction:column; padding:16px 24px 0; }
 .settings-page .page-heading { margin-bottom:14px; }
+.settings-page [data-act=close-settings] { flex-shrink:0; }
 .settings-content { flex:1; min-height:0; overflow:auto; padding:4px 10px 12px 4px; scrollbar-width:thin; }
+.lesson-content,.settings-content {
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:#cdb8dd #f6eff9;
+  scrollbar-gutter:stable;
+}
+.lesson-content::-webkit-scrollbar,.settings-content::-webkit-scrollbar { width:6px; height:6px; }
+.lesson-content::-webkit-scrollbar-track,.settings-content::-webkit-scrollbar-track { background:#f6eff9; border-radius:8px; }
+.lesson-content::-webkit-scrollbar-thumb,.settings-content::-webkit-scrollbar-thumb { background:#cdb8dd; border-radius:8px; }
 .setting-row { grid-template-columns:180px 1fr 70px; }
 .setting-row label { font-size:14px; }
 .setting-row label small { font-size:13px; }
@@ -3360,6 +3376,7 @@ kbd,.key-help kbd { font-size:13px; }
     return `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toFixed(2).padStart(5, '0')}`;
   }
   function toast(message) { $('#toast').textContent = message; $('#toast').classList.add('visible'); toastUntil = now() + 3000; }
+  function dismissToast() { $('#toast').classList.remove('visible'); toastUntil = 0; }
   function pick(lines) { return lines[Math.floor(Math.random() * lines.length)]; }
   function mascot(expr = 'normal', prefix = 'app') { return M.mascotSVG(expr, { idPrefix: prefix }); }
   function speech(text, id = '') { return `<div class="speech" ${id ? `id="${id}"` : ''}><span class="speaker">テト学園のガイド · ミルフィ</span><span class="bubble-text">${escape(text)}</span></div>`; }
@@ -3426,7 +3443,7 @@ kbd,.key-help kbd { font-size:13px; }
   function demoVariants(lesson) { return lesson.demo.examples || lesson.demo.variants || [lesson.demo]; }
   function tutorialHTML() {
     const lesson = lessons[lessonIndex], variants = demoVariants(lesson);
-    return `<main class="page lesson-page"><div class="page-heading lesson-heading"><div><div class="eyebrow">LESSON ${String(lessonIndex + 1).padStart(2, '0')} / 12</div><h2 style="margin-top:5px">${escape(lesson.title)}</h2></div><div class="row"><nav class="lesson-steps" aria-label="レッスン選択">${lessons.map((l, i) => `<button data-act="lesson" data-index="${i}" title="${escape(l.title)}" class="${i === lessonIndex ? 'active' : progress.completed.includes(i) ? 'done' : ''}">${i + 1}</button>`).join('')}</nav><button class="small" data-act="lessons">一覧</button></div></div><div class="lesson-grid"><aside class="lesson-coach">${speech(lesson.lines[0], 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${lesson.expression}">${mascot(lesson.expression, 'lesson')}</div><p class="tiny" style="text-align:center">ミルフィのフィネス教室</p></aside><section class="lesson-board">${boardHTML()}<div id="demo-keys" class="sequence"></div><p id="demo-caption" class="tiny" style="text-align:center;margin:8px 0">実演を準備しています…</p><div id="tutorial-result" class="lesson-status" aria-live="polite">${escape(lessonMessage)}</div></section><section class="lesson-content" tabindex="0" aria-label="レッスンの説明と最短表"><span class="tag ${tryMode ? 'mint-tag' : ''}">${tryMode ? 'YOUR TURN / 自分でチャレンジ' : 'WATCH / キーの光り方を見てみよう'}</span><div class="lesson-text">${lesson.lines.slice(1).map(line => `<p>${escape(line)}</p>`).join('')}</div><div class="demo-tabs">${variants.map((v, i) => `<button class="${demoVariant === i && !tryMode ? 'active' : ''}" data-act="demo" data-index="${i}">${lesson.demo.type === 'compare-sequences' ? i === 0 ? 'タップ × 4' : 'DAS × 1' : v.type === 'irs' ? 'IRSの実演' : v.type === 'ihs' ? 'IHSの実演' : '実演 ' + (i + 1)}</button>`).join('')}<button data-act="settings">操作の設定 ↗</button></div><div class="try-box"><h3>✧ やってみましょう</h3><p>${lesson.tryIt.requireIRS ? 'ARE中に回転キーを長押しして、IRSで置いてみましょう。' : '目標の輪郭に、最少の回数で置いてみましょう。別の最短手順でもOKです。'}<br>移動・回転で合わせ、${escape(friendly(bindings.hardDrop[0]))} で落下 / ${escape(friendly(bindings.retry[0]))} でもう一度</p><button class="small ${tryMode ? '' : 'primary'}" data-act="try-it">${tryDone ? 'もう一度チャレンジ' : tryMode ? `目標 ${Math.min(tryIndex + 1, lesson.tryIt.targets.length)} / ${lesson.tryIt.targets.length} · 最初から` : `${lesson.tryIt.targets.length}つの目標にチャレンジ`}</button></div>${lesson.demo.placementGroups ? `<h3 style="margin-bottom:7px">${lesson.demo.piece}ミノの最短ルート表</h3><p class="tiny">列を選ぶと実演します。0 / R / 2 / L は回転の向きです。</p><table class="lesson-table"><thead><tr><th>向き・左端の列</th><th>最短入力</th></tr></thead><tbody>${lesson.demo.placementGroups.map((group, i) => `<tr><td><button data-act="table-demo" data-index="${i}">${group.placements.map(p => `${p.rotationLabel}・${p.column}`).join(' / ')}</button></td><td><div class="sequence">${route(group.actions)}</div></td></tr>`).join('')}</tbody></table>` : ''}<div class="lesson-nav"><button class="small" data-act="previous-lesson" ${lessonIndex === 0 ? 'disabled' : ''}>← 前へ</button><button class="primary small" data-act="next-lesson">${lessonIndex === 11 ? 'ドリルへ →' : '次のレッスン →'}</button></div><p class="tiny" style="margin-top:10px">実演中: Enter / Space / → で次へ · ← で前へ · Esc でタイトル</p></section></div></main>`;
+    return `<main class="page lesson-page"><div class="page-heading lesson-heading"><div><div class="eyebrow">LESSON ${String(lessonIndex + 1).padStart(2, '0')} / 12</div><h2 style="margin-top:5px">${escape(lesson.title)}</h2></div><div class="row"><nav class="lesson-steps" aria-label="レッスン選択">${lessons.map((l, i) => `<button data-act="lesson" data-index="${i}" title="${escape(l.title)}" class="${i === lessonIndex ? 'active' : progress.completed.includes(i) ? 'done' : ''}">${i + 1}</button>`).join('')}</nav><button class="small" data-act="lessons">一覧</button></div></div><div class="lesson-grid"><aside class="lesson-coach">${speech(lesson.lines[0], 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${lesson.expression}">${mascot(lesson.expression, 'lesson')}</div><p class="tiny" style="text-align:center">ミルフィのフィネス教室</p></aside><section class="lesson-board">${boardHTML()}<div id="demo-keys" class="sequence"></div><p id="demo-caption" class="tiny" style="text-align:center;margin:8px 0">実演を準備しています…</p><div id="tutorial-result" class="lesson-status" aria-live="polite">${escape(lessonMessage)}</div></section><section class="lesson-details" aria-label="レッスンの説明と操作"><div class="lesson-content" tabindex="0" aria-label="レッスンの説明と最短表"><span class="tag ${tryMode ? 'mint-tag' : ''}">${tryMode ? 'YOUR TURN / 自分でチャレンジ' : 'WATCH / キーの光り方を見てみよう'}</span><div class="lesson-text">${lesson.lines.slice(1).map(line => `<p>${escape(line)}</p>`).join('')}</div><div class="demo-tabs">${variants.map((v, i) => `<button class="${demoVariant === i && !tryMode ? 'active' : ''}" data-act="demo" data-index="${i}">${lesson.demo.type === 'compare-sequences' ? i === 0 ? 'タップ × 4' : 'DAS × 1' : v.type === 'irs' ? 'IRSの実演' : v.type === 'ihs' ? 'IHSの実演' : '実演 ' + (i + 1)}</button>`).join('')}<button data-act="settings">操作の設定 ↗</button></div><div class="try-box"><h3>✧ やってみましょう</h3><p>${lesson.tryIt.requireIRS ? 'ARE中に回転キーを長押しして、IRSで置いてみましょう。' : '目標の輪郭に、最少の回数で置いてみましょう。別の最短手順でもOKです。'}<br>移動・回転で合わせ、${escape(friendly(bindings.hardDrop[0]))} で落下 / ${escape(friendly(bindings.retry[0]))} でもう一度</p><button class="small ${tryMode ? '' : 'primary'}" data-act="try-it">${tryDone ? 'もう一度チャレンジ' : tryMode ? `目標 ${Math.min(tryIndex + 1, lesson.tryIt.targets.length)} / ${lesson.tryIt.targets.length} · 最初から` : `${lesson.tryIt.targets.length}つの目標にチャレンジ`}</button></div>${lesson.demo.placementGroups ? `<h3 style="margin-bottom:7px">${lesson.demo.piece}ミノの最短ルート表</h3><p class="tiny">列を選ぶと実演します。0 / R / 2 / L は回転の向きです。</p><table class="lesson-table"><thead><tr><th>向き・左端の列</th><th>最短入力</th></tr></thead><tbody>${lesson.demo.placementGroups.map((group, i) => `<tr><td><button data-act="table-demo" data-index="${i}">${group.placements.map(p => `${p.rotationLabel}・${p.column}`).join(' / ')}</button></td><td><div class="sequence">${route(group.actions)}</div></td></tr>`).join('')}</tbody></table>` : ''}</div><nav class="lesson-nav" aria-label="前後のレッスン"><button class="small" data-act="previous-lesson" ${lessonIndex === 0 ? 'disabled' : ''}>← 前へ</button><button class="primary small" data-act="next-lesson">${lessonIndex === 11 ? 'ドリルへ →' : '次のレッスン →'}</button></nav><p class="tiny lesson-shortcuts">実演中: Enter / Space / → で次へ · ← で前へ · Esc でタイトル</p></section></div></main>`;
   }
   function handlingRow(key, title, note, step = 1) {
     const [min, max] = E.SETTING_LIMITS[key];
@@ -3449,6 +3466,7 @@ kbd,.key-help kbd { font-size:13px; }
   }
 
   function render(focus = true) {
+    dismissToast();
     const previous = document.activeElement;
     const focusKey = previous?.dataset ? { ...previous.dataset } : {};
     const previousId = previous?.id;
@@ -4041,7 +4059,7 @@ kbd,.key-help kbd { font-size:13px; }
         lastTipAttempt = attempts; setCoach(M.TIPS[tipIndex++ % M.TIPS.length], 'normal');
       }
     }
-    if (toastUntil && t >= toastUntil) { $('#toast').classList.remove('visible'); toastUntil = 0; }
+    if (toastUntil && t >= toastUntil) dismissToast();
     startFrames();
   }
 
