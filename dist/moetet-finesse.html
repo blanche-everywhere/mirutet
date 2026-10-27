@@ -1,0 +1,2186 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f4fc">
+  <meta name="description" content="ミルフィと学ぶ、最短操作のテトリミノ・フィネストレーナー。オフラインで遊べます。">
+  <title>萌えテト フィネス編</title>
+  <style>
+.milfy { display: block; max-width: 100%; height: auto; overflow: visible; }
+.milfy .milfy-eyes-closed { opacity: 0; }
+.milfy--animated .milfy-bob { animation: milfy-bob 4s ease-in-out infinite; }
+.milfy--animated .milfy-eyes-open { animation: milfy-open 5.7s steps(1, end) infinite; }
+.milfy--animated .milfy-eyes-closed { animation: milfy-blink 5.7s steps(1, end) infinite; }
+.milfy--animated .milfy-sparkle { transform-box: fill-box; transform-origin: center;
+  animation: milfy-twinkle 3.2s ease-in-out infinite; }
+.milfy--animated .milfy-sparkle:nth-child(even) { animation-delay: -1.6s; }
+@keyframes milfy-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes milfy-open { 0%, 43%, 46%, 100% { opacity: 1; } 44%, 45% { opacity: 0; } }
+@keyframes milfy-blink { 0%, 43%, 46%, 100% { opacity: 0; } 44%, 45% { opacity: 1; } }
+@keyframes milfy-twinkle { 0%, 100% { opacity: .5; transform: scale(.88); }
+  50% { opacity: 1; transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) {
+  .milfy--animated .milfy-bob, .milfy--animated .milfy-eyes-open,
+  .milfy--animated .milfy-eyes-closed, .milfy--animated .milfy-sparkle { animation: none; }
+  .milfy .milfy-eyes-open { opacity: 1; }
+  .milfy .milfy-eyes-closed { opacity: 0; }
+}
+:root{--ink:#49445e;--muted:#8c849e;--pink:#e58ba9;--purple:#9a82c8;--mint:#77bcab;--line:#e9e1f0;--paper:#fffdfefa;--shadow:0 8px 30px #72588d0a;--cell:min(24px,calc((100vh - 236px)/22));font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans CJK JP",sans-serif;color:var(--ink);font-size:14px;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;min-width:1000px;background:radial-gradient(ellipse at 8% 4%,#fcebf2 0,transparent 42%),radial-gradient(ellipse at 90% 80%,#eaf6f2 0,transparent 45%),#f8f5fc}button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 15px;transition:background .15s,transform .15s,box-shadow .15s}button:hover{background:#f6f0fc;border-color:#d2bfe7;transform:translateY(-1px)}button:active{transform:translateY(1px)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #b6a0da;outline-offset:3px}button:disabled{opacity:.42;cursor:default;transform:none}.primary{color:#fff;background:linear-gradient(125deg,#bd9cda,#a48aca);border-color:transparent;box-shadow:0 5px 14px #a183c52d}.primary:hover{background:#a086c2}.pink{background:#fbedf3;color:#b86f8b;border-color:#efd4df}.quiet{background:transparent;border-color:transparent}.small{font-size:12px;padding:7px 11px;border-radius:9px}.danger{color:#bc7288}.eyebrow{font-size:10px;letter-spacing:.2em;font-weight:800;color:#a38ab9;text-transform:uppercase}.muted{color:var(--muted)}.tiny{font-size:11px;color:var(--muted)}h1,h2,h3,p{margin:0}h2{font-size:23px;letter-spacing:.04em}h3{font-size:14px}.row{display:flex;align-items:center;gap:10px}.spread{justify-content:space-between}.stack{display:grid;gap:14px}.panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:18px}.tag{display:inline-flex;align-items:center;gap:6px;background:#f0eaf8;border:1px solid #e7dff0;color:#9278b3;border-radius:30px;padding:4px 9px;font-size:10px;letter-spacing:.06em}.mint-tag{color:#5b9e8e;background:#e9f5ef;border-color:#d2eade}.topbar{height:72px;padding:0 34px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e9e1f0aa;background:#fffc;gap:20px}.brand{display:flex;gap:11px;align-items:center;font-weight:800;letter-spacing:.08em}.brand-button{border:0;background:none;padding:0}.brand-mark{display:grid;grid-template-columns:repeat(3,8px);grid-template-rows:repeat(2,8px);gap:2px;transform:rotate(-7deg)}.brand-mark i{background:#b6a1d4;border-radius:2px}.brand-mark i:first-child{grid-column:2;background:#e7adc2}.brand small{display:block;font-size:9px;letter-spacing:.23em;font-weight:500;color:#a197ae;margin-top:3px}.top-actions{display:flex;gap:10px;align-items:center}.page{max-width:1140px;margin:auto;padding:28px 18px}.page-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}.page-heading p{margin-top:7px;color:var(--muted);font-size:12px}.footer{font-size:10px;color:#a69bb2;display:flex;justify-content:space-between;gap:15px;padding:15px 34px;letter-spacing:.04em}kbd{font:600 11px/1.2 inherit;display:inline-flex;align-items:center;justify-content:center;min-width:27px;min-height:26px;padding:4px 7px;border:1px solid #dfd5eb;border-bottom:3px solid #d9cde7;border-radius:6px;background:#fff;color:#7c668f;white-space:nowrap}kbd.pressed{background:#b498d0;color:#fff;border-color:#a284c2;transform:translateY(2px);box-shadow:0 0 13px #c3a6e680}.sequence{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-height:30px}.sequence .arrow{color:#c7bbd2;font-size:10px}.sequence small{font-size:8px;margin-left:4px;color:#b48ac0}.empty-route{font-size:12px;color:var(--muted)}
+/* Title screen */
+.menu{max-width:1080px;min-height:calc(100vh - 116px);margin:auto;display:grid;grid-template-columns:1.05fr 1fr;gap:58px;align-items:center;padding:32px}.menu-copy .eyebrow{display:flex;align-items:center;gap:10px}.menu-copy .eyebrow:before{content:"";width:22px;height:1px;background:#cdb7df}.logo{font-weight:900;line-height:1.17;font-size:66px;letter-spacing:.04em;margin:22px 0 15px;color:#a783bd;text-shadow:2px 3px 0 #fff}.logo span{color:#db93af}.logo small{display:block;font-size:30px;letter-spacing:.18em;margin-top:9px;color:#776787}.menu-intro{line-height:2;color:#93849f;font-size:13px;margin-bottom:26px}.menu-buttons{display:grid;grid-template-columns:1fr 1fr;gap:11px}.menu-buttons button{text-align:left;min-height:62px;display:flex;justify-content:space-between;align-items:center;padding:13px 17px}.menu-buttons button:first-child{grid-column:1/-1}.menu-buttons button b{display:block;font-size:14px;letter-spacing:.04em}.menu-buttons button small{display:block;font-size:9px;font-weight:400;letter-spacing:.14em;opacity:.7;margin-top:4px}.menu-buttons .button-arrow{opacity:.65;font-size:20px}.first-note{margin-top:15px;font-size:11px;color:#ac8cb4;display:flex;align-items:center;gap:8px}.menu-art{position:relative;text-align:center}.menu-art:before{content:"";position:absolute;inset:40px -10px 65px;border-radius:50%;background:radial-gradient(circle,#f0e6f7 0,#f9f5fc00 70%)}.menu-art .mascot-wrap{max-width:370px;margin:auto;position:relative}.speech{background:#fff;border:1px solid #e7dbee;border-radius:18px;padding:17px 19px;line-height:1.9;font-size:13px;position:relative;box-shadow:0 5px 20px #9c7baa0a}.speech:after{content:"";position:absolute;bottom:-7px;left:50%;height:12px;width:12px;background:#fff;border-right:1px solid #e7dbee;border-bottom:1px solid #e7dbee;transform:rotate(45deg)}.speaker{display:block;font-size:10px;font-weight:800;letter-spacing:.14em;color:#ad88bc;margin-bottom:5px}.menu-art .speech{max-width:340px;margin:0 auto -7px;text-align:left;z-index:1}.mascot-caption{font-size:10px;color:#ad9cb7;letter-spacing:.15em;margin-top:-14px}.float-block{position:absolute;width:19px;height:19px;border-radius:5px;background:#edc6d5;box-shadow:21px 0 #edc6d5,21px -21px #edc6d5,42px -21px #edc6d5;transform:rotate(13deg);left:17px;top:46%;opacity:.6}.float-block.two{left:auto;right:32px;top:67%;background:#bce3d6;box-shadow:21px 0 #bce3d6,-21px 0 #bce3d6,0 -21px #bce3d6;transform:rotate(-15deg)}
+/* Training workspace: all three columns fit at 1280 x 720. */
+.play-page{padding:17px 28px 0;max-width:1260px;margin:auto}.play-topline{height:30px;margin-bottom:12px}.play-title{font-size:17px;display:flex;align-items:center;gap:10px}.play-grid{display:grid;grid-template-columns:minmax(220px,1fr) 428px minmax(230px,1fr);gap:22px;align-items:start;height:calc(100vh - 166px)}.coach{display:flex;flex-direction:column;gap:12px;height:100%;min-height:0}.coach .speech{min-height:116px;font-size:12px}.coach .mascot-wrap{width:200px;max-height:234px;margin:0 auto;flex:1;min-height:120px}.coach .milfy{height:100%;width:100%;max-height:240px}.coach .speaker{font-size:9px}.coach-label{text-align:center;font-size:10px;color:#a293ae;letter-spacing:.12em;margin-top:-14px}.practice-options{padding:13px 15px}.practice-options h3{font-size:11px;color:#887794;margin-bottom:10px}.piece-filters{display:flex;gap:5px;flex-wrap:wrap}.piece-check input{position:absolute;opacity:0}.piece-check span{display:inline-flex;width:27px;height:27px;align-items:center;justify-content:center;border-radius:7px;border:1px solid var(--line);font-size:11px;cursor:pointer;color:#c4bbca}.piece-check input:checked+span{background:#f0eaf8;border-color:#cbb7df;color:#79618c;font-weight:800}.piece-check input:focus-visible+span{outline:2px solid #aa8fc7}.filter-line{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:9px;font-size:10px}.filter-line select{width:120px;padding:4px;border-radius:6px;border:1px solid var(--line);background:#fff}.filter-line input[type=number]{width:45px;padding:3px}.checkline{display:flex;align-items:center;gap:7px;font-size:11px;line-height:1.7}.checkline input{accent-color:#aa89c9}.filter-error{font-size:10px;color:#b35e7a;margin-top:6px}.board-stage{display:grid;grid-template-columns:76px calc(var(--cell)*10) 76px;gap:12px;justify-content:center}.board-column{position:relative}.board-heading{height:25px;display:flex;align-items:center;justify-content:space-between;font-size:9px;color:#a18eaf;letter-spacing:.14em}.board-shell{position:relative;border-radius:10px;overflow:hidden;border:1px solid #d8cde5;box-shadow:0 6px 24px #8a6da716;background:#faf9fd;width:calc(var(--cell)*10 + 2px);height:calc(var(--cell)*22 + 2px)}canvas.board{display:block;width:calc(var(--cell)*10);height:calc(var(--cell)*22)}.column-labels{display:grid;grid-template-columns:repeat(10,1fr);font-size:8px;text-align:center;color:#b6a9c0;padding-top:7px}.board-note{text-align:center;font-size:9px;color:#b4a3bf;margin-top:8px}.side-queue{padding-top:25px}.queue-box{background:#fffc;border:1px solid #e8dff0;border-radius:12px;overflow:hidden;text-align:center}.queue-title{font-size:9px;letter-spacing:.14em;color:#a18daf;padding:10px 0 3px}.mini-piece{display:block;width:72px;height:54px;margin:auto}.queue-box .mini-piece+.mini-piece{border-top:1px solid #f2edf6}.hold-note{font-size:9px;line-height:1.7;color:#ac9cb5;margin-top:9px;text-align:center}.key-help{display:flex;gap:7px;flex-wrap:wrap;margin-top:17px;justify-content:center}.key-help kbd{font-size:9px;min-width:25px;padding:3px;min-height:22px}.irs-flash{position:absolute;top:47px;left:50%;transform:translateX(-50%);background:#a485c9e8;color:#fff;font-size:11px;border-radius:20px;padding:5px 15px;letter-spacing:.18em;opacity:0;transition:opacity .12s;pointer-events:none}.irs-flash.visible{opacity:1}.are-track{position:absolute;top:0;left:0;right:0;height:3px;background:#e7def1;opacity:0}.are-track.visible{opacity:1}.are-fill{height:100%;background:#b396ce;width:0}.right-stack{display:grid;gap:12px}.stats-panel{padding:16px}.panel-label{font-size:9px;letter-spacing:.16em;color:#9e8eaa;font-weight:700;margin-bottom:12px}.stats-main{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat strong{font-size:27px;font-weight:600;letter-spacing:-.04em;line-height:1.2}.stat strong.accent{color:#b88bca}.stat small{font-size:10px;color:#ab9eb6}.stat label{display:block;font-size:9px;color:#a496af;margin-bottom:4px}.stats-strip{border-top:1px solid var(--line);display:flex;justify-content:space-between;margin-top:13px;padding-top:10px;font-size:10px;color:#9d8da9}.stats-strip b{color:#74627e;font-weight:600}.piece-bars{display:grid;gap:5px}.piece-bar{display:grid;grid-template-columns:12px 1fr 42px;gap:8px;font-size:9px;align-items:center}.bar-track{height:5px;background:#f0ebf5;border-radius:5px;overflow:hidden}.bar-fill{height:100%;border-radius:5px;background:#d6b2c6}.piece-bar span:last-child{text-align:right;color:#a89ab1}.result-panel{padding:16px;min-height:168px}.result-panel.perfect{border-color:#cee6dc;background:#fbfffd}.result-panel.fault{border-color:#eccbd9;background:#fffafc}.result-panel.miss{border-color:#e8d9bc}.result-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.result-head strong{font-size:17px;color:#9f83b7}.perfect .result-head strong{color:#6ca995}.fault .result-head strong{color:#ce8ba6}.result-head small{font-size:10px;color:#a193ac}.route-label{font-size:9px;letter-spacing:.08em;color:#a496b0;margin:9px 0 4px}.play-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.play-buttons button{font-size:11px;padding:9px 5px}.hint-route{margin-top:10px;border-top:1px dashed #e2d6eb;padding-top:7px}.play-footer{height:35px;padding-top:11px;font-size:9px;color:#ac9db8;text-align:center;letter-spacing:.04em}.sprint-progress{height:4px;background:#eadff1;border-radius:4px;margin-top:10px;overflow:hidden}.sprint-progress div{height:100%;background:#b298cf}.sprint-time{font-variant-numeric:tabular-nums;color:#9c7eaf;font-weight:700;font-size:20px}
+/* Lessons */
+.lesson-page{padding-top:20px}.lesson-heading{margin-bottom:17px}.lesson-steps{display:flex;gap:5px}.lesson-steps button{width:24px;height:24px;border-radius:50%;padding:0;font-size:9px;background:#fff}.lesson-steps button.active{background:#b59acf;color:#fff}.lesson-steps button.done{border-color:#a8d5c2;color:#70a98f}.lesson-grid{display:grid;grid-template-columns:240px 270px 1fr;gap:24px;align-items:start}.lesson-coach .speech{font-size:12px;min-height:140px}.lesson-coach .mascot-wrap{width:220px;margin:auto}.lesson-board .board-shell{margin:auto}.lesson-board .board-heading{width:calc(var(--cell)*10);margin:auto}.lesson-board .sequence{justify-content:center;margin-top:12px;min-height:35px}.lesson-content{max-height:calc(100vh - 198px);overflow:auto;padding:3px 7px 12px 0;scrollbar-width:thin}.lesson-text{font-size:12px;line-height:1.95;color:#897a95;margin:13px 0}.lesson-text p+p{margin-top:12px}.demo-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.demo-tabs button{font-size:10px;padding:6px 8px}.demo-tabs button.active{background:#eee5f7;border-color:#cbb8df}.try-box{background:#edf7f2;border:1px solid #d6e9de;border-radius:12px;padding:14px;margin:15px 0}.try-box h3{color:#699a88;font-size:13px}.try-box p{font-size:11px;color:#83a193;line-height:1.8;margin:6px 0 10px}.lesson-nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px}.lesson-table{width:100%;border-collapse:collapse;font-size:10px}.lesson-table th{font-weight:500;color:#ad9bb8;text-align:left;padding:7px 4px;border-bottom:1px solid var(--line)}.lesson-table td{padding:7px 4px;border-bottom:1px solid #efe9f4}.lesson-table button{border:none;background:none;padding:0;text-align:left;color:#9985ac;font-size:10px}.lesson-table kbd{font-size:9px;min-height:20px;min-width:20px;padding:2px 4px}.lesson-list{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.lesson-card{text-align:left;min-height:110px;padding:20px}.lesson-card b{display:block;margin:8px 0;font-size:14px}.lesson-card span{font-size:11px;color:var(--muted)}.lesson-status{color:#76ad99;font-size:11px;margin:8px 0;line-height:1.8}
+/* Settings / records / results */
+.settings-page{max-width:1140px}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.settings-grid h3{font-size:13px;margin-bottom:12px}.setting-row{padding:10px 0;border-top:1px solid #f0eaf5;display:grid;grid-template-columns:116px 1fr 65px;gap:11px;align-items:center}.setting-row label{font-weight:700;font-size:12px}.setting-row label small{display:block;font-size:9px;font-weight:400;color:#ad9cb8;margin-top:3px}.setting-row input[type=range]{width:100%;accent-color:#b398cf}.setting-row input[type=number],input[type=number]{border:1px solid var(--line);border-radius:7px;background:#fff;padding:6px;width:65px}.handling-note{font-size:10px;color:#ad9ab5;line-height:1.9;margin:10px 0}.toggle-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:10px}.toggle-grid .checkline{font-size:11px}.binding-list{display:grid;gap:0}.binding-row{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #f0eaf5;min-height:41px;gap:6px}.binding-row>span{font-size:11px;color:#8c7b99}.binding-keys{display:flex;gap:4px;align-items:center}.binding-key{font-size:10px;padding:4px 7px;border-radius:6px;min-width:25px}.binding-add{font-size:14px;border:1px dashed #d8c6e5;border-radius:6px;padding:1px 7px;color:#ad96c0}.settings-bottom{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px}.settings-bottom textarea{width:100%;height:100px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:10px;font:11px/1.5 monospace;margin:10px 0;background:#fcfaff}.storage-note{font-size:10px;color:#b08a9f;margin-top:8px}.capture-overlay,.overlay{position:fixed;inset:0;background:#51415955;backdrop-filter:blur(7px);z-index:10;display:grid;place-items:center}.modal{width:420px;background:#fffcff;border:1px solid #e4d5ef;border-radius:24px;padding:30px;box-shadow:0 20px 80px #54416425;text-align:center}.modal h2{font-size:24px;margin:8px 0 12px}.modal p{font-size:12px;color:#9e8eaa;line-height:1.9;margin:10px 0 20px}.modal .stack{gap:9px}.capture-icon{font-size:35px;color:#c1a3d5;margin:15px}.capture-overlay .conflict{color:#bc7d96}.stats-full{display:grid;grid-template-columns:1fr 1fr;gap:20px}.big-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.big-stats .stat{padding:13px}.big-stats .stat strong{font-size:35px}.full-table{width:100%;border-collapse:collapse;font-size:12px}.full-table th,.full-table td{text-align:right;padding:10px 8px;border-bottom:1px solid #eee7f4}.full-table th{font-weight:500;font-size:10px;color:#aa9ab4}.full-table td:first-child,.full-table th:first-child{text-align:left}.sprint-setup{max-width:850px;margin:25px auto;display:grid;grid-template-columns:300px 1fr;gap:40px;align-items:center}.sprint-setup .mascot-wrap{width:290px}.sprint-choices{display:flex;gap:10px;margin:20px 0}.sprint-choices button{flex:1;padding:20px 10px;font-size:22px;color:#a383bd}.custom-sprint{display:flex;align-items:center;gap:10px;font-size:12px}.best-line{font-size:11px;color:#a691b5;margin:12px 0}.result-page{max-width:960px;margin:auto;padding-top:28px}.result-layout{display:grid;grid-template-columns:300px 1fr;gap:35px;align-items:center}.result-layout .mascot-wrap{width:290px}.result-time{font-size:62px;font-weight:700;letter-spacing:-.05em;color:#b18ac4;margin:10px 0;font-variant-numeric:tabular-nums}.result-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}.result-summary strong{font-size:24px}.result-best{color:#76b098;font-size:12px}.result-layout .piece-bars{margin:20px 0}.result-layout .piece-bar{font-size:11px}.result-layout .bar-track{height:7px}#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);padding:11px 20px;border:1px solid #dfcee9;background:#fffcff;border-radius:30px;box-shadow:var(--shadow);z-index:30;font-size:12px;color:#9d7cb0;opacity:0;pointer-events:none;transition:.2s}#toast.visible{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(min-height:850px){:root{--cell:28px}.play-page{padding-top:28px}.play-grid{gap:30px;grid-template-columns:minmax(240px,1fr) 472px minmax(250px,1fr);height:calc(100vh - 195px)}.coach .mascot-wrap{width:250px;max-height:330px}.coach .milfy{max-height:330px}.coach .speech{min-height:145px;font-size:13px}.practice-options{padding:18px}.right-stack{gap:18px}.stats-panel,.result-panel{padding:22px}.result-panel{min-height:210px}.lesson-grid{grid-template-columns:250px 300px 1fr}.menu{max-width:1150px;gap:90px}.menu-art .mascot-wrap{max-width:420px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+[hidden]{display:none!important}
+body[data-screen=play]{height:100vh;overflow:hidden}
+.right-stack .stats-panel{padding:12px}.right-stack .panel-label{margin-bottom:9px}.right-stack .stats-main strong{font-size:25px}.right-stack .stats-strip{margin-top:8px;padding-top:7px}.right-stack .piece-bars{gap:3px}.right-stack .piece-bar{line-height:1.05}.right-stack .result-panel{padding:13px;min-height:150px}.right-stack .result-head{margin-bottom:8px}.right-stack .route-label{margin-top:6px}.right-stack .sequence{min-height:27px}.right-stack .play-buttons button{padding:8px 5px}
+</style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <noscript>遊ぶにはJavaScriptを有効にしてください。</noscript>
+  <script>/* Moe Tet: Finesse Edition — DOM-free, dependency-free engine.
+ * Classic script: globalThis.MoeTet; Node: require('./src/engine.js').
+ *
+ * Coordinates are integer cells, x right, y UP. Board rows are bottom first.
+ * State {type,x,y,rot}: x/y are the SRS MATRIX origin, rot is 0/1/2/3
+ * (0/R/2/L). Target {rot,x}: x is the OCCUPIED bounding box's left column.
+ * Targets and locks are compared by absolute cell sets, never rotation names.
+ */
+(function (root, factory) {
+  'use strict';
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.MoeTet = api;
+})(globalThis, function () {
+  'use strict';
+
+  const WIDTH = 10, HEIGHT = 40, VISIBLE_HEIGHT = 20;
+  const PIECE_TYPES = Object.freeze(['I', 'O', 'T', 'S', 'Z', 'J', 'L']);
+  const ROTATIONS = Object.freeze(['0', 'R', '2', 'L']);
+  function deepFreeze(value) {
+    if (value && typeof value === 'object') {
+      Object.values(value).forEach(deepFreeze);
+      Object.freeze(value);
+    }
+    return value;
+  }
+  const COLORS = deepFreeze({ I: '#00F0F0', O: '#F0F000', T: '#A000F0',
+    S: '#00F000', Z: '#F00000', J: '#0000F0', L: '#F0A000' });
+  function pieceType(type) {
+    if (!PIECE_TYPES.includes(type)) throw new RangeError('Unknown piece: ' + type);
+    return type;
+  }
+  function rotation(rot = 0) {
+    if (typeof rot === 'string') {
+      const index = ROTATIONS.indexOf(rot);
+      if (index < 0) throw new RangeError('Unknown rotation: ' + rot);
+      return index;
+    }
+    if (!Number.isInteger(rot)) throw new RangeError('Rotation must be an integer');
+    return ((rot % 4) + 4) % 4;
+  }
+
+  // Spawn matrices: JLSTZ origin (3,19), I origin (3,18), O origin (3,19).
+  // I: (3,20),(4,20),(5,20),(6,20). O: (4,20),(5,20),(4,21),(5,21).
+  // T: (3,20),(4,20),(5,20),(4,21); J has (3,21), L has (5,21).
+  // S: (3,20),(4,20),(4,21),(5,21); Z is its horizontal mirror.
+  // Thus rows 21–22 (1-indexed), left-rounded 3-wide spawns, flat side down.
+  const BASE = {
+    I: [[0, 2], [1, 2], [2, 2], [3, 2]],
+    O: [[1, 1], [2, 1], [1, 2], [2, 2]],
+    T: [[0, 1], [1, 1], [2, 1], [1, 2]],
+    S: [[0, 1], [1, 1], [1, 2], [2, 2]],
+    Z: [[1, 1], [2, 1], [0, 2], [1, 2]],
+    J: [[0, 1], [1, 1], [2, 1], [0, 2]],
+    L: [[0, 1], [1, 1], [2, 1], [2, 2]]
+  };
+  const SHAPES = {};
+  for (const type of PIECE_TYPES) {
+    const pivot = type === 'I' ? 1.5 : 1;
+    SHAPES[type] = [BASE[type]];
+    for (let r = 1; r < 4; r++) {
+      SHAPES[type].push(type === 'O' ? BASE.O.map(c => c.slice()) :
+        SHAPES[type][r - 1].map(([x, y]) => [pivot + (y - pivot), pivot - (x - pivot)]));
+    }
+  }
+  deepFreeze(SHAPES);
+
+  // Guideline SRS, NOT Arika/TETR.IO's symmetric I quarter-turn variant.
+  // Independent published implementation for cross-checking the standard data:
+  // https://github.com/26F-Studio/Techmino/blob/main/parts/RSlist.lua (local SRS)
+  const KICKS_JLSTZ = deepFreeze({
+    '0>R': [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
+    'R>0': [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
+    'R>2': [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
+    '2>R': [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
+    '2>L': [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
+    'L>2': [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]],
+    'L>0': [[0, 0], [-1, 0], [-1, -1], [0, 2], [-1, 2]],
+    '0>L': [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]]
+  });
+  const KICKS_I = deepFreeze({
+    '0>R': [[0, 0], [-2, 0], [1, 0], [-2, -1], [1, 2]],
+    'R>0': [[0, 0], [2, 0], [-1, 0], [2, 1], [-1, -2]],
+    'R>2': [[0, 0], [-1, 0], [2, 0], [-1, 2], [2, -1]],
+    '2>R': [[0, 0], [1, 0], [-2, 0], [1, -2], [-2, 1]],
+    '2>L': [[0, 0], [2, 0], [-1, 0], [2, 1], [-1, -2]],
+    'L>2': [[0, 0], [-2, 0], [1, 0], [-2, -1], [1, 2]],
+    'L>0': [[0, 0], [1, 0], [-2, 0], [1, -2], [-2, 1]],
+    '0>L': [[0, 0], [-1, 0], [2, 0], [-1, 2], [2, -1]]
+  });
+  // TETR.IO SRS+ 180 extension only; O remains a placement-wise no-op.
+  // y-up basic-rotation offsets, including test zero, in priority order.
+  // I uses ONLY the first two tests (not the six JLSTZ tests).
+  // Cross-check: getPatternRotate180 / SRSPlus in
+  // https://gist.github.com/torchlight/1832786cf053daa51bf188110b764090
+  // Official mechanics entry: https://github.com/tetrio/faq/wiki/Mechanics
+  const KICKS_180 = deepFreeze({
+    '0>2': [[0, 0], [0, 1], [1, 1], [-1, 1], [1, 0], [-1, 0]],
+    'R>L': [[0, 0], [1, 0], [1, 2], [1, 1], [0, 2], [0, 1]],
+    '2>0': [[0, 0], [0, -1], [-1, -1], [1, -1], [-1, 0], [1, 0]],
+    'L>R': [[0, 0], [-1, 0], [-1, 2], [-1, 1], [0, 2], [0, 1]]
+  });
+  const KICKS_I_180 = deepFreeze(Object.fromEntries(
+    Object.entries(KICKS_180).map(([key, value]) => [key, value.slice(0, 2)])));
+  const NO_KICK = deepFreeze([[0, 0]]);
+  function kickTests(type, from, to) {
+    pieceType(type);
+    from = rotation(from); to = rotation(to);
+    if (type === 'O' || from === to) return NO_KICK;
+    const key = ROTATIONS[from] + '>' + ROTATIONS[to];
+    return (Math.abs(from - to) === 2 ?
+      (type === 'I' ? KICKS_I_180 : KICKS_180) :
+      (type === 'I' ? KICKS_I : KICKS_JLSTZ))[key];
+  }
+  function cells(state) {
+    return SHAPES[pieceType(state.type)][rotation(state.rot)].map(
+      ([x, y]) => [state.x + x, state.y + y]);
+  }
+  function cellsKey(points) {
+    return points.map(([x, y]) => [x, y]).sort((a, b) => a[1] - b[1] || a[0] - b[0])
+      .map(c => c.join(',')).join(';');
+  }
+  function sameCells(a, b) { return cellsKey(a) === cellsKey(b); }
+  function bounds(state) {
+    const points = cells(state);
+    const xs = points.map(c => c[0]), ys = points.map(c => c[1]);
+    return { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
+  }
+
+  class Board {
+    constructor(width = WIDTH, height = HEIGHT, rows) {
+      if (typeof width === 'object') ({ width = WIDTH, height = HEIGHT, rows } = width);
+      if (!Number.isInteger(width) || !Number.isInteger(height) || width < 4 || height < 4) {
+        throw new RangeError('Invalid board dimensions');
+      }
+      this.width = width; this.height = height;
+      if (rows && (rows.length !== height || rows.some(row => row.length !== width))) {
+        throw new RangeError('Rows must match board dimensions (bottom first)');
+      }
+      this.rows = rows ? rows.map(row => Array.from(row)) :
+        Array.from({ length: height }, () => Array(width).fill(null));
+    }
+    inside(x, y) { return Number.isInteger(x) && Number.isInteger(y) && x >= 0 && x < this.width && y >= 0 && y < this.height; }
+    get(x, y) { return this.inside(x, y) ? this.rows[y][x] : undefined; }
+    set(x, y, value = '#') {
+      if (!this.inside(x, y)) throw new RangeError('Cell outside board');
+      this.rows[y][x] = value; return this;
+    }
+    fits(state) { return cells(state).every(([x, y]) => this.inside(x, y) && !this.rows[y][x]); }
+    clone() { return new Board(this.width, this.height, this.rows); }
+    clear() { this.rows.forEach(row => row.fill(null)); return this; }
+    isEmpty() { return this.rows.every(row => row.every(c => !c)); }
+    lock(state) {
+      if (!this.fits(state)) throw new RangeError('Cannot lock an overlapping/outside piece');
+      const points = cells(state);
+      points.forEach(([x, y]) => this.set(x, y, state.type));
+      return points;
+    }
+    clearLines() {
+      const kept = this.rows.filter(row => !row.every(Boolean));
+      const count = this.height - kept.length;
+      while (kept.length < this.height) kept.push(Array(this.width).fill(null));
+      this.rows = kept; return count;
+    }
+  }
+  function spawnPiece(type, options = {}) {
+    pieceType(type);
+    const board = options.board || new Board();
+    let state = { type, x: Math.floor(board.width / 2) - 2, y: type === 'I' ? 18 : 19, rot: 0 };
+    if (options.spawnDrop && board.fits(state)) state = movePiece(board, state, 0, -1) || state;
+    return state;
+  }
+  function movePiece(board, state, dx, dy = 0) {
+    const next = { ...state, x: state.x + dx, y: state.y + dy };
+    return board.fits(next) ? next : null;
+  }
+  function turnAmount(turn) {
+    if (turn === 'CW') return 1;
+    if (turn === 'CCW') return -1;
+    if (turn === '180') return 2;
+    if ([1, -1, 2].includes(turn)) return turn;
+    throw new RangeError('Turn must be CW, CCW, 180, +1, -1 or 2');
+  }
+  function rotatePiece(board, state, turn, options = {}) {
+    turn = turnAmount(turn);
+    if (turn === 2 && options.allow180 === false) return null;
+    const rot = rotation(rotation(state.rot) + turn);
+    for (const [dx, dy] of kickTests(state.type, state.rot, rot)) {
+      const next = { ...state, x: state.x + dx, y: state.y + dy, rot };
+      if (board.fits(next)) return next;
+    }
+    return null;
+  }
+  function slidePiece(board, state, direction) {
+    if (direction !== -1 && direction !== 1) throw new RangeError('Direction must be -1 or 1');
+    let next;
+    while ((next = movePiece(board, state, direction))) state = next;
+    return state;
+  }
+  function hardDrop(board, state) {
+    if (!board.fits(state)) return null;
+    let next;
+    while ((next = movePiece(board, state, 0, -1))) state = next;
+    return state;
+  }
+
+  // Mulberry32 with a stable FNV-1a string seed; no global random state.
+  function createRNG(seed = 0) {
+    if (typeof seed === 'string') {
+      let hash = 2166136261;
+      for (let i = 0; i < seed.length; i++) hash = Math.imul(hash ^ seed.charCodeAt(i), 16777619);
+      seed = hash;
+    }
+    if (!Number.isFinite(seed)) throw new RangeError('Invalid seed');
+    let state = seed >>> 0;
+    return function () {
+      state = (state + 0x6D2B79F5) >>> 0;
+      let n = Math.imul(state ^ (state >>> 15), 1 | state);
+      n ^= n + Math.imul(n ^ (n >>> 7), 61 | n);
+      return ((n ^ (n >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function randomUnit(rng) {
+    const n = rng();
+    if (!(n >= 0 && n < 1)) throw new RangeError('RNG must return [0,1)');
+    return n;
+  }
+  function normalizePieces(pieces = PIECE_TYPES) {
+    const selected = Array.from(new Set(pieces));
+    if (!selected.length) throw new RangeError('Select at least one piece');
+    selected.forEach(pieceType); return selected;
+  }
+  class Bag {
+    constructor(options = {}) {
+      if (typeof options === 'function') options = { rng: options };
+      this.rng = options.rng || (options.seed === undefined ? Math.random : createRNG(options.seed));
+      // Filtered practice shuffles one of EACH selected piece per bag.
+      this.pieces = normalizePieces(options.pieces);
+      this.queue = [];
+    }
+    _fill(count) {
+      while (this.queue.length < count) {
+        const bag = this.pieces.slice();
+        for (let i = bag.length - 1; i > 0; i--) {
+          const j = Math.floor(randomUnit(this.rng) * (i + 1));
+          [bag[i], bag[j]] = [bag[j], bag[i]];
+        }
+        this.queue.push(...bag);
+      }
+    }
+    next() { this._fill(1); return this.queue.shift(); }
+    peek(count = 5) {
+      if (!Number.isInteger(count) || count < 0) throw new RangeError('Invalid preview size');
+      this._fill(count); return this.queue.slice(0, count);
+    }
+  }
+
+  const ACTION_LABELS = deepFreeze({ left: '←', right: '→', dasLeft: 'DAS←',
+    dasRight: 'DAS→', cw: 'CW', ccw: 'CCW', rotate180: '180', softDrop: '↓' });
+  function applyAction(board, state, action, options = {}) {
+    switch (action) {
+      case 'left': return movePiece(board, state, -1);
+      case 'right': return movePiece(board, state, 1);
+      case 'dasLeft': return slidePiece(board, state, -1);
+      case 'dasRight': return slidePiece(board, state, 1);
+      case 'cw': return rotatePiece(board, state, 1, options);
+      case 'ccw': return rotatePiece(board, state, -1, options);
+      case 'rotate180': return rotatePiece(board, state, 2, options);
+      default: throw new RangeError('Not a solver action: ' + action);
+    }
+  }
+  function placementFor(type, target, options = {}) {
+    const board = options.board || new Board();
+    const rot = rotation(target.rot);
+    if (!Number.isInteger(target.x)) return null;
+    const localMin = Math.min(...SHAPES[pieceType(type)][rot].map(c => c[0]));
+    const state = { ...spawnPiece(type, { board, spawnDrop: options.spawnDrop }), rot, x: target.x - localMin };
+    const lock = hardDrop(board, state);
+    return lock && { type, rot, x: target.x, state: lock, cells: cells(lock), key: cellsKey(cells(lock)) };
+  }
+  const solverCache = new Map();
+  function cloneSolution(solution) {
+    return solution && { ...solution, cells: solution.cells.map(c => c.slice()),
+      state: { ...solution.state }, actions: solution.actions.slice(), sequence: solution.sequence.slice() };
+  }
+  /* Unit-cost BFS, including both tap and full DAS edges at EVERY state.
+   * Collision and all kicks share the gameplay primitive, but tests implement
+   * a separate matrix simulator and iterative-deepening oracle independently.
+   * y is part of the visited key: stack/floor kicks can change height. Soft-drop
+   * edges/tucks requiring deliberate descent are intentionally out of scope.
+   * Rotation edges first make ties deterministic and prefer rotation first.
+   */
+  function solveAll(type, options = {}) {
+    pieceType(type);
+    const board = options.board || new Board();
+    const start = options.start || spawnPiece(type, { board, spawnDrop: options.spawnDrop });
+    if (start.type !== type) throw new RangeError('Solver start piece differs');
+    const cacheKey = JSON.stringify([type, options.allow180 !== false, start, board.width, board.height, board.rows]);
+    if (solverCache.has(cacheKey)) return solverCache.get(cacheKey);
+    const placements = new Map();
+    if (board.fits(start)) {
+      const actions = ['cw', 'ccw', ...(options.allow180 === false ? [] : ['rotate180']),
+        'left', 'right', 'dasLeft', 'dasRight'];
+      const stateKey = s => [s.x, s.y, type === 'O' ? 0 : s.rot].join(',');
+      const nodes = [{ state: { ...start, rot: rotation(start.rot) }, actions: [] }];
+      const seen = new Set([stateKey(nodes[0].state)]);
+      for (let head = 0; head < nodes.length; head++) {
+        const node = nodes[head], lock = hardDrop(board, node.state);
+        const points = cells(lock), key = cellsKey(points);
+        if (!placements.has(key)) placements.set(key, { type, rot: lock.rot,
+          x: bounds(lock).minX, state: lock, cells: points, key,
+          count: node.actions.length, actions: node.actions,
+          sequence: node.actions.map(a => ACTION_LABELS[a]) });
+        for (const action of actions) {
+          const next = applyAction(board, node.state, action, options);
+          if (!next || seen.has(stateKey(next))) continue;
+          seen.add(stateKey(next)); nodes.push({ state: next, actions: node.actions.concat(action) });
+        }
+      }
+    }
+    if (solverCache.size >= 32) solverCache.delete(solverCache.keys().next().value);
+    solverCache.set(cacheKey, placements);
+    return placements;
+  }
+  function allPlacements(type, options = {}) {
+    return Array.from(solveAll(type, options).values(), cloneSolution)
+      .sort((a, b) => a.rot - b.rot || a.x - b.x);
+  }
+  function finesseFor(type, target, options = {}) {
+    const points = Array.isArray(target) ? target : target.cells;
+    const placement = points ? { key: cellsKey(points) } : placementFor(type, target, options);
+    return placement ? cloneSolution(solveAll(type, options).get(placement.key) || null) : null;
+  }
+
+  const DEFAULT_SETTINGS = deepFreeze({ das: 110, arr: 0, sdf: 40, dcd: 0,
+    are: 80, gravity: 0, irs: true, ihs: false, allow180: true, spawnDrop: false });
+  const SETTING_LIMITS = deepFreeze({ das: [0, 500], arr: [0, 200], sdf: [1, 41],
+    dcd: [0, 200], are: [0, 500], gravity: [0, 20] });
+  function normalizeSettings(patch = {}, base = DEFAULT_SETTINGS) {
+    const result = { ...base };
+    for (const [key, [min, max]] of Object.entries(SETTING_LIMITS)) {
+      if (!(key in patch)) continue;
+      const value = patch[key];
+      if (key === 'sdf' && (value === Infinity || value === 'instant')) result.sdf = 41;
+      else {
+        if (typeof value !== 'number' || !Number.isFinite(value)) throw new RangeError('Invalid ' + key);
+        result[key] = Math.max(min, Math.min(max, value));
+      }
+    }
+    for (const key of ['irs', 'ihs', 'allow180', 'spawnDrop']) {
+      if (key in patch) {
+        if (typeof patch[key] !== 'boolean') throw new TypeError(key + ' must be boolean');
+        result[key] = patch[key];
+      }
+    }
+    return result;
+  }
+  const INPUT_ACTIONS = Object.freeze(['left', 'right', 'cw', 'ccw', 'rotate180',
+    'softDrop', 'hardDrop', 'hold', 'retry', 'skip', 'pause', 'settings', 'hint']);
+  const ROTATE_ACTIONS = { cw: 1, ccw: -1, rotate180: 2 };
+  function defaultClock() { return typeof performance === 'object' ? performance.now() : Date.now(); }
+
+  /* Discrete-event input clock contract:
+   * - Monotone ms timestamps, injectable clock; update processes ALL due events.
+   * - Equal-time timers precede external keys; spawn, horizontal, fall is the
+   *   timer tie order. No movement depends on how often update is sampled.
+   * - Last physical direction wins. Each held key charges even while inactive
+   *   or in ARE. Resuming an older key uses its charge, without a backlog burst.
+   * - DAS's first repeat is at keydown+DAS, then ARR apart. ARR=0 slides once
+   *   immediately at charge; a rotation/fall can enable a further held slide.
+   * - DCD gates AUTO horizontal motion until t+DCD after spawn, successful
+   *   rotation, or hard drop; it never delays a fresh manual tap or DAS charge.
+   *   Delayed repeats resume at the gate, without replaying gated repeats.
+   * - At spawn, uncharged held direction taps once; charged direction repeats
+   *   once (or slides) at the DCD gate. Count it only if it moves that piece.
+   * - Gravity is G cells per 1/60 second. Finite soft drop replaces gravity
+   *   with SDF times that rate; gravity OFF uses a 1 cell/sec training baseline.
+   *   Soft drop taps once immediately; 41/Infinity/'instant' drops without lock.
+   * - IHS precedes IRS, spawnDrop, buffered horizontal and falling input. IRS
+   *   counts one attempted rotation even if obstructed; O rotations also count.
+   *   IHS latches hold presses during ARE, even if released before spawn; IRS
+   *   deliberately requires a rotation key still HELD at the spawn instant.
+   * - Public key methods accept {code,repeat}. Distinct codes for one action
+   *   work independently; duplicate held codes and OS repeats are ignored.
+   */
+  class InputHandler {
+    constructor(options = {}) {
+      this.clock = options.clock || defaultClock;
+      this.time = options.time === undefined ? this.clock() : options.time;
+      if (!Number.isFinite(this.time)) throw new RangeError('Invalid initial time');
+      this.settings = normalizeSettings(options.settings);
+      this.board = options.board || new Board();
+      this.bag = options.bag || new Bag({ seed: options.seed, rng: options.rng, pieces: options.pieces });
+      this.pieceProvider = options.pieceProvider || (() => this.bag.next());
+      this.autoNext = options.autoNext !== false;
+      this.lockToBoard = !!options.lockToBoard;
+      this.holdEnabled = options.holdEnabled !== false;
+      this.callbacks = options;
+      this.active = null; this.pending = null; this.heldPiece = null; this.holdUsed = false;
+      this.initialHoldBuffered = false;
+      this.held = new Map(); this.order = 0; this.pieceId = 0;
+      this.inputs = []; this.inputCount = 0; this.flags = { ihs: false, softDrop: false };
+      this.cutUntil = this.time; this.fallAt = Infinity;
+      this.paused = false; this.pauseStarted = null; this.blocked = false;
+      this._advancing = false;
+    }
+    _emit(kind, data = {}) {
+      const event = { kind, t: this.time, ...data };
+      if (this.callbacks.onEvent) this.callbacks.onEvent(event, this);
+      return event;
+    }
+    _latest(predicate) {
+      let newest = null;
+      for (const key of this.held.values()) if (predicate(key) && (!newest || key.order > newest.order)) newest = key;
+      return newest;
+    }
+    _direction() { return this._latest(k => k.action === 'left' || k.action === 'right'); }
+    _soft() { return this._latest(k => k.action === 'softDrop'); }
+    _rotation() { return this._latest(k => k.action in ROTATE_ACTIONS && (k.action !== 'rotate180' || this.settings.allow180)); }
+    _record(action, key, details = {}) {
+      if (key && key.countedFor === this.pieceId) return this.inputs[key.inputIndex];
+      const entry = { action, label: ACTION_LABELS[action], t: this.time,
+        initial: !!details.initial, irs: !!details.irs, slide: false };
+      this.inputs.push(entry); this.inputCount++;
+      if (key) { key.countedFor = this.pieceId; key.inputIndex = this.inputs.length - 1; }
+      if (action === 'softDrop') this.flags.softDrop = true;
+      if (this.callbacks.onInput) this.callbacks.onInput(entry, this);
+      return entry;
+    }
+    _interval() {
+      const gravityRate = this.settings.gravity * 60;
+      if (this._soft()) {
+        if (this.settings.sdf === 41) return 0;
+        return 1000 / ((gravityRate || 1) * this.settings.sdf);
+      }
+      return gravityRate ? 1000 / gravityRate : Infinity;
+    }
+    _resetFall() {
+      const interval = this._interval();
+      // Key releases and live settings are allowed in pause. Their scheduling
+      // uses the frozen play clock; no instant drop may execute under overlay.
+      if (this.paused) {
+        this.fallAt = this.active ? this.pauseStarted + interval : Infinity;
+        return;
+      }
+      this.fallAt = this.active && interval !== 0 ? this.time + interval : Infinity;
+      if (this.active && interval === 0) this._fall(true);
+    }
+    _wakeFall() {
+      if (this._interval() === 0) this._fall(true);
+      else if (this.fallAt === Infinity && this.active) this.fallAt = this.time + this._interval();
+    }
+    _wakeHorizontal() {
+      const key = this._direction();
+      if (key && key.nextAt === Infinity && this.time >= key.since + this.settings.das) key.nextAt = this.time;
+    }
+    _cut() {
+      this.cutUntil = Math.max(this.cutUntil, this.time + this.settings.dcd);
+      this._wakeHorizontal();
+    }
+    _horizontal(key, automatic, initial = false) {
+      const delta = key.action === 'left' ? -1 : 1;
+      const next = automatic && this.settings.arr === 0 ? slidePiece(this.board, this.active, delta) :
+        movePiece(this.board, this.active, delta);
+      const moved = next && (next.x !== this.active.x);
+      if (moved || !automatic && !initial) {
+        const entry = this._record(key.action, key, { initial });
+        if (automatic) { entry.slide = true; entry.label = delta < 0 ? 'DAS←' : 'DAS→'; }
+      }
+      if (moved) { this.active = next; this._emit('move', { action: key.action, automatic, state: { ...next } }); this._wakeFall(); }
+      if (automatic) key.nextAt = this.settings.arr === 0 ? Infinity : this.time + this.settings.arr;
+    }
+    _fall(instant = false) {
+      if (!this.active) return;
+      const key = this._soft();
+      const next = instant ? hardDrop(this.board, this.active) : movePiece(this.board, this.active, 0, -1);
+      const moved = next && next.y !== this.active.y;
+      if (moved) {
+        if (key) this._record('softDrop', key, { initial: true });
+        this.active = next;
+        this._emit('fall', { soft: !!key, state: { ...next } });
+        this._wakeHorizontal();
+      }
+      this.fallAt = !instant && moved ? this.time + this._interval() : Infinity;
+    }
+    _spawn(type, { initialHold = true, holdUsed = false, ihs = false } = {}) {
+      const bufferedHold = this.initialHoldBuffered;
+      this.initialHoldBuffered = false;
+      this.pending = null; this.pieceId++;
+      this.active = spawnPiece(type, { board: this.board });
+      this.holdUsed = holdUsed; this.inputs = []; this.inputCount = 0;
+      this.flags = { ihs, softDrop: false }; this.blocked = false;
+      if (initialHold && this.settings.ihs && (bufferedHold || this._latest(k => k.action === 'hold')) && this.holdEnabled) {
+        this._hold(true); return;
+      }
+      const rotateKey = this.settings.irs && this._rotation();
+      if (rotateKey) {
+        this._record(rotateKey.action, rotateKey, { initial: true, irs: true });
+        this.active = rotatePiece(this.board, this.active, ROTATE_ACTIONS[rotateKey.action], this.settings) || this.active;
+      }
+      if (!this.board.fits(this.active)) {
+        this.active = null; this.blocked = true; this.fallAt = Infinity;
+        this._emit('blockout'); return;
+      }
+      if (this.settings.spawnDrop) this.active = movePiece(this.board, this.active, 0, -1) || this.active;
+      this._cut();
+      this._emit('spawn', { type, state: { ...this.active }, ihs });
+      if (this.callbacks.onSpawn) this.callbacks.onSpawn(this.active, this);
+      const direction = this._direction();
+      if (direction) {
+        direction.nextAt = Math.max(this.time, direction.since + this.settings.das);
+        if (direction.since + this.settings.das > this.time) this._horizontal(direction, false, true);
+      }
+      this._resetFall();
+    }
+    _hold(initial) {
+      if (!this.active || this.holdUsed || !this.holdEnabled) return false;
+      const from = this.active.type, to = this.heldPiece || pieceType(this.pieceProvider());
+      this.heldPiece = from;
+      const event = this._emit('hold', { from, to, initial });
+      if (this.callbacks.onHold) this.callbacks.onHold(event, this);
+      this._spawn(to, { initialHold: false, holdUsed: true, ihs: initial });
+      return true;
+    }
+    _lock() {
+      const state = hardDrop(this.board, this.active);
+      if (!state) return;
+      const result = { t: this.time, type: state.type, state, cells: cells(state),
+        used: this.inputCount, inputs: this.inputs.map(e => ({ ...e })), flags: { ...this.flags } };
+      if (this.lockToBoard) this.board.lock(state);
+      this.active = null; this.fallAt = Infinity; this._cut();
+      this._emit('lock', result);
+      if (this.callbacks.onLock) this.callbacks.onLock(result, this);
+      if (this.autoNext && !this.pending && !this.active) this._schedule(pieceType(this.pieceProvider()), this.settings.are);
+    }
+    _schedule(type, delay) {
+      if (!Number.isFinite(delay) || delay < 0) throw new RangeError('Invalid spawn delay');
+      this.active = null; this.fallAt = Infinity;
+      const since = this.paused ? this.pauseStarted : this.time;
+      this.initialHoldBuffered = false;
+      this.pending = { type: pieceType(type), since, at: since + delay };
+      this._emit('are', { type, at: this.pending.at });
+    }
+    scheduleSpawn(type, t = this.clock(), delay = this.settings.are) {
+      this.update(t); this._schedule(type, delay); this.update(t); return this;
+    }
+    spawn(type, t = this.clock()) { return this.scheduleSpawn(type, t, 0); }
+    start(t = this.clock()) { return this.scheduleSpawn(pieceType(this.pieceProvider()), t); }
+    update(t = this.clock()) {
+      if (!Number.isFinite(t) || t < this.time) throw new RangeError('Time must be finite and monotone');
+      if (this._advancing) return this;
+      if (this.paused) { this.time = t; return this; }
+      this._advancing = true;
+      try {
+        for (;;) {
+          const direction = this._direction();
+          const spawnAt = this.pending ? this.pending.at : Infinity;
+          const horizontalAt = this.active && direction ? Math.max(direction.nextAt, this.cutUntil) : Infinity;
+          const fallAt = this.active ? this.fallAt : Infinity;
+          const at = Math.min(spawnAt, horizontalAt, fallAt);
+          if (at > t || at === Infinity) break;
+          this.time = at;
+          if (spawnAt === at) this._spawn(this.pending.type);
+          else if (horizontalAt === at) this._horizontal(direction, true, true);
+          else this._fall(this._interval() === 0);
+          if (this.paused) break; // A spawn/input callback may pause mid-update.
+        }
+        this.time = t;
+      } finally { this._advancing = false; }
+      return this;
+    }
+    keyDown(action, t = this.clock(), options = {}) {
+      if (!INPUT_ACTIONS.includes(action)) throw new RangeError('Unknown action: ' + action);
+      this.update(t);
+      const code = options.code || action;
+      if (options.repeat || this.held.has(code)) return false;
+      if (action === 'pause') {
+        this.held.set(code, { action, since: t, order: ++this.order, nextAt: Infinity });
+        if (this.callbacks.onCommand) this.callbacks.onCommand(action, t, this);
+        else if (this.paused) this.resume(t); else this.pause(t);
+        return true;
+      }
+      if (this.paused) return false;
+      const key = { action, since: t, order: ++this.order, nextAt: t + this.settings.das, countedFor: -1 };
+      this.held.set(code, key);
+      if (action === 'hold' && this.pending && this.settings.ihs) this.initialHoldBuffered = true;
+      if (['retry', 'skip', 'settings', 'hint'].includes(action)) {
+        if (this.callbacks.onCommand) this.callbacks.onCommand(action, t, this);
+      } else if (this.active) {
+        if (action === 'rotate180' && !this.settings.allow180) return false;
+        if (this.callbacks.onAction) this.callbacks.onAction(action, t, this);
+        if (action === 'left' || action === 'right') this._horizontal(key, false);
+        else if (action in ROTATE_ACTIONS) {
+          this._record(action, key);
+          const next = rotatePiece(this.board, this.active, ROTATE_ACTIONS[action], this.settings);
+          if (next) { this.active = next; this._cut(); this._wakeFall(); this._emit('rotate', { action, state: { ...next } }); }
+        } else if (action === 'softDrop') {
+          this._record(action, key);
+          if (this.settings.sdf === 41) this._fall(true); else { this._fall(); this._resetFall(); }
+        } else if (action === 'hardDrop') this._lock();
+        else if (action === 'hold') this._hold(false);
+      }
+      this.update(t); return true;
+    }
+    keyUp(action, t = this.clock(), options = {}) {
+      this.update(t);
+      const before = this._direction(), code = options.code || action;
+      const key = this.held.get(code);
+      if (!key || key.action !== action) return false;
+      this.held.delete(code);
+      const after = this._direction();
+      const effectiveTime = this.paused ? this.pauseStarted : t;
+      if (after && before !== after) after.nextAt = Math.max(effectiveTime, after.since + this.settings.das);
+      if (action === 'softDrop') this._resetFall();
+      this.update(t); return true;
+    }
+    setSettings(patch, t = this.clock()) {
+      this.update(t); this.settings = normalizeSettings(patch, this.settings);
+      // Live edits preserve DAS age, restart ARR/fall phases at edit time,
+      // and recalculate an in-flight ARE deadline from its original start.
+      const effectiveTime = this.paused ? this.pauseStarted : t;
+      for (const key of this.held.values()) key.nextAt = Math.max(effectiveTime, key.since + this.settings.das);
+      if (this.pending) this.pending.at = Math.max(effectiveTime, this.pending.since + this.settings.are);
+      this._resetFall(); this.update(t); return this;
+    }
+    pause(t = this.clock()) {
+      this.update(t);
+      if (!this.paused) { this.paused = true; this.pauseStarted = t; this._emit('pause'); }
+      return this;
+    }
+    resume(t = this.clock()) {
+      this.update(t);
+      if (!this.paused) return this;
+      const delta = t - this.pauseStarted;
+      for (const key of this.held.values()) { key.since += delta; key.nextAt += delta; }
+      if (this.pending) { this.pending.since += delta; this.pending.at += delta; }
+      this.cutUntil += delta; this.fallAt += delta;
+      this.paused = false; this.pauseStarted = null;
+      this._emit('resume'); this.update(t); return this;
+    }
+  }
+
+  function emptyCounters() {
+    return { attempts: 0, placements: 0, perfect: 0, faults: 0, misses: 0,
+      usedInputs: 0, optimalInputs: 0, softDropAttempts: 0 };
+  }
+  class Stats {
+    constructor(saved) {
+      Object.assign(this, emptyCounters(), { streak: 0, bestStreak: 0, skips: 0, retries: 0 });
+      this.byPiece = Object.fromEntries(PIECE_TYPES.map(type => [type, emptyCounters()]));
+      this.byTarget = Object.create(null); this.bestTimes = Object.create(null);
+      if (saved) this._load(saved);
+    }
+    _load(saved) {
+      const copyNumbers = (to, from) => {
+        for (const key of Object.keys(to)) if (typeof to[key] === 'number' &&
+          Number.isFinite(from[key]) && from[key] >= 0) to[key] = from[key];
+      };
+      copyNumbers(this, saved);
+      for (const type of PIECE_TYPES) copyNumbers(this.byPiece[type], saved.byPiece?.[type] || {});
+      for (const [key, value] of Object.entries(saved.byTarget || {})) {
+        this.byTarget[key] = emptyCounters(); copyNumbers(this.byTarget[key], value || {});
+      }
+      for (const [length, time] of Object.entries(saved.bestTimes || {})) {
+        if (/^[1-9]\d*$/.test(length) && Number.isFinite(time) && time >= 0) this.bestTimes[length] = time;
+      }
+    }
+    record(result) {
+      pieceType(result.type);
+      if (!['perfect', 'fault', 'miss'].includes(result.status) ||
+        !Number.isFinite(result.used) || result.used < 0 || !Number.isFinite(result.optimal) || result.optimal < 0) {
+        throw new RangeError('Invalid result');
+      }
+      const key = result.type + ':' + result.targetKey;
+      const target = this.byTarget[key] || (this.byTarget[key] = emptyCounters());
+      for (const counter of [this, this.byPiece[result.type], target]) {
+        counter.attempts++; counter[result.status === 'perfect' ? 'perfect' : result.status === 'fault' ? 'faults' : 'misses']++;
+        if (result.status !== 'miss') counter.placements++;
+        counter.usedInputs += result.used; counter.optimalInputs += result.optimal;
+        if (result.flags?.softDrop) counter.softDropAttempts++;
+      }
+      this.streak = result.status === 'perfect' ? this.streak + 1 : 0;
+      this.bestStreak = Math.max(this.bestStreak, this.streak);
+      return this;
+    }
+    snapshot() {
+      return { ...this.toJSON(), accuracy: this.attempts ? 100 * this.perfect / this.attempts : 0,
+        averageInputs: this.attempts ? this.usedInputs / this.attempts : 0,
+        averageOptimal: this.attempts ? this.optimalInputs / this.attempts : 0 };
+    }
+    toJSON() {
+      const result = { version: 1 };
+      for (const key of Object.keys(emptyCounters()).concat(['streak', 'bestStreak', 'skips', 'retries'])) result[key] = this[key];
+      result.byPiece = Object.fromEntries(PIECE_TYPES.map(type => [type, { ...this.byPiece[type] }]));
+      result.byTarget = Object.fromEntries(Object.entries(this.byTarget).map(([key, value]) => [key, { ...value }]));
+      result.bestTimes = { ...this.bestTimes }; return result;
+    }
+    reset() { Object.assign(this, new Stats()); return this; }
+  }
+
+  /* DrillSession keeps an empty practice board for every attempt. No lines
+   * accumulate. It exposes round/target during ARE and nextQueue(5) for UI.
+   * Column filters constrain the occupied LEFT column (inclusive); area aliases
+   * left/center/right mean 0..2 / 3..5 / 6..9, clipped to legal placements.
+   * Piece choice uses filtered bags; targets are uniform over distinct cell
+   * sets, or optionally weighted by a smoothed per-target fault/miss rate.
+   * Accuracy = perfect / all lock attempts (misses are separate from faults).
+   * Sprint progress counts correct placements, excluding zero-fault resets.
+   * Retry/skip/hold are not lock attempts; hold is disabled for one-piece bags.
+   * Timer starts on first gameplay input, including IRS/HD/IHS; pauses excluded.
+   * Persistence is data-only via Stats.toJSON(); storage belongs to the UI.
+   */
+  class DrillSession {
+    constructor(options = {}) {
+      this.clock = options.clock || defaultClock;
+      this.pieces = normalizePieces(options.pieces);
+      this.settings = normalizeSettings(options.settings);
+      this.rng = options.rng || (options.seed === undefined ? Math.random : createRNG(options.seed));
+      this.bag = new Bag({ rng: this.rng, pieces: this.pieces });
+      this.boardTemplate = options.board ? options.board.clone() : new Board();
+      this.area = options.area || 'all';
+      if (!['all', 'left', 'center', 'right'].includes(this.area)) throw new RangeError('Unknown area');
+      this.columnRange = options.columnRange || null;
+      if (this.columnRange && (this.columnRange.length !== 2 || !this.columnRange.every(Number.isInteger) ||
+        this.columnRange[0] > this.columnRange[1])) throw new RangeError('Invalid column range');
+      this.weakSpot = !!options.weakSpot;
+      this.zeroFault = !!options.zeroFault; this.repeatOnFault = !!options.repeatOnFault;
+      this.repeatOnMiss = options.repeatOnMiss !== false;
+      this.sprintLength = options.sprintLength || 0;
+      if (!Number.isInteger(this.sprintLength) || this.sprintLength < 0) throw new RangeError('Invalid sprint length');
+      this.stats = new Stats();
+      this.totalStats = options.totalStats instanceof Stats ? options.totalStats : new Stats(options.totalStats);
+      this.completed = 0; this.startedAt = null; this.endedAt = null;
+      this.pausedAt = null; this.pausedDuration = 0;
+      this.round = null; this.lastResult = null; this.running = false; this.serial = 0;
+      this.onEvent = options.onEvent;
+      this.handler = new InputHandler({ clock: this.clock, time: options.time, settings: this.settings,
+        board: this.boardTemplate.clone(), bag: this.bag, autoNext: false,
+        holdEnabled: this.pieces.length > 1,
+        onInput: () => this._touch(this.handler.time),
+        onAction: (action, t) => this._touch(t),
+        onHold: event => {
+          this._touch(event.t); this.stats.skips++; this.totalStats.skips++;
+          this._newRound(event.to); this.handler.board = this.boardTemplate.clone();
+        },
+        onLock: result => this._onLock(result),
+        onCommand: (action, t) => {
+          if (action === 'retry') this.retry(t);
+          else if (action === 'skip') this.skip(t);
+          else if (action === 'pause') this.pausedAt === null ? this.pause(t) : this.resume(t);
+          else this._emit(action, { t });
+        },
+        onEvent: event => this._emit(event.kind, event)
+      });
+      // Fail before play if ANY selected piece has no target under the filter.
+      for (const type of this.pieces) if (!this._candidates(type).length) throw new RangeError('No targets for ' + type);
+    }
+    _emit(kind, data = {}) { if (this.onEvent) this.onEvent({ kind, ...data }, this); }
+    _touch(t) { if (this.running && this.startedAt === null) this.startedAt = t; }
+    _candidates(type) {
+      const ranges = { all: [0, 9], left: [0, 2], center: [3, 5], right: [6, 9] };
+      const [min, max] = this.columnRange || ranges[this.area];
+      return allPlacements(type, { board: this.boardTemplate, ...this.settings }).filter(p => p.x >= min && p.x <= max);
+    }
+    _newRound(type, target) {
+      const candidates = this._candidates(type);
+      let selected = target;
+      if (!selected) {
+        const weights = candidates.map(p => {
+          const history = this.totalStats.byTarget[type + ':' + p.key];
+          return this.weakSpot && history ? 1 + 4 * (history.faults + history.misses) / (history.attempts + 2) : 1;
+        });
+        let pick = randomUnit(this.rng) * weights.reduce((sum, w) => sum + w, 0);
+        selected = candidates[candidates.length - 1];
+        for (let i = 0; i < candidates.length; i++) { pick -= weights[i]; if (pick < 0) { selected = candidates[i]; break; } }
+      }
+      const optimal = finesseFor(type, selected.cells || selected, { board: this.boardTemplate, ...this.settings });
+      if (!optimal) throw new RangeError('Target is unreachable');
+      this.round = { type, target: optimal, optimal: optimal.count, serial: ++this.serial };
+      this._emit('target', { round: this.round });
+    }
+    _schedule(t) {
+      this.handler.board = this.boardTemplate.clone();
+      this.handler.scheduleSpawn(this.round.type, t, this.settings.are);
+    }
+    start(t = this.clock()) {
+      if (this.running || this.endedAt !== null) throw new Error('Session already started');
+      this.running = true; this._newRound(this.bag.next()); this._schedule(t); return this;
+    }
+    _onLock(lock) {
+      const correct = sameCells(lock.cells, this.round.target.cells);
+      const status = !correct ? 'miss' : lock.used === this.round.optimal ? 'perfect' : 'fault';
+      const advanced = correct && !(status === 'fault' && this.zeroFault);
+      const result = { ...lock, status, optimal: this.round.optimal, targetKey: this.round.target.key,
+        targetCells: this.round.target.cells.map(c => c.slice()),
+        optimalSequence: this.round.target.sequence.slice(), extra: Math.max(0, lock.used - this.round.optimal), advanced };
+      this.stats.record(result); this.totalStats.record(result); this.lastResult = result;
+      if (advanced) this.completed++;
+      this._emit('result', { result });
+      if (this.sprintLength && this.completed >= this.sprintLength) {
+        this.endedAt = lock.t; this.running = false;
+        const elapsed = this.elapsed(lock.t), previous = this.totalStats.bestTimes[this.sprintLength];
+        if (previous === undefined || elapsed < previous) this.totalStats.bestTimes[this.sprintLength] = elapsed;
+        this._emit('finish', { result: this.snapshot(lock.t) }); return;
+      }
+      const repeat = status === 'miss' && this.repeatOnMiss || status === 'fault' && (this.zeroFault || this.repeatOnFault);
+      if (repeat) this._newRound(this.round.type, this.round.target);
+      else this._newRound(this.bag.next());
+      this._schedule(lock.t);
+    }
+    retry(t = this.clock()) {
+      this.update(t);
+      if (!this.running || this.pausedAt !== null) return false;
+      this.stats.retries++; this.totalStats.retries++;
+      this._newRound(this.round.type, this.round.target); this._schedule(t); return true;
+    }
+    skip(t = this.clock()) {
+      this.update(t);
+      if (!this.running || this.pausedAt !== null) return false;
+      this.stats.skips++; this.totalStats.skips++;
+      this._newRound(this.bag.next()); this._schedule(t); return true;
+    }
+    setSettings(patch, t = this.clock()) {
+      this.update(t); this.settings = normalizeSettings(patch, this.settings);
+      // Refresh optimal count when 180/spawnDrop changes, retaining cell target.
+      if (this.round) this._newRound(this.round.type, this.round.target);
+      this.handler.setSettings(patch, t); return this;
+    }
+    pause(t = this.clock()) {
+      this.update(t);
+      if (this.running && this.pausedAt === null) { this.pausedAt = t; this.handler.pause(t); }
+      return this;
+    }
+    resume(t = this.clock()) {
+      this.update(t);
+      if (this.pausedAt !== null) {
+        if (this.startedAt !== null) this.pausedDuration += t - this.pausedAt;
+        this.pausedAt = null; this.handler.resume(t);
+      }
+      return this;
+    }
+    update(t = this.clock()) { this.handler.update(t); return this; }
+    keyDown(action, t = this.clock(), options) {
+      if (!this.running) return false;
+      return this.handler.keyDown(action, t, options);
+    }
+    keyUp(action, t = this.clock(), options) { return this.handler.keyUp(action, t, options); }
+    nextQueue(count = 5) {
+      return this.handler.pending ? [this.round.type].concat(this.bag.peek(Math.max(0, count - 1))).slice(0, count) : this.bag.peek(count);
+    }
+    elapsed(t = this.clock()) {
+      return this.startedAt === null ? 0 : Math.max(0, (this.endedAt ?? this.pausedAt ?? t) - this.startedAt - this.pausedDuration);
+    }
+    snapshot(t = this.clock()) {
+      const elapsed = this.elapsed(t);
+      return { ...this.stats.snapshot(), completed: this.completed, sprintLength: this.sprintLength,
+        running: this.running, elapsed, pps: elapsed ? this.completed * 1000 / elapsed : 0,
+        finished: this.endedAt !== null };
+    }
+  }
+
+  return Object.freeze({ WIDTH, HEIGHT, VISIBLE_HEIGHT, PIECE_TYPES, ROTATIONS, COLORS,
+    SHAPES, KICKS_JLSTZ, KICKS_I, KICKS_180, KICKS_I_180, kickTests, rotation,
+    cells, cellsKey, sameCells, bounds, Board, spawnPiece, movePiece, rotatePiece,
+    slidePiece, hardDrop, createRNG, Bag, ACTION_LABELS, applyAction, placementFor,
+    finesseFor, allPlacements, DEFAULT_SETTINGS, SETTING_LIMITS, normalizeSettings,
+    INPUT_ACTIONS, InputHandler, Stats, DrillSession });
+});
+</script>
+  <script>/* ミルフィ — original art and Japanese teaching material for Moe Tet.
+ * Classic scripts: load engine.js first, then use MoeTet.mascot.
+ * Node: require('./mascot.js'). No DOM, network, fonts, or image dependencies.
+ */
+(function (root, factory) {
+  'use strict';
+  if (typeof module === 'object' && module.exports) {
+    module.exports = factory(require('./engine.js'));
+  } else {
+    const api = factory(root.MoeTet);
+    // engine.js deliberately freezes its API. Preserve its exports in a new
+    // namespace rather than changing the engine or mutating that frozen object.
+    root.MoeTet = Object.assign({}, root.MoeTet, { mascot: api });
+  }
+})(globalThis, function (engine) {
+  'use strict';
+  if (!engine || typeof engine.allPlacements !== 'function') {
+    throw new Error('Load MoeTet engine.js before mascot.js');
+  }
+
+  function deepFreeze(value) {
+    if (value && typeof value === 'object') {
+      Object.values(value).forEach(deepFreeze);
+      Object.freeze(value);
+    }
+    return value;
+  }
+
+  const EXPRESSIONS = Object.freeze(['normal', 'happy', 'surprised', 'thinking', 'sorry']);
+  const EXPRESSION_LABELS = Object.freeze({ normal: 'にっこり', happy: '大喜び',
+    surprised: '応援', thinking: 'ヒント', sorry: 'もう一度' });
+
+  // Include this string once in the app's stylesheet or a <style> element.
+  // The happy face has its own closed smiling eyes; only open faces blink.
+  const MASCOT_CSS = `
+.milfy { display: block; max-width: 100%; height: auto; overflow: visible; }
+.milfy .milfy-eyes-closed { opacity: 0; }
+.milfy--animated .milfy-bob { animation: milfy-bob 4s ease-in-out infinite; }
+.milfy--animated .milfy-eyes-open { animation: milfy-open 5.7s steps(1, end) infinite; }
+.milfy--animated .milfy-eyes-closed { animation: milfy-blink 5.7s steps(1, end) infinite; }
+.milfy--animated .milfy-sparkle { transform-box: fill-box; transform-origin: center;
+  animation: milfy-twinkle 3.2s ease-in-out infinite; }
+.milfy--animated .milfy-sparkle:nth-child(even) { animation-delay: -1.6s; }
+@keyframes milfy-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes milfy-open { 0%, 43%, 46%, 100% { opacity: 1; } 44%, 45% { opacity: 0; } }
+@keyframes milfy-blink { 0%, 43%, 46%, 100% { opacity: 0; } 44%, 45% { opacity: 1; } }
+@keyframes milfy-twinkle { 0%, 100% { opacity: .5; transform: scale(.88); }
+  50% { opacity: 1; transform: scale(1.08); } }
+@media (prefers-reduced-motion: reduce) {
+  .milfy--animated .milfy-bob, .milfy--animated .milfy-eyes-open,
+  .milfy--animated .milfy-eyes-closed, .milfy--animated .milfy-sparkle { animation: none; }
+  .milfy .milfy-eyes-open { opacity: 1; }
+  .milfy .milfy-eyes-closed { opacity: 0; }
+}`;
+
+  function xml(text) {
+    return String(text).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;',
+      '>': '&gt;', '"': '&quot;', "'": '&apos;' })[char]);
+  }
+  let svgSerial = 0;
+
+  /** Bust-up original vector art, 300 × 360. opts: width, height (positive
+   * numbers), title, idPrefix, animated (default true), halo (default true).
+   * Each call scopes all paint/clip/title IDs, including when idPrefix repeats.
+   * data-part groups keep eyebrows, eyes, mouth, and pose independently swappable.
+   */
+  function mascotSVG(expression = 'normal', opts = {}) {
+    if (!EXPRESSIONS.includes(expression)) throw new RangeError('Unknown expression: ' + expression);
+    const width = opts.width ?? 300, height = opts.height ?? 360;
+    if (![width, height].every(n => Number.isFinite(n) && n > 0)) {
+      throw new RangeError('Mascot dimensions must be positive numbers');
+    }
+    const prefix = String(opts.idPrefix ?? 'portrait').replace(/[^A-Za-z0-9_-]/g, '-') || 'portrait';
+    const id = 'milfy-' + prefix + '-' + (++svgSerial);
+    const paint = name => `url(#${id}-${name})`;
+    const title = opts.title ?? `ミルフィ：${EXPRESSION_LABELS[expression]}`;
+    const happy = expression === 'happy', thinking = expression === 'thinking';
+    const surprised = expression === 'surprised', sorry = expression === 'sorry';
+
+    function eye(cx, side) {
+      const cy = surprised ? 155 : sorry ? 160 : 157;
+      const ry = surprised ? 29 : thinking && side === 'right' ? 23 : 26;
+      const pupilX = cx + (thinking ? 4 : 0);
+      return `<g class="milfy-eye milfy-eye--${side}">
+        <path d="M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14}
+          Q${cx + 24} ${cy + 21} ${cx} ${cy + 25} Q${cx - 23} ${cy + 21} ${cx - 22} ${cy - 15}Z"
+          fill="#fffafa"/>
+        <g clip-path="${paint('eye-' + side)}">
+          <ellipse cx="${pupilX}" cy="${cy}" rx="18" ry="${ry}" fill="${paint('iris')}"/>
+          <ellipse cx="${pupilX}" cy="${cy - 2}" rx="8" ry="17" fill="#453961"/>
+          <path d="M${pupilX - 13} ${cy + 13} Q${pupilX} ${cy + 25} ${pupilX + 13} ${cy + 13}"
+            fill="none" stroke="#9ff0d9" stroke-width="5" stroke-linecap="round"/>
+          <ellipse cx="${pupilX - 6}" cy="${cy - 13}" rx="7.2" ry="9" fill="#fff"/>
+          <circle cx="${pupilX + 9}" cy="${cy + 6}" r="4" fill="#fff"/>
+          <circle cx="${pupilX - 7}" cy="${cy + 15}" r="2" fill="#fff" opacity=".9"/>
+          <path d="M${pupilX + 9} ${cy - 18} l1.3 3.2 3.2 1.3-3.2 1.3-1.3 3.2-1.3-3.2-3.2-1.3 3.2-1.3Z"
+            fill="#e5fff7"/>
+        </g>
+        <path d="M${cx - 23} ${cy - 15} Q${cx - 4} ${cy - ry - 9} ${cx + 22} ${cy - 14}"
+          fill="none" stroke="#57465f" stroke-width="5" stroke-linecap="round"/>
+        <path d="M${cx - 19} ${cy - 18} l-7-7 M${cx - 12} ${cy - 22} l-3-6"
+          fill="none" stroke="#57465f" stroke-width="3.1" stroke-linecap="round"
+          ${side === 'right' ? `transform="translate(${cx * 2} 0) scale(-1 1)"` : ''}/>
+        <path d="M${cx - 14} ${cy + 23} Q${cx} ${cy + 29} ${cx + 13} ${cy + 23}"
+          fill="none" stroke="#bb8d9e" stroke-width="1.5" stroke-linecap="round"/>
+      </g>`;
+    }
+
+    const brows = happy
+      ? 'M92 119 Q107 109 121 119 M179 119 Q193 109 208 119'
+      : surprised ? 'M92 116 Q105 104 121 112 M179 112 Q195 104 208 116'
+      : thinking ? 'M93 124 Q108 119 122 121 M179 115 Q195 111 207 119'
+      : sorry ? 'M93 125 Q110 126 123 116 M177 116 Q190 126 207 125'
+      : 'M93 120 Q107 113 122 119 M178 119 Q193 113 207 120';
+    const mouth = happy
+      ? '<path d="M137 194 Q150 199 163 194 Q161 214 150 215 Q139 214 137 194Z" fill="#a9607b"/><path d="M142 209 Q150 203 158 209 Q150 217 142 209Z" fill="#f9a9b8"/>'
+      : surprised ? '<ellipse cx="150" cy="202" rx="7" ry="9" fill="#b66d85"/><ellipse cx="150" cy="206" rx="4" ry="3" fill="#ffc0c7"/>'
+      : thinking ? '<path d="M144 201 Q149 198 155 201" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/>'
+      : sorry ? '<path d="M141 205 Q150 197 159 205" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/>'
+      : '<path d="M140 198 Q150 208 160 198" fill="none" stroke="#a96780" stroke-width="2.5" stroke-linecap="round"/>';
+
+    const closedEyes = `<path d="M91 160 Q109 ${happy ? 136 : 171} 128 160 M172 160 Q191 ${happy ? 136 : 171} 209 160"
+      fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>
+      <path d="M93 158 l-5-4 M207 158 l5-4" fill="none" stroke="#57465f" stroke-width="2.5" stroke-linecap="round"/>`;
+
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 300 360"
+      class="milfy milfy--${expression}${opts.animated === false ? '' : ' milfy--animated'}" role="img"
+      aria-labelledby="${id}-title ${id}-desc" focusable="false" data-expression="${expression}">
+      <title id="${id}-title">${xml(title)}</title>
+      <desc id="${id}-desc">テト学園の案内役、ミルフィ。ミントとライラックのツインテール、きらきらした瞳、ブロックの髪飾りと桃色の制服です。</desc>
+      <defs>
+        <linearGradient id="${id}-hair" x1=".15" y1="0" x2=".8" y2="1" gradientUnits="objectBoundingBox">
+          <stop stop-color="#edfff3"/><stop offset=".34" stop-color="#afe5d9"/><stop offset=".7" stop-color="#c6d4f1"/><stop offset="1" stop-color="#c6a9e3"/>
+        </linearGradient>
+        <linearGradient id="${id}-tail" x1="0" y1="0" x2=".8" y2="1">
+          <stop stop-color="#b7e9de"/><stop offset=".5" stop-color="#a7d9d6"/><stop offset=".82" stop-color="#c9b3e8"/><stop offset="1" stop-color="#eed5f4"/>
+        </linearGradient>
+        <linearGradient id="${id}-skin" x1="0" y1="0" x2=".3" y2="1">
+          <stop stop-color="#fff8ee"/><stop offset=".7" stop-color="#fff1e9"/><stop offset="1" stop-color="#f7d9d8"/>
+        </linearGradient>
+        <linearGradient id="${id}-iris" x1="0" y1="0" x2="0" y2="1">
+          <stop stop-color="#4e456e"/><stop offset=".4" stop-color="#8476b8"/><stop offset=".73" stop-color="#9bbae0"/><stop offset="1" stop-color="#b2f4df"/>
+        </linearGradient>
+        <linearGradient id="${id}-uniform" x1="0" y1="0" x2=".7" y2="1">
+          <stop stop-color="#fff4f7"/><stop offset=".6" stop-color="#f6d8e8"/><stop offset="1" stop-color="#dfc8e9"/>
+        </linearGradient>
+        <linearGradient id="${id}-ribbon" x1="0" y1="0" x2="1" y2="1">
+          <stop stop-color="#c1a4de"/><stop offset=".5" stop-color="#e6cdf3"/><stop offset="1" stop-color="#b49cd5"/>
+        </linearGradient>
+        <radialGradient id="${id}-blush"><stop stop-color="#f5a4b6" stop-opacity=".7"/><stop offset="1" stop-color="#ffb9c7" stop-opacity="0"/></radialGradient>
+        <radialGradient id="${id}-halo"><stop stop-color="#fcf4ff"/><stop offset=".8" stop-color="#edf9f5" stop-opacity=".7"/><stop offset="1" stop-color="#edf9f5" stop-opacity="0"/></radialGradient>
+        ${['left', 'right'].map((side, i) => {
+          const cx = i ? 191 : 109, cy = surprised ? 155 : sorry ? 160 : 157;
+          const ry = surprised ? 29 : thinking && side === 'right' ? 23 : 26;
+          return `<clipPath id="${id}-eye-${side}"><path d="M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14} Q${cx + 24} ${cy + 21} ${cx} ${cy + 25} Q${cx - 23} ${cy + 21} ${cx - 22} ${cy - 15}Z"/></clipPath>`;
+        }).join('')}
+      </defs>
+      ${opts.halo === false ? '' : `<ellipse cx="150" cy="180" rx="144" ry="171" fill="${paint('halo')}"/>`}
+      <g class="milfy-bob" stroke-linejoin="round">
+        <g data-part="back-hair" stroke="#929cc3" stroke-width="1.8">
+          <path d="M72 88 C44 81 30 103 31 143 C33 182 10 212 17 258 C20 288 34 312 55 319 C41 291 61 270 63 242 C70 275 58 302 62 317 C89 296 91 262 82 224 C77 189 96 130 72 88Z" fill="${paint('tail')}"/>
+          <path d="M228 88 C256 81 270 103 269 143 C267 182 290 212 283 258 C280 288 266 312 245 319 C259 291 239 270 237 242 C230 275 242 302 238 317 C211 296 209 262 218 224 C223 189 204 130 228 88Z" fill="${paint('tail')}"/>
+          <path d="M62 117 C48 155 59 182 42 225 C31 258 37 281 45 294 M74 149 C66 189 77 221 71 254 M238 117 C252 155 241 182 258 225 C269 258 263 281 255 294 M226 149 C234 189 223 221 229 254" fill="none" opacity=".6"/>
+          <path d="M43 134 C48 106 54 105 58 110 C48 139 54 167 44 192 C47 168 40 156 43 134Z M257 134 C252 106 246 105 242 110 C252 139 246 167 256 192 C253 168 260 156 257 134Z" fill="#f3fff8" stroke="none" opacity=".65"/>
+          <path d="M67 136 C54 79 77 29 144 25 C214 19 251 68 234 141 L227 223 Q207 250 187 238 L109 238 Q78 249 67 220Z" fill="${paint('hair')}"/>
+        </g>
+        <g data-part="hair-ribbons" stroke="#a08cbd" stroke-width="1.5">
+          <path d="M66 100 Q39 74 34 91 L44 115 Q29 137 43 143 L68 121 L76 140 Q88 134 77 110Z M234 100 Q261 74 266 91 L256 115 Q271 137 257 143 L232 121 L224 140 Q212 134 223 110Z" fill="${paint('ribbon')}"/>
+          <path d="M46 96 L64 111 L45 133 M254 96 L236 111 L255 133" fill="none" stroke="#f5e6ff" stroke-width="2.5"/>
+          <ellipse cx="68" cy="112" rx="9" ry="12" fill="#e9d6f3"/><ellipse cx="232" cy="112" rx="9" ry="12" fill="#e9d6f3"/>
+        </g>
+        <g data-part="outfit" stroke="#b49ab8" stroke-width="1.8">
+          <path d="M136 213 L134 238 Q150 253 166 238 L164 213" fill="${paint('skin')}"/>
+          <path d="M134 227 Q150 236 166 227" stroke="#e7b8bd" fill="none"/>
+          <path d="M132 234 Q107 234 89 253 Q73 276 75 314 L88 324 L92 350 Q150 363 208 350 L212 324 L225 314 Q227 276 211 253 Q193 234 168 234 Q150 249 132 234Z" fill="${paint('uniform')}"/>
+          <path d="M107 241 L94 261 L119 293 L150 261 L181 293 L206 261 L193 241 L166 238 L150 255 L134 238Z" fill="#c4b5de"/>
+          <path d="M108 248 L101 260 L120 283 L144 260 M192 248 L199 260 L180 283 L156 260" stroke="#fff4fa" stroke-width="2.6" fill="none"/>
+          <path d="M93 279 Q101 294 94 315 M207 279 Q199 294 206 315 M108 316 L105 349 M192 316 L195 349" fill="none" stroke="#d8b5ce"/>
+          <path d="M76 305 L94 309 L93 324 L76 320Z M224 305 L206 309 L207 324 L224 320Z" fill="#fdf7ff"/>
+          <path d="M150 268 Q124 249 124 268 L127 287 Q142 284 150 275 Q158 284 173 287 L176 268 Q176 249 150 268Z" fill="${paint('ribbon')}"/>
+          <path d="M144 275 L137 301 L150 294 L163 301 L156 275" fill="#c6b0df"/>
+          <rect x="144" y="264" width="12" height="15" rx="5" fill="#fff2cf" stroke="#d6b8bb"/>
+          <path d="M150 309 L150 347" stroke="#e8c4d9"/><circle cx="150" cy="315" r="2.5" fill="#fdf7ff"/><circle cx="150" cy="336" r="2.5" fill="#fdf7ff"/>
+          <path d="M179 305 h12 v12 h-12Z M183 301 h4 v4" fill="#d0ece2" stroke="#a7c5bd" stroke-width="1.3"/>
+        </g>
+        <g data-part="face-base">
+          <ellipse cx="76" cy="168" rx="11" ry="17" fill="${paint('skin')}" stroke="#c9a3ac" stroke-width="1.5"/>
+          <ellipse cx="224" cy="168" rx="11" ry="17" fill="${paint('skin')}" stroke="#c9a3ac" stroke-width="1.5"/>
+          <path d="M76 117 C75 83 99 65 150 65 C201 65 225 83 224 117 L224 166 C223 195 194 226 150 233 C106 226 77 195 76 166Z" fill="${paint('skin')}" stroke="#bd9aa9" stroke-width="1.6"/>
+          <path d="M79 133 Q96 99 125 105 Q153 92 181 106 Q208 106 222 134 L222 111 Q209 71 151 72 Q93 72 78 110Z" fill="#e7c6cb" opacity=".24"/>
+        </g>
+        <g class="milfy-expression" data-expression="${expression}">
+          <g data-part="eyebrows"><path d="${brows}" fill="none" stroke="#a092b3" stroke-width="2.8" stroke-linecap="round"/></g>
+          <g data-part="eyes">
+            ${happy ? `<g class="milfy-happy-eyes">${closedEyes}</g>` : `<g class="milfy-eyes-open">${eye(109, 'left')}${eye(191, 'right')}</g><g class="milfy-eyes-closed" opacity="0">${closedEyes}</g>`}
+          </g>
+          <g data-part="cheeks">
+            <ellipse cx="92" cy="187" rx="23" ry="13" fill="${paint('blush')}"/><ellipse cx="208" cy="187" rx="23" ry="13" fill="${paint('blush')}"/>
+            <path d="M83 186 l-1 4 M90 187 l-1 4 M97 187 l-1 4 M203 187 l-1 4 M210 187 l-1 4 M217 186 l-1 4" stroke="#e7a3b4" stroke-width="1.4" stroke-linecap="round"/>
+          </g>
+          <path d="M149 182 q-3 4 1 4" fill="none" stroke="#ddb7b8" stroke-width="1.4" stroke-linecap="round"/>
+          <g data-part="mouth">${mouth}</g>
+        </g>
+        <g data-part="front-hair" stroke="#929cc3" stroke-width="1.65">
+          <path d="M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 213 117 C196 117 177 99 166 79 Q168 109 180 128 Q146 121 131 86 Q130 113 115 130 Q110 110 109 105 Q94 131 78 143 L77 179 Q66 165 70 138Z" fill="${paint('hair')}"/>
+          <path d="M129 40 C113 49 105 70 109 105 M164 39 C156 50 159 69 166 79 M180 42 C208 61 216 88 213 117 M91 61 Q76 91 78 121 M222 88 L224 123" fill="none" opacity=".65"/>
+          <path d="M82 86 Q87 70 98 62 Q94 72 92 84Z M103 59 Q120 46 140 47 Q127 53 119 66 L112 76 L108 69Z M149 45 Q175 40 194 58 L202 71 Q180 57 158 61Z M207 72 Q217 83 220 98 L211 92Z" fill="#f5fff8" stroke="none" opacity=".82"/>
+          <path d="M102 81 Q104 73 108 68 M172 61 Q190 62 201 73" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".75" fill="none"/>
+          <path d="M148 28 Q143 16 155 11 Q150 20 160 26" fill="${paint('hair')}" stroke-linecap="round"/>
+        </g>
+        <g data-part="block-clip" transform="rotate(-17 91 88)" stroke="#b09ab3" stroke-width="1.5">
+          <path d="M74 79 h12 v-12 h12 v12 h12 v12 H74Z" fill="#fff0c8"/>
+          <path d="M76 81 h8 v8 h-8Z M88 69 h8 v8 h-8Z M88 81 h8 v8 h-8Z M100 81 h8 v8 h-8Z" fill="#f5cedf" stroke="none"/>
+          <path d="M78 83 h4 M90 71 h4 M90 83 h4 M102 83 h4" stroke="#fffaf0" stroke-linecap="round"/>
+        </g>
+        <g data-part="pose" stroke="#bc9aa9" stroke-width="1.7">
+          ${thinking ? `<path d="M212 303 Q194 286 177 241 L171 222 Q168 213 174 210 Q181 207 183 219 L187 232 Q193 225 198 231 L205 248 Q215 270 226 287Z" fill="${paint('skin')}"/><path d="M208 285 L225 278 L233 299 L216 310Z" fill="${paint('uniform')}"/><path d="M182 225 L186 238 M191 233 L195 241" fill="none" stroke="#e0b7bc"/>`
+            : happy || surprised ? `<path d="M87 296 L69 266 Q58 261 58 251 L56 238 Q57 230 64 234 L68 245 Q68 228 75 230 Q80 231 79 241 Q86 235 91 242 Q96 248 89 261 L103 281Z M213 296 L231 266 Q242 261 242 251 L244 238 Q243 230 236 234 L232 245 Q232 228 225 230 Q220 231 221 241 Q214 235 209 242 Q204 248 211 261 L197 281Z" fill="${paint('skin')}"/><path d="M80 282 L99 271 L110 292 L91 305Z M220 282 L201 271 L190 292 L209 305Z" fill="${paint('uniform')}"/><path d="M65 250 Q73 246 83 251 M235 250 Q227 246 217 251" fill="none" stroke="#e0b7bc"/>`
+              : `<path d="M93 324 Q110 326 129 315 Q139 308 149 317 Q160 309 170 315 Q190 326 207 324 L206 338 Q184 344 165 330 Q151 337 137 330 Q116 344 94 338Z" fill="${paint('skin')}"/><path d="M141 319 L151 325 L160 319 M135 325 L141 329 M165 325 L159 329" fill="none" stroke="#e0b7bc"/>`}
+        </g>
+        <g data-part="expression-accents" fill="none" stroke-linecap="round">
+          ${happy || surprised ? `<g class="milfy-sparkle" fill="#fff0bc" stroke="#d6b7c2" stroke-width="1.1"><path d="M32 166 l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z"/></g><g class="milfy-sparkle" fill="#e2d2fa" stroke="#b3a1cf" stroke-width="1.1"><path d="M263 46 l3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/></g><path d="M24 206 l-4 7 M276 206 l4 7" stroke="#d7badc" stroke-width="2.5"/>` : ''}
+          ${thinking ? '<path d="M257 71 Q256 60 265 59 Q276 59 275 68 Q275 73 266 77 L266 82 M266 90 v1" stroke="#b29cce" stroke-width="3.5"/>' : ''}
+          ${sorry ? '<path d="M239 157 Q231 169 236 173 Q243 178 245 170 Q245 165 239 157Z" fill="#c5e4f3" stroke="#a5bedb" stroke-width="1.3"/>' : ''}
+        </g>
+      </g>
+    </svg>`;
+  }
+
+  const PRAISE_LINES = Object.freeze([
+    'やりました！パーフェクトです♪',
+    'ぴったり最短です！とてもきれいな操作ですね。',
+    '今の一手、ミルフィも見とれちゃいました♪',
+    'むだのない動きです！その感覚を覚えてくださいね。',
+    '大成功です！指が道順を覚えてきましたね。',
+    '目標にすっと届きましたね！お見事です。',
+    'その調子です♪ 一つずつ上手になっていますね。',
+    '最短ルート、ばっちりです！',
+    '今の置き方、とってもなめらかでしたよ♪',
+    '落ち着いて置けましたね。パーフェクトです！',
+    'きらっと光るフィネスです♪ 次もいっしょに練習しましょう。',
+    'すごいです！必要な入力だけで届きましたね。',
+    '回数も位置も花まるです♪',
+    '一手ずつの判断が実っていますね！',
+    'いいリズムです！ミルフィもうれしいです♪',
+    '狙いどおりです！そのルートはもう得意ですね。',
+    'テト学園の花まるをどうぞ♪ とても上手です！',
+    '最短の道を選べましたね！自信を持ってください。'
+  ]);
+  const STREAK_LINES = deepFreeze({
+    5: ['5連続パーフェクトです！いいリズムができてきましたね♪'],
+    10: ['10連続です！両手にいっぱい花まるを贈りますね♪'],
+    25: ['25連続パーフェクトです！落ち着いた操作、とてもすてきです。'],
+    50: ['50連続です！ミルフィ、感激です♪ 少し休憩しても大丈夫ですよ。']
+  });
+  const PIECE_PRAISE = deepFreeze({
+    I: ['Iミノがすらっと到着です！縦も横もお見事ですね♪', 'Iミノの長さを上手に生かせましたね！'],
+    O: ['Oミノがころんと着地です♪ 移動だけでばっちりですね。', 'Oミノの最短移動、花まるです！'],
+    T: ['Tミノの向きも位置もぴったりです♪', 'Tミノの回転選び、とても上手ですね！'],
+    L: ['Lミノの曲がり角まで、きれいに合わせましたね！', 'Lミノがすっと収まりました♪'],
+    J: ['Jミノも最短です！鏡向きの形を見分けられましたね。', 'Jミノの道順、もうばっちりですね♪'],
+    S: ['Sミノの斜めの形も、すいっと置けましたね♪', 'Sミノの向き選び、お見事です！'],
+    Z: ['Zミノも迷わず到着です！すてきですね♪', 'Zミノの最短ルート、しっかり覚えていますね。']
+  });
+  const MISS_LINES = Object.freeze([
+    '少し違う場所でしたね。輪郭をもう一度見て、ゆっくり試しましょう。',
+    '大丈夫ですよ♪ 同じ目標でもう一度練習できます。',
+    'まずは向き、その次は列を確かめましょうね。',
+    '焦らなくて大丈夫です。着地の影と目標の輪郭を重ねてみましょう。',
+    'あと少しです！落とす前に一呼吸おいてみましょう。',
+    'ミルフィといっしょに、目標までの道を見直しましょうね。'
+  ]);
+  const ENCOURAGEMENT_LINES = Object.freeze([
+    '速さはあとからついてきます。まずは正確に置いてみましょう♪',
+    'ひとつ覚えられたら、それだけで前進です！',
+    '迷ったらヒントを見ても大丈夫です。一緒に覚えましょう。',
+    'むずかしい列は、同じ目標を繰り返すと慣れてきますよ。',
+    '指が疲れたら休憩しましょうね。練習はいつでも再開できます。',
+    '昨日の自分より、ひとつ気づけたら大成功です♪'
+  ]);
+  const WELCOME_LINES = Object.freeze([
+    'テト学園へようこそ！案内役のミルフィです♪',
+    'はじめまして、ミルフィです！いっしょに最短の操作を覚えましょうね。',
+    'おかえりなさい♪ 今日も少しずつ、フィネスを練習しましょう！',
+    '準備はできましたか？レッスンもドリルも、好きなところからどうぞ♪'
+  ]);
+  const TIPS = Object.freeze([
+    'フィネスは、目標の向きと列へ最少の入力で運ぶ練習です。速押しより道順が大切ですよ。',
+    '壁まで移動するならDASが便利です。方向キーの長押しは、移動が続いても1入力です。',
+    'DASは連続移動が始まるまでの待ち時間です。設定で自分に合う長さを探しましょう。',
+    'ARRはDAS後の移動間隔です。ARRが0なら、チャージ後は壁まで一気に移動しますよ。',
+    '壁の一つ手前は、壁までDASしてから逆方向へ1回戻すルートも確認しましょう。',
+    '中央の近くは、短いタップだけで届くことがありますよ。目標までの距離を見ましょう。',
+    '回転はCWとCCWを使い分けると、3回回す操作を1回に減らせますよ。',
+    'CWは右回転、CCWは左回転です。両方のキーを無理なく押せる位置にしましょうね。',
+    '180°回転が有効なら、T・J・Lの上下反転は1回転入力でできますよ。',
+    '180°回転をオフにすると最短手順も変わります。今の設定に合うヒントを見てくださいね。',
+    'SRSは回転の仕組みです。壁に当たると、補正で少し位置がずれることがありますよ。',
+    'Iミノの回転補正はほかのミノと別です。縦向きの列を着地の影で確かめましょう。',
+    'Oミノは回しても置く形が変わりません。このドリルでは移動だけで大丈夫ですよ。',
+    'I・S・Zミノの着地の形は縦と横の2種類です。同じ着地になる回転状態がありますよ。',
+    'LとJは鏡向きです。出現時の上の1マスが、どちら側かを見てみましょう。',
+    'SとZは出現時の斜めの向きが逆です。色と形をいっしょに覚えると安心ですよ。',
+    'IRSは出現時の先行回転です。ARE中から回転キーを押し、出現する瞬間まで長押ししましょう。',
+    'IRSの回転も1入力です。先に押しておけば、出現してすぐ移動に取りかかれますよ。',
+    'IRSで回転キーを複数押した場合は、最後に押している回転キーが優先されますよ。',
+    'AREは次のミノが出るまでの待ち時間です。IRSの練習では少し長めに設定してみましょう。',
+    'ARE中はNextと次の目標を見て、出現する前に向きと列を決めてみましょう。',
+    '方向キーを押したままなら、ARE中もDASのチャージが続きます。次の目標に注意しましょうね。',
+    'IHSは出現時の先行ホールドです。設定で有効にして、ARE中にホールドを押してみましょう。',
+    'ホールドはフィネス入力に数えません。このドリルではスキップ扱いになり、目標も変わります。',
+    '1種類だけの練習ではホールドは使えません。そのミノの道順に集中しましょうね。',
+    'ハードドロップはフィネスの入力回数に数えません。向きと位置が合ったら落としましょう♪',
+    '空の盤面の最短手順にはソフトドロップは不要です。押すたびに1入力増えるので気をつけましょう。',
+    '壁に向かって余分に押しても1入力に数えます。届いたらキーを離す習慣をつけましょうね。',
+    'DCDは回転や出現のあとに自動横移動を少し待たせる設定です。意図しない移動の調整に使えます。',
+    'SDFはソフトドロップの速さです。瞬間落下でも固定はしないので、確定はハードドロップですよ。',
+    '左右を同時に押すと、あとから押した方向が優先されます。離したあとの動きにも注意しましょう。',
+    'ヒントの列番号は、ミノが占めるいちばん左のマスです。盤面の左端を1列目として数えますよ。',
+    'ミスは目標との位置違い、フィネスフォルトは入力の使いすぎです。結果を分けて振り返りましょう。',
+    '同じ最短回数になる道順は複数あります。ヒントと違う順序でも、回数と着地が合えばパーフェクトです。',
+    'PPSは1秒あたりに置いたミノの数です。まず正確さを保ち、慣れてから少しずつ上げましょう。',
+    'キー配置は変更できます。回転と移動を両手に分けるなど、楽な押し方を試してくださいね。'
+  ]);
+  const SPRINT_COMMENTS = deepFreeze({
+    // Accuracy uses the engine's percent scale, 0..100; PPS is pieces/second.
+    accuracy: [
+      { min: 100, expression: 'happy', text: '全問パーフェクトです！丁寧に積み重ねた成果ですね♪' },
+      { min: 95, expression: 'happy', text: 'とても高い正確さです！あと少しで全問パーフェクトですね♪' },
+      { min: 80, expression: 'surprised', text: '最短の操作が身についてきましたね！苦手な列をドリルで復習しましょう。' },
+      { min: 0, expression: 'normal', text: '最後までおつかれさまでした！ヒントを見ながら、一つずつ最短ルートを覚えましょうね。' }
+    ],
+    pps: [
+      { min: 2, text: 'すいすい進む速さでしたね！手を休める時間も大切ですよ。' },
+      { min: 1, text: 'いいテンポです♪ このリズムで正確さも育てていきましょう。' },
+      { min: 0, text: 'じっくり取り組めましたね♪ 慣れるほど速さもついてきますよ。' }
+    ]
+  });
+
+  /** Plain text only: render with textContent, then render key caps separately
+   * from the engine's action IDs using the player's current bindings.
+   */
+  function hintText(piece, used, optimal, optimalSeqLabels) {
+    if (!engine.PIECE_TYPES.includes(piece)) throw new RangeError('Unknown piece: ' + piece);
+    if (![used, optimal].every(n => Number.isInteger(n) && n >= 0) ||
+      !Array.isArray(optimalSeqLabels) || !optimalSeqLabels.every(s => typeof s === 'string') ||
+      optimalSeqLabels.length !== optimal) throw new RangeError('Invalid finesse hint');
+    const route = optimal === 0 ? '移動も回転もせず、ハードドロップだけで大丈夫です。'
+      : `こうすると${optimal}回で置けますよ：${optimalSeqLabels.join(' → ')}。最後はハードドロップです。`;
+    const extra = Math.max(0, used - optimal);
+    return `${piece}ミノは今回${used}回、最短は${optimal}回です。${extra ? `あと${extra}回、入力を減らせますね♪ ` : '道順を確かめましょうね♪ '}${route}`;
+  }
+  function sprintComment(accuracy, pps) {
+    if (!Number.isFinite(accuracy) || accuracy < 0 || accuracy > 100 || !Number.isFinite(pps) || pps < 0) {
+      throw new RangeError('Accuracy must be 0..100 and PPS must be nonnegative');
+    }
+    return SPRINT_COMMENTS.accuracy.find(tier => accuracy >= tier.min).text +
+      ' ' + SPRINT_COMMENTS.pps.find(tier => pps >= tier.min).text;
+  }
+  const DIALOGUE = deepFreeze({ welcome: WELCOME_LINES, praise: PRAISE_LINES, streak: STREAK_LINES,
+    perPiece: PIECE_PRAISE, miss: MISS_LINES, encouragement: ENCOURAGEMENT_LINES,
+    tips: TIPS, sprint: SPRINT_COMMENTS });
+
+  /** All DISTINCT empty-board landings grouped by the engine's canonical
+   * optimal action sequence, including [] (no movement). x is zero-based
+   * occupied-left-column, column is its one-based display equivalent. Symmetric
+   * rotations share a cell set and appear exactly once. No handwritten table.
+   * Pass {allow180:false} when the app disables 180; default matches the engine.
+   * The result is fresh mutable data, isolated from engine and lesson caches.
+   */
+  function lessonPlacementGroups(piece, opts = {}) {
+    const groups = new Map();
+    for (const placement of engine.allPlacements(piece, { allow180: opts.allow180 !== false })) {
+      const signature = JSON.stringify(placement.actions);
+      if (!groups.has(signature)) groups.set(signature, {
+        id: piece + '-' + (placement.actions.join('-') || 'drop'), piece,
+        count: placement.count, actions: placement.actions.slice(), sequence: placement.sequence.slice(),
+        label: placement.sequence.length ? placement.sequence.join(' → ') : 'そのままハードドロップ',
+        placements: []
+      });
+      groups.get(signature).placements.push({ ...placement, column: placement.x + 1,
+        rotationLabel: engine.ROTATIONS[placement.rot],
+        label: `${engine.ROTATIONS[placement.rot]}向き・左から${placement.x + 1}列目` });
+    }
+    return Array.from(groups.values()).sort((a, b) => a.count - b.count ||
+      (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  }
+
+  const PIECE_LESSON_TEXT = deepFreeze({
+    I: ['Iミノは4マスのまっすぐな形です。縦と横の置き方を覚えましょう！',
+      '着地の形は2種類です。0と2、RとLは同じ着地の形になりますが、回転後の列は確かめてくださいね。',
+      'Iミノの回転補正は専用です。横移動と回転の順番も、表の実演で見てみましょう♪'],
+    O: ['Oミノは2×2の四角です。回転しても、置く形と位置は変わりませんよ。',
+      '最短の置き方に回転は不要です。移動だけの9か所を、表で確認しましょう。',
+      '壁までころん、ひとつ戻ってころん♪ OミノでDASの感覚を覚えましょう。'],
+    T: ['Tミノは上に1マス出た形です。4つの向きと列をセットで覚えましょう。',
+      '右向きはCW、左向きはCCWが候補です。下向きは、設定で有効なら180°回転1回でも作れますよ。',
+      '向きを先に決めると、移動中に迷いにくくなりますね♪'],
+    L: ['Lミノは出現時の右上に1マスある形です。4つの向きを見てみましょう。',
+      '横向きと縦向きでは幅が変わります。目標のいちばん左のマスを確認してくださいね。',
+      '長い辺と短い辺を見分けると安心です♪ 表の回転方向を試してみましょう。'],
+    J: ['Jミノは出現時の左上に1マスある形です。Lミノとは鏡向きですね。',
+      '同じ列でも、Lミノと同じ回転で届くとは限りません。Jミノの表を確かめましょう。',
+      '左上の小さな角を目印にすると、向きを覚えやすいですよ♪'],
+    S: ['Sミノは右上がりの階段のような形です。横と縦の2種類を練習しましょう。',
+      '0と2、RとLは同じ着地の形です。180°回転で形を変える必要はありませんよ。',
+      'CWとCCWで同じ縦の形でも列が変わります。最短の道順は表で見てみましょう♪'],
+    Z: ['Zミノは左上がりの階段のような形です。Sミノと斜めの向きが逆ですよ。',
+      '着地の形は横と縦の2種類です。同じ形になる回転状態も、最短回数をまとめて調べています。',
+      '赤い階段の向きを見てから、回転と移動を選びましょうね♪']
+  });
+
+  // Declarative demo schema (JSON serializable; app.js owns time and drawing):
+  // sequence = engine solver action IDs; dasLeft/dasRight mean key holds until
+  // DAS/ARR reaches the wall, NOT literal InputHandler action names. finish is
+  // hardDrop (0 finesse cost). For each variant reset to an empty-board spawn.
+  // buffered events happen during ARE; keep held actions down through spawn.
+  // An app can use InputHandler for those events, including IRS/IHS, and render
+  // target.cells directly. Targets always use engine coordinates (y up).
+  function demoVariant(piece, id, sequence, settings) {
+    const board = new engine.Board();
+    let state = engine.spawnPiece(piece);
+    for (const action of sequence) {
+      state = engine.applyAction(board, state, action, settings);
+      if (!state) throw new Error('Invalid lesson demonstration: ' + id);
+    }
+    const lock = engine.hardDrop(board, state);
+    return { id, piece, sequence: sequence.slice(), labels: sequence.map(a => engine.ACTION_LABELS[a]),
+      inputCount: sequence.length, target: engine.finesseFor(piece, engine.cells(lock), settings),
+      finish: 'hardDrop' };
+  }
+  function practice(piece, targets, settings) {
+    return { piece, targets, requireOptimal: true, hints: true, settings: { ...settings } };
+  }
+  function pieceStep(piece, settings) {
+    const placementGroups = lessonPlacementGroups(piece, settings);
+    const all = placementGroups.flatMap(group => group.placements);
+    const left = engine.finesseFor(piece, { rot: 0, x: 0 }, settings);
+    const center = all.find(target => target.count === 0);
+    const edge = piece === 'O' ? engine.finesseFor(piece, { rot: 0, x: 8 }, settings)
+      : all.filter(target => target.rot !== 0).sort((a, b) => b.x - a.x || a.count - b.count)[0];
+    const targets = [left, center, edge];
+    return { id: 'piece-' + piece, title: piece + 'ミノのレッスン', expression: 'normal',
+      lines: [...PIECE_LESSON_TEXT[piece],
+        '表は最短の手順ごとにまとめています。列はミノのいちばん左のマスを、左端から1、2と数えますよ。',
+        '3つの実演を見たら、同じミノの目標に挑戦しましょう！ヒントを見ながらで大丈夫です♪'],
+      demo: { type: 'piece-placements', piece, settings: { ...settings }, placementGroups,
+        examples: targets.map((target, i) => demoVariant(piece, piece + '-example-' + (i + 1), target.actions, settings)),
+        targets },
+      tryIt: practice(piece, targets, settings) };
+  }
+
+  /** Exactly the SPEC's 12 steps. Rebuild when allow180 changes so tables,
+   * demonstrations, hints, and required counts all use the live solver option.
+   * IRS/IHS demo overrides enable the feature and lengthen ARE for visibility;
+   * app.js should apply these temporarily to its demonstration handler only.
+   */
+  function createLessons(opts = {}) {
+    const settings = { allow180: opts.allow180 !== false, gravity: 0, spawnDrop: false };
+    const dasTarget = engine.finesseFor('O', { rot: 0, x: 0 }, settings);
+    const rotationVariants = [demoVariant('T', 'cw', ['cw'], settings),
+      demoVariant('T', 'ccw', ['ccw'], settings),
+      demoVariant('T', 'half-turn', settings.allow180 ? ['rotate180'] : ['cw', 'cw'], settings)];
+    const irsDemo = demoVariant('T', 'irs', ['cw'], settings);
+    const ihsTarget = engine.finesseFor('O', { rot: 0, x: 4 }, settings);
+    const summaryTarget = engine.finesseFor('T', { rot: 2, x: 0 }, settings);
+    return deepFreeze([
+      { id: 'finesse', title: 'フィネスとは？', expression: 'normal', lines: [
+        'テト学園へようこそ！ミルフィです♪ フィネスは、目標の場所へ最少のキー入力でミノを運ぶことです。',
+        '道順が短くなると、素早く置きやすくなり、押し間違いも減らせますよ。まずは正確に試しましょうね。',
+        '左右のタップ、壁までの長押し、回転はそれぞれ1入力です。ソフトドロップも押すたびに1入力に数えます。',
+        'ハードドロップは回数に数えません。ホールドも数えませんが、このドリルではスキップ扱いで目標が変わりますよ。',
+        '出現位置の真下が目標なら、移動と回転は0回です。まずはそのまま落としてみましょう♪'
+      ], demo: { type: 'optimal-placement', piece: 'O', settings: { ...settings },
+        ...demoVariant('O', 'zero-input', [], settings) },
+      tryIt: practice('O', [ihsTarget], settings) },
+      { id: 'das', title: 'なぜ壁までDAS？', expression: 'thinking', lines: [
+        'Oミノを左端へ運びます。左を4回押すと4入力ですが、壁まで長押しするDASなら1入力ですよ。',
+        'DASは、押してから連続移動が始まるまでの待ち時間です。長押し中の移動はまとめて1入力になります。',
+        'ARRはその後の移動間隔です。ARRが0なら、DASがたまると壁まで一気に移動しますよ。',
+        '設定でDASとARRを調整できます。まずは待ってからすべる感覚を、ミルフィと確かめましょう♪'
+      ], demo: { type: 'compare-sequences', piece: 'O', settings: { ...settings, das: 110, arr: 0 },
+        targets: [dasTarget], variants: [demoVariant('O', 'four-taps', ['left', 'left', 'left', 'left'], settings),
+          demoVariant('O', 'one-das', ['dasLeft'], settings)], settingsLink: 'handling' },
+      tryIt: practice('O', [dasTarget], { ...settings, das: 110, arr: 0 }) },
+      { id: 'rotation', title: '回転の基本（SRS・CW・CCW・180°）', expression: 'normal', lines: [
+        'CWは右へ90°、CCWは左へ90°の回転です。両方を使うと、遠回りの回転を減らせますよ。',
+        settings.allow180 ? '180°回転がオンなら、半回転も1入力です。Tミノを下向きにするときに試しましょう。'
+          : '今は180°回転がオフです。半回転は90°回転を2回使います。オンにすると最短手順も変わりますよ。',
+        'このゲームの回転はSRSです。壁や床にぶつかると、決められた順で位置を補正して回転を試します。',
+        'Iミノの補正は専用で、Oミノは回しても置く形が変わりません。形と着地の影を見てくださいね。'
+      ], demo: { type: 'rotation-basics', piece: 'T', settings: { ...settings }, variants: rotationVariants,
+        targets: rotationVariants.map(variant => variant.target), rotationSystem: 'SRS', kickSource: 'engine' },
+      tryIt: practice('T', rotationVariants.map(variant => variant.target), settings) },
+      { id: 'irs-ihs', title: 'IRS・IHSとARE', expression: 'surprised', lines: [
+        'IRSは出現時の先行回転です。次のミノが出る瞬間に回転キーを押し続けていると、回転した状態で出てきます！',
+        'AREは次のミノが出るまでの待ち時間です。この間に回転キーを押し、出現する瞬間まで長押ししてみましょう。',
+        'IRSの回転も新しいミノの1入力です。複数の回転キーを長押しすると、最後に押したものが優先されますよ。',
+        'IHSは出現時の先行ホールドです。オンなら、ARE中にホールドを押すか、出現時まで長押しすると交換できます。',
+        'ホールドは1個につき固定まで1回です。ドリルではスキップ扱いで目標も変わり、1種類だけの練習では使えません。',
+        '設定でIRSは初期オン、IHSは初期オフ、AREは初期80msです。練習ではAREを少し長くすると押すタイミングをつかみやすいですよ♪'
+      ], demo: { type: 'spawn-buffer', piece: 'T', settings: { ...settings, irs: true, ihs: true, are: 350 },
+        targets: [irsDemo.target, ihsTarget], variants: [
+          { ...irsDemo, type: 'irs', buffered: [{ action: 'cw', during: 'are', holdThroughSpawn: true }] },
+          { id: 'ihs', type: 'ihs', piece: 'T', heldPiece: 'O', nextPiece: 'I',
+            buffered: [{ action: 'hold', during: 'are', holdThroughSpawn: true }],
+            sequence: [], labels: [], inputCount: 0, target: ihsTarget, finish: 'hardDrop', holdCounts: false }
+        ], settingsLink: 'handling' },
+      tryIt: { ...practice('T', [irsDemo.target], { ...settings, irs: true, ihs: false, are: 350 }),
+        requireIRS: true, bufferedAction: 'cw' } },
+      ...['I', 'O', 'T', 'L', 'J', 'S', 'Z'].map(piece => pieceStep(piece, settings)),
+      { id: 'summary', title: 'まとめ：ドリルへ出発です♪', expression: 'happy', lines: [
+        'レッスン修了です！まず向きと列を決めて、回転・タップ・DASの最短ルートを選びましょう。',
+        'ハードドロップは入力回数に含みません。IRSの回転は1入力です。落とす前に目標の輪郭を確かめてくださいね。',
+        '同じ最短回数なら、表と別の道順でもパーフェクトです。むずかしい場所はヒントと再挑戦で練習できますよ。',
+        '進み具合はアプリに保存され、レッスン一覧からいつでも復習できます。ドリルでもミルフィが応援しますね♪'
+      ], demo: { type: 'optimal-placement', piece: 'T', settings: { ...settings },
+        ...demoVariant('T', 'summary-route', summaryTarget.actions, settings) },
+      tryIt: practice('T', [summaryTarget], settings), next: 'drill' }
+    ]);
+  }
+  const LESSONS = createLessons();
+
+  return Object.freeze({ name: 'ミルフィ', EXPRESSIONS, EXPRESSION_LABELS, MASCOT_CSS, mascotSVG,
+    DIALOGUE, PRAISE_LINES, STREAK_LINES, PIECE_PRAISE, MISS_LINES, ENCOURAGEMENT_LINES,
+    WELCOME_LINES, TIPS, SPRINT_COMMENTS, hintText, sprintComment,
+    LESSONS, createLessons, lessonPlacementGroups });
+});
+</script>
+  <script>/* Offline UI. Engine time, keyboard time and animation time all use the same
+ * performance.now() clock. No OS repeats, DOM coordinates or frame counts enter
+ * the rules engine. Debug helpers choose targets; they never manufacture locks.
+ */
+(function () {
+  'use strict';
+  const E = globalThis.MoeTet, M = E.mascot;
+  const $ = (s, root = document) => root.querySelector(s);
+  const $$ = (s, root = document) => [...root.querySelectorAll(s)];
+  const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const copy = value => JSON.parse(JSON.stringify(value));
+  const now = () => performance.now();
+  const STORAGE = 'moetet-finesse.v1';
+  const DEFAULT_KEYS = {
+    left: ['ArrowLeft'], right: ['ArrowRight'], softDrop: ['ArrowDown'], hardDrop: ['Space'],
+    cw: ['ArrowUp', 'KeyX'], ccw: ['KeyZ'], rotate180: ['KeyA'], hold: ['ShiftLeft', 'KeyC'],
+    retry: ['KeyR'], pause: ['Escape'], skip: ['KeyN'], settings: ['Comma'], hint: ['KeyH']
+  };
+  const ACTION_NAMES = { left: '左へ', right: '右へ', softDrop: 'ソフトドロップ', hardDrop: 'ハードドロップ',
+    cw: '右回転 CW', ccw: '左回転 CCW', rotate180: '180°回転', hold: 'ホールド', retry: '同じ目標をリトライ',
+    pause: '一時停止', skip: '次の目標', settings: '設定を開く', hint: 'ヒント切替' };
+  const UI_DEFAULTS = { zeroFault: false, repeatOnFault: false, repeatOnMiss: true, showTarget: true,
+    showOptimal: true, showKeys: true, ghost: true, sound: true, volume: .3, bubbles: true };
+  const PRACTICE_DEFAULTS = { pieces: [...E.PIECE_TYPES], area: 'all', minColumn: 1, maxColumn: 9, weakSpot: false };
+  let settings = { ...E.DEFAULT_SETTINGS }, ui = { ...UI_DEFAULTS }, bindings = copy(DEFAULT_KEYS);
+  let practice = copy(PRACTICE_DEFAULTS), progress = { current: 0, completed: [] };
+  let totalStats = new E.Stats(), storageOK = true;
+
+  // Import and disk loading share strict validation. A malformed import never
+  // partially updates preferences or steals a binding from another action.
+  function validatePreferences(data) {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('JSONの形式を確認してください。');
+    const result = { settings: E.normalizeSettings(data.settings || {}), ui: { ...UI_DEFAULTS }, bindings: copy(DEFAULT_KEYS) };
+    for (const key of Object.keys(UI_DEFAULTS)) if (data.ui && key in data.ui) {
+      const value = data.ui[key];
+      if (key === 'volume') {
+        if (typeof value !== 'number' || !Number.isFinite(value)) throw new Error('音量は数値にしてください。');
+        result.ui.volume = Math.max(0, Math.min(1, value));
+      } else {
+        if (typeof value !== 'boolean') throw new Error(key + ' は true / false にしてください。');
+        result.ui[key] = value;
+      }
+    }
+    if (data.bindings) {
+      const used = new Set();
+      for (const action of E.INPUT_ACTIONS) {
+        const keys = data.bindings[action];
+        if (!Array.isArray(keys) || !keys.length || keys.length > 8) throw new Error(ACTION_NAMES[action] + ' のキーが必要です。');
+        for (const code of keys) {
+          if (typeof code !== 'string' || !/^[A-Za-z][A-Za-z0-9]{0,39}$/.test(code) || used.has(code)) throw new Error('キーが重複しているか、無効なコードです。');
+          used.add(code);
+        }
+        result.bindings[action] = keys.slice();
+      }
+    }
+    return result;
+  }
+  try {
+    const raw = localStorage.getItem(STORAGE);
+    if (raw) {
+      const saved = JSON.parse(raw), checked = validatePreferences(saved);
+      ({ settings, ui, bindings } = checked);
+      totalStats = new E.Stats(saved.stats);
+      if (saved.practice) {
+        const p = saved.practice;
+        if (Array.isArray(p.pieces) && p.pieces.length && p.pieces.every(t => E.PIECE_TYPES.includes(t))) practice.pieces = [...new Set(p.pieces)];
+        if (['all', 'left', 'center', 'right', 'custom'].includes(p.area)) practice.area = p.area;
+        for (const key of ['minColumn', 'maxColumn']) if (Number.isInteger(p[key])) practice[key] = Math.max(1, Math.min(9, p[key]));
+        if (practice.minColumn > practice.maxColumn) practice.maxColumn = practice.minColumn;
+        practice.weakSpot = p.weakSpot === true;
+      }
+      if (saved.progress) {
+        progress.current = Math.max(0, Math.min(11, Number(saved.progress.current) || 0)) | 0;
+        progress.completed = (Array.isArray(saved.progress.completed) ? saved.progress.completed : []).filter(i => Number.isInteger(i) && i >= 0 && i < 12);
+      }
+    }
+  } catch (_) { storageOK = false; }
+  function save() {
+    try {
+      localStorage.setItem(STORAGE, JSON.stringify({ version: 1, settings, ui, bindings, practice, progress, stats: totalStats.toJSON() }));
+      storageOK = true;
+    } catch (_) { storageOK = false; }
+  }
+  let screen = 'menu', session = null, demo = null, lessonIndex = progress.current;
+  let lessons = M.createLessons(settings), tryMode = false, tryIndex = 0, tryDone = false;
+  let lessonMessage = '', sessionEventQueue = [], trace = [], irsUntil = 0, irsCount = 0;
+  let hint = false, lastResult = null, resultActions = [], lastTargetActions = [];
+  let expression = 'normal', bubble = '', tipIndex = 0, particles = [];
+  let settingsReturn = 'menu', capture = null, toastUntil = 0, lastHUD = 0, sprintResult = null;
+  let demoVariant = 0, selectedDemo = null, lastQueue = '', statsScope = 'total';
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const app = $('#app');
+
+  function friendly(code) {
+    const labels = { ArrowLeft: '←', ArrowRight: '→', ArrowDown: '↓', ArrowUp: '↑', Space: 'Space',
+      ShiftLeft: 'Shift(左)', ShiftRight: 'Shift(右)', ControlLeft: 'Ctrl(左)', ControlRight: 'Ctrl(右)',
+      AltLeft: 'Alt(左)', AltRight: 'Alt(右)', Escape: 'Esc', Comma: ',', Period: '.', Enter: 'Enter',
+      Backspace: 'BS', Backquote: '`', Slash: '/', Semicolon: ';', Quote: "'", Minus: '-', Equal: '=' };
+    return labels[code] || code.replace(/^Key|^Digit/, '');
+  }
+  function actionLabel(action) {
+    const base = action === 'dasLeft' ? 'left' : action === 'dasRight' ? 'right' : action;
+    const key = friendly(bindings[base]?.[0] || action);
+    return key + (action.startsWith('das') ? ' 長押し' : ['cw', 'ccw', 'rotate180'].includes(action) ? ' ' + E.ACTION_LABELS[action] : '');
+  }
+  function route(actions, pressed = '') {
+    if (!actions?.length) return '<span class="empty-route">そのまま ' + escape(friendly(bindings.hardDrop[0])) + ' ↓</span>';
+    return actions.map((action, i) => (i ? '<span class="arrow">›</span>' : '') +
+      `<kbd data-key-action="${action}" class="${pressed === action ? 'pressed' : ''}">${escape(actionLabel(action))}</kbd>`).join('');
+  }
+  function actualRoute(inputs) { return inputs.map(input => input.slide ? input.action === 'left' ? 'dasLeft' : 'dasRight' : input.action); }
+  function timeText(ms) {
+    const seconds = ms / 1000;
+    return `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${(seconds % 60).toFixed(2).padStart(5, '0')}`;
+  }
+  function toast(message) { $('#toast').textContent = message; $('#toast').classList.add('visible'); toastUntil = now() + 3000; }
+  function pick(lines) { return lines[Math.floor(Math.random() * lines.length)]; }
+  function mascot(expr = 'normal', prefix = 'app') { return M.mascotSVG(expr, { idPrefix: prefix }); }
+  function speech(text, id = '') { return `<div class="speech" ${id ? `id="${id}"` : ''}><span class="speaker">テト学園のガイド · ミルフィ</span><span class="bubble-text">${escape(text)}</span></div>`; }
+  function setCoach(text, expr = 'normal') {
+    bubble = text; expression = expr;
+    const target = $('#coach-speech .bubble-text');
+    if (target) target.textContent = ui.bubbles || screen === 'tutorial' ? text : 'ミルフィが応援中です♪';
+    const portrait = $('#coach-mascot');
+    if (portrait && portrait.dataset.expression !== expr) {
+      portrait.innerHTML = mascot(expr, 'coach'); portrait.dataset.expression = expr;
+    }
+  }
+
+  // WebAudio is created only after a user gesture. Unsupported, suspended or
+  // restricted audio is a silent fallback; it can never interrupt play.
+  let audioContext;
+  function sound(kind) {
+    if (!ui.sound || ui.volume === 0) return;
+    try {
+      const Audio = window.AudioContext || window.webkitAudioContext;
+      if (!Audio) return;
+      audioContext ||= new Audio();
+      if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+      if (audioContext.state !== 'running') return;
+      const frequencies = kind === 'perfect' ? [660, 880, 1100] : kind === 'fault' ? [330, 260] : [440];
+      frequencies.forEach((frequency, i) => {
+        const oscillator = audioContext.createOscillator(), gain = audioContext.createGain();
+        const start = audioContext.currentTime + i * .065;
+        oscillator.type = 'sine'; oscillator.frequency.value = frequency;
+        gain.gain.setValueAtTime(0, start); gain.gain.linearRampToValueAtTime(ui.volume * .13, start + .008);
+        gain.gain.exponentialRampToValueAtTime(.0001, start + .13);
+        oscillator.connect(gain); gain.connect(audioContext.destination); oscillator.start(start); oscillator.stop(start + .15);
+        oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
+      });
+    } catch (_) { /* Audio is optional. */ }
+  }
+  function header() {
+    return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>萌えテト <small>FINESSE EDITION / フィネス編</small></span></button><div class="top-actions"><span class="tag mint-tag">● オフラインで練習できます</span>${screen !== 'menu' ? '<button class="quiet small" data-act="menu">タイトル</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
+  }
+  function footer() { return '<footer class="footer"><span>テト学園 · 小さな一手を、きれいなフィネスに。</span><span>ORIGINAL ART & SYNTHESIZED SOUND · NO NETWORK</span></footer>'; }
+  function menuHTML() {
+    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO TETO ACADEMY</div><h1 class="logo">萌え<span>テト</span><small>フィネス編</small></h1><p class="menu-intro">ひとつのミノに、いちばん短い道を。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>FREE PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button><button data-act="lessons"><span><b>レッスン一覧</b><small>LEARN AT YOUR PACE</small></span><span>▤</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}</p><p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech('テト学園へようこそ！ミルフィです♪\n最短の操作、いっしょに見つけましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR FINESSE COMPANION / ミルフィ</p></section></main>${footer()}`;
+  }
+  function mini(type, extra = '') { return `<canvas class="mini-piece" data-piece="${type || ''}" width="144" height="108" aria-label="${type || '空'}ミノ" ${extra}></canvas>`; }
+  function boardHTML() {
+    return `<div class="board-heading"><span>SPAWN / 21–22</span><span>10 × 20</span></div><div class="board-shell"><canvas id="board" class="board" role="img" aria-label="練習フィールド、10列20行と出現2行"></canvas><div id="irs-indicator" class="irs-flash" aria-live="polite">IRS ✧</div><div id="are-bar" class="are-track" role="progressbar" aria-label="出現までの待ち時間" aria-valuemin="0" aria-valuemax="100"><div class="are-fill"></div></div></div><div class="column-labels">${Array.from({ length: 10 }, (_, i) => `<span>${i + 1}</span>`).join('')}</div>`;
+  }
+  function pieceBars(stats) {
+    return E.PIECE_TYPES.map(type => {
+      const p = stats.byPiece[type], percent = p.attempts ? 100 * p.faults / p.attempts : 0;
+      return `<div class="piece-bar" title="${type}: 試行${p.attempts}回 / フォルト${p.faults}回"><span>${type}</span><div class="bar-track"><div class="bar-fill" style="width:${percent}%"></div></div><span>${p.faults} / ${p.attempts}</span></div>`;
+    }).join('');
+  }
+  function practiceHTML() {
+    return `<section class="panel practice-options"><h3>練習するミノ / 目標のエリア</h3><div class="piece-filters">${E.PIECE_TYPES.map(type => `<label class="piece-check"><input type="checkbox" data-piece-filter="${type}" ${practice.pieces.includes(type) ? 'checked' : ''}><span>${type}</span></label>`).join('')}</div><label class="filter-line">列のエリア<select id="area" aria-label="列のエリア">${[['all','すべて'],['left','左 / 1–3列'],['center','中央 / 4–6列'],['right','右 / 7–10列'],['custom','列を指定']].map(([value, label]) => `<option value="${value}" ${practice.area === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>${practice.area === 'custom' ? `<div class="filter-line">左端の列 <input id="min-column" aria-label="開始列" type="number" min="1" max="9" value="${practice.minColumn}"> 〜 <input id="max-column" aria-label="終了列" type="number" min="1" max="9" value="${practice.maxColumn}"></div>` : ''}<label class="checkline" style="margin-top:8px"><input data-practice="weakSpot" type="checkbox" ${practice.weakSpot ? 'checked' : ''}>苦手な目標を多めに</label><label class="checkline"><input data-ui="zeroFault" type="checkbox" ${ui.zeroFault ? 'checked' : ''}>ゼロフォルト（成功まで再挑戦）</label><p class="tiny" style="margin-top:5px">変更は次の目標から反映・成績は引き継ぎます</p></section>`;
+  }
+  function playHTML() {
+    const sprint = session.sprintLength;
+    return `<main class="play-page"><div class="row spread play-topline"><h1 class="play-title">${sprint ? 'スプリント' : 'フィネス・ドリル'}<span class="tag">${sprint ? sprint + ' PLACEMENTS' : 'FREE PRACTICE'}</span></h1><div class="row"><span id="sprint-time" class="sprint-time">00:00.00</span><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div></div><div class="play-grid"><aside class="coach">${speech(ui.bubbles ? bubble : 'ミルフィが応援中です♪', 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div class="coach-label">ミルフィと、ひとつずつ。</div><div id="practice-wrap">${practiceHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">HOLD</div><div id="hold-preview">${mini(null)}</div></div><p id="hold-note" class="hold-note">${session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効'}</p><div class="key-help">${['left', 'right', 'cw', 'ccw', 'rotate180'].map(a => `<kbd data-live-key="${a}" title="${ACTION_NAMES[a]}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><div class="queue-box"><div class="queue-title">NEXT 5</div><div id="next-preview"></div></div><p class="hold-note">${escape(friendly(bindings.hardDrop[0]))}<br>ハードドロップ</p></aside></section><aside class="right-stack"><section class="panel stats-panel"><div class="row spread panel-label"><span>SESSION / この練習</span><button class="quiet small" style="padding:0;font-size:9px" data-act="records-session">全記録 ↗</button></div><div class="stats-main"><div class="stat"><label>連続 PERFECT</label><strong class="accent" id="streak">0</strong><small> streak</small></div><div class="stat"><label>フィネス正確率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>BEST <b id="best-streak">0</b></span><span>PPS <b id="pps">0.00</b></span><span>成功 <b id="completed">0${sprint ? '/' + sprint : ''}</b></span></div>${sprint ? '<div class="sprint-progress"><div id="sprint-progress"></div></div>' : ''}<div class="stats-strip"><span>平均入力 <b id="average">0 / 0</b></span><span>ミス <b id="misses">0</b></span></div></section><section class="panel stats-panel"><div class="panel-label">FAULTS / ATTEMPTS · ミノ別</div><div id="piece-bars" class="piece-bars">${pieceBars(session.stats)}</div></section><section id="result-panel" class="panel result-panel"></section><div class="play-buttons"><button data-act="retry">↻ 同じ目標</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の目標 →</button><button data-act="settings">操作の設定</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
+  }
+  function lessonsHTML() {
+    return `<main class="page"><div class="page-heading"><div><div class="eyebrow">FINESSE CLASSROOM</div><h2 style="margin-top:6px">レッスン一覧</h2><p>実演を見て、3つの目標で練習。好きなところから復習できます。</p></div><span class="tag mint-tag">${progress.completed.length} / 12 チャレンジ達成</span></div><div class="lesson-list">${lessons.map((lesson, i) => `<button class="lesson-card" data-act="lesson" data-index="${i}"><span class="eyebrow">LESSON ${String(i + 1).padStart(2, '0')} ${progress.completed.includes(i) ? ' · ✔' : ''}</span><b>${escape(lesson.title)}</b><span>${i >= 4 && i <= 10 ? 'ミノ別の最短表・実演・3つの目標' : '実演とミニチャレンジ'}</span></button>`).join('')}</div></main>${footer()}`;
+  }
+  function demoVariants(lesson) { return lesson.demo.examples || lesson.demo.variants || [lesson.demo]; }
+  function tutorialHTML() {
+    const lesson = lessons[lessonIndex], variants = demoVariants(lesson);
+    return `<main class="page lesson-page"><div class="page-heading lesson-heading"><div><div class="eyebrow">LESSON ${String(lessonIndex + 1).padStart(2, '0')} / 12</div><h2 style="margin-top:5px">${escape(lesson.title)}</h2></div><div class="row"><nav class="lesson-steps" aria-label="レッスン選択">${lessons.map((l, i) => `<button data-act="lesson" data-index="${i}" title="${escape(l.title)}" class="${i === lessonIndex ? 'active' : progress.completed.includes(i) ? 'done' : ''}">${i + 1}</button>`).join('')}</nav><button class="small" data-act="lessons">一覧</button></div></div><div class="lesson-grid"><aside class="lesson-coach">${speech(lesson.lines[0], 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${lesson.expression}">${mascot(lesson.expression, 'lesson')}</div><p class="tiny" style="text-align:center">ミルフィのフィネス教室</p></aside><section class="lesson-board">${boardHTML()}<div id="demo-keys" class="sequence"></div><p id="demo-caption" class="tiny" style="text-align:center;margin:8px 0">実演を準備しています…</p><div id="tutorial-result" class="lesson-status" aria-live="polite">${escape(lessonMessage)}</div></section><section class="lesson-content"><span class="tag ${tryMode ? 'mint-tag' : ''}">${tryMode ? 'YOUR TURN / 自分でチャレンジ' : 'WATCH / キーの光り方を見てみよう'}</span><div class="lesson-text">${lesson.lines.slice(1).map(line => `<p>${escape(line)}</p>`).join('')}</div><div class="demo-tabs">${variants.map((v, i) => `<button class="${demoVariant === i && !tryMode ? 'active' : ''}" data-act="demo" data-index="${i}">${lesson.demo.type === 'compare-sequences' ? i === 0 ? 'タップ × 4' : 'DAS × 1' : v.type === 'irs' ? 'IRSの実演' : v.type === 'ihs' ? 'IHSの実演' : '実演 ' + (i + 1)}</button>`).join('')}<button data-act="settings">操作の設定 ↗</button></div><div class="try-box"><h3>✧ やってみましょう</h3><p>${lesson.tryIt.requireIRS ? 'ARE中に回転キーを長押しして、IRSで置いてみましょう。' : '目標の輪郭に、最少の回数で置いてみましょう。別の最短手順でもOKです。'}<br>移動・回転 ${escape(friendly(bindings.hardDrop[0]))} で落下 / ${escape(friendly(bindings.retry[0]))} でもう一度</p><button class="small ${tryMode ? '' : 'primary'}" data-act="try-it">${tryDone ? 'もう一度チャレンジ' : tryMode ? `目標 ${Math.min(tryIndex + 1, lesson.tryIt.targets.length)} / ${lesson.tryIt.targets.length} · 最初から` : `${lesson.tryIt.targets.length}つの目標にチャレンジ`}</button></div>${lesson.demo.placementGroups ? `<h3 style="margin-bottom:7px">${lesson.demo.piece}ミノの最短ルート表</h3><p class="tiny">列を選ぶと実演します。0 / R / 2 / L は回転の向きです。</p><table class="lesson-table"><thead><tr><th>向き・左端の列</th><th>最短入力</th></tr></thead><tbody>${lesson.demo.placementGroups.map((group, i) => `<tr><td><button data-act="table-demo" data-index="${i}">${group.placements.map(p => `${p.rotationLabel}・${p.column}`).join(' / ')}</button></td><td><div class="sequence">${route(group.actions)}</div></td></tr>`).join('')}</tbody></table>` : ''}<div class="lesson-nav"><button class="small" data-act="previous-lesson" ${lessonIndex === 0 ? 'disabled' : ''}>← 前へ</button><button class="primary small" data-act="next-lesson">${lessonIndex === 11 ? 'ドリルへ →' : '次のレッスン →'}</button></div><p class="tiny" style="margin-top:10px">実演中: Enter / Space / → で次へ · ← で前へ · Esc でタイトル</p></section></div></main>`;
+  }
+  function handlingRow(key, title, note, step = 1) {
+    const [min, max] = E.SETTING_LIMITS[key];
+    return `<div class="setting-row"><label for="setting-${key}">${title}<small>${note} · ${min}–${max}</small></label><input aria-label="${title} スライダー" data-setting="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${settings[key]}"><input id="setting-${key}" aria-label="${title}" data-setting="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${settings[key]}"></div>`;
+  }
+  function toggle(key, label, engine = false) { return `<label class="checkline"><input type="checkbox" ${engine ? 'data-engine-toggle' : 'data-ui'}="${key}" ${(engine ? settings : ui)[key] ? 'checked' : ''}>${label}</label>`; }
+  function settingsHTML() {
+    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">操作と表示の設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-grid"><section class="panel"><div class="row spread"><h3>ハンドリング</h3><button class="quiet small" data-act="reset-handling">初期値に戻す</button></div>${handlingRow('das','DAS','長押しの待ち時間 ms')}${handlingRow('arr','ARR','連続移動の間隔 ms')}${handlingRow('sdf','SDF','ソフト落下倍率 / 41 = ∞')}${handlingRow('dcd','DCD','自動移動の待機 ms')}${handlingRow('are','ARE','次の出現まで ms')}${handlingRow('gravity','重力 G','0 = OFF / cells per frame',.1)}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('ghost','着地の影を表示')}${toggle('showOptimal','最短手順を表示')}${toggle('showKeys','操作キーを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div><label class="filter-line" style="margin-top:17px">音量 <input aria-label="音量" data-ui="volume" type="range" min="0" max="1" step=".05" value="${ui.volume}"></label></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0;font-size:10px" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では、矢印キーで数値を調整できます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></main>${footer()}`;
+  }
+  function statsHTML() {
+    const stats = statsScope === 'session' && session ? session.stats.snapshot() : totalStats.snapshot();
+    return `<main class="page"><div class="page-heading"><div><div class="eyebrow">A LITTLE BETTER EVERY DAY</div><h2 style="margin-top:5px">練習の記録</h2><p>${statsScope === 'session' ? 'このセッションの記録です。' : 'このブラウザに保存した、これまでの練習です。'} フォルトと置き場所のミスは別々に集計します。</p></div><div class="row">${session ? `<button class="small" data-act="stats-scope">${statsScope === 'session' ? '通算記録へ' : 'セッション記録へ'}</button><button class="primary small" data-act="return-play">練習に戻る</button>` : ''}<button class="small danger" data-act="reset-stats">記録をリセット</button></div></div><section class="panel big-stats">${[['試行数',stats.attempts,'回'],['正確率',stats.accuracy.toFixed(1),'%'],['最高連続',stats.bestStreak,'回'],['フォルト',stats.faults,'回'],['置き場所ミス',stats.misses,'回'],['平均入力 / 最短',stats.averageInputs.toFixed(2) + ' / ' + stats.averageOptimal.toFixed(2),'']].map(([label,value,unit]) => `<div class="stat"><label>${label}</label><strong class="accent">${value}</strong><small> ${unit}</small></div>`).join('')}</section><div class="stats-full" style="margin-top:20px"><section class="panel"><h3>ミノごとの記録</h3><table class="full-table"><thead><tr><th>ミノ</th><th>試行</th><th>Perfect</th><th>Fault</th><th>Miss</th></tr></thead><tbody>${E.PIECE_TYPES.map(type => { const p=stats.byPiece[type]; return `<tr><td>${type}</td><td>${p.attempts}</td><td>${p.perfect}</td><td>${p.faults}</td><td>${p.misses}</td></tr>`; }).join('')}</tbody></table></section><section class="panel"><h3>スプリントのベストタイム</h3><table class="full-table"><thead><tr><th>目標数</th><th>ベストタイム</th></tr></thead><tbody>${Object.entries(totalStats.bestTimes).map(([length, time]) => `<tr><td>${length} 個</td><td>${timeText(time)}</td></tr>`).join('') || '<tr><td colspan="2">まだ記録がありません。スプリントに挑戦しましょう♪</td></tr>'}</tbody></table><p class="handling-note">正確率 = Perfect ÷ 全試行。PPS = 成功した配置数 ÷ 秒数。<br>ゼロフォルトでは余分な入力のあった配置は進捗に入りません。</p></section></div></main>${footer()}`;
+  }
+  function sprintHTML() {
+    return `<main class="page"><div class="page-heading"><div><div class="eyebrow">FIND YOUR RHYTHM</div><h2 style="margin-top:5px">スプリント</h2></div><span class="tag">タイマーは最初の操作から</span></div><div class="sprint-setup"><div>${speech('正確さとリズムを大切に♪ 目標の数だけ置いて、自己ベストに挑戦しましょうね。')}<div class="mascot-wrap">${mascot('surprised','sprint')}</div></div><section class="panel"><h2>今日は何個、置きますか？</h2><p class="handling-note">正しい場所への配置が目標数に達するとゴールです。<br>操作・ミノ・列の設定はドリルと共通です。</p><div class="sprint-choices"><button data-act="start-sprint" data-length="40">40<small class="tiny"> 個</small></button><button data-act="start-sprint" data-length="100">100<small class="tiny"> 個</small></button></div><div class="custom-sprint"><label for="custom-length">カスタム</label><input id="custom-length" type="number" min="1" max="9999" value="20"><button class="primary small" data-act="custom-sprint">スタート →</button></div><p class="best-line">40個 ${totalStats.bestTimes[40] === undefined ? '—' : timeText(totalStats.bestTimes[40])} / 100個 ${totalStats.bestTimes[100] === undefined ? '—' : timeText(totalStats.bestTimes[100])}</p>${toggle('zeroFault','ゼロフォルト：最短成功だけで進む')}</section></div></main>${footer()}`;
+  }
+  function resultHTML() {
+    const r = sprintResult;
+    return `<main class="page result-page"><div class="page-heading"><div><div class="eyebrow">SPRINT COMPLETE</div><h2 style="margin-top:5px">${r.sprintLength}個、おつかれさまでした！</h2></div><span class="tag mint-tag">FINISH ✧</span></div><div class="result-layout"><div>${speech(M.sprintComment(r.accuracy, r.pps))}<div class="mascot-wrap">${mascot('happy', 'finish')}</div></div><section class="panel"><div class="panel-label">YOUR TIME</div><div class="result-time">${timeText(r.elapsed)}</div><p class="result-best">ベスト ${timeText(totalStats.bestTimes[r.sprintLength])}</p><div class="result-summary"><div class="stat"><label>PPS</label><strong>${r.pps.toFixed(2)}</strong></div><div class="stat"><label>正確率</label><strong>${r.accuracy.toFixed(1)}<small>%</small></strong></div><div class="stat"><label>フォルト / ミス</label><strong>${r.faults}<small> / ${r.misses}</small></strong></div></div><div class="panel-label">FAULTS / ATTEMPTS · ミノ別</div><div class="piece-bars">${pieceBars(r)}</div><div class="row"><button class="primary" data-act="start-sprint" data-length="${r.sprintLength}">もう一度 →</button><button data-act="menu">タイトルへ</button></div></section></div></main>${footer()}`;
+  }
+
+  function render(focus = true) {
+    app.innerHTML = header() + ({ menu: menuHTML, play: playHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
+      settings: settingsHTML, records: statsHTML, sprint: sprintHTML, result: resultHTML }[screen])();
+    document.body.dataset.screen = screen;
+    lastQueue = ''; lastHUD = 0;
+    if (screen === 'play') { updateResult(); updateHUD(now()); }
+    if (screen === 'tutorial' && !tryMode) beginDemo();
+    drawMinis();
+    if (focus) {
+      const target = $('main .primary:not(:disabled)') || $('main button:not(:disabled)');
+      target?.focus({ preventScroll: true });
+    }
+    if (session?.pausedAt !== null && screen === 'play') showPause();
+  }
+  function releaseAll() {
+    if (!session) return;
+    const t = now();
+    for (const [code, key] of [...session.handler.held]) session.keyUp(key.action, t, { code });
+  }
+  function pauseSession() {
+    if (!session?.running) return;
+    session.pause(now()); releaseAll();
+  }
+  function go(screenName) {
+    releaseAll(); demo = null; selectedDemo = null;
+    if (screenName === 'menu' || screenName === 'sprint' || screenName === 'lessons') {
+      if (session?.running) session.pause(now());
+      session = null; tryMode = false; particles = []; sessionEventQueue = [];
+    }
+    screen = screenName; window.scrollTo(0, 0); render();
+  }
+  function openSettings() {
+    if (screen === 'settings') return;
+    settingsReturn = screen; pauseSession(); demo = null; screen = 'settings'; window.scrollTo(0, 0); render();
+  }
+  function closeSettings() {
+    screen = settingsReturn; lessons = M.createLessons(settings); window.scrollTo(0, 0); render();
+    if (screen === 'tutorial' && tryMode) session?.resume(now());
+    // A live drill returns to the pause overlay so held keys cannot jump ahead.
+  }
+  function updateSettings(patch) {
+    settings = E.normalizeSettings(patch, settings);
+    if (session) session.setSettings(settings, now());
+    save();
+  }
+  function updateOptions() {
+    if (session) {
+      session.zeroFault = ui.zeroFault; session.repeatOnFault = ui.repeatOnFault;
+      session.repeatOnMiss = ui.repeatOnMiss;
+    }
+    save();
+  }
+  function newSession(options) {
+    const s = new E.DrillSession({ clock: now, time: now(), settings, totalStats, ...options,
+      onEvent: (event, source) => sessionEventQueue.push({ event, source }) });
+    return s;
+  }
+  function sessionOptions() {
+    return { pieces: practice.pieces, area: practice.area === 'custom' ? 'all' : practice.area,
+      columnRange: practice.area === 'custom' ? [practice.minColumn - 1, practice.maxColumn - 1] : null,
+      weakSpot: practice.weakSpot, zeroFault: ui.zeroFault, repeatOnFault: ui.repeatOnFault, repeatOnMiss: ui.repeatOnMiss };
+  }
+  function startPlay(length = 0) {
+    releaseAll(); sessionEventQueue = []; demo = null; tryMode = false;
+    session = newSession({ ...sessionOptions(), sprintLength: length });
+    lastResult = null; particles = []; hint = false; irsUntil = 0; irsCount = 0;
+    setCoach('目標の輪郭へ、最短ルートでどうぞ♪ 迷ったらヒントを見てくださいね。');
+    screen = 'play'; session.start(now()); window.scrollTo(0, 0); render(); processEvents();
+  }
+  function updatePractice(next) {
+    // Change the target policy inside the current session, preserving its timer,
+    // sprint progress and statistics. Reject a range with no legal placements.
+    const opts = { ...next, area: next.area === 'custom' ? 'all' : next.area,
+      columnRange: next.area === 'custom' ? [next.minColumn - 1, next.maxColumn - 1] : null };
+    try { new E.DrillSession({ ...opts, settings, time: now() }); }
+    catch (_) { toast('この条件では置ける目標がありません。列の範囲を広げてください。'); $('#practice-wrap').innerHTML = practiceHTML(); return; }
+    releaseAll(); practice = next; save();
+    if (session && screen === 'play') {
+      session.pieces = [...practice.pieces]; session.area = opts.area; session.columnRange = opts.columnRange;
+      session.weakSpot = practice.weakSpot; session.bag = new E.Bag({ pieces: practice.pieces, rng: session.rng });
+      session.handler.bag = session.bag; session.handler.pieceProvider = () => session.bag.next();
+      session.handler.holdEnabled = practice.pieces.length > 1; session.handler.heldPiece = null;
+      session.skip(now());
+      $('#practice-wrap').innerHTML = practiceHTML();
+      $('#hold-note').innerHTML = session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効';
+      updateHUD(now());
+    }
+  }
+  function showPause() {
+    if ($('.overlay') || screen !== 'play') return;
+    releaseAll();
+    app.insertAdjacentHTML('beforeend', `<div class="overlay" role="dialog" aria-modal="true" aria-label="一時停止"><div class="modal"><div class="eyebrow">TAKE A LITTLE BREAK</div><h2>ひとやすみしましょう♪</h2><p>タイマーもミノも止まっています。<br>準備ができたら、また一緒に。</p><div class="stack"><button class="primary" data-act="resume">練習を再開 ${escape(friendly(bindings.pause[0]))}</button><button data-act="settings">操作の設定</button><button class="quiet" data-act="menu">タイトルへ戻る</button></div></div></div>`);
+    $('.overlay .primary').focus({ preventScroll: true });
+  }
+  function resumePlay() {
+    $('.overlay')?.remove(); releaseAll(); session?.resume(now()); $('#board')?.focus({ preventScroll: true });
+  }
+  function updateResult() {
+    const panel = $('#result-panel'); if (!panel) return;
+    if (!lastResult) {
+      panel.className = 'panel result-panel';
+      panel.innerHTML = `<div class="result-head"><strong>目標を見てみよう</strong><small id="target-optimal"></small></div><p class="tiny" style="line-height:1.9">破線の目標と着地の影を重ねて、<br>${escape(friendly(bindings.hardDrop[0]))} で固定します。</p><div id="hint-route" class="hint-route" ${hint && ui.showOptimal ? '' : 'hidden'}></div>`;
+    } else {
+      const r = lastResult;
+      panel.className = 'panel result-panel ' + r.status;
+      panel.innerHTML = `<div class="result-head"><strong>${r.status === 'perfect' ? '✔ Perfect!' : r.status === 'fault' ? '✧ フォルト +' + r.extra : '◇ 置き場所ミス'}</strong><small>${r.used} / 最短 ${r.optimal}</small></div>${ui.showOptimal ? `<div class="route-label">OPTIMAL / この目標の最短</div><div class="sequence">${route(resultActions)}</div>` : ''}<div class="route-label">YOUR INPUT / あなたの操作${r.flags.softDrop ? ' · ソフト落下あり' : ''}</div><div class="sequence">${route(actualRoute(r.inputs))}</div><div id="hint-route" class="hint-route" ${hint && ui.showOptimal ? '' : 'hidden'}></div>`;
+    }
+    updateHint();
+  }
+  function updateHint() {
+    const el = $('#hint-route');
+    if (el && session?.round) {
+      el.hidden = !(hint && ui.showOptimal);
+      el.innerHTML = `<div class="route-label">NEXT TARGET / 今の目標 · ${session.round.optimal}入力</div><div class="sequence">${route(session.round.target.actions)}</div>`;
+    }
+  }
+  function processEvents() {
+    // Engine callbacks only enqueue work. Updating the DOM or releasing keys
+    // after update/keyDown returns prevents clock re-entry inside a spawn/lock.
+    while (sessionEventQueue.length) {
+      const { event: event, source } = sessionEventQueue.shift();
+      if (source !== session) continue;
+      trace.push({ kind: event.kind, t: event.t, type: event.type, status: event.result?.status });
+      if (trace.length > 150) trace.shift();
+      if (event.kind === 'target') { lastTargetActions = event.round.target.actions.slice(); updateHint(); }
+      if (event.kind === 'spawn' && source.handler.inputs.some(input => input.irs)) { irsUntil = now() + 850; irsCount++; }
+      if (event.kind === 'pause' && screen === 'play') showPause();
+      if (event.kind === 'resume') $('.overlay')?.remove();
+      if (event.kind === 'hint') { hint = !hint; updateHint(); }
+      if (event.kind === 'settings') openSettings();
+      if (event.kind === 'result') {
+        const r = event.result;
+        lastResult = r;
+        resultActions = r.optimalSequence.map(label => Object.keys(E.ACTION_LABELS).find(key => E.ACTION_LABELS[key] === label));
+        if (screen === 'tutorial' && tryMode) {
+          const requiresIRS = lessons[lessonIndex].tryIt.requireIRS;
+          if (r.status === 'perfect' && (!requiresIRS || r.inputs.some(i => i.irs))) {
+            tryIndex++;
+            if (tryIndex >= lessons[lessonIndex].tryIt.targets.length) {
+              tryDone = true; pauseSession();
+              if (!progress.completed.includes(lessonIndex)) progress.completed.push(lessonIndex);
+              lessonMessage = '✔ チャレンジ達成！次のレッスンへ進めます♪';
+              setCoach('大成功です！最短の操作、覚えられましたね♪', 'happy');
+            } else {
+              lessonMessage = `✔ Perfect! ${tryIndex} / ${lessons[lessonIndex].tryIt.targets.length} 達成。次の目標です♪`;
+              choosePracticeTarget();
+            }
+          } else {
+            lessonMessage = requiresIRS && r.status === 'perfect' ? '出現前の待ち時間に回転を長押ししてみましょう。' : `${r.status === 'miss' ? '置き場所をもう一度♪' : 'もう少し短くできますよ♪'} 最短 ${r.optimal}入力`;
+            choosePracticeTarget();
+          }
+          $('#tutorial-result').textContent = lessonMessage;
+          $('#demo-keys').innerHTML = route(lessons[lessonIndex].tryIt.targets[Math.min(tryIndex, lessons[lessonIndex].tryIt.targets.length - 1)].actions);
+          save(); sound(r.status === 'perfect' ? 'perfect' : 'fault');
+        } else {
+          if (r.status === 'perfect') {
+            const streakLines = M.STREAK_LINES[source.stats.streak];
+            setCoach(streakLines ? pick(streakLines) : source.stats.streak % 3 === 0 ? pick(M.PIECE_PRAISE[r.type]) : pick(M.PRAISE_LINES), 'happy');
+            if (!reducedMotion) for (let i = 0; i < 28; i++) particles.push({ x: 5, y: 2, vx: (Math.random() - .5) * 10, vy: 2 + Math.random() * 9, start: now(), color: ['#d9a6ce','#b5ddc8','#c5ade1','#efcf95'][i % 4] });
+          } else if (r.status === 'fault') {
+            setCoach(M.hintText(r.type, r.used, r.optimal, resultActions.map(actionLabel)), 'thinking');
+          } else setCoach(pick(M.MISS_LINES), 'sorry');
+          sound(r.status === 'perfect' ? 'perfect' : 'fault'); updateResult(); save();
+        }
+      }
+      if (event.kind === 'finish') {
+        sprintResult = event.result; save(); releaseAll(); screen = 'result'; render();
+      }
+    }
+  }
+  function updateHUD(t) {
+    if (screen !== 'play' || !session) return;
+    const stats = session.snapshot(t), handler = session.handler;
+    const values = { streak: stats.streak, accuracy: stats.accuracy.toFixed(0), 'best-streak': stats.bestStreak,
+      pps: stats.pps.toFixed(2), completed: stats.completed + (session.sprintLength ? '/' + session.sprintLength : ''),
+      average: stats.averageInputs.toFixed(1) + ' / ' + stats.averageOptimal.toFixed(1), misses: stats.misses,
+      'sprint-time': timeText(stats.elapsed) };
+    for (const [id, value] of Object.entries(values)) { const el = $('#' + id); if (el) el.textContent = value; }
+    $('#piece-bars').innerHTML = pieceBars(session.stats);
+    if ($('#target-optimal')) $('#target-optimal').textContent = '最短 ' + session.round.optimal + ' 入力';
+    if ($('#sprint-progress')) $('#sprint-progress').style.width = 100 * session.completed / session.sprintLength + '%';
+    const queue = session.nextQueue(), key = queue.join('') + ':' + handler.heldPiece;
+    if (key !== lastQueue) {
+      lastQueue = key; $('#next-preview').innerHTML = queue.map(type => mini(type)).join('');
+      $('#hold-preview').innerHTML = mini(handler.heldPiece); drawMinis();
+    }
+    $('#hold-preview').style.opacity = !handler.holdEnabled || handler.holdUsed ? '.4' : '1';
+    $('.key-help').hidden = !ui.showKeys;
+    const tip = M.TIPS[tipIndex % M.TIPS.length];
+    $('#play-footer').textContent = '✧ ' + tip;
+    if (session.stats.attempts && session.stats.attempts % 7 === 0) tipIndex = Math.floor(session.stats.attempts / 7);
+  }
+
+  function startLesson(index) {
+    releaseAll(); session = null; sessionEventQueue = []; tryMode = false; tryDone = false; lessonMessage = '';
+    lessonIndex = Math.max(0, Math.min(11, index)); progress.current = lessonIndex; save();
+    lessons = M.createLessons(settings); demoVariant = 0; selectedDemo = null; irsUntil = 0;
+    screen = 'tutorial'; render();
+  }
+  function choosePracticeTarget() {
+    const target = lessons[lessonIndex].tryIt.targets[Math.min(tryIndex, lessons[lessonIndex].tryIt.targets.length - 1)];
+    releaseAll(); session._newRound(target.type, target); session._schedule(now());
+  }
+  function startTryIt() {
+    demo = null; releaseAll(); sessionEventQueue = []; tryMode = true; tryIndex = 0; tryDone = false; lastResult = null;
+    const exercise = lessons[lessonIndex].tryIt;
+    session = newSession({ pieces: [exercise.piece], settings: { ...settings, ...exercise.settings },
+      totalStats: new E.Stats(), zeroFault: true, repeatOnFault: true, repeatOnMiss: true });
+    session.start(now()); choosePracticeTarget(); lessonMessage = '輪郭に重ねてハードドロップしてみましょう♪'; render();
+    $('#demo-keys').innerHTML = route(exercise.targets[0].actions);
+    $('#demo-caption').textContent = `チャレンジ 1 / ${exercise.targets.length} · 最短 ${exercise.targets[0].count} 入力`;
+    processEvents();
+  }
+  function beginDemo() {
+    const lesson = lessons[lessonIndex], variants = demoVariants(lesson);
+    const variant = selectedDemo || variants[demoVariant % variants.length];
+    const target = variant.target || lesson.demo.targets?.[0];
+    const type = variant.piece || lesson.demo.piece;
+    const t = now(), localSettings = { ...settings, ...lesson.demo.settings, gravity: 0, sdf: 40,
+      das: 240, arr: 35, dcd: 0, are: lesson.demo.type === 'spawn-buffer' ? 650 : 450 };
+    const events = [], handler = new E.InputHandler({ clock: now, time: t, settings: localSettings, autoNext: false,
+      onEvent: event => { if (event.kind === 'spawn' && handler.inputs.some(i => i.irs)) irsUntil = now() + 850; } });
+    if (variant.type === 'ihs') handler.heldPiece = variant.heldPiece;
+    handler.scheduleSpawn(type, t, localSettings.are);
+    const actions = variant.sequence || variant.actions || target?.actions || [];
+    const add = (at, action, down) => events.push({ at, action, down });
+    let cursor = t + localSettings.are + 400;
+    if (variant.type === 'irs' || variant.type === 'ihs') {
+      const action = variant.type === 'irs' ? variant.buffered[0].action : 'hold';
+      add(t + 160, action, true); add(t + localSettings.are + 250, action, false);
+      // IRS already executes the rotation in variant.sequence on spawn.
+    } else for (const action of actions) {
+      const isDAS = action.startsWith('das');
+      const base = isDAS ? action === 'dasLeft' ? 'left' : 'right' : action;
+      add(cursor, base, true);
+      cursor += isDAS ? localSettings.das + 11 * localSettings.arr : 160;
+      add(cursor, base, false); cursor += 380;
+    }
+    add(cursor + 100, 'hardDrop', true); add(cursor + 150, 'hardDrop', false);
+    demo = { handler, events, end: cursor + 1550, target, actions, variant, lock: null };
+    handler.callbacks.onLock = result => { if (demo?.handler === handler) demo.lock = result.state; };
+    $('#demo-keys').innerHTML = route(variant.type === 'ihs' ? ['hold'] : actions);
+    $('#demo-caption').textContent = variant.type === 'irs' ? 'ARE中に回転を長押し → 出現時にIRS（1入力）' : variant.type === 'ihs' ? 'ARE中にホールド → 出現時にIHS（0入力）' : `${type}ミノ · ${actions.length}入力 + ハードドロップ`;
+  }
+  function updateDemo(t) {
+    if (!demo) return;
+    while (demo.events.length && demo.events[0].at <= t) {
+      const event = demo.events.shift();
+      demo.handler[event.down ? 'keyDown' : 'keyUp'](event.action, event.at);
+    }
+    demo.handler.update(t);
+    for (const el of $$('#demo-keys kbd')) {
+      const action = el.dataset.keyAction;
+      const base = action === 'dasLeft' ? 'left' : action === 'dasRight' ? 'right' : action;
+      el.classList.toggle('pressed', [...demo.handler.held.values()].some(key => key.action === base));
+    }
+    if (t >= demo.end) { demoVariant++; beginDemo(); }
+  }
+
+  // Canvas coordinates preserve the engine's y-up 40-row board. Only the top
+  // two spawn rows and the 20-row field are drawn; device pixels stay crisp.
+  function rounded(ctx, x, y, w, h, radius) { ctx.beginPath(); ctx.roundRect(x, y, w, h, radius); }
+  function block(ctx, x, y, size, color, alpha = 1) {
+    ctx.save(); ctx.globalAlpha *= alpha;
+    const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
+    gradient.addColorStop(0, color); gradient.addColorStop(1, color);
+    rounded(ctx, x + 1, y + 1, size - 2, size - 2, Math.max(2, size * .13)); ctx.fillStyle = gradient; ctx.fill();
+    rounded(ctx, x + 2, y + 2, size - 4, (size - 4) * .46, Math.max(1, size * .1)); ctx.fillStyle = '#ffffff55'; ctx.fill();
+    ctx.strokeStyle = '#ffffff66'; ctx.lineWidth = 1; rounded(ctx, x + 1.5, y + 1.5, size - 3, size - 3, Math.max(2, size * .12)); ctx.stroke(); ctx.restore();
+  }
+  function prepareCanvas(canvas) {
+    const rect = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    if (!rect.width || !rect.height) return null;
+    const w = Math.round(rect.width * dpr), h = Math.round(rect.height * dpr);
+    if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+    const ctx = canvas.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, rect.width, rect.height);
+    return { ctx, width: rect.width, height: rect.height };
+  }
+  function drawMinis() {
+    for (const canvas of $$('.mini-piece')) {
+      const surface = prepareCanvas(canvas), type = canvas.dataset.piece;
+      if (!surface || !type) continue;
+      const { ctx, width, height } = surface, points = E.SHAPES[type][0];
+      const xs = points.map(c => c[0]), ys = points.map(c => c[1]);
+      const minX = Math.min(...xs), minY = Math.min(...ys), maxX = Math.max(...xs), maxY = Math.max(...ys), size = 13;
+      const ox = (width - (maxX - minX + 1) * size) / 2, oy = (height - (maxY - minY + 1) * size) / 2;
+      for (const [x, y] of points) block(ctx, ox + (x - minX) * size, oy + (maxY - y) * size, size, E.COLORS[type], .7);
+    }
+  }
+  function renderBoard(t) {
+    const canvas = $('#board'); if (!canvas) return;
+    const handler = screen === 'tutorial' && !tryMode ? demo?.handler : session?.handler;
+    const target = screen === 'tutorial' && !tryMode ? demo?.target : session?.round?.target;
+    if (!handler) return;
+    const surface = prepareCanvas(canvas); if (!surface) return;
+    const { ctx, width, height } = surface, cell = width / 10;
+    ctx.fillStyle = '#fcfaff'; ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = '#ede7f180'; ctx.fillRect(0, 0, width, 2 * cell);
+    ctx.strokeStyle = '#eee8f4'; ctx.lineWidth = .65;
+    for (let x = 0; x <= 10; x++) { ctx.beginPath(); ctx.moveTo(x * cell, 0); ctx.lineTo(x * cell, height); ctx.stroke(); }
+    for (let y = 0; y <= 22; y++) { ctx.beginPath(); ctx.moveTo(0, y * cell); ctx.lineTo(width, y * cell); ctx.stroke(); }
+    ctx.strokeStyle = '#cebddf'; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(0, 2 * cell); ctx.lineTo(width, 2 * cell); ctx.stroke(); ctx.setLineDash([]);
+    const drawCells = (points, type, alpha) => { for (const [x, y] of points) if (y >= 0 && y <= 21) block(ctx, x * cell, (21 - y) * cell, cell, E.COLORS[type] || '#bbb0cb', alpha * (y >= 20 ? .65 : 1)); };
+    for (let y = 0; y <= 21; y++) for (let x = 0; x < 10; x++) if (handler.board.get(x, y)) drawCells([[x, y]], handler.board.get(x, y), .7);
+    if (handler.active && (ui.ghost || screen === 'tutorial')) {
+      const ghost = E.hardDrop(handler.board, handler.active);
+      if (ghost) drawCells(E.cells(ghost), ghost.type, .13);
+    }
+    if (target && (ui.showTarget || screen === 'tutorial')) {
+      const color = E.COLORS[target.type], pulse = reducedMotion ? .8 : .65 + Math.sin(t / 270) * .2;
+      ctx.save(); ctx.globalAlpha = pulse; ctx.strokeStyle = color; ctx.fillStyle = color + '0c'; ctx.lineWidth = 1.9;
+      ctx.setLineDash([4, 2.5]); ctx.lineDashOffset = reducedMotion ? 0 : -t / 130;
+      ctx.shadowColor = color; ctx.shadowBlur = 4;
+      for (const [x, y] of target.cells) {
+        rounded(ctx, x * cell + 2, (21 - y) * cell + 2, cell - 4, cell - 4, 3); ctx.fill(); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    if (handler.active) drawCells(E.cells(handler.active), handler.active.type, .8);
+    if (screen === 'tutorial' && demo?.lock && !tryMode) drawCells(E.cells(demo.lock), demo.lock.type, .85);
+    for (const p of particles) {
+      const age = (t - p.start) / 1000;
+      if (age > 1) continue;
+      ctx.save(); ctx.globalAlpha = 1 - age; ctx.fillStyle = p.color;
+      const x = (p.x + p.vx * age) * cell, y = (22 - p.y - p.vy * age + age * age * 6) * cell;
+      ctx.translate(x, y); ctx.rotate(age * 4); ctx.fillRect(-2, -2, 4, 4); ctx.restore();
+    }
+    particles = particles.filter(p => t - p.start < 1100);
+    const indicator = $('#irs-indicator'); if (indicator) indicator.classList.toggle('visible', t < irsUntil);
+    const bar = $('#are-bar'), pending = handler.pending;
+    if (bar) {
+      bar.classList.toggle('visible', !!pending);
+      const percent = pending ? Math.max(0, Math.min(100, 100 * (handler.time - pending.since) / Math.max(1, pending.at - pending.since))) : 0;
+      $('.are-fill', bar).style.width = percent + '%'; bar.setAttribute('aria-valuenow', Math.round(percent));
+    }
+    for (const cap of $$('[data-live-key]')) cap.classList.toggle('pressed', [...handler.held.values()].some(k => k.action === cap.dataset.liveKey));
+  }
+
+  function captureHTML() {
+    $('.capture-overlay')?.remove();
+    if (!capture) return;
+    app.insertAdjacentHTML('beforeend', `<div class="capture-overlay" role="dialog" aria-modal="true" aria-label="キーを設定"><div class="modal"><div class="eyebrow">KEY BINDING</div><h2>${ACTION_NAMES[capture.action]}</h2><div class="capture-icon">⌨</div>${capture.conflict ? `<p class="conflict">${escape(friendly(capture.code))} は「${ACTION_NAMES[capture.conflict]}」に使われています。<br>この操作の${escape(friendly(bindings[capture.action][capture.index ?? 0]))} と入れ替えますか？</p><button class="primary" data-act="swap-key">入れ替える</button>` : '<p>割り当てるキーを押してください…<br>Esc でキャンセルできます。</p><button class="small" data-act="bind-escape">Esc を割り当てる</button>'}<button class="quiet" data-act="cancel-capture">キャンセル</button></div></div>`);
+    $('.capture-overlay button')?.focus();
+  }
+  function acceptKey(code) {
+    if (!code || code === 'Unidentified') return;
+    const conflict = Object.keys(bindings).find(action => bindings[action].includes(code));
+    if (conflict === capture.action) { capture = null; render(false); return; }
+    if (conflict) { capture.code = code; capture.conflict = conflict; captureHTML(); return; }
+    if (capture.index === null) bindings[capture.action].push(code);
+    else bindings[capture.action][capture.index] = code;
+    capture = null; save(); render(false); toast('キー設定を保存しました。');
+  }
+  function clickAction(button) {
+    const act = button.dataset.act;
+    if (act === 'menu') { save(); go('menu'); }
+    else if (act === 'drill') startPlay();
+    else if (act === 'tutorial') startLesson(progress.current);
+    else if (act === 'lessons') go('lessons');
+    else if (act === 'lesson') startLesson(Number(button.dataset.index));
+    else if (act === 'next-lesson') lessonIndex === 11 ? startPlay() : startLesson(lessonIndex + 1);
+    else if (act === 'previous-lesson') startLesson(lessonIndex - 1);
+    else if (act === 'demo' || act === 'table-demo') {
+      releaseAll(); session = null; tryMode = false; lessonMessage = ''; demoVariant = Number(button.dataset.index); selectedDemo = null;
+      if (act === 'table-demo') {
+        const group = lessons[lessonIndex].demo.placementGroups[demoVariant];
+        selectedDemo = { piece: lessons[lessonIndex].demo.piece, sequence: group.actions, target: group.placements[0] };
+      }
+      render(false);
+    } else if (act === 'try-it') startTryIt();
+    else if (act === 'settings') openSettings();
+    else if (act === 'close-settings') closeSettings();
+    else if (act === 'pause') { pauseSession(); showPause(); }
+    else if (act === 'resume') resumePlay();
+    else if (act === 'retry') { releaseAll(); session.retry(now()); processEvents(); }
+    else if (act === 'skip') { releaseAll(); session.skip(now()); processEvents(); }
+    else if (act === 'hint') { hint = !hint; updateHint(); if (hint) setCoach(`この目標は${session.round.optimal}入力です♪ ` + session.round.target.actions.map(actionLabel).join(' → '), 'thinking'); }
+    else if (act === 'records' || act === 'records-session') {
+      pauseSession(); statsScope = act === 'records-session' ? 'session' : 'total'; screen = 'records'; render();
+    } else if (act === 'stats-scope') { statsScope = statsScope === 'total' ? 'session' : 'total'; render(); }
+    else if (act === 'return-play') { screen = 'play'; render(); }
+    else if (act === 'sprint') go('sprint');
+    else if (act === 'start-sprint') startPlay(Number(button.dataset.length));
+    else if (act === 'custom-sprint') {
+      const input = $('#custom-length'), length = Number(input.value);
+      if (Number.isInteger(length) && length >= 1 && length <= 9999) startPlay(length);
+      else { input.reportValidity(); toast('目標数は1〜9999の整数にしてください。'); }
+    } else if (act === 'reset-handling') { updateSettings(E.DEFAULT_SETTINGS); render(false); toast('ハンドリングを初期値に戻しました。'); }
+    else if (act === 'reset-keys') { bindings = copy(DEFAULT_KEYS); save(); render(false); }
+    else if (act === 'reset-settings') {
+      settings = { ...E.DEFAULT_SETTINGS }; ui = { ...UI_DEFAULTS }; bindings = copy(DEFAULT_KEYS);
+      updateSettings(settings); updateOptions(); render(false); toast('すべての設定を初期化しました。');
+    } else if (act === 'export') {
+      $('#settings-json').value = JSON.stringify({ version: 1, settings, ui, bindings }, null, 2);
+      $('#settings-json').focus(); $('#settings-json').select(); $('#import-status').textContent = '選択したJSONをコピーしてください。';
+    } else if (act === 'import') {
+      try {
+        const next = validatePreferences(JSON.parse($('#settings-json').value));
+        ({ settings, ui, bindings } = next); updateSettings(settings); updateOptions(); render(false);
+        $('#import-status').textContent = '✓ インポートして保存しました。';
+      } catch (error) { $('#import-status').textContent = '読み込めませんでした：' + error.message; }
+    } else if (act === 'reset-stats') {
+      totalStats.reset(); if (session) session.stats.reset(); save(); render(false); toast('練習の記録をリセットしました。');
+    } else if (act === 'capture') { capture = { action: button.dataset.action, index: button.dataset.index === undefined ? null : Number(button.dataset.index) }; captureHTML(); }
+    else if (act === 'cancel-capture') { capture = null; $('.capture-overlay')?.remove(); }
+    else if (act === 'bind-escape') acceptKey('Escape');
+    else if (act === 'swap-key') {
+      const index = capture.index ?? 0, old = bindings[capture.action][index];
+      bindings[capture.conflict][bindings[capture.conflict].indexOf(capture.code)] = old;
+      bindings[capture.action][index] = capture.code; capture = null; save(); render(false); toast('キーを入れ替えました。');
+    } else if (act === 'remove-key') { bindings[button.dataset.action].splice(Number(button.dataset.index), 1); save(); render(false); }
+  }
+  document.addEventListener('click', event => { const button = event.target.closest('button[data-act]'); if (button && !button.disabled) clickAction(button); });
+  document.addEventListener('input', event => {
+    const input = event.target;
+    if (input.dataset.setting) {
+      if (!input.value || !Number.isFinite(Number(input.value))) return;
+      const key = input.dataset.setting, value = Number(input.value); updateSettings({ [key]: value });
+      for (const other of $$(`[data-setting="${key}"]`)) if (other !== input) other.value = settings[key];
+    } else if (input.dataset.ui === 'volume') { ui.volume = Number(input.value); save(); }
+  });
+  document.addEventListener('change', event => {
+    const input = event.target;
+    if (input.dataset.engineToggle) updateSettings({ [input.dataset.engineToggle]: input.checked });
+    else if (input.dataset.ui && input.dataset.ui !== 'volume') { ui[input.dataset.ui] = input.checked; updateOptions(); }
+    else if (input.dataset.setting) input.value = settings[input.dataset.setting];
+    else if (input.dataset.pieceFilter) {
+      const pieces = $$('[data-piece-filter]:checked').map(el => el.dataset.pieceFilter);
+      if (!pieces.length) { input.checked = true; toast('ミノを1種類以上選んでください。'); }
+      else updatePractice({ ...practice, pieces });
+    } else if (input.id === 'area') updatePractice({ ...practice, area: input.value });
+    else if (input.id === 'min-column' || input.id === 'max-column') {
+      const min = Number($('#min-column').value), max = Number($('#max-column').value);
+      if (!Number.isInteger(min) || !Number.isInteger(max) || min < 1 || max > 9 || min > max) { toast('列は1〜9で、開始列≦終了列にしてください。'); $('#practice-wrap').innerHTML = practiceHTML(); }
+      else updatePractice({ ...practice, minColumn: min, maxColumn: max });
+    } else if (input.dataset.practice) updatePractice({ ...practice, [input.dataset.practice]: input.checked });
+  });
+
+  function editable(target) { return target instanceof HTMLElement && (target.matches('input,textarea,select') || target.isContentEditable); }
+  document.addEventListener('keydown', event => {
+    if (capture) {
+      event.preventDefault(); if (event.repeat) return;
+      if (event.code === 'Escape') { capture = null; $('.capture-overlay')?.remove(); }
+      else acceptKey(event.code); return;
+    }
+    const action = Object.keys(bindings).find(name => bindings[name].includes(event.code));
+    if (screen === 'settings') {
+      if (event.code === 'Escape' && !editable(event.target)) { event.preventDefault(); closeSettings(); }
+      return;
+    }
+    if (screen === 'tutorial' && event.code === 'Escape') { event.preventDefault(); go('menu'); return; }
+    if ((screen === 'play' || screen === 'tutorial' && tryMode) && session) {
+      if (editable(event.target)) return;
+      if (action) {
+        event.preventDefault(); if (event.repeat) return;
+        if (action === 'settings') { openSettings(); return; }
+        if (session.pausedAt !== null) {
+          if (action === 'pause' && screen === 'play') resumePlay(); return;
+        }
+        // performance.now() is used here AND in rAF; stale rAF callback times
+        // and epoch-based event timestamps can never move engine time backward.
+        session.keyDown(action, now(), { code: event.code }); processEvents(); return;
+      }
+    }
+    if (screen === 'tutorial' && !tryMode && !editable(event.target)) {
+      if (['ArrowRight', 'Enter', 'Space'].includes(event.code)) { event.preventDefault(); if (!event.repeat) lessonIndex === 11 ? startPlay() : startLesson(lessonIndex + 1); return; }
+      if (event.code === 'ArrowLeft') { event.preventDefault(); if (!event.repeat) startLesson(lessonIndex - 1); return; }
+    }
+    if (event.code === 'Escape' && screen !== 'menu') { event.preventDefault(); go('menu'); return; }
+    if (action === 'settings' && !editable(event.target)) { event.preventDefault(); if (!event.repeat) openSettings(); return; }
+    if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.code) && !editable(event.target)) {
+      const root = $('.overlay') || $('main');
+      const buttons = $$('button:not(:disabled)', root).filter(el => el.offsetParent !== null);
+      if (!buttons.length) return;
+      event.preventDefault();
+      const direction = ['ArrowDown', 'ArrowRight'].includes(event.code) ? 1 : -1;
+      const index = buttons.indexOf(document.activeElement);
+      buttons[(index + direction + buttons.length) % buttons.length].focus();
+    }
+  });
+  document.addEventListener('keyup', event => {
+    if (!session) return;
+    const held = session.handler.held.get(event.code);
+    if (held) { event.preventDefault(); session.keyUp(held.action, now(), { code: event.code }); processEvents(); }
+  });
+  function blur() {
+    // Freeze first, then release: releasing a newer direction cannot resume an
+    // older charged direction beneath a pause overlay.
+    if (session?.running) { pauseSession(); processEvents(); if (screen === 'play') showPause(); }
+    else releaseAll();
+    save();
+  }
+  window.addEventListener('blur', blur);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) blur(); });
+  window.addEventListener('pagehide', save);
+  window.addEventListener('resize', drawMinis);
+  function frame() {
+    const t = now();
+    if (screen === 'play' || screen === 'tutorial' && tryMode) { session?.update(t); processEvents(); }
+    if (screen === 'tutorial' && !tryMode) updateDemo(t);
+    if (screen === 'play' || screen === 'tutorial') renderBoard(t);
+    if (screen === 'play' && t - lastHUD > 90) { lastHUD = t; updateHUD(t); }
+    if (toastUntil && t >= toastUntil) { $('#toast').classList.remove('visible'); toastUntil = 0; }
+    requestAnimationFrame(frame);
+  }
+
+  // Public, serializable browser-test seam. Gameplay is always driven by normal
+  // KeyboardEvent dispatch or page.keyboard; no helper changes counts/results.
+  window.__moetet = Object.freeze({
+    getState() {
+      const handler = screen === 'tutorial' && !tryMode ? demo?.handler : session?.handler;
+      return copy({ screen, settings, ui, bindings, practice, progress, lessonIndex, tryMode, tryIndex, tryDone,
+        expression, bubble, irsCount, storageOK, hint, lastResult, trace,
+        round: session?.round, stats: session?.snapshot(), totalStats: totalStats.snapshot(),
+        active: handler?.active, pending: handler?.pending, inputs: handler?.inputs, inputCount: handler?.inputCount,
+        held: handler ? [...handler.held.keys()] : [], heldPiece: handler?.heldPiece, flags: handler?.flags,
+        paused: session?.pausedAt !== null && !!session,
+        demo: demo ? { type: demo.variant.type, actions: demo.actions, target: demo.target } : null, sprintResult });
+    },
+    chooseTarget(type, target, { delay } = {}) {
+      if (!session?.running || session.pausedAt !== null) throw new Error('Open a running drill first');
+      const optimal = E.finesseFor(type, target, session.settings);
+      if (!optimal) throw new Error('Unreachable debug target');
+      releaseAll(); session._newRound(type, optimal); session.handler.board = session.boardTemplate.clone();
+      session.handler.scheduleSpawn(type, now(), delay ?? session.settings.are); processEvents(); return copy(optimal);
+    },
+    dispatch(code, down = true) { document.dispatchEvent(new KeyboardEvent(down ? 'keydown' : 'keyup', { code, bubbles: true, cancelable: true })); },
+    storageKey: STORAGE
+  });
+  render(); requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

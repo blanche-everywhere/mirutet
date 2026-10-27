@@ -1,10 +1,12 @@
 {
   "name": "moetet-finesse",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Offline Japanese finesse trainer with ミルフィ",
+  "main": "src/engine.js",
   "scripts": {
-    "test": "node --test tests/"
+    "build": "node build.js",
+    "test": "node --test tests/*.test.js",
+    "test:browser": "node tests/browser.check.js"
   },
   "keywords": [],
   "author": "",
