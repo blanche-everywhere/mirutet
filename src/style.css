@@ -83,7 +83,7 @@ button:disabled {
 }
 
 .small {
-  font-size:12px;
+  font-size:13px;
   padding:7px 11px;
   border-radius:9px
 }
@@ -93,7 +93,7 @@ button:disabled {
 }
 
 .eyebrow {
-  font-size:10px;
+  font-size:13px;
   letter-spacing:.2em;
   font-weight:800;
   color:#a38ab9;
@@ -105,7 +105,7 @@ button:disabled {
 }
 
 .tiny {
-  font-size:11px;
+  font-size:13px;
   color:var(--muted)
 }
 
@@ -154,7 +154,7 @@ h3 {
   color:#9278b3;
   border-radius:30px;
   padding:4px 9px;
-  font-size:10px;
+  font-size:13px;
   letter-spacing:.06em
 }
 
@@ -209,7 +209,7 @@ h3 {
 
 .brand small {
   display:block;
-  font-size:9px;
+  font-size:13px;
   letter-spacing:.23em;
   font-weight:500;
   color:#a197ae;
@@ -238,11 +238,11 @@ h3 {
 .page-heading p {
   margin-top:7px;
   color:var(--muted);
-  font-size:12px
+  font-size:13px
 }
 
 .footer {
-  font-size:10px;
+  font-size:13px;
   color:#a69bb2;
   display:flex;
   justify-content:space-between;
@@ -253,7 +253,7 @@ h3 {
 
 kbd {
   font-family:inherit;
-  font-size:11px;
+  font-size:13px;
   font-weight:600;
   line-height:1.2;
   display:inline-flex;
@@ -288,17 +288,17 @@ kbd.pressed {
 
 .sequence .arrow {
   color:#c7bbd2;
-  font-size:10px
+  font-size:13px
 }
 
 .sequence small {
-  font-size:8px;
+  font-size:13px;
   margin-left:4px;
   color:#b48ac0
 }
 
 .empty-route {
-  font-size:12px;
+  font-size:13px;
   color:var(--muted)
 }
 
@@ -383,9 +383,9 @@ kbd.pressed {
 
 .menu-buttons button small {
   display:block;
-  font-size:9px;
+  font-size:13px;
   font-weight:400;
-  letter-spacing:.14em;
+  letter-spacing:.03em;
   opacity:.7;
   margin-top:4px
 }
@@ -397,7 +397,7 @@ kbd.pressed {
 
 .first-note {
   margin-top:15px;
-  font-size:11px;
+  font-size:13px;
   color:#ac8cb4;
   display:flex;
   align-items:center;
@@ -449,9 +449,9 @@ kbd.pressed {
 
 .speaker {
   display:block;
-  font-size:10px;
+  font-size:13px;
   font-weight:800;
-  letter-spacing:.14em;
+  letter-spacing:.03em;
   color:#ad88bc;
   margin-bottom:5px
 }
@@ -464,7 +464,7 @@ kbd.pressed {
 }
 
 .mascot-caption {
-  font-size:10px;
+  font-size:13px;
   color:#ad9cb7;
   letter-spacing:.15em;
   margin-top:-14px
@@ -529,7 +529,7 @@ kbd.pressed {
 
 .coach .speech {
   min-height:116px;
-  font-size:12px
+  font-size:13px
 }
 
 .coach .mascot-wrap {
@@ -547,12 +547,12 @@ kbd.pressed {
 }
 
 .coach .speaker {
-  font-size:9px
+  font-size:13px
 }
 
 .coach-label {
   text-align:center;
-  font-size:10px;
+  font-size:13px;
   color:#a293ae;
   letter-spacing:.12em;
   margin-top:-14px
@@ -563,7 +563,7 @@ kbd.pressed {
 }
 
 .practice-options h3 {
-  font-size:11px;
+  font-size:13px;
   color:#887794;
   margin-bottom:10px
 }
@@ -587,7 +587,7 @@ kbd.pressed {
   justify-content:center;
   border-radius:7px;
   border:1px solid var(--line);
-  font-size:11px;
+  font-size:13px;
   cursor:pointer;
   color:#c4bbca
 }
@@ -609,7 +609,7 @@ kbd.pressed {
   justify-content:space-between;
   gap:5px;
   margin-top:9px;
-  font-size:10px
+  font-size:13px
 }
 
 .filter-line select {
@@ -629,7 +629,7 @@ kbd.pressed {
   display:flex;
   align-items:center;
   gap:7px;
-  font-size:11px;
+  font-size:13px;
   line-height:1.7
 }
 
@@ -638,7 +638,7 @@ kbd.pressed {
 }
 
 .filter-error {
-  font-size:10px;
+  font-size:13px;
   color:#b35e7a;
   margin-top:6px
 }
@@ -659,9 +659,9 @@ kbd.pressed {
   display:flex;
   align-items:center;
   justify-content:space-between;
-  font-size:9px;
+  font-size:13px;
   color:#a18eaf;
-  letter-spacing:.14em
+  letter-spacing:.03em
 }
 
 .board-shell {
@@ -684,7 +684,7 @@ canvas.board {
 .column-labels {
   display:grid;
   grid-template-columns:repeat(10,1fr);
-  font-size:8px;
+  font-size:13px;
   text-align:center;
   color:#b6a9c0;
   padding-top:7px
@@ -692,7 +692,7 @@ canvas.board {
 
 .board-note {
   text-align:center;
-  font-size:9px;
+  font-size:13px;
   color:#b4a3bf;
   margin-top:8px
 }
@@ -710,8 +710,8 @@ canvas.board {
 }
 
 .queue-title {
-  font-size:9px;
-  letter-spacing:.14em;
+  font-size:13px;
+  letter-spacing:.03em;
   color:#a18daf;
   padding:10px 0 3px
 }
@@ -728,7 +728,7 @@ canvas.board {
 }
 
 .hold-note {
-  font-size:9px;
+  font-size:13px;
   line-height:1.7;
   color:#ac9cb5;
   margin-top:9px;
@@ -744,7 +744,7 @@ canvas.board {
 }
 
 .key-help kbd {
-  font-size:9px;
+  font-size:13px;
   min-width:25px;
   padding:3px;
   min-height:22px
@@ -757,7 +757,7 @@ canvas.board {
   transform:translateX(-50%);
   background:#a485c9e8;
   color:#fff;
-  font-size:11px;
+  font-size:13px;
   border-radius:20px;
   padding:5px 15px;
   letter-spacing:.18em;
@@ -800,8 +800,8 @@ canvas.board {
 }
 
 .panel-label {
-  font-size:9px;
-  letter-spacing:.16em;
+  font-size:13px;
+  letter-spacing:.03em;
   color:#9e8eaa;
   font-weight:700;
   margin-bottom:12px
@@ -825,13 +825,13 @@ canvas.board {
 }
 
 .stat small {
-  font-size:10px;
+  font-size:13px;
   color:#ab9eb6
 }
 
 .stat label {
   display:block;
-  font-size:9px;
+  font-size:13px;
   color:#a496af;
   margin-bottom:4px
 }
@@ -842,7 +842,7 @@ canvas.board {
   justify-content:space-between;
   margin-top:13px;
   padding-top:10px;
-  font-size:10px;
+  font-size:13px;
   color:#9d8da9
 }
 
@@ -860,7 +860,7 @@ canvas.board {
   display:grid;
   grid-template-columns:12px 1fr 42px;
   gap:8px;
-  font-size:9px;
+  font-size:13px;
   align-items:center
 }
 
@@ -922,12 +922,12 @@ canvas.board {
 }
 
 .result-head small {
-  font-size:10px;
+  font-size:13px;
   color:#a193ac
 }
 
 .route-label {
-  font-size:9px;
+  font-size:13px;
   letter-spacing:.08em;
   color:#a496b0;
   margin:9px 0 4px
@@ -940,7 +940,7 @@ canvas.board {
 }
 
 .play-buttons button {
-  font-size:11px;
+  font-size:13px;
   padding:9px 5px
 }
 
@@ -953,7 +953,7 @@ canvas.board {
 .play-footer {
   height:35px;
   padding-top:11px;
-  font-size:9px;
+  font-size:13px;
   color:#ac9db8;
   text-align:center;
   letter-spacing:.04em
@@ -998,7 +998,7 @@ canvas.board {
   height:24px;
   border-radius:50%;
   padding:0;
-  font-size:9px;
+  font-size:13px;
   background:#fff
 }
 
@@ -1020,7 +1020,7 @@ canvas.board {
 }
 
 .lesson-coach .speech {
-  font-size:12px;
+  font-size:13px;
   min-height:140px
 }
 
@@ -1052,7 +1052,7 @@ canvas.board {
 }
 
 .lesson-text {
-  font-size:12px;
+  font-size:13px;
   line-height:1.95;
   color:#897a95;
   margin:13px 0
@@ -1070,7 +1070,7 @@ canvas.board {
 }
 
 .demo-tabs button {
-  font-size:10px;
+  font-size:13px;
   padding:6px 8px
 }
 
@@ -1093,7 +1093,7 @@ canvas.board {
 }
 
 .try-box p {
-  font-size:11px;
+  font-size:13px;
   color:#83a193;
   line-height:1.8;
   margin:6px 0 10px
@@ -1109,7 +1109,7 @@ canvas.board {
 .lesson-table {
   width:100%;
   border-collapse:collapse;
-  font-size:10px
+  font-size:13px
 }
 
 .lesson-table th {
@@ -1131,11 +1131,11 @@ canvas.board {
   padding:0;
   text-align:left;
   color:#9985ac;
-  font-size:10px
+  font-size:13px
 }
 
 .lesson-table kbd {
-  font-size:9px;
+  font-size:13px;
   min-height:20px;
   min-width:20px;
   padding:2px 4px
@@ -1160,13 +1160,13 @@ canvas.board {
 }
 
 .lesson-card span {
-  font-size:11px;
+  font-size:13px;
   color:var(--muted)
 }
 
 .lesson-status {
   color:#76ad99;
-  font-size:11px;
+  font-size:13px;
   margin:8px 0;
   line-height:1.8
 }
@@ -1198,12 +1198,12 @@ canvas.board {
 
 .setting-row label {
   font-weight:700;
-  font-size:12px
+  font-size:13px
 }
 
 .setting-row label small {
   display:block;
-  font-size:9px;
+  font-size:13px;
   font-weight:400;
   color:#ad9cb8;
   margin-top:3px
@@ -1223,7 +1223,7 @@ canvas.board {
 }
 
 .handling-note {
-  font-size:10px;
+  font-size:13px;
   color:#ad9ab5;
   line-height:1.9;
   margin:10px 0
@@ -1237,7 +1237,7 @@ canvas.board {
 }
 
 .toggle-grid .checkline {
-  font-size:11px
+  font-size:13px
 }
 
 .binding-list {
@@ -1255,7 +1255,7 @@ canvas.board {
 }
 
 .binding-row>span {
-  font-size:11px;
+  font-size:13px;
   color:#8c7b99
 }
 
@@ -1266,7 +1266,7 @@ canvas.board {
 }
 
 .binding-key {
-  font-size:10px;
+  font-size:13px;
   padding:4px 7px;
   border-radius:6px;
   min-width:25px
@@ -1294,13 +1294,13 @@ canvas.board {
   border:1px solid var(--line);
   border-radius:10px;
   padding:10px;
-  font:11px/1.5 monospace;
+  font:13px/1.5 monospace;
   margin:10px 0;
   background:#fcfaff
 }
 
 .storage-note {
-  font-size:10px;
+  font-size:13px;
   color:#b08a9f;
   margin-top:8px
 }
@@ -1331,7 +1331,7 @@ canvas.board {
 }
 
 .modal p {
-  font-size:12px;
+  font-size:13px;
   color:#9e8eaa;
   line-height:1.9;
   margin:10px 0 20px
@@ -1374,7 +1374,7 @@ canvas.board {
 .full-table {
   width:100%;
   border-collapse:collapse;
-  font-size:12px
+  font-size:13px
 }
 
 .full-table th,.full-table td {
@@ -1385,7 +1385,7 @@ canvas.board {
 
 .full-table th {
   font-weight:500;
-  font-size:10px;
+  font-size:13px;
   color:#aa9ab4
 }
 
@@ -1423,11 +1423,11 @@ canvas.board {
   display:flex;
   align-items:center;
   gap:10px;
-  font-size:12px
+  font-size:13px
 }
 
 .best-line {
-  font-size:11px;
+  font-size:13px;
   color:#a691b5;
   margin:12px 0
 }
@@ -1471,7 +1471,7 @@ canvas.board {
 
 .result-best {
   color:#76b098;
-  font-size:12px
+  font-size:13px
 }
 
 .result-layout .piece-bars {
@@ -1479,7 +1479,7 @@ canvas.board {
 }
 
 .result-layout .piece-bar {
-  font-size:11px
+  font-size:13px
 }
 
 .result-layout .bar-track {
@@ -1497,7 +1497,7 @@ canvas.board {
   border-radius:30px;
   box-shadow:var(--shadow);
   z-index:30;
-  font-size:12px;
+  font-size:13px;
   color:#9d7cb0;
   opacity:0;
   pointer-events:none;
@@ -1681,3 +1681,106 @@ body[data-keycaps=off] .sequence kbd.pressed {
   text-decoration:underline;
   font-weight:800;
 }
+
+
+/* Viewport layout: readable type and a height budget for every board sibling.
+   Settings/long lesson tables scroll inside their labelled, focusable panel. */
+:root {
+  --muted:#766c88;
+  --queue:86px;
+  --cell:min(36px,calc((100vh - 240px)/22),calc((100vw - 950px)/10));
+  font-size:15px;
+}
+.topbar { height:64px; flex:0 0 64px; }
+.footer { min-height:38px; padding:9px 28px; flex:0 0 38px; }
+body[data-screen=menu],body[data-screen=tutorial],body[data-screen=settings] { height:100vh; }
+body:is([data-screen=menu],[data-screen=tutorial],[data-screen=settings],[data-screen=play]) #app {
+  height:100%; display:flex; flex-direction:column;
+}
+.speech,.coach .speech,.lesson-coach .speech { font-size:15px; line-height:1.65; padding:12px 14px; }
+.bubble-text { font-size:15px; overflow-wrap:anywhere; white-space:pre-line; }
+.speaker,.coach .speaker { font-size:13px; letter-spacing:.02em; line-height:1.4; }
+.menu { flex:1; width:100%; min-height:0; padding:18px 28px; }
+.menu .logo { font-size:60px; margin:14px 0 12px; }
+.menu-intro { font-size:15px; line-height:1.65; margin-bottom:18px; }
+.menu-buttons button { min-height:66px; padding:10px 15px; }
+.menu-buttons button small { font-size:13px; letter-spacing:.03em; }
+.menu-art .mascot-wrap { width:min(36vh,390px); max-width:100%; }
+.menu-art .speech { max-width:380px; }
+.first-note { margin-top:10px; }
+.menu .tiny { margin-top:6px!important; }
+.page-heading { flex-shrink:0; gap:16px; }
+.page-heading p,.lesson-text,.try-box p { font-size:14px; }
+.lesson-page { flex:1; min-height:0; width:100%; max-width:1500px; display:flex; flex-direction:column; padding:16px 24px; }
+.lesson-heading { margin-bottom:14px; }
+.lesson-steps button { width:28px; height:28px; }
+.lesson-grid { flex:1; min-height:0; grid-template-columns:minmax(230px,1fr) minmax(220px,310px) minmax(420px,1.65fr); gap:22px; }
+.lesson-coach { height:100%; min-height:0; display:flex; flex-direction:column; gap:10px; }
+.lesson-coach .speech { min-height:0; flex:0 0 auto; }
+.lesson-coach .mascot-wrap { flex:1; min-height:0; width:100%; max-width:310px; }
+.lesson-coach .milfy { width:100%; height:100%; max-height:430px; }
+.lesson-board { --cell:min(30px,calc((100vh - 350px)/22)); height:100%; min-height:0; display:flex; flex-direction:column; align-items:center; }
+.lesson-board>* { flex-shrink:0; }
+.lesson-board .column-labels { width:calc(var(--cell)*10); }
+.lesson-board .sequence { margin-top:8px; min-height:30px; }
+.lesson-board #demo-caption,.lesson-status { font-size:13px; line-height:1.5; }
+.lesson-content { height:100%; min-height:0; max-height:none; padding-right:10px; overflow:auto; }
+.lesson-text { margin:10px 0; line-height:1.8; }
+.lesson-text p+p { margin-top:8px; }
+.try-box { padding:12px; margin:12px 0; }
+.lesson-table,.lesson-table button,.lesson-table kbd { font-size:13px; }
+.settings-page { flex:1; min-height:0; width:100%; max-width:1450px; display:flex; flex-direction:column; padding:16px 24px 0; }
+.settings-page .page-heading { margin-bottom:14px; }
+.settings-content { flex:1; min-height:0; overflow:auto; padding:4px 10px 12px 4px; scrollbar-width:thin; }
+.setting-row { grid-template-columns:180px 1fr 70px; }
+.setting-row label { font-size:14px; }
+.setting-row label small { font-size:13px; }
+.binding-keys { flex-wrap:wrap; justify-content:flex-end; }
+.binding-key { font-size:13px; }
+.toggle-grid .checkline,.handling-note,.storage-note { font-size:13px; }
+.play-page { flex:1; min-height:0; width:100%; max-width:1600px; display:flex; flex-direction:column; padding:14px 28px 0; }
+.play-grid { flex:1; min-height:0; height:auto; grid-template-columns:minmax(0,1fr) calc(var(--cell)*10 + var(--queue)*2 + 26px) minmax(0,1fr); gap:20px; }
+.board-stage { grid-template-columns:var(--queue) calc(var(--cell)*10 + 2px) var(--queue); gap:12px; }
+.board-heading { font-size:13px; letter-spacing:0; white-space:nowrap; }
+.column-labels { font-size:13px; padding-top:4px; }
+.board-note { font-size:13px; margin-top:5px; }
+.hold-note { font-size:13px; line-height:1.5; overflow-wrap:anywhere; }
+.queue-title { font-size:13px; letter-spacing:0; }
+.play-footer { flex:0 0 32px; height:32px; font-size:13px; padding-top:8px; }
+.coach { gap:8px; }
+.coach .speech { min-height:0; flex-shrink:0; }
+.coach .mascot-wrap { min-height:0; width:100%; max-height:320px; }
+.coach .milfy { max-height:320px; }
+.coach-label { font-size:13px; margin-top:0; }
+.practice-options { padding:10px 12px; }
+.practice-options h3 { font-size:13px; margin-bottom:8px; }
+.piece-filters { gap:5px; }
+.piece-check span { font-size:13px; width:28px; height:28px; }
+.checkline,.filter-line { font-size:13px; }
+.filter-line select { width:140px; }
+.right-stack { min-height:0; gap:8px; }
+.right-stack .stats-panel { padding:10px; }
+.right-stack .panel-label { font-size:13px; letter-spacing:0; margin-bottom:7px; }
+.right-stack .stats-strip { font-size:13px; margin-top:6px; padding-top:5px; }
+.stat label,.stat small { font-size:13px; }
+.right-stack .piece-bars { gap:5px 10px; }
+.piece-bar { font-size:13px; grid-template-columns:12px 1fr 54px; }
+.right-stack .piece-bar { line-height:1.2; }
+.right-stack .result-panel { padding:10px; }
+.result-head strong { font-size:16px; }
+.result-head small,.route-label { font-size:13px; letter-spacing:0; }
+.right-stack .result-head { margin-bottom:5px; }
+.right-stack .hint-route { margin-top:6px; padding-top:5px; }
+.right-stack .result-panel .sequence { max-height:60px; }
+kbd,.key-help kbd { font-size:13px; }
+.play-buttons button { font-size:13px; }
+@media(min-width:1600px) and (min-height:900px) {
+  :root { font-size:16px; }
+  .play-grid { gap:30px; }
+  .coach .mascot-wrap,.coach .milfy { max-height:430px; }
+  .practice-options,.right-stack .stats-panel,.right-stack .result-panel { padding:18px; }
+  .right-stack { gap:14px; }
+  .right-stack .stats-main strong { font-size:34px; }
+  .mini-piece { width:82px; height:64px; }
+}
+.board-shell:focus-within { outline:3px solid #b6a0da; outline-offset:3px; }

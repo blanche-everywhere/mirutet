@@ -67,7 +67,7 @@
 
   // Guideline SRS, NOT Arika/TETR.IO's symmetric I quarter-turn variant.
   // Independent published implementation for cross-checking the standard data:
-  // https://github.com/26F-Studio/Techmino/blob/main/parts/RSlist.lua (local SRS)
+  // Techmino parts/RSlist.lua (local SRS); source links: docs/REVIEW.md.
   const KICKS_JLSTZ = deepFreeze({
     '0>R': [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
     'R>0': [[0, 0], [1, 0], [1, -1], [0, 2], [1, 2]],
@@ -92,8 +92,7 @@
   // y-up basic-rotation offsets, including test zero, in priority order.
   // I uses ONLY the first two tests (not the six JLSTZ tests).
   // Cross-check: getPatternRotate180 / SRSPlus in
-  // https://gist.github.com/torchlight/1832786cf053daa51bf188110b764090
-  // Official mechanics entry: https://github.com/tetrio/faq/wiki/Mechanics
+  // torchlight's sfinder 180 patch; source links: docs/REVIEW.md.
   const KICKS_180 = deepFreeze({
     '0>2': [[0, 0], [0, 1], [1, 1], [-1, 1], [1, 0], [-1, 0]],
     'R>L': [[0, 0], [1, 0], [1, 2], [1, 1], [0, 2], [0, 1]],
@@ -358,6 +357,36 @@
   const INPUT_ACTIONS = Object.freeze(['left', 'right', 'cw', 'ccw', 'rotate180',
     'softDrop', 'hardDrop', 'hold', 'retry', 'skip', 'pause', 'settings', 'hint']);
   const ROTATE_ACTIONS = { cw: 1, ccw: -1, rotate180: 2 };
+  function validateBindings(bindings) {
+    const result = {}, used = new Set();
+    for (const action of INPUT_ACTIONS) {
+      const keys = bindings?.[action];
+      if (!Array.isArray(keys) || !keys.length || keys.length > 8) throw new RangeError('各操作に1〜8個のキーが必要です。');
+      result[action] = keys.map(code => {
+        if (typeof code !== 'string' || !/^[A-Za-z][A-Za-z0-9]{0,39}$/.test(code) || used.has(code)) {
+          throw new RangeError('キーが重複しているか、無効なコードです。');
+        }
+        used.add(code); return code;
+      });
+    }
+    return result;
+  }
+  // Pure, atomic rebinding. A conflict swaps the selected slot (first slot for
+  // an add request), so neither action can lose its last usable binding.
+  function rebindKeys(bindings, action, index, code) {
+    const result = validateBindings(bindings), keys = result[action];
+    if (!keys || index !== null && (!Number.isInteger(index) || index < 0 || index >= keys.length)) {
+      throw new RangeError('無効なキー設定です。');
+    }
+    const owner = INPUT_ACTIONS.find(name => result[name].includes(code));
+    if (owner === action) return result;
+    if (owner) {
+      const slot = index ?? 0;
+      result[owner][result[owner].indexOf(code)] = keys[slot]; keys[slot] = code;
+    } else if (index === null) keys.push(code);
+    else keys[index] = code;
+    return validateBindings(result);
+  }
   function defaultClock() { return typeof performance === 'object' ? performance.now() : Date.now(); }
 
   /* Discrete-event input clock contract:
@@ -400,7 +429,7 @@
       this.initialHoldBuffered = false;
       this.held = new Map(); this.order = 0; this.pieceId = 0;
       this.inputs = []; this.inputCount = 0; this.flags = { ihs: false, softDrop: false };
-      this.cutUntil = this.time; this.fallAt = Infinity;
+      this.cutAt = this.time; this.cutUntil = this.time; this.fallAt = Infinity;
       this.paused = false; this.pauseStarted = null; this.blocked = false;
       this._advancing = false;
     }
@@ -455,7 +484,8 @@
       if (key && key.nextAt === Infinity && this.time >= key.since + this.settings.das) key.nextAt = this.time;
     }
     _cut() {
-      this.cutUntil = Math.max(this.cutUntil, this.time + this.settings.dcd);
+      this.cutAt = this.time;
+      this.cutUntil = this.cutAt + this.settings.dcd;
       this._wakeHorizontal();
     }
     _horizontal(key, automatic, initial = false) {
@@ -507,7 +537,7 @@
       this._emit('spawn', { type, state: { ...this.active }, ihs });
       if (this.callbacks.onSpawn) this.callbacks.onSpawn(this.active, this);
       const direction = this._direction();
-      if (direction) {
+      if (direction && !this.paused) {
         direction.nextAt = Math.max(this.time, direction.since + this.settings.das);
         if (direction.since + this.settings.das > this.time) this._horizontal(direction, false, true);
       }
@@ -614,12 +644,21 @@
       if (action === 'softDrop') this._resetFall();
       this.update(t); return true;
     }
+    // Atomic focus/pause cleanup: sequential keyUp calls could wake an older
+    // charged direction between releases. Also discard a released IHS ARE tap.
+    releaseAll(t = this.clock()) {
+      this.update(t);
+      this.held.clear(); this.initialHoldBuffered = false;
+      this._resetFall();
+      return this;
+    }
     setSettings(patch, t = this.clock()) {
       this.update(t); this.settings = normalizeSettings(patch, this.settings);
       // Live edits preserve DAS age, restart ARR/fall phases at edit time,
       // and recalculate an in-flight ARE deadline from its original start.
       const effectiveTime = this.paused ? this.pauseStarted : t;
       for (const key of this.held.values()) key.nextAt = Math.max(effectiveTime, key.since + this.settings.das);
+      this.cutUntil = Math.max(effectiveTime, this.cutAt + this.settings.dcd);
       if (this.pending) this.pending.at = Math.max(effectiveTime, this.pending.since + this.settings.are);
       this._resetFall(); this.update(t); return this;
     }
@@ -634,7 +673,7 @@
       const delta = t - this.pauseStarted;
       for (const key of this.held.values()) { key.since += delta; key.nextAt += delta; }
       if (this.pending) { this.pending.since += delta; this.pending.at += delta; }
-      this.cutUntil += delta; this.fallAt += delta;
+      this.cutAt += delta; this.cutUntil += delta; this.fallAt += delta;
       this.paused = false; this.pauseStarted = null;
       this._emit('resume'); this.update(t); return this;
     }
@@ -864,5 +903,5 @@
     cells, cellsKey, sameCells, bounds, Board, spawnPiece, movePiece, rotatePiece,
     slidePiece, hardDrop, createRNG, Bag, ACTION_LABELS, applyAction, placementFor,
     finesseFor, allPlacements, DEFAULT_SETTINGS, SETTING_LIMITS, normalizeSettings,
-    INPUT_ACTIONS, InputHandler, Stats, DrillSession });
+    INPUT_ACTIONS, validateBindings, rebindKeys, InputHandler, Stats, DrillSession });
 });

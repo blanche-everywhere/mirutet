@@ -41,18 +41,7 @@
         result.ui[key] = value;
       }
     }
-    if (data.bindings) {
-      const used = new Set();
-      for (const action of E.INPUT_ACTIONS) {
-        const keys = data.bindings[action];
-        if (!Array.isArray(keys) || !keys.length || keys.length > 8) throw new Error(ACTION_NAMES[action] + ' のキーが必要です。');
-        for (const code of keys) {
-          if (typeof code !== 'string' || !/^[A-Za-z][A-Za-z0-9]{0,39}$/.test(code) || used.has(code)) throw new Error('キーが重複しているか、無効なコードです。');
-          used.add(code);
-        }
-        result.bindings[action] = keys.slice();
-      }
-    }
+    if (data.bindings) result.bindings = E.validateBindings(data.bindings);
     return result;
   }
   try {
@@ -160,7 +149,7 @@
   }
   function mini(type, extra = '') { return `<canvas class="mini-piece" data-piece="${type || ''}" width="144" height="108" aria-label="${type || '空'}ミノ" ${extra}></canvas>`; }
   function boardHTML() {
-    return `<div class="board-heading"><span>SPAWN / 21–22</span><span>10 × 20</span></div><div class="board-shell"><canvas id="board" class="board" tabindex="-1" role="img" aria-label="練習フィールド、10列20行と出現2行"></canvas><div id="irs-indicator" class="irs-flash" aria-live="polite">IRS ✧</div><div id="are-bar" class="are-track" role="progressbar" aria-label="出現までの待ち時間" aria-valuemin="0" aria-valuemax="100"><div class="are-fill"></div></div></div><div class="column-labels">${Array.from({ length: 10 }, (_, i) => `<span>${i + 1}</span>`).join('')}</div>`;
+    return `<div class="board-heading"><span>出現 / 21–22行</span><span>10 × 20</span></div><div class="board-shell"><canvas id="board" class="board" tabindex="0" role="img" aria-label="練習フィールド、10列20行と出現2行"></canvas><div id="irs-indicator" class="irs-flash" aria-live="polite">IRS ✧</div><div id="are-bar" class="are-track" role="progressbar" aria-label="出現までの待ち時間" aria-valuemin="0" aria-valuemax="100"><div class="are-fill"></div></div></div><div class="column-labels">${Array.from({ length: 10 }, (_, i) => `<span>${i + 1}</span>`).join('')}</div>`;
   }
   function pieceBars(stats) {
     return E.PIECE_TYPES.map(type => {
@@ -173,7 +162,7 @@
   }
   function playHTML() {
     const sprint = session.sprintLength;
-    return `<main class="play-page"><div class="row spread play-topline"><h1 class="play-title">${sprint ? 'スプリント' : 'フィネス・ドリル'}<span class="tag">${sprint ? sprint + ' PLACEMENTS' : 'FREE PRACTICE'}</span></h1><div class="row"><span id="sprint-time" class="sprint-time">00:00.00</span><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div></div><div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div class="coach-label">ミルフィと、ひとつずつ。</div><div id="practice-wrap">${practiceHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">HOLD</div><div id="hold-preview">${mini(null)}</div></div><p id="hold-note" class="hold-note">${session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効'}</p><div class="key-help">${['left', 'right', 'cw', 'ccw', 'rotate180'].map(a => `<kbd data-live-key="${a}" title="${ACTION_NAMES[a]}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><div class="queue-box"><div class="queue-title">NEXT 5</div><div id="next-preview"></div></div><p class="hold-note">${escape(friendly(bindings.hardDrop[0]))}<br>ハードドロップ</p></aside></section><aside class="right-stack"><section class="panel stats-panel"><div class="row spread panel-label"><span>SESSION / この練習</span><button class="quiet small" style="padding:0;font-size:9px" data-act="records-session">全記録 ↗</button></div><div class="stats-main"><div class="stat"><label>連続 PERFECT</label><strong class="accent" id="streak">0</strong><small> streak</small></div><div class="stat"><label>フィネス正確率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>BEST <b id="best-streak">0</b></span><span>PPS <b id="pps">0.00</b></span><span>成功 <b id="completed">0${sprint ? '/' + sprint : ''}</b></span></div>${sprint ? '<div class="sprint-progress"><div id="sprint-progress"></div></div>' : ''}<div class="stats-strip"><span>平均入力 <b id="average">0 / 0</b></span><span>ミス <b id="misses">0</b></span></div></section><section class="panel stats-panel"><div class="panel-label">FAULTS / ATTEMPTS · ミノ別</div><div id="piece-bars" class="piece-bars">${pieceBars(session.stats)}</div></section><section id="result-panel" class="panel result-panel"></section><div class="play-buttons"><button data-act="retry">↻ 同じ目標</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の目標 →</button><button data-act="settings">操作の設定</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
+    return `<main class="play-page"><div class="row spread play-topline"><h1 class="play-title">${sprint ? 'スプリント' : 'フィネス・ドリル'}<span class="tag">${sprint ? sprint + ' PLACEMENTS' : 'FREE PRACTICE'}</span></h1><div class="row"><span id="sprint-time" class="sprint-time">00:00.00</span><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div></div><div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div class="coach-label">ミルフィと、ひとつずつ。</div><div id="practice-wrap">${practiceHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">ホールド</div><div id="hold-preview">${mini(null)}</div></div><p id="hold-note" class="hold-note">${session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効'}</p><div class="key-help">${['left', 'right', 'cw', 'ccw', 'rotate180'].map(a => `<kbd data-live-key="${a}" title="${ACTION_NAMES[a]}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><div class="queue-box"><div class="queue-title">次の5個</div><div id="next-preview"></div></div><p class="hold-note">${escape(friendly(bindings.hardDrop[0]))}<br>ハードドロップ</p></aside></section><aside class="right-stack"><section class="panel stats-panel"><div class="row spread panel-label"><span>SESSION / この練習</span><button class="quiet small" style="padding:0" data-act="records-session">全記録 ↗</button></div><div class="stats-main"><div class="stat"><label>連続パーフェクト</label><strong class="accent" id="streak">0</strong><small> 連続</small></div><div class="stat"><label>フィネス正確率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>最高 <b id="best-streak">0</b></span><span>PPS <b id="pps">0.00</b></span><span>成功 <b id="completed">0${sprint ? '/' + sprint : ''}</b></span></div>${sprint ? '<div class="sprint-progress"><div id="sprint-progress"></div></div>' : ''}<div class="stats-strip"><span>平均入力 <b id="average">0 / 0</b></span><span>ミス <b id="misses">0</b></span></div></section><section class="panel stats-panel"><div class="panel-label">フォルト / 試行 · ミノ別</div><div id="piece-bars" class="piece-bars">${pieceBars(session.stats)}</div></section><section id="result-panel" class="panel result-panel"></section><div class="play-buttons"><button data-act="retry">↻ 同じ目標</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の目標 →</button><button data-act="settings">操作の設定</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
   }
   function lessonsHTML() {
     return `<main class="page"><div class="page-heading"><div><div class="eyebrow">FINESSE CLASSROOM</div><h2 style="margin-top:6px">レッスン一覧</h2><p>実演を見て、3つの目標で練習。好きなところから復習できます。</p></div><span class="tag mint-tag">${progress.completed.length} / 12 チャレンジ達成</span></div><div class="lesson-list">${lessons.map((lesson, i) => `<button class="lesson-card" data-act="lesson" data-index="${i}"><span class="eyebrow">LESSON ${String(i + 1).padStart(2, '0')} ${progress.completed.includes(i) ? ' · ✔' : ''}</span><b>${escape(lesson.title)}</b><span>${i >= 4 && i <= 10 ? 'ミノ別の最短表・実演・3つの目標' : '実演とミニチャレンジ'}</span></button>`).join('')}</div></main>${footer()}`;
@@ -181,7 +170,7 @@
   function demoVariants(lesson) { return lesson.demo.examples || lesson.demo.variants || [lesson.demo]; }
   function tutorialHTML() {
     const lesson = lessons[lessonIndex], variants = demoVariants(lesson);
-    return `<main class="page lesson-page"><div class="page-heading lesson-heading"><div><div class="eyebrow">LESSON ${String(lessonIndex + 1).padStart(2, '0')} / 12</div><h2 style="margin-top:5px">${escape(lesson.title)}</h2></div><div class="row"><nav class="lesson-steps" aria-label="レッスン選択">${lessons.map((l, i) => `<button data-act="lesson" data-index="${i}" title="${escape(l.title)}" class="${i === lessonIndex ? 'active' : progress.completed.includes(i) ? 'done' : ''}">${i + 1}</button>`).join('')}</nav><button class="small" data-act="lessons">一覧</button></div></div><div class="lesson-grid"><aside class="lesson-coach">${speech(lesson.lines[0], 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${lesson.expression}">${mascot(lesson.expression, 'lesson')}</div><p class="tiny" style="text-align:center">ミルフィのフィネス教室</p></aside><section class="lesson-board">${boardHTML()}<div id="demo-keys" class="sequence"></div><p id="demo-caption" class="tiny" style="text-align:center;margin:8px 0">実演を準備しています…</p><div id="tutorial-result" class="lesson-status" aria-live="polite">${escape(lessonMessage)}</div></section><section class="lesson-content"><span class="tag ${tryMode ? 'mint-tag' : ''}">${tryMode ? 'YOUR TURN / 自分でチャレンジ' : 'WATCH / キーの光り方を見てみよう'}</span><div class="lesson-text">${lesson.lines.slice(1).map(line => `<p>${escape(line)}</p>`).join('')}</div><div class="demo-tabs">${variants.map((v, i) => `<button class="${demoVariant === i && !tryMode ? 'active' : ''}" data-act="demo" data-index="${i}">${lesson.demo.type === 'compare-sequences' ? i === 0 ? 'タップ × 4' : 'DAS × 1' : v.type === 'irs' ? 'IRSの実演' : v.type === 'ihs' ? 'IHSの実演' : '実演 ' + (i + 1)}</button>`).join('')}<button data-act="settings">操作の設定 ↗</button></div><div class="try-box"><h3>✧ やってみましょう</h3><p>${lesson.tryIt.requireIRS ? 'ARE中に回転キーを長押しして、IRSで置いてみましょう。' : '目標の輪郭に、最少の回数で置いてみましょう。別の最短手順でもOKです。'}<br>移動・回転 ${escape(friendly(bindings.hardDrop[0]))} で落下 / ${escape(friendly(bindings.retry[0]))} でもう一度</p><button class="small ${tryMode ? '' : 'primary'}" data-act="try-it">${tryDone ? 'もう一度チャレンジ' : tryMode ? `目標 ${Math.min(tryIndex + 1, lesson.tryIt.targets.length)} / ${lesson.tryIt.targets.length} · 最初から` : `${lesson.tryIt.targets.length}つの目標にチャレンジ`}</button></div>${lesson.demo.placementGroups ? `<h3 style="margin-bottom:7px">${lesson.demo.piece}ミノの最短ルート表</h3><p class="tiny">列を選ぶと実演します。0 / R / 2 / L は回転の向きです。</p><table class="lesson-table"><thead><tr><th>向き・左端の列</th><th>最短入力</th></tr></thead><tbody>${lesson.demo.placementGroups.map((group, i) => `<tr><td><button data-act="table-demo" data-index="${i}">${group.placements.map(p => `${p.rotationLabel}・${p.column}`).join(' / ')}</button></td><td><div class="sequence">${route(group.actions)}</div></td></tr>`).join('')}</tbody></table>` : ''}<div class="lesson-nav"><button class="small" data-act="previous-lesson" ${lessonIndex === 0 ? 'disabled' : ''}>← 前へ</button><button class="primary small" data-act="next-lesson">${lessonIndex === 11 ? 'ドリルへ →' : '次のレッスン →'}</button></div><p class="tiny" style="margin-top:10px">実演中: Enter / Space / → で次へ · ← で前へ · Esc でタイトル</p></section></div></main>`;
+    return `<main class="page lesson-page"><div class="page-heading lesson-heading"><div><div class="eyebrow">LESSON ${String(lessonIndex + 1).padStart(2, '0')} / 12</div><h2 style="margin-top:5px">${escape(lesson.title)}</h2></div><div class="row"><nav class="lesson-steps" aria-label="レッスン選択">${lessons.map((l, i) => `<button data-act="lesson" data-index="${i}" title="${escape(l.title)}" class="${i === lessonIndex ? 'active' : progress.completed.includes(i) ? 'done' : ''}">${i + 1}</button>`).join('')}</nav><button class="small" data-act="lessons">一覧</button></div></div><div class="lesson-grid"><aside class="lesson-coach">${speech(lesson.lines[0], 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${lesson.expression}">${mascot(lesson.expression, 'lesson')}</div><p class="tiny" style="text-align:center">ミルフィのフィネス教室</p></aside><section class="lesson-board">${boardHTML()}<div id="demo-keys" class="sequence"></div><p id="demo-caption" class="tiny" style="text-align:center;margin:8px 0">実演を準備しています…</p><div id="tutorial-result" class="lesson-status" aria-live="polite">${escape(lessonMessage)}</div></section><section class="lesson-content" tabindex="0" aria-label="レッスンの説明と最短表"><span class="tag ${tryMode ? 'mint-tag' : ''}">${tryMode ? 'YOUR TURN / 自分でチャレンジ' : 'WATCH / キーの光り方を見てみよう'}</span><div class="lesson-text">${lesson.lines.slice(1).map(line => `<p>${escape(line)}</p>`).join('')}</div><div class="demo-tabs">${variants.map((v, i) => `<button class="${demoVariant === i && !tryMode ? 'active' : ''}" data-act="demo" data-index="${i}">${lesson.demo.type === 'compare-sequences' ? i === 0 ? 'タップ × 4' : 'DAS × 1' : v.type === 'irs' ? 'IRSの実演' : v.type === 'ihs' ? 'IHSの実演' : '実演 ' + (i + 1)}</button>`).join('')}<button data-act="settings">操作の設定 ↗</button></div><div class="try-box"><h3>✧ やってみましょう</h3><p>${lesson.tryIt.requireIRS ? 'ARE中に回転キーを長押しして、IRSで置いてみましょう。' : '目標の輪郭に、最少の回数で置いてみましょう。別の最短手順でもOKです。'}<br>移動・回転で合わせ、${escape(friendly(bindings.hardDrop[0]))} で落下 / ${escape(friendly(bindings.retry[0]))} でもう一度</p><button class="small ${tryMode ? '' : 'primary'}" data-act="try-it">${tryDone ? 'もう一度チャレンジ' : tryMode ? `目標 ${Math.min(tryIndex + 1, lesson.tryIt.targets.length)} / ${lesson.tryIt.targets.length} · 最初から` : `${lesson.tryIt.targets.length}つの目標にチャレンジ`}</button></div>${lesson.demo.placementGroups ? `<h3 style="margin-bottom:7px">${lesson.demo.piece}ミノの最短ルート表</h3><p class="tiny">列を選ぶと実演します。0 / R / 2 / L は回転の向きです。</p><table class="lesson-table"><thead><tr><th>向き・左端の列</th><th>最短入力</th></tr></thead><tbody>${lesson.demo.placementGroups.map((group, i) => `<tr><td><button data-act="table-demo" data-index="${i}">${group.placements.map(p => `${p.rotationLabel}・${p.column}`).join(' / ')}</button></td><td><div class="sequence">${route(group.actions)}</div></td></tr>`).join('')}</tbody></table>` : ''}<div class="lesson-nav"><button class="small" data-act="previous-lesson" ${lessonIndex === 0 ? 'disabled' : ''}>← 前へ</button><button class="primary small" data-act="next-lesson">${lessonIndex === 11 ? 'ドリルへ →' : '次のレッスン →'}</button></div><p class="tiny" style="margin-top:10px">実演中: Enter / Space / → で次へ · ← で前へ · Esc でタイトル</p></section></div></main>`;
   }
   function handlingRow(key, title, note, step = 1) {
     const [min, max] = E.SETTING_LIMITS[key];
@@ -189,21 +178,24 @@
   }
   function toggle(key, label, engine = false) { return `<label class="checkline"><input type="checkbox" ${engine ? 'data-engine-toggle' : 'data-ui'}="${key}" ${(engine ? settings : ui)[key] ? 'checked' : ''}>${label}</label>`; }
   function settingsHTML() {
-    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">操作と表示の設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-grid"><section class="panel"><div class="row spread"><h3>ハンドリング</h3><button class="quiet small" data-act="reset-handling">初期値に戻す</button></div>${handlingRow('das','DAS','長押しの待ち時間 ms')}${handlingRow('arr','ARR','連続移動の間隔 ms')}${handlingRow('sdf','SDF','ソフト落下倍率 / 41 = ∞')}${handlingRow('dcd','DCD','自動移動の待機 ms')}${handlingRow('are','ARE','次の出現まで ms')}${handlingRow('gravity','重力 G','0 = OFF / cells per frame',.1)}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('ghost','着地の影を表示')}${toggle('showOptimal','最短手順を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div><label class="filter-line" style="margin-top:17px">音量 <input aria-label="音量" data-ui="volume" type="range" min="0" max="1" step=".05" value="${ui.volume}"></label></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0;font-size:10px" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では、矢印キーで数値を調整できます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></main>${footer()}`;
+    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">操作と表示の設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目"><div class="settings-grid"><section class="panel"><div class="row spread"><h3>ハンドリング</h3><button class="quiet small" data-act="reset-handling">初期値に戻す</button></div>${handlingRow('das','DAS','長押しの待ち時間 ms')}${handlingRow('arr','ARR','連続移動の間隔 ms')}${handlingRow('sdf','SDF','ソフト落下倍率 / 41 = ∞')}${handlingRow('dcd','DCD','自動移動の待機 ms')}${handlingRow('are','ARE','次の出現まで ms')}${handlingRow('gravity','重力 G','0 = なし / マス数（60分の1秒）',.1)}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('ghost','着地の影を表示')}${toggle('showOptimal','最短手順を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div><label class="filter-line" style="margin-top:17px">音量 <input aria-label="音量" data-ui="volume" type="range" min="0" max="1" step=".05" value="${ui.volume}"></label></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
   }
   function statsHTML() {
     const stats = statsScope === 'session' && session ? session.stats.snapshot() : totalStats.snapshot();
-    return `<main class="page"><div class="page-heading"><div><div class="eyebrow">A LITTLE BETTER EVERY DAY</div><h2 style="margin-top:5px">練習の記録</h2><p>${statsScope === 'session' ? 'このセッションの記録です。' : 'このブラウザに保存した、これまでの練習です。'} フォルトと置き場所のミスは別々に集計します。</p></div><div class="row">${session ? `<button class="small" data-act="stats-scope">${statsScope === 'session' ? '通算記録へ' : 'セッション記録へ'}</button><button class="primary small" data-act="return-play">練習に戻る</button>` : ''}<button class="small danger" data-act="reset-stats">記録をリセット</button></div></div><section class="panel big-stats">${[['試行数',stats.attempts,'回'],['正確率',stats.accuracy.toFixed(1),'%'],['最高連続',stats.bestStreak,'回'],['フォルト',stats.faults,'回'],['置き場所ミス',stats.misses,'回'],['平均入力 / 最短',stats.averageInputs.toFixed(2) + ' / ' + stats.averageOptimal.toFixed(2),'']].map(([label,value,unit]) => `<div class="stat"><label>${label}</label><strong class="accent">${value}</strong><small> ${unit}</small></div>`).join('')}</section><div class="stats-full" style="margin-top:20px"><section class="panel"><h3>ミノごとの記録</h3><table class="full-table"><thead><tr><th>ミノ</th><th>試行</th><th>Perfect</th><th>Fault</th><th>Miss</th></tr></thead><tbody>${E.PIECE_TYPES.map(type => { const p=stats.byPiece[type]; return `<tr><td>${type}</td><td>${p.attempts}</td><td>${p.perfect}</td><td>${p.faults}</td><td>${p.misses}</td></tr>`; }).join('')}</tbody></table></section><section class="panel"><h3>スプリントのベストタイム</h3><table class="full-table"><thead><tr><th>目標数</th><th>ベストタイム</th></tr></thead><tbody>${Object.entries(totalStats.bestTimes).map(([length, time]) => `<tr><td>${length} 個</td><td>${timeText(time)}</td></tr>`).join('') || '<tr><td colspan="2">まだ記録がありません。スプリントに挑戦しましょう♪</td></tr>'}</tbody></table><p class="handling-note">正確率 = Perfect ÷ 全試行。PPS = 成功した配置数 ÷ 秒数。<br>ゼロフォルトでは余分な入力のあった配置は進捗に入りません。</p></section></div></main>${footer()}`;
+    return `<main class="page"><div class="page-heading"><div><div class="eyebrow">A LITTLE BETTER EVERY DAY</div><h2 style="margin-top:5px">練習の記録</h2><p>${statsScope === 'session' ? 'このセッションの記録です。' : 'このブラウザに保存した、これまでの練習です。'} フォルトと置き場所のミスは別々に集計します。</p></div><div class="row">${session ? `<button class="small" data-act="stats-scope">${statsScope === 'session' ? '通算記録へ' : 'セッション記録へ'}</button><button class="primary small" data-act="return-play">練習に戻る</button>` : ''}<button class="small danger" data-act="reset-stats">記録をリセット</button></div></div><section class="panel big-stats">${[['試行数',stats.attempts,'回'],['正確率',stats.accuracy.toFixed(1),'%'],['最高連続',stats.bestStreak,'回'],['フォルト',stats.faults,'回'],['置き場所ミス',stats.misses,'回'],['平均入力 / 最短',stats.averageInputs.toFixed(2) + ' / ' + stats.averageOptimal.toFixed(2),'']].map(([label,value,unit]) => `<div class="stat"><label>${label}</label><strong class="accent">${value}</strong><small> ${unit}</small></div>`).join('')}</section><div class="stats-full" style="margin-top:20px"><section class="panel"><h3>ミノごとの記録</h3><table class="full-table"><thead><tr><th>ミノ</th><th>試行</th><th>最短成功</th><th>フォルト</th><th>ミス</th></tr></thead><tbody>${E.PIECE_TYPES.map(type => { const p=stats.byPiece[type]; return `<tr><td>${type}</td><td>${p.attempts}</td><td>${p.perfect}</td><td>${p.faults}</td><td>${p.misses}</td></tr>`; }).join('')}</tbody></table></section><section class="panel"><h3>スプリントのベストタイム</h3><table class="full-table"><thead><tr><th>目標数</th><th>ベストタイム</th></tr></thead><tbody>${Object.entries(totalStats.bestTimes).map(([length, time]) => `<tr><td>${length} 個</td><td>${timeText(time)}</td></tr>`).join('') || '<tr><td colspan="2">まだ記録がありません。スプリントに挑戦しましょう♪</td></tr>'}</tbody></table><p class="handling-note">正確率 = Perfect ÷ 全試行。PPS = 成功した配置数 ÷ 秒数。<br>ゼロフォルトでは余分な入力のあった配置は進捗に入りません。</p></section></div></main>${footer()}`;
   }
   function sprintHTML() {
     return `<main class="page"><div class="page-heading"><div><div class="eyebrow">FIND YOUR RHYTHM</div><h2 style="margin-top:5px">スプリント</h2></div><span class="tag">タイマーは最初の操作から</span></div><div class="sprint-setup"><div>${speech('正確さとリズムを大切に♪ 目標の数だけ置いて、自己ベストに挑戦しましょうね。')}<div class="mascot-wrap">${mascot('surprised','sprint')}</div></div><section class="panel"><h2>今日は何個、置きますか？</h2><p class="handling-note">正しい場所への配置が目標数に達するとゴールです。<br>操作・ミノ・列の設定はドリルと共通です。</p><div class="sprint-choices"><button data-act="start-sprint" data-length="40">40<small class="tiny"> 個</small></button><button data-act="start-sprint" data-length="100">100<small class="tiny"> 個</small></button></div><div class="custom-sprint"><label for="custom-length">カスタム</label><input id="custom-length" type="number" min="1" max="9999" value="20"><button class="primary small" data-act="custom-sprint">スタート →</button></div><p class="best-line">40個 ${totalStats.bestTimes[40] === undefined ? '—' : timeText(totalStats.bestTimes[40])} / 100個 ${totalStats.bestTimes[100] === undefined ? '—' : timeText(totalStats.bestTimes[100])}</p>${toggle('zeroFault','ゼロフォルト：最短成功だけで進む')}</section></div></main>${footer()}`;
   }
   function resultHTML() {
     const r = sprintResult;
-    return `<main class="page result-page"><div class="page-heading"><div><div class="eyebrow">SPRINT COMPLETE</div><h2 style="margin-top:5px">${r.sprintLength}個、おつかれさまでした！</h2></div><span class="tag mint-tag">FINISH ✧</span></div><div class="result-layout"><div>${speech(M.sprintComment(r.accuracy, r.pps))}<div class="mascot-wrap">${mascot('happy', 'finish')}</div></div><section class="panel"><div class="panel-label">YOUR TIME</div><div class="result-time">${timeText(r.elapsed)}</div><p class="result-best">ベスト ${timeText(totalStats.bestTimes[r.sprintLength])}</p><div class="result-summary"><div class="stat"><label>PPS</label><strong>${r.pps.toFixed(2)}</strong></div><div class="stat"><label>正確率</label><strong>${r.accuracy.toFixed(1)}<small>%</small></strong></div><div class="stat"><label>フォルト / ミス</label><strong>${r.faults}<small> / ${r.misses}</small></strong></div></div><div class="panel-label">FAULTS / ATTEMPTS · ミノ別</div><div class="piece-bars">${pieceBars(r)}</div><div class="row"><button class="primary" data-act="start-sprint" data-length="${r.sprintLength}">もう一度 →</button><button data-act="menu">タイトルへ</button></div></section></div></main>${footer()}`;
+    return `<main class="page result-page"><div class="page-heading"><div><div class="eyebrow">SPRINT COMPLETE</div><h2 style="margin-top:5px">${r.sprintLength}個、おつかれさまでした！</h2></div><span class="tag mint-tag">FINISH ✧</span></div><div class="result-layout"><div>${speech(M.sprintComment(r.accuracy, r.pps))}<div class="mascot-wrap">${mascot('happy', 'finish')}</div></div><section class="panel"><div class="panel-label">YOUR TIME</div><div class="result-time">${timeText(r.elapsed)}</div><p class="result-best">ベスト ${timeText(totalStats.bestTimes[r.sprintLength])}</p><div class="result-summary"><div class="stat"><label>PPS</label><strong>${r.pps.toFixed(2)}</strong></div><div class="stat"><label>正確率</label><strong>${r.accuracy.toFixed(1)}<small>%</small></strong></div><div class="stat"><label>フォルト / ミス</label><strong>${r.faults}<small> / ${r.misses}</small></strong></div></div><div class="panel-label">フォルト / 試行 · ミノ別</div><div class="piece-bars">${pieceBars(r)}</div><div class="row"><button class="primary" data-act="start-sprint" data-length="${r.sprintLength}">もう一度 →</button><button data-act="menu">タイトルへ</button></div></section></div></main>${footer()}`;
   }
 
   function render(focus = true) {
+    const previous = document.activeElement;
+    const focusKey = previous?.dataset ? { ...previous.dataset } : {};
+    const previousId = previous?.id;
     app.innerHTML = header() + ({ menu: menuHTML, play: playHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
       settings: settingsHTML, records: statsHTML, sprint: sprintHTML, result: resultHTML }[screen])();
     document.body.dataset.screen = screen;
@@ -211,17 +203,28 @@
     lastQueue = ''; lastHUD = 0;
     if (screen === 'play') { updateResult(); updateHUD(now()); }
     if (screen === 'tutorial' && !tryMode) beginDemo();
-    drawMinis();
-    if (focus) {
-      const target = screen === 'play' ? $('#board') : $('main .primary:not(:disabled)') || $('main button:not(:disabled)');
-      target?.focus({ preventScroll: true });
+    if (screen === 'tutorial' && tryMode) {
+      const exercise = lessons[lessonIndex].tryIt;
+      $('#demo-keys').innerHTML = route(exercise.targets[Math.min(tryIndex, exercise.targets.length - 1)].actions);
+      $('#demo-caption').textContent = tryDone ? 'チャレンジ達成！花まるです♪' : `チャレンジ ${tryIndex + 1} / ${exercise.targets.length}`;
     }
-    if (session?.pausedAt !== null && screen === 'play') showPause();
+    drawMinis();
+    fitLessonBoard();
+    if (focus) {
+      const target = screen === 'play' || screen === 'tutorial' ? $('#board') : $('main .primary:not(:disabled)') || $('main button:not(:disabled)');
+      target?.focus({ preventScroll: true });
+    } else {
+      // DOM replacement must not strand keyboard users at the document root.
+      const controls = $$('button,input,select,textarea');
+      const target = previousId && document.getElementById(previousId) || controls.find(el =>
+        Object.keys(focusKey).length && Object.entries(focusKey).every(([key, value]) => el.dataset[key] === value));
+      (target || $('main button:not(:disabled)'))?.focus({ preventScroll: true });
+    }
+    if (session && session.pausedAt !== null && !tryDone) showPause();
   }
   function releaseAll() {
     if (!session) return;
-    const t = now();
-    for (const [code, key] of [...session.handler.held]) session.keyUp(key.action, t, { code });
+    session.handler.releaseAll(now());
   }
   function pauseSession() {
     if (!session?.running) return;
@@ -268,19 +271,24 @@
       weakSpot: practice.weakSpot, zeroFault: ui.zeroFault, repeatOnFault: ui.repeatOnFault, repeatOnMiss: ui.repeatOnMiss };
   }
   function startPlay(length = 0) {
-    releaseAll(); sessionEventQueue = []; demo = null; tryMode = false;
+    releaseAll(); sessionEventQueue = []; demo = null; tryMode = false; tryDone = false;
     session = newSession({ ...sessionOptions(), sprintLength: length });
     lastResult = null; particles = []; hint = false; irsUntil = 0; irsCount = 0; lastTipAttempt = 0;
     setCoach('目標の輪郭へ、最短ルートでどうぞ♪ 迷ったらヒントを見てくださいね。');
     screen = 'play'; session.start(now()); window.scrollTo(0, 0); render(); processEvents();
   }
   function updatePractice(next) {
+    const focused = document.activeElement;
+    const focusId = focused?.id, focusData = { ...focused?.dataset };
+    const restoreFocus = () => (focusId && document.getElementById(focusId) ||
+      $$('#practice-wrap input').find(el => Object.keys(focusData).length &&
+        Object.entries(focusData).every(([key, value]) => el.dataset[key] === value)))?.focus({ preventScroll: true });
     // Change the target policy inside the current session, preserving its timer,
     // sprint progress and statistics. Reject a range with no legal placements.
     const opts = { ...next, area: next.area === 'custom' ? 'all' : next.area,
       columnRange: next.area === 'custom' ? [next.minColumn - 1, next.maxColumn - 1] : null };
     try { new E.DrillSession({ ...opts, settings, time: now() }); }
-    catch (_) { toast('この条件では置ける目標がありません。列の範囲を広げてください。'); $('#practice-wrap').innerHTML = practiceHTML(); return; }
+    catch (_) { toast('この条件では置ける目標がありません。列の範囲を広げてください。'); $('#practice-wrap').innerHTML = practiceHTML(); restoreFocus(); return; }
     releaseAll(); practice = next; save();
     if (session && screen === 'play') {
       session.pieces = [...practice.pieces]; session.area = opts.area; session.columnRange = opts.columnRange;
@@ -290,11 +298,11 @@
       session.skip(now());
       $('#practice-wrap').innerHTML = practiceHTML();
       $('#hold-note').innerHTML = session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効';
-      updateHUD(now()); $('#board')?.focus({ preventScroll: true });
+      updateHUD(now()); restoreFocus();
     }
   }
   function showPause() {
-    if ($('.overlay') || screen !== 'play') return;
+    if ($('.overlay') || !['play', 'tutorial'].includes(screen) || screen === 'tutorial' && tryDone) return;
     releaseAll();
     app.insertAdjacentHTML('beforeend', `<div class="overlay" role="dialog" aria-modal="true" aria-label="一時停止"><div class="modal"><div class="eyebrow">TAKE A LITTLE BREAK</div><h2>ひとやすみしましょう♪</h2><p>タイマーもミノも止まっています。<br>準備ができたら、また一緒に。</p><div class="stack"><button class="primary" data-act="resume">練習を再開 ${escape(friendly(bindings.pause[0]))}</button><button data-act="settings">操作の設定</button><button class="quiet" data-act="menu">タイトルへ戻る</button></div></div></div>`);
     $('.overlay .primary').focus({ preventScroll: true });
@@ -310,7 +318,7 @@
     } else {
       const r = lastResult;
       panel.className = 'panel result-panel ' + r.status;
-      panel.innerHTML = `<div class="result-head"><strong>${r.status === 'perfect' ? '✔ Perfect!' : r.status === 'fault' ? '✧ フォルト +' + r.extra : '◇ 置き場所ミス'}</strong><small>${r.used} / 最短 ${r.optimal}</small></div>${ui.showOptimal ? `<div class="route-label">OPTIMAL / この目標の最短</div><div class="sequence">${route(resultActions)}</div>` : ''}<div class="route-label">YOUR INPUT / あなたの操作${r.flags.softDrop ? ' · ソフト落下あり' : ''}</div><div class="sequence">${route(actualRoute(r.inputs))}</div><div id="hint-route" class="hint-route" ${hint && ui.showOptimal ? '' : 'hidden'}></div>`;
+      panel.innerHTML = `<div class="result-head"><strong>${r.status === 'perfect' ? '✔ パーフェクト！' : r.status === 'fault' ? '✧ フォルト +' + r.extra : '◇ 置き場所ミス'}</strong><small>${r.used} / 最短 ${r.optimal}</small></div>${ui.showOptimal ? `<div class="route-label">最短手順 / この目標</div><div class="sequence">${route(resultActions)}</div>` : ''}<div class="route-label">あなたの入力${r.flags.softDrop ? ' · ソフト落下あり' : ''}</div><div class="sequence">${route(actualRoute(r.inputs))}</div><div id="hint-route" class="hint-route" ${hint && ui.showOptimal ? '' : 'hidden'}></div>`;
     }
     updateHint();
   }
@@ -318,7 +326,7 @@
     const el = $('#hint-route');
     if (el && session?.round) {
       el.hidden = !(hint && ui.showOptimal);
-      el.innerHTML = `<div class="route-label">NEXT TARGET / 今の目標 · ${session.round.optimal}入力</div><div class="sequence">${route(session.round.target.actions)}</div>`;
+      el.innerHTML = `<div class="route-label">今の目標 · ${session.round.optimal}入力</div><div class="sequence">${route(session.round.target.actions)}</div>`;
     }
   }
   function processEvents() {
@@ -331,7 +339,7 @@
       if (trace.length > 150) trace.shift();
       if (event.kind === 'target') updateHint();
       if (event.kind === 'spawn' && source.handler.inputs.some(input => input.irs)) { irsUntil = now() + 850; irsCount++; }
-      if (event.kind === 'pause' && screen === 'play') showPause();
+      if (event.kind === 'pause') showPause();
       if (event.kind === 'resume') $('.overlay')?.remove();
       if (event.kind === 'hint') { hint = !hint; updateHint(); }
       if (event.kind === 'settings') openSettings();
@@ -349,7 +357,7 @@
               lessonMessage = '✔ チャレンジ達成！次のレッスンへ進めます♪';
               setCoach('大成功です！最短の操作、覚えられましたね♪', 'happy');
             } else {
-              lessonMessage = `✔ Perfect! ${tryIndex} / ${lessons[lessonIndex].tryIt.targets.length} 達成。次の目標です♪`;
+              lessonMessage = `✔ パーフェクト！ ${tryIndex} / ${lessons[lessonIndex].tryIt.targets.length} 達成。次の目標です♪`;
               choosePracticeTarget();
             }
           } else {
@@ -361,6 +369,7 @@
           $('#demo-caption').textContent = tryDone ? 'チャレンジ達成！花まるです♪' : `チャレンジ ${tryIndex + 1} / ${exercise.targets.length} · 最短 ${exercise.targets[tryIndex].count} 入力`;
           $('[data-act=try-it]').textContent = tryDone ? 'もう一度チャレンジ' : `目標 ${tryIndex + 1} / ${exercise.targets.length} · 最初から`;
           $('#demo-keys').innerHTML = route(lessons[lessonIndex].tryIt.targets[Math.min(tryIndex, lessons[lessonIndex].tryIt.targets.length - 1)].actions);
+          fitLessonBoard();
           save(); sound(r.status === 'perfect' ? 'perfect' : 'fault');
         } else {
           if (r.status === 'perfect') {
@@ -419,6 +428,7 @@
     session.start(now()); choosePracticeTarget(); lessonMessage = '輪郭に重ねてハードドロップしてみましょう♪'; render();
     $('#demo-keys').innerHTML = route(exercise.targets[0].actions);
     $('#demo-caption').textContent = `チャレンジ 1 / ${exercise.targets.length} · 最短 ${exercise.targets[0].count} 入力`;
+    fitLessonBoard();
     processEvents();
   }
   function beginDemo() {
@@ -451,6 +461,7 @@
     handler.callbacks.onLock = result => { if (demo?.handler === handler) demo.lock = result.state; };
     $('#demo-keys').innerHTML = route(variant.type === 'ihs' ? ['hold'] : actions);
     $('#demo-caption').textContent = variant.type === 'irs' ? 'ARE中に回転を長押し → 出現時にIRS（1入力）' : variant.type === 'ihs' ? 'ARE中にホールド → 出現時にIHS（0入力）' : `${type}ミノ · ${actions.length}入力 + ハードドロップ（ゆっくり実演）`;
+    fitLessonBoard();
   }
   function updateDemo(t) {
     if (!demo) return;
@@ -470,6 +481,20 @@
   // Canvas coordinates preserve the engine's y-up 40-row board. Only the top
   // two spawn rows and the 20-row field are drawn; device pixels stay crisp.
   function rounded(ctx, x, y, w, h, radius) { ctx.beginPath(); ctx.roundRect(x, y, w, h, radius); }
+  function fitLessonBoard() {
+    const column = $('.lesson-board');
+    if (!column) return;
+    // Reserve actual space for labels, keycaps, wrapped captions and feedback.
+    // A second pass resolves caption wrapping after the board width changes.
+    for (let pass = 0; pass < 3; pass++) {
+      const extra = [...column.children].filter(el => !el.matches('.board-shell')).reduce((sum, el) => {
+        const style = getComputedStyle(el);
+        return sum + el.getBoundingClientRect().height + parseFloat(style.marginTop) + parseFloat(style.marginBottom);
+      }, 0);
+      const cell = Math.max(1, Math.min(34, (column.clientHeight - extra - 4) / 22, (column.clientWidth - 2) / 10));
+      column.style.setProperty('--cell', cell + 'px');
+    }
+  }
   function block(ctx, x, y, size, color, alpha = 1) {
     ctx.save(); ctx.globalAlpha *= alpha;
     const gradient = ctx.createLinearGradient(x, y, x + size, y + size);
@@ -550,17 +575,25 @@
   function captureHTML() {
     $('.capture-overlay')?.remove();
     if (!capture) return;
-    app.insertAdjacentHTML('beforeend', `<div class="capture-overlay" role="dialog" aria-modal="true" aria-label="キーを設定"><div class="modal"><div class="eyebrow">KEY BINDING</div><h2>${ACTION_NAMES[capture.action]}</h2><div class="capture-icon">⌨</div>${capture.conflict ? `<p class="conflict">${escape(friendly(capture.code))} は「${ACTION_NAMES[capture.conflict]}」に使われています。<br>この操作の${escape(friendly(bindings[capture.action][capture.index ?? 0]))} と入れ替えますか？</p><button class="primary" data-act="swap-key">入れ替える</button>` : '<p>割り当てるキーを押してください…<br>Esc でキャンセルできます。</p><button class="small" data-act="bind-escape">Esc を割り当てる</button>'}<button class="quiet" data-act="cancel-capture">キャンセル</button></div></div>`);
-    $('.capture-overlay button')?.focus();
+    app.insertAdjacentHTML('beforeend', `<div class="capture-overlay" role="dialog" aria-modal="true" aria-label="キーを設定"><div class="modal"><div class="eyebrow">KEY BINDING</div><h2>${ACTION_NAMES[capture.action]}</h2><div class="capture-icon">⌨</div>${capture.conflict ? `<p class="conflict">${escape(friendly(capture.code))} は「${ACTION_NAMES[capture.conflict]}」に使われています。<br>この操作の${escape(friendly(bindings[capture.action][capture.index ?? 0]))} と入れ替えますか？</p><button class="primary" data-act="swap-key">入れ替える</button>` : '<p>割り当てるキーを押してください…<br>Esc でキャンセル、Tab でボタンを選べます。</p><button class="small" data-act="bind-escape">Esc を割り当てる</button><button class="small" data-act="bind-tab">Tab を割り当てる</button>'}<button class="quiet" data-act="cancel-capture">キャンセル</button></div></div>`);
+    if (!capture.conflict) {
+      const prompt = $('.capture-overlay p'); prompt.tabIndex = -1; prompt.focus();
+    } else $('.capture-overlay button')?.focus();
+  }
+  function endCapture(rerender = false) {
+    const previous = capture; capture = null;
+    if (rerender) render(false); else $('.capture-overlay')?.remove();
+    if (previous) $$('[data-act=capture]').find(el => el.dataset.action === previous.action &&
+      (previous.index === null ? el.dataset.index === undefined : Number(el.dataset.index) === previous.index))?.focus();
   }
   function acceptKey(code) {
     if (!code || code === 'Unidentified') return;
     const conflict = Object.keys(bindings).find(action => bindings[action].includes(code));
-    if (conflict === capture.action) { capture = null; render(false); return; }
+    if (conflict === capture.action) { endCapture(); return; }
     if (conflict) { capture.code = code; capture.conflict = conflict; captureHTML(); return; }
-    if (capture.index === null) bindings[capture.action].push(code);
-    else bindings[capture.action][capture.index] = code;
-    capture = null; save(); render(false); toast('キー設定を保存しました。');
+    try { bindings = E.rebindKeys(bindings, capture.action, capture.index, code); }
+    catch (error) { toast(error.message); return; }
+    save(); endCapture(true); toast('キー設定を保存しました。');
   }
   function clickAction(button) {
     const act = button.dataset.act;
@@ -613,12 +646,12 @@
     } else if (act === 'reset-stats') {
       totalStats.reset(); if (session) session.stats.reset(); save(); render(false); toast('練習の記録をリセットしました。');
     } else if (act === 'capture') { capture = { action: button.dataset.action, index: button.dataset.index === undefined ? null : Number(button.dataset.index) }; captureHTML(); }
-    else if (act === 'cancel-capture') { capture = null; $('.capture-overlay')?.remove(); }
+    else if (act === 'cancel-capture') endCapture();
     else if (act === 'bind-escape') acceptKey('Escape');
+    else if (act === 'bind-tab') acceptKey('Tab');
     else if (act === 'swap-key') {
-      const index = capture.index ?? 0, old = bindings[capture.action][index];
-      bindings[capture.conflict][bindings[capture.conflict].indexOf(capture.code)] = old;
-      bindings[capture.action][index] = capture.code; capture = null; save(); render(false); toast('キーを入れ替えました。');
+      bindings = E.rebindKeys(bindings, capture.action, capture.index, capture.code);
+      save(); endCapture(true); toast('キーを入れ替えました。');
     } else if (act === 'remove-key') { bindings[button.dataset.action].splice(Number(button.dataset.index), 1); save(); render(false); }
   }
   document.addEventListener('click', event => { const button = event.target.closest('button[data-act]'); if (button && !button.disabled) clickAction(button); });
@@ -633,7 +666,7 @@
   document.addEventListener('change', event => {
     const input = event.target;
     if (input.dataset.engineToggle) updateSettings({ [input.dataset.engineToggle]: input.checked });
-    else if (input.dataset.ui && input.dataset.ui !== 'volume') { ui[input.dataset.ui] = input.checked; updateOptions(); if (screen === 'play') $('#board')?.focus({ preventScroll: true }); }
+    else if (input.dataset.ui && input.dataset.ui !== 'volume') { ui[input.dataset.ui] = input.checked; updateOptions(); }
     else if (input.dataset.setting) input.value = settings[input.dataset.setting];
     else if (input.dataset.pieceFilter) {
       const pieces = $$('[data-piece-filter]:checked').map(el => el.dataset.pieceFilter);
@@ -648,45 +681,76 @@
   });
 
   function editable(target) { return target instanceof HTMLElement && (target.matches('input,textarea,select') || target.isContentEditable); }
+  function navigateDialog(event, root) {
+    const buttons = $$('button:not(:disabled)', root).filter(el => el.offsetParent !== null);
+    if (!buttons.length) return;
+    if (event.code === 'Tab' || ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
+      event.preventDefault();
+      const back = event.code === 'Tab' ? event.shiftKey : ['ArrowUp', 'ArrowLeft'].includes(event.code);
+      const index = buttons.indexOf(document.activeElement);
+      buttons[index < 0 ? back ? buttons.length - 1 : 0 : (index + (back ? -1 : 1) + buttons.length) % buttons.length].focus();
+    }
+  }
   document.addEventListener('keydown', event => {
     if (capture) {
-      event.preventDefault(); if (event.repeat) return;
-      if (event.code === 'Escape') { capture = null; $('.capture-overlay')?.remove(); }
-      else acceptKey(event.code); return;
+      if (event.code === 'Escape') { event.preventDefault(); if (!event.repeat) endCapture(); return; }
+      const modal = $('.capture-overlay');
+      if (event.code === 'Tab' || capture.conflict) { navigateDialog(event, modal); return; }
+      // Buttons retain native Enter/Space activation after Tab navigation. The
+      // initial prompt itself captures Enter/Space so either can be rebound.
+      if (event.target.closest?.('button') && ['Enter', 'Space'].includes(event.code)) return;
+      event.preventDefault(); if (!event.repeat) acceptKey(event.code); return;
     }
     const action = Object.keys(bindings).find(name => bindings[name].includes(event.code));
+    const onBoard = event.target === $('#board') || event.target === document.body || event.target === document;
     if (screen === 'settings') {
-      if (event.code === 'Escape' && !editable(event.target)) { event.preventDefault(); closeSettings(); }
+      if (event.code === 'Escape') { event.preventDefault(); if (!event.repeat) closeSettings(); }
       return;
     }
-    if (screen === 'tutorial' && event.code === 'Escape') { event.preventDefault(); go('menu'); return; }
-    if ((screen === 'play' || screen === 'tutorial' && tryMode) && session) {
-      if (editable(event.target)) return;
-      if (action) {
+    if (screen === 'tutorial' && event.code === 'Escape') { event.preventDefault(); if (!event.repeat) go('menu'); return; }
+    const overlay = $('.overlay');
+    if (overlay) {
+      if (event.code === 'Escape') { event.preventDefault(); if (!event.repeat) resumePlay(); }
+      else if (event.target.closest?.('button') && ['Enter', 'Space'].includes(event.code)) return;
+      else if (action === 'pause') { event.preventDefault(); if (!event.repeat) resumePlay(); }
+      else if (action === 'settings') { event.preventDefault(); if (!event.repeat) openSettings(); }
+      else navigateDialog(event, overlay);
+      return;
+    }
+    // Respect an explicit gameplay rebind of Escape on board. In native UI,
+    // Escape always closes the editor/overlay or pauses the current drill.
+    if (screen === 'play' && event.code === 'Escape' && (!onBoard || !action || action === 'pause')) {
+      event.preventDefault(); if (!event.repeat) { pauseSession(); processEvents(); showPause(); } return;
+    }
+    if (event.code === 'Escape' && !['menu', 'play', 'tutorial'].includes(screen)) {
+      event.preventDefault(); if (!event.repeat) go('menu'); return;
+    }
+    if (editable(event.target)) return;
+    const buttonActivation = event.target.closest?.('button') && ['Enter', 'Space'].includes(event.code);
+    if ((screen === 'play' || screen === 'tutorial' && tryMode) && session && !buttonActivation) {
+      // Shift+Tab always reaches native controls. Arrow keys navigate controls while
+      // the board is unfocused; gameplay shortcuts use their bindings on board.
+      if ((event.code !== 'Tab' || onBoard && !event.shiftKey) && (onBoard || !event.code.startsWith('Arrow')) && action) {
         event.preventDefault(); if (event.repeat) return;
         if (action === 'settings') { openSettings(); return; }
-        if (session.pausedAt !== null) {
-          if (action === 'pause' && screen === 'play') resumePlay(); return;
-        }
-        // performance.now() is used here AND in rAF; stale rAF callback times
-        // and epoch-based event timestamps can never move engine time backward.
+        if (session.pausedAt !== null) return;
+        if (screen === 'tutorial' && action === 'skip') { choosePracticeTarget(); processEvents(); return; }
         session.keyDown(action, now(), { code: event.code }); processEvents(); return;
       }
     }
-    if (screen === 'tutorial' && !tryMode && !editable(event.target)) {
+    if (screen === 'tutorial' && !tryMode && onBoard) {
       if (['ArrowRight', 'Enter', 'Space'].includes(event.code)) { event.preventDefault(); if (!event.repeat) lessonIndex === 11 ? startPlay() : startLesson(lessonIndex + 1); return; }
       if (event.code === 'ArrowLeft') { event.preventDefault(); if (!event.repeat) startLesson(lessonIndex - 1); return; }
     }
-    if (event.code === 'Escape' && screen !== 'menu' && screen !== 'play') { event.preventDefault(); go('menu'); return; }
-    if (action === 'settings' && !editable(event.target)) { event.preventDefault(); if (!event.repeat) openSettings(); return; }
-    if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.code) && !editable(event.target)) {
-      const root = $('.overlay') || $('main');
-      const buttons = $$('button:not(:disabled)', root).filter(el => el.offsetParent !== null);
+    if (action === 'settings') { event.preventDefault(); if (!event.repeat) openSettings(); return; }
+    if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
+      const buttons = $$('button:not(:disabled)', $('main')).filter(el => el.offsetParent !== null);
       if (!buttons.length) return;
       event.preventDefault();
       const direction = ['ArrowDown', 'ArrowRight'].includes(event.code) ? 1 : -1;
       const index = buttons.indexOf(document.activeElement);
-      buttons[(index + direction + buttons.length) % buttons.length].focus();
+      const next = buttons[(index + direction + buttons.length) % buttons.length];
+      next.focus();
     }
   });
   document.addEventListener('keyup', event => {
@@ -697,15 +761,19 @@
   function blur() {
     // Freeze first, then release: releasing a newer direction cannot resume an
     // older charged direction beneath a pause overlay.
-    if (session?.running) { pauseSession(); processEvents(); if (screen === 'play') showPause(); }
+    if (session?.running) { pauseSession(); processEvents(); showPause(); }
     else releaseAll();
     save();
   }
   window.addEventListener('blur', blur);
   document.addEventListener('visibilitychange', () => { if (document.hidden) blur(); });
-  window.addEventListener('pagehide', save);
-  window.addEventListener('resize', drawMinis);
+  let frameId = 0;
+  function startFrames() { if (!frameId) frameId = requestAnimationFrame(frame); }
+  window.addEventListener('pagehide', () => { blur(); cancelAnimationFrame(frameId); frameId = 0; });
+  window.addEventListener('pageshow', startFrames);
+  window.addEventListener('resize', () => { fitLessonBoard(); drawMinis(); });
   function frame() {
+    frameId = 0;
     const t = now();
     if (screen === 'play' || screen === 'tutorial' && tryMode) { session?.update(t); processEvents(); }
     if (screen === 'tutorial' && !tryMode) updateDemo(t);
@@ -718,7 +786,7 @@
       }
     }
     if (toastUntil && t >= toastUntil) { $('#toast').classList.remove('visible'); toastUntil = 0; }
-    requestAnimationFrame(frame);
+    startFrames();
   }
 
   // Public, serializable browser-test seam. Gameplay is always driven by normal
@@ -739,10 +807,11 @@
       const optimal = E.finesseFor(type, target, session.settings);
       if (!optimal) throw new Error('Unreachable debug target');
       releaseAll(); session._newRound(type, optimal); session.handler.board = session.boardTemplate.clone();
-      session.handler.scheduleSpawn(type, now(), delay ?? session.settings.are); processEvents(); return copy(optimal);
+      session.handler.scheduleSpawn(type, now(), delay ?? session.settings.are); processEvents();
+      $('#board')?.focus({ preventScroll: true }); return copy(optimal);
     },
     dispatch(code, down = true) { document.dispatchEvent(new KeyboardEvent(down ? 'keydown' : 'keyup', { code, bubbles: true, cancelable: true })); },
     storageKey: STORAGE
   });
-  render(); requestAnimationFrame(frame);
+  render(); startFrames();
 })();

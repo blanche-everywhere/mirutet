@@ -25,9 +25,17 @@ npm run test:browser
 
 ソルバーは回転・タップ・DASを同じ1入力として幅優先探索します。着地セルの一致で対称形を同一視し、同点なら回転を先に選びます。空フィールドの配置数はI=17、O=9、T/J/L=34、S/Z=17。180°有効時の空フィールド全配置では最大3入力です（I/Oは最大2）。180°無効時はT/J/Lで最大4入力になり、両設定を独立参照テストで検証します。スタック上の意図的な下降を必要とする潜り込みはソルバーの探索対象外です。全表は `tests/finesse-table.txt` を参照してください。
 
-`tests/browser.check.js` はplaywright-coreと `/usr/bin/google-chrome`（headless、`--no-sandbox`）を使用します。file://で起動し、コンソールエラー・ページ例外・外部通信を検出します。レッスン実演と練習、通常キー入力、Perfect/フォルト/ミス、DAS/ARR、ライブIRS、設定保存とJSON、キー競合、一時停止、フィルター、短いスプリントと保存禁止時の動作を確認し、`screens/` に6枚のスクリーンショットを保存します。Chromeが起動できないサンドボックスでは、起動エラーを表示して失敗します。
+`tests/browser.check.js` はplaywright-coreと `/usr/bin/google-chrome`（headless、`--no-sandbox`）を使用します。file://で起動し、コンソールエラー・ページ例外・外部通信を検出します。レッスン実演と練習、通常キー入力、Perfect/フォルト/ミス、DAS/ARR、実キー長押しによるARE・IRSの1入力判定、設定保存とJSON、キー競合のキーボード決定、一時停止、フィルター、短いスプリントと保存禁止時の動作を確認します。1280×720のタイトル・レッスン・ドリル・設定で文書全体のはみ出しを検査し、盤面下の列番号・説明の切れと文字サイズも確認します。ドリルは1920×1080での拡大も検査します。`screens/` にタイトル、通常レッスン、IRSレッスン、固定前の目標、1080pドリル、成功、フォルト＋ヒント、設定、スプリント結果の9枚を保存します。ビルドのURL検査はSVG名前空間以外を拒否します。Chromeが起動できないサンドボックスでは、起動エラーを表示して失敗します。
 
 ブラウザテスト用に `window.__moetet.getState()`、`chooseTarget(type, {rot,x}, {delay})`、`dispatch(code, down)` を公開します。`chooseTarget` のxは占有セルの左端（0始まり）です。キーは通常の `KeyboardEvent` と同じ経路を通り、デバッグ操作で結果や入力数を書き換えません。
+
+補助文字は13px以上、吹き出しは15pxです。レッスン盤面は列番号・キー・説明・結果欄の高さを実測して残りの高さに収めます。長い最短表と設定項目はパネル内でスクロールできます。盤面からTabで操作欄へ移動でき、Tabをゲーム操作に割り当てた場合もShift+Tabで移れます。ダイアログはTab・矢印で選択し、Enter/Spaceで決定、Escで閉じられます。監査の根拠と修正一覧は [docs/REVIEW.md](docs/REVIEW.md) にあります。
+
+## Ideas / memo
+
+ユーザーのアイデア：盤面に影（目標）をあらかじめ示し、そこへ最適な入力手順でミノを置く、パズル形式の練習。現在のドリルは「目標の影を見る → 最短入力で置く → 手順を振り返る」という基本ループをすでに実装しています。積まれたブロックから始める問題や、複数ミノを使う専用のクイズ／「問題」モードは今後の検討事項です。今回の実装範囲には含めません。
+
+Idea: pre-show a target shadow and place the piece there with the optimal input sequence. The current drill already implements this core loop; a dedicated quiz mode with a pre-filled stack and multiple pieces is future work.
 
 ## English
 
