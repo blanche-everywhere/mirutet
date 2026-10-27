@@ -539,14 +539,6 @@ kbd.pressed {
   font-size:13px
 }
 
-.coach-label {
-  text-align:center;
-  font-size:13px;
-  color:#a293ae;
-  letter-spacing:.12em;
-  margin-top:-14px
-}
-
 .practice-options {
   padding:13px 15px
 }
@@ -1795,7 +1787,6 @@ body:is([data-screen=menu],[data-screen=tutorial],[data-screen=settings],[data-s
 .coach .speech { min-height:0; flex-shrink:0; }
 .coach .mascot-wrap { min-height:0; width:100%; max-height:320px; }
 .coach .mirufi { max-height:320px; }
-.coach-label { font-size:13px; margin-top:0; }
 .practice-options { padding:10px 12px; }
 .practice-options h3 { font-size:13px; margin-bottom:8px; }
 .piece-filters { gap:5px; }
