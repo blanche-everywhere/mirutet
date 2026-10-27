@@ -31,7 +31,7 @@
     surprised: '応援', thinking: 'ヒント', sorry: 'もう一度' });
 
   // Include this string once in the app's stylesheet or a <style> element.
-  // The happy face has its own closed smiling eyes; only open faces blink.
+  // Every expression keeps an open-eye layer and the same natural blink timing.
   const MASCOT_CSS = `
 .mirufi { display: block; max-width: 100%; height: auto; overflow: hidden;
   --mirufi-sway: .7deg; --mirufi-sway-time: 4.8s; }
@@ -67,6 +67,104 @@
   .mirufi .mirufi-eyes-closed { opacity: 0; }
 }`;
 
+
+  const HAIR_SKINS = Object.freeze(['side', 'center', 'intake']);
+  const DEFAULT_HAIR_SKIN = 'center';
+  const HAIR_SKIN_LABELS = Object.freeze({ side: '7:3', center: '真ん中分け', intake: '控えめインテーク' });
+  const HAIR_DESIGNS = deepFreeze({
+  "side": {
+    "outline": "M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 214 125 C199 122 190 108 182 92 C173 104 150 116 126 118 Q105 121 86 123 Q88 153 77 179 Q66 165 70 138Z",
+    "strands": "M181 34 C188 51 188 71 182 92 M164 37 C159 59 153 88 126 109 M141 37 C123 54 117 89 94 118 M198 48 C209 67 214 90 217 111 M91 61 Q76 91 78 121 M222 88 L224 123",
+    "highlights": "M82 86 Q87 70 98 62 Q94 72 92 84Z M103 60 Q123 45 146 44 Q137 50 132 62 L124 76 L119 68Z M151 44 Q162 39 174 42 Q173 52 167 63 L159 74 L155 65Z M192 49 Q209 60 217 83 L205 76 Q201 63 192 60Z",
+    "glints": "M107 84 Q112 75 118 70 M151 79 Q158 71 161 64 M203 84 L207 94",
+    "shadow": "M86 123 Q105 121 126 118 C150 116 173 104 182 92 C190 108 199 122 214 125 L214 128 C199 125 190 111 182 95 C173 107 150 119 126 121 Q105 124 86 126Z"
+  },
+  "center": {
+    "outline": "M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 214 125 C191 132 164 111 150 89 C137 108 109 124 86 125 Q88 153 77 179 Q66 165 70 138Z",
+    "strands": "M150 32 C146 50 147 68 150 89 M132 39 C116 58 115 89 94 113 M168 39 C184 58 185 89 206 113 M91 61 Q76 91 78 121 M222 88 L224 123",
+    "highlights": "M82 86 Q87 70 98 62 Q94 72 92 84Z M104 60 Q119 47 139 44 Q130 52 126 65 L120 78 L116 69Z M160 44 Q181 45 195 59 L202 75 Q185 62 171 64Z M207 72 Q217 83 220 98 L211 92Z",
+    "glints": "M108 82 Q112 73 116 68 M176 67 Q190 70 200 82",
+    "shadow": "M86 125 C109 124 137 108 150 89 C164 111 191 132 214 125 L214 128 C191 135 164 114 150 92 C137 111 109 127 86 128Z"
+  },
+  "intake": {
+    "outline": "M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 214 125 C193 130 178 115 173 96 C169 80 158 76 150 86 C142 76 131 80 127 96 C122 115 107 130 86 125 Q88 153 77 179 Q66 165 70 138Z",
+    "strands": "M150 32 C146 48 148 65 150 79 M147 77 C140 59 125 57 115 70 C106 83 105 101 94 113 M153 77 C160 59 175 57 185 70 C194 83 195 101 206 113 M91 61 Q76 91 78 121 M222 88 L224 123",
+    "pockets": "M150 85 C143 68 130 65 122 75 C132 71 142 78 150 85Z M150 85 C157 68 170 65 178 75 C168 71 158 78 150 85Z",
+    "highlights": "M82 86 Q87 70 98 62 Q94 72 92 84Z M105 68 C117 47 137 47 143 64 C133 55 120 58 113 74 L109 82Z M157 64 C163 47 183 47 195 68 L191 82 L187 74 C180 58 167 55 157 64Z M207 72 Q217 83 220 98 L211 92Z",
+    "glints": "M116 62 Q127 54 136 60 M164 60 Q175 54 184 63",
+    "shadow": "M86 125 C107 130 122 115 127 96 C131 80 142 76 150 86 C158 76 169 80 173 96 C178 115 193 130 214 125 L214 128 C193 133 178 118 173 99 C169 83 158 79 150 89 C142 79 131 83 127 99 C122 118 107 133 86 128Z",
+    "opacity": ".30"
+  }
+});
+  function normalizeHairSkin(value) {
+    return HAIR_SKINS.includes(value) ? value : DEFAULT_HAIR_SKIN;
+  }
+  function frontHairSVG(skin, id, paint) {
+    const v = HAIR_DESIGNS[skin], clip = id + '-intake-clip';
+    const clipped = skin === 'intake' ? ` clip-path="url(#${clip})"` : '';
+    return `<g data-part="front-hair" stroke="#929cc3" stroke-width="1.65">${skin === 'intake' ? `
+      <defs><clipPath id="${clip}"><path d="${v.outline}"/></clipPath></defs>` : ''}
+      <path d="${v.outline}" fill="${paint('hair')}"/>
+      <path d="${v.strands}" fill="none" opacity=".65"${clipped}/>${skin === 'intake' ? `
+      <path data-part="intake-root-shadow" d="${v.pockets}" fill="#929cc3" opacity="${v.opacity}" stroke="none"${clipped}/>` : ''}
+      <path d="${v.highlights}" fill="#f5fff8" stroke="none" opacity=".82"${clipped}/>
+      <path d="${v.glints}" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".75" fill="none"${clipped}/>
+      <path d="M148 28 Q143 16 155 11 Q150 20 160 26" fill="${paint('hair')}" stroke-linecap="round"/>
+    </g>`;
+  }
+
+  const OUTFIT_SKINS = Object.freeze(['uniform', 'cape']);
+  const DEFAULT_OUTFIT_SKIN = 'uniform';
+  const OUTFIT_SKIN_LABELS = Object.freeze({ uniform: '制服', cape: '黒ケープ' });
+  function normalizeOutfitSkin(value) {
+    return OUTFIT_SKINS.includes(value) ? value : DEFAULT_OUTFIT_SKIN;
+  }
+  function outfitSVG(skin, id, paint) {
+    if (skin === 'cape') return `<g data-part="outfit" stroke="#595361" stroke-width="1.6">
+ <defs>
+ <linearGradient id="${id}-dress-black" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#41404e"/><stop offset=".55" stop-color="#252633"/><stop offset="1" stop-color="#191b27"/></linearGradient>
+ <linearGradient id="${id}-cape-black" x1="0" y1="0" x2=".75" y2="1"><stop stop-color="#585160"/><stop offset=".38" stop-color="#393642"/><stop offset="1" stop-color="#242431"/></linearGradient>
+ <linearGradient id="${id}-cape-lining" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a89abd"/><stop offset="1" stop-color="#6c617f"/></linearGradient>
+ </defs>
+ <path d="M136 213 L134 238 Q150 253 166 238 L164 213" fill="url(#${id}-skin)" stroke="#b49ab8" stroke-width="1.8"/>
+ <path d="M134 227 Q150 236 166 227" stroke="#e7b8bd" fill="none" stroke-width="1.8"/>
+ <path data-part="dress" d="M132 234 Q107 234 89 253 Q77 271 75 300 L73 350 H227 L225 300 Q223 271 211 253 Q193 234 168 234 Q150 249 132 234Z" fill="url(#${id}-dress-black)"/>
+ <path d="M136 246 Q150 253 164 246 L168 303 Q150 310 132 303Z" fill="#484250" stroke="#75697f" stroke-width="1.2"/>
+ <path d="M140 252 L137 300 M160 252 L163 300" fill="none" stroke="#eee7df" stroke-width="1.4"/>
+ <path d="M132 302 Q150 309 168 302 L172 311 Q150 318 128 311Z" fill="#24232f" stroke="#b4a4c1" stroke-width="1"/>
+ <path d="M132 309 Q136 314 140 311 Q145 316 150 312 Q155 316 160 311 Q164 314 168 309" fill="none" stroke="#f2eade" stroke-width="1.4"/>
+ <path d="M110 295 Q104 315 105 348 M129 318 L124 349 M171 318 L176 349 M190 295 Q196 315 195 348" fill="none" stroke="#777083" stroke-width="1.3" opacity=".65"/>
+ <path d="M150 269 L150 301" stroke="#81758f" fill="none"/>
+ <circle cx="150" cy="277" r="2" fill="#d7c1e8" stroke="#a28caf" stroke-width=".8"/>
+ <circle cx="150" cy="288" r="2" fill="#d7c1e8" stroke="#a28caf" stroke-width=".8"/>
+ <circle cx="150" cy="299" r="2" fill="#d7c1e8" stroke="#a28caf" stroke-width=".8"/>
+ <path d="M132 234 Q107 234 89 253 Q84 267 81 282 Q101 300 130 289 L145 252Z M168 234 Q193 234 211 253 Q216 267 219 282 Q199 300 170 289 L155 252Z" fill="url(#${id}-cape-black)"/>
+ <path d="M130 289 Q138 278 145 252 L138 261 L126 287Z M170 289 Q162 278 155 252 L162 261 L174 287Z" fill="url(#${id}-cape-lining)" stroke-width=".8"/>
+ <path d="M105 246 Q96 263 91 277 M119 243 Q111 259 109 277 M195 246 Q204 263 209 277 M181 243 Q189 259 191 277" fill="none" stroke="#827589" stroke-width="1.4" opacity=".55"/>
+ <path d="M83 281 Q102 296 129 287 M217 281 Q198 296 171 287" fill="none" stroke="#e9e1d8" stroke-width="1.5"/>
+ <path d="M83 283 Q83 290 89 288 Q89 295 95 292 Q98 299 103 294 Q107 300 111 294 Q116 299 120 292 Q125 296 129 289 M217 283 Q217 290 211 288 Q211 295 205 292 Q202 299 197 294 Q193 300 189 294 Q184 299 180 292 Q175 296 171 289" fill="none" stroke="#f3ecdf" stroke-width="1.3" stroke-linecap="round"/>
+ <path d="M134 237 Q139 244 150 247 L140 255 Q131 250 127 242Z M166 237 Q161 244 150 247 L160 255 Q169 250 173 242Z" fill="#f4eee4" stroke="#c1b3c8" stroke-width="1.2"/>
+ <path d="M136 243 L141 249 M164 243 L159 249" stroke="#d5c6d9" stroke-width="1"/>
+ <path d="M150 255 C141 246 133 247 135 253 L136 262 Q143 262 150 257 Q157 262 164 262 L165 253 C167 247 159 246 150 255Z" fill="url(#${id}-ribbon)" stroke="#9e87b7" stroke-width="1.1"/>
+ <path d="M146 258 L141 273 L150 268 L159 273 L154 258" fill="#c0a7d6" stroke="#8e79a2" stroke-width="1"/>
+ <path d="M138 252 L147 256 M162 252 L153 256" stroke="#eadcf4" stroke-width="1.3" fill="none"/>
+ <ellipse cx="150" cy="257" rx="3.7" ry="4.7" fill="#f3e4bd" stroke="#b99d87" stroke-width="1.1"/>
+ <ellipse cx="150" cy="256" rx="1.7" ry="2.3" fill="#fff6df" stroke="none"/>
+ </g>`;
+    return `<g data-part="outfit" stroke="#b49ab8" stroke-width="1.8">
+          <path d="M136 213 L134 238 Q150 253 166 238 L164 213" fill="${paint('skin')}"/>
+          <path d="M134 227 Q150 236 166 227" stroke="#e7b8bd" fill="none"/>
+          <path d="M132 234 Q107 234 89 253 Q77 271 75 300 L73 350 H227 L225 300 Q223 271 211 253 Q193 234 168 234 Q150 249 132 234Z" fill="${paint('uniform')}"/>
+          <path d="M107 241 L94 261 L119 293 L150 261 L181 293 L206 261 L193 241 L166 238 L150 255 L134 238Z" fill="#c4b5de"/>
+          <path d="M108 248 L101 260 L120 283 L144 260 M192 248 L199 260 L180 283 L156 260" stroke="#fff4fa" stroke-width="2.6" fill="none"/>
+          <path d="M150 268 Q124 249 124 268 L127 287 Q142 284 150 275 Q158 284 173 287 L176 268 Q176 249 150 268Z" fill="${paint('ribbon')}"/>
+          <path d="M144 275 L137 301 L150 294 L163 301 L156 275" fill="#c6b0df"/>
+          <rect x="144" y="264" width="12" height="15" rx="5" fill="#fff2cf" stroke="#d6b8bb"/>
+          <path d="M150 309 L150 347" stroke="#e8c4d9"/><circle cx="150" cy="315" r="2.5" fill="#fdf7ff"/><circle cx="150" cy="336" r="2.5" fill="#fdf7ff"/>
+          <path d="M179 305 h12 v12 h-12Z M183 301 h4 v4" fill="#d0ece2" stroke="#a7c5bd" stroke-width="1.3"/>
+        </g>`;
+  }
+
   function xml(text) {
     return String(text).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;',
       '>': '&gt;', '"': '&quot;', "'": '&apos;' })[char]);
@@ -74,13 +172,17 @@
   let svgSerial = 0;
 
   /** Chest-up original vector art, 300 × 328. opts: width, height (positive
-   * numbers), title, idPrefix, animated (default true), halo (default true).
+   * numbers), title, idPrefix, animated (default true), halo (default true),
+   * hairSkin (side, center, intake; missing/unknown values use center),
+   * outfitSkin (uniform, cape; missing/unknown values use uniform).
    * Each call scopes all paint/clip/title IDs, including when idPrefix repeats.
    * The uniform continues below the viewport for a natural portrait crop.
    * data-part groups keep the face, hair, and effect marks independently swappable.
    */
   function mascotSVG(expression = 'normal', opts = {}) {
     if (!EXPRESSIONS.includes(expression)) throw new RangeError('Unknown expression: ' + expression);
+    const hairSkin = normalizeHairSkin(opts.hairSkin);
+    const outfitSkin = normalizeOutfitSkin(opts.outfitSkin);
     const width = opts.width ?? 300, height = opts.height ?? 328;
     if (![width, height].every(n => Number.isFinite(n) && n > 0)) {
       throw new RangeError('Mascot dimensions must be positive numbers');
@@ -98,7 +200,7 @@
       const pupilX = cx + (thinking ? 4 : 0);
       return `<g class="mirufi-eye mirufi-eye--${side}">
         <path d="M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14}
-          Q${cx + 24} ${cy + 21} ${cx} ${cy + 25} Q${cx - 23} ${cy + 21} ${cx - 22} ${cy - 15}Z"
+          Q${cx + 24} ${cy + (happy ? 17 : 21)} ${cx} ${cy + (happy ? 21 : 25)} Q${cx - 23} ${cy + (happy ? 17 : 21)} ${cx - 22} ${cy - 15}Z"
           fill="#fffafa"/>
         <g clip-path="${paint('eye-' + side)}">
           <ellipse cx="${pupilX}" cy="${cy}" rx="18" ry="${ry}" fill="${paint('iris')}"/>
@@ -116,25 +218,25 @@
         <path d="M${cx - 19} ${cy - 18} l-7-7 M${cx - 12} ${cy - 22} l-3-6"
           fill="none" stroke="#57465f" stroke-width="3.1" stroke-linecap="round"
           ${side === 'right' ? `transform="translate(${cx * 2} 0) scale(-1 1)"` : ''}/>
-        <path d="M${cx - 14} ${cy + 23} Q${cx} ${cy + 29} ${cx + 13} ${cy + 23}"
+        <path d="M${cx - 14} ${cy + (happy ? 19 : 23)} Q${cx} ${cy + (happy ? 23 : 29)} ${cx + 13} ${cy + (happy ? 19 : 23)}"
           fill="none" stroke="#bb8d9e" stroke-width="1.5" stroke-linecap="round"/>
       </g>`;
     }
 
     const brows = happy
-      ? 'M92 119 Q107 109 121 119 M179 119 Q193 109 208 119'
+      ? 'M93 118 Q107 110 121 117 M179 117 Q193 110 207 118'
       : surprised ? 'M92 116 Q105 104 121 112 M179 112 Q195 104 208 116'
       : thinking ? 'M93 124 Q108 119 122 121 M179 115 Q195 111 207 119'
       : sorry ? 'M93 125 Q110 126 123 116 M177 116 Q190 126 207 125'
       : 'M93 120 Q107 113 122 119 M178 119 Q193 113 207 120';
     const mouth = happy
-      ? '<path d="M137 194 Q150 199 163 194 Q161 214 150 215 Q139 214 137 194Z" fill="#a9607b"/><path d="M142 209 Q150 203 158 209 Q150 217 142 209Z" fill="#f9a9b8"/>'
+      ? '<path d="M137 194 Q150 199 163 194 C160 203 156 208 150 208 C144 208 140 203 137 194Z" fill="#a9607b"/><path d="M144 204 Q150 201 156 204 Q150 210 144 204Z" fill="#f9a9b8"/>'
       : surprised ? '<ellipse cx="150" cy="202" rx="7" ry="9" fill="#b66d85"/><ellipse cx="150" cy="206" rx="4" ry="3" fill="#ffc0c7"/>'
       : thinking ? '<path d="M144 201 Q149 198 155 201" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/>'
       : sorry ? '<path d="M141 205 Q150 197 159 205" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/>'
       : '<path d="M140 198 Q150 208 160 198" fill="none" stroke="#a96780" stroke-width="2.5" stroke-linecap="round"/>';
 
-    const closedEyes = `<path d="M91 160 Q109 ${happy ? 136 : 171} 128 160 M172 160 Q191 ${happy ? 136 : 171} 209 160"
+    const closedEyes = `<path d="M91 160 Q109 171 128 160 M172 160 Q191 171 209 160"
       fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>
       <path d="M93 158 l-5-4 M207 158 l5-4" fill="none" stroke="#57465f" stroke-width="2.5" stroke-linecap="round"/>`;
     const accents = [
@@ -147,9 +249,9 @@
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 300 328" overflow="hidden"
       class="mirufi mirufi--${expression}${opts.animated === false ? '' : ' mirufi--animated'}" role="img"
-      aria-labelledby="${id}-title ${id}-desc" focusable="false" data-expression="${expression}">
+      aria-labelledby="${id}-title ${id}-desc" focusable="false" data-expression="${expression}" data-hair-skin="${hairSkin}" data-outfit-skin="${outfitSkin}">
       <title id="${id}-title">${xml(title)}</title>
-      <desc id="${id}-desc">ミルテト学園の先輩、ミルフィ。ミントとライラックのツインテール、きらきらした瞳、ブロックの髪飾りと桃色の制服です。</desc>
+      <desc id="${id}-desc">ミルテト学園の先輩、ミルフィ。ミントとライラックのツインテール、きらきらした瞳、ブロックの髪飾りと${outfitSkin === 'cape' ? '黒いケープの衣装' : '桃色の制服'}です。</desc>
       <defs>
         <linearGradient id="${id}-hair" x1=".15" y1="0" x2=".8" y2="1" gradientUnits="objectBoundingBox">
           <stop stop-color="#edfff3"/><stop offset=".34" stop-color="#afe5d9"/><stop offset=".7" stop-color="#c6d4f1"/><stop offset="1" stop-color="#c6a9e3"/>
@@ -174,7 +276,7 @@
         ${['left', 'right'].map((side, i) => {
           const cx = i ? 191 : 109, cy = surprised ? 155 : sorry ? 160 : 157;
           const ry = surprised ? 29 : thinking && side === 'right' ? 23 : 26;
-          return `<clipPath id="${id}-eye-${side}"><path d="M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14} Q${cx + 24} ${cy + 21} ${cx} ${cy + 25} Q${cx - 23} ${cy + 21} ${cx - 22} ${cy - 15}Z"/></clipPath>`;
+          return `<clipPath id="${id}-eye-${side}"><path d="M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14} Q${cx + 24} ${cy + (happy ? 17 : 21)} ${cx} ${cy + (happy ? 21 : 25)} Q${cx - 23} ${cy + (happy ? 17 : 21)} ${cx - 22} ${cy - 15}Z"/></clipPath>`;
         }).join('')}
       </defs>
       ${opts.halo === false ? '' : `<ellipse cx="150" cy="180" rx="144" ry="171" fill="${paint('halo')}"/>`}
@@ -190,50 +292,33 @@
             <path d="M238 117 C252 155 241 182 258 225 C269 258 263 281 255 294 M226 149 C234 189 223 221 229 254" fill="none" opacity=".6"/>
             <path d="M257 134 C252 106 246 105 242 110 C252 139 246 167 256 192 C253 168 260 156 257 134Z" fill="#f3fff8" stroke="none" opacity=".65"/>
           </g>
-          <path d="M67 136 C54 79 77 29 144 25 C214 19 251 68 234 141 L227 223 Q207 250 187 238 L109 238 Q78 249 67 220Z" fill="${paint('hair')}"/>
+          <path d="M67 136 C54 79 77 29 144 25 C214 19 251 68 234 141 L229 177 Q225 190 219 198 L214 211 Q207 207 207 198 L200 207 Q201 195 205 182 L95 182 Q99 195 100 207 L93 198 Q93 207 86 211 L81 198 Q75 190 71 177Z" fill="${paint('hair')}"/>
         </g>
         <g data-part="hair-ribbons" stroke="#a08cbd" stroke-width="1.5">
           <path d="M66 100 Q39 74 34 91 L44 115 Q29 137 43 143 L68 121 L76 140 Q88 134 77 110Z M234 100 Q261 74 266 91 L256 115 Q271 137 257 143 L232 121 L224 140 Q212 134 223 110Z" fill="${paint('ribbon')}"/>
           <path d="M46 96 L64 111 L45 133 M254 96 L236 111 L255 133" fill="none" stroke="#f5e6ff" stroke-width="2.5"/>
           <ellipse cx="68" cy="112" rx="9" ry="12" fill="#e9d6f3"/><ellipse cx="232" cy="112" rx="9" ry="12" fill="#e9d6f3"/>
         </g>
-        <g data-part="outfit" stroke="#b49ab8" stroke-width="1.8">
-          <path d="M136 213 L134 238 Q150 253 166 238 L164 213" fill="${paint('skin')}"/>
-          <path d="M134 227 Q150 236 166 227" stroke="#e7b8bd" fill="none"/>
-          <path d="M132 234 Q107 234 89 253 Q77 271 75 300 L73 350 H227 L225 300 Q223 271 211 253 Q193 234 168 234 Q150 249 132 234Z" fill="${paint('uniform')}"/>
-          <path d="M107 241 L94 261 L119 293 L150 261 L181 293 L206 261 L193 241 L166 238 L150 255 L134 238Z" fill="#c4b5de"/>
-          <path d="M108 248 L101 260 L120 283 L144 260 M192 248 L199 260 L180 283 L156 260" stroke="#fff4fa" stroke-width="2.6" fill="none"/>
-          <path d="M150 268 Q124 249 124 268 L127 287 Q142 284 150 275 Q158 284 173 287 L176 268 Q176 249 150 268Z" fill="${paint('ribbon')}"/>
-          <path d="M144 275 L137 301 L150 294 L163 301 L156 275" fill="#c6b0df"/>
-          <rect x="144" y="264" width="12" height="15" rx="5" fill="#fff2cf" stroke="#d6b8bb"/>
-          <path d="M150 309 L150 347" stroke="#e8c4d9"/><circle cx="150" cy="315" r="2.5" fill="#fdf7ff"/><circle cx="150" cy="336" r="2.5" fill="#fdf7ff"/>
-          <path d="M179 305 h12 v12 h-12Z M183 301 h4 v4" fill="#d0ece2" stroke="#a7c5bd" stroke-width="1.3"/>
-        </g>
+        ${outfitSVG(outfitSkin, id, paint)}
         <g data-part="face-base">
           <ellipse cx="76" cy="168" rx="11" ry="17" fill="${paint('skin')}" stroke="#c9a3ac" stroke-width="1.5"/>
           <ellipse cx="224" cy="168" rx="11" ry="17" fill="${paint('skin')}" stroke="#c9a3ac" stroke-width="1.5"/>
           <path d="M76 117 C75 83 99 65 150 65 C201 65 225 83 224 117 L224 166 C223 195 194 226 150 233 C106 226 77 195 76 166Z" fill="${paint('skin')}" stroke="#bd9aa9" stroke-width="1.6"/>
-          <path d="M79 133 Q96 99 125 105 Q153 92 181 106 Q208 106 222 134 L222 111 Q209 71 151 72 Q93 72 78 110Z" fill="#e7c6cb" opacity=".24"/>
+          <path data-part="hairline-shadow" d="${HAIR_DESIGNS[hairSkin].shadow}" fill="#e7c6cb" opacity=".24"/>
         </g>
         <g class="mirufi-expression" data-expression="${expression}">
           <g data-part="eyebrows"><path d="${brows}" fill="none" stroke="#a092b3" stroke-width="2.8" stroke-linecap="round"/></g>
           <g data-part="eyes">
-            ${happy ? `<g class="mirufi-happy-eyes">${closedEyes}</g>` : `<g class="mirufi-eyes-open">${eye(109, 'left')}${eye(191, 'right')}</g><g class="mirufi-eyes-closed" opacity="0">${closedEyes}</g>`}
+            <g class="mirufi-eyes-open">${eye(109, 'left')}${eye(191, 'right')}</g><g class="mirufi-eyes-closed" opacity="0">${closedEyes}</g>
           </g>
-          <g data-part="cheeks">
-            <ellipse cx="92" cy="187" rx="23" ry="13" fill="${paint('blush')}"/><ellipse cx="208" cy="187" rx="23" ry="13" fill="${paint('blush')}"/>
+          <g data-part="cheeks"${happy ? ' transform="translate(0 -3)"' : ''}>
+            <ellipse cx="92" cy="187" rx="${happy ? 21 : 23}" ry="${happy ? 12 : 13}" fill="${paint('blush')}"/><ellipse cx="208" cy="187" rx="${happy ? 21 : 23}" ry="${happy ? 12 : 13}" fill="${paint('blush')}"/>
             <path d="M83 186 l-1 4 M90 187 l-1 4 M97 187 l-1 4 M203 187 l-1 4 M210 187 l-1 4 M217 186 l-1 4" stroke="#e7a3b4" stroke-width="1.4" stroke-linecap="round"/>
           </g>
           <path d="M149 182 q-3 4 1 4" fill="none" stroke="#ddb7b8" stroke-width="1.4" stroke-linecap="round"/>
           <g data-part="mouth">${mouth}</g>
         </g>
-        <g data-part="front-hair" stroke="#929cc3" stroke-width="1.65">
-          <path d="M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 213 117 C196 117 177 99 166 79 Q168 109 180 128 Q146 121 131 86 Q130 113 115 130 Q110 110 109 105 Q94 131 78 143 L77 179 Q66 165 70 138Z" fill="${paint('hair')}"/>
-          <path d="M129 40 C113 49 105 70 109 105 M164 39 C156 50 159 69 166 79 M180 42 C208 61 216 88 213 117 M91 61 Q76 91 78 121 M222 88 L224 123" fill="none" opacity=".65"/>
-          <path d="M82 86 Q87 70 98 62 Q94 72 92 84Z M103 59 Q120 46 140 47 Q127 53 119 66 L112 76 L108 69Z M149 45 Q175 40 194 58 L202 71 Q180 57 158 61Z M207 72 Q217 83 220 98 L211 92Z" fill="#f5fff8" stroke="none" opacity=".82"/>
-          <path d="M102 81 Q104 73 108 68 M172 61 Q190 62 201 73" stroke="#fff" stroke-width="3.5" stroke-linecap="round" opacity=".75" fill="none"/>
-          <path d="M148 28 Q143 16 155 11 Q150 20 160 26" fill="${paint('hair')}" stroke-linecap="round"/>
-        </g>
+        ${frontHairSVG(hairSkin, id, paint)}
         <g data-part="block-clip" transform="rotate(-17 91 88)" stroke="#b09ab3" stroke-width="1.5">
           <path d="M74 79 h12 v-12 h12 v12 h12 v12 H74Z" fill="#fff0c8"/>
           <path d="M76 81 h8 v8 h-8Z M88 69 h8 v8 h-8Z M88 81 h8 v8 h-8Z M100 81 h8 v8 h-8Z" fill="#f5cedf" stroke="none"/>
@@ -539,6 +624,8 @@
   const LESSONS = createLessons();
 
   return Object.freeze({ name: 'ミルフィ', EXPRESSIONS, EXPRESSION_LABELS, MASCOT_CSS, mascotSVG,
+    HAIR_SKINS, DEFAULT_HAIR_SKIN, HAIR_SKIN_LABELS, normalizeHairSkin,
+    OUTFIT_SKINS, DEFAULT_OUTFIT_SKIN, OUTFIT_SKIN_LABELS, normalizeOutfitSkin,
     DIALOGUE, PRAISE_LINES, STREAK_LINES, PIECE_PRAISE, MISS_LINES, ENCOURAGEMENT_LINES,
     WELCOME_LINES, TIPS, SPRINT_COMMENTS, hintText, sprintComment,
     LESSONS, createLessons, lessonPlacementGroups });

@@ -7,6 +7,35 @@ const vm = require('node:vm');
 const E = require('../src/engine.js');
 const M = require('../src/mascot.js');
 
+test('three hair skins cover every expression with safe IDs and unchanged facial features', () => {
+  assert.deepEqual(M.HAIR_SKINS, ['side', 'center', 'intake']);
+  assert.equal(M.DEFAULT_HAIR_SKIN, 'center');
+  const normalize = s => s.replace(/mirufi-skin-\d+/g, 'mirufi-skin');
+  const withoutHair = s => normalize(s).replace(/ data-hair-skin="[^"]+"/, '')
+    .replace(/<g data-part="front-hair"[\s\S]*?<\/g>/, '')
+    .replace(/<path data-part="hairline-shadow"[^>]*\/>/, '');
+  const seen = new Set();
+  for (const expr of M.EXPRESSIONS) {
+    const outlines = new Set();
+    const base = M.mascotSVG(expr, { idPrefix: 'skin' });
+    for (const hairSkin of M.HAIR_SKINS) {
+      const svg = M.mascotSVG(expr, { idPrefix: 'skin', hairSkin });
+      const elements = parseXML(svg);
+      const ids = new Set(elements.map(e => e.attrs.id).filter(Boolean));
+      for (const id of ids) { assert(!seen.has(id)); seen.add(id); }
+      for (const match of svg.matchAll(/url\(#([^)]+)\)/g)) assert(ids.has(match[1]));
+      assert.equal(withoutHair(svg), withoutHair(base));
+      assert(svg.includes(`data-hair-skin="${hairSkin}"`));
+      outlines.add(svg.match(/<g data-part="front-hair"[\s\S]*?<path d="([^"]+)"/)[1]);
+    }
+    assert.equal(outlines.size, 3, 'each selection has a distinct silhouette');
+  }
+  for (const value of [null, 'lifted', 'original', '<script>', 42, {}]) {
+    assert.equal(M.normalizeHairSkin(value), 'center');
+    assert(M.mascotSVG('normal', { hairSkin: value }).includes('data-hair-skin="center"'));
+  }
+});
+
 // A small, independent XML-subset parser. A tag stack alone misses malformed
 // attributes, bare ampersands, duplicate attributes, and text outside the root.
 // The generator uses no comments, CDATA, DTDs, or processing instructions.
@@ -83,12 +112,12 @@ test('all five expressions are well-formed standalone SVGs with self-contained p
     }
     assert.ok(elements.filter(el => /Gradient$/.test(el.name)).length >= 6, 'layered gradient artwork');
     faces.add(svg.match(/<g data-part="mouth">([\s\S]*?)<\/g>/)[1]);
-    if (expression === 'happy') assert.match(svg, /mirufi-happy-eyes/);
-    else {
-      assert.match(svg, /mirufi-eyes-open/);
-      assert.equal(elements.find(el => el.attrs.class === 'mirufi-eyes-closed').attrs.opacity, '0',
-        'closed blink layer stays hidden even before CSS loads');
-    }
+    assert.equal(elements.filter(el => el.attrs.class === 'mirufi-eyes-open').length, 1);
+    assert.equal(elements.filter(el => el.attrs.class === 'mirufi-eyes-closed').length, 1);
+    assert.equal(elements.filter(el => /^mirufi-eye mirufi-eye--/.test(el.attrs.class || '')).length, 2,
+      'every expression, including happy, has two open eyes');
+    assert.equal(elements.find(el => el.attrs.class === 'mirufi-eyes-closed').attrs.opacity, '0',
+      'closed blink layer stays hidden even before CSS loads');
   }
   assert.equal(faces.size, 5, 'different mouths for every expression');
 });
@@ -331,4 +360,29 @@ test('preview tool writes all five inline SVGs with no external resources at the
   assert.ok(!/<(?:link|script|img|iframe)\b/i.test(preview));
   assert.ok(!/\b(?:src|href)\s*=|@import|url\((?!#)/i.test(preview));
   for (const expression of M.EXPRESSIONS) assert.ok(preview.includes(`data-expression="${expression}"`));
+});
+
+test('outfit choices cover all 30 combinations without changing hair or face', () => {
+  const normalize = s => s.replace(/mirufi-outfit-\d+/g, 'mirufi-outfit')
+    .replace(/ data-outfit-skin="[^"]+"/, '').replace(/<desc[^>]*>[\s\S]*?<\/desc>/, '')
+    .replace(/<g data-part="outfit"[\s\S]*?<\/g>/, '');
+  const seen = new Set();
+  for (const hairSkin of M.HAIR_SKINS) for (const expression of M.EXPRESSIONS) {
+    const uniform = M.mascotSVG(expression, { hairSkin, idPrefix: 'outfit' });
+    for (const outfitSkin of M.OUTFIT_SKINS) {
+      const svg = M.mascotSVG(expression, { hairSkin, outfitSkin, idPrefix: 'outfit' });
+      assert.equal(normalize(svg), normalize(uniform));
+      const elements = parseXML(svg), ids = new Set(elements.map(e => e.attrs.id).filter(Boolean));
+      assert.equal(ids.size, elements.filter(e => e.attrs.id).length, 'no duplicate IDs within a portrait');
+      for (const id of ids) { assert(!seen.has(id)); seen.add(id); }
+      for (const match of svg.matchAll(/url\(#([^)]+)\)/g)) assert(ids.has(match[1]));
+      assert(svg.includes(`data-outfit-skin="${outfitSkin}"`));
+      assert.match(svg, /<desc[^>]*>ミルテト学園の先輩、ミルフィ。/);
+      assert.ok(svg.includes(outfitSkin === 'cape' ? '黒いケープの衣装です。' : '桃色の制服です。'));
+      for (const { attrs } of elements) for (const attr of ['id', 'class', 'data-part']) {
+        assert.doesNotMatch(attrs[attr] || '', /hand|finger|arm|sleeve|cuff/i, 'all skins remain chest-up without limbs');
+      }
+    }
+  }
+  for (const value of [undefined, null, '', 'goth', 1, false, {}, []]) assert.equal(M.normalizeOutfitSkin(value), 'uniform');
 });

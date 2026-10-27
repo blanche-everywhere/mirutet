@@ -14,7 +14,7 @@ async function main() {
   const urls = html.match(/https?:\/\/[^\s"'<>`\\)]+/gi) || [];
   assert.deepEqual(urls.filter(url => !['http://www.w3.org/2000/svg', 'http://www.w3.org/1999/xlink'].includes(url)), [], 'Unexpected URL in offline HTML');
   fs.mkdirSync(path.join(root, 'screens'), { recursive: true });
-  const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', headless: true, args: ['--no-sandbox'] });
+  const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome', headless: true, args: ['--no-sandbox'] });
   try {
     // Mutated preferences and reload/persistence checks stay in this context.
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 });
@@ -102,8 +102,20 @@ async function main() {
       ]);
       await checkText();
     };
-    const checkSettings = (label, targetPage = page) => checkViewport(label,
-      ['.page-heading', '[data-act=close-settings]', '.settings-content', '.footer'], targetPage);
+    const checkSettings = async (label, targetPage = page) => {
+      await checkViewport(label, ['.page-heading', '[data-act=close-settings]', '.settings-content', '.footer'], targetPage);
+      const appearance = targetPage.locator('[role=group][aria-labelledby=shared-appearance]');
+      assert.equal(await appearance.locator('#hair-skin').count(), 1);
+      assert.equal(await appearance.locator('#outfit-skin').count(), 1);
+      const shared = targetPage.locator('[role=group][aria-labelledby=shared-display-sound]');
+      for (const key of ['ghost', 'showKeys', 'sound', 'bubbles', 'volume', 'pieceCueTiming', 'pieceCueVolume']) {
+        assert.equal(await shared.locator(`[data-ui="${key}"]`).count(), 1, `${key} is a series-wide setting`);
+      }
+      const finesse = targetPage.locator('[role=group][aria-labelledby=finesse-settings]');
+      assert.deepEqual(await finesse.locator('[data-ui]').evaluateAll(es => es.map(e => e.dataset.ui)),
+        ['zeroFault', 'repeatOnFault', 'repeatOnMiss', 'showTarget', 'showOptimal']);
+      assert.equal(await finesse.locator('#hair-skin,#outfit-skin').count(), 0);
+    };
     const checkDrill = async () => {
       await checkLayout();
       await checkViewport('drill', ['.coach .speech', '.coach .mirufi', '.board-shell', '.column-labels', '.board-note', '.practice-options',
@@ -316,11 +328,14 @@ async function main() {
     await click('reset-keys');
     await page.locator('[data-act=capture][data-action=cw][data-index="0"]').click();
     await page.keyboard.press('KeyQ'); assert.equal((await state()).bindings.cw[0], 'KeyQ');
+    await page.selectOption('#hair-skin', 'side');
+    await page.selectOption('#outfit-skin', 'cape');
     await click('export');
     const exported = JSON.parse(await page.locator('#settings-json').inputValue());
     assert.equal(exported.settings.das, 300);
     assert.equal(exported.ui.pieceCueTiming, 'current');
     assert.equal(exported.ui.pieceCueVolume, 61);
+    assert.equal(exported.ui.hairSkin, 'side'); assert.equal(exported.ui.outfitSkin, 'cape');
     await page.locator('#settings-json').fill('{bad JSON'); await click('import');
     assert.match(await page.locator('#import-status').innerText(), /読み込めません/);
     assert.equal((await state()).settings.das, 300);
@@ -334,6 +349,7 @@ async function main() {
     await page.reload(); await waitScreen('menu');
     s = await state(); assert.equal(s.settings.das, 300); assert.equal(s.settings.arr, 0); assert.equal(s.settings.are, 400);
     assert.equal(s.ui.pieceCueTiming, 'current'); assert.equal(s.ui.pieceCueVolume, 61);
+    assert.equal(s.ui.hairSkin, 'side'); assert.equal(s.ui.outfitSkin, 'cape');
     assert.equal(s.bindings.cw[0], 'KeyQ'); assert.ok(s.progress.completed.includes(4)); assert.ok(s.totalStats.faults >= 1);
     await click('drill'); await ready();
 
@@ -451,6 +467,9 @@ async function main() {
       assert.deepEqual(defaults.bindings.hold, ['ShiftLeft', 'KeyC']);
       assert.equal(defaults.settings.das, 110); assert.equal(defaults.settings.are, 80);
       assert.equal(defaults.ui.pieceCueTiming, 'next'); assert.equal(defaults.ui.pieceCueVolume, 60);
+      assert.equal(defaults.ui.hairSkin, 'center'); assert.equal(defaults.ui.outfitSkin, 'uniform');
+      assert.equal(await defaultPage.locator('#hair-skin').inputValue(), 'center');
+      assert.equal(await defaultPage.locator('#outfit-skin').inputValue(), 'uniform');
       assert.equal(await defaultPage.locator('[data-ui=pieceCueTiming]').inputValue(), 'next');
       assert.equal(await defaultPage.locator('[data-ui=pieceCueVolume]').inputValue(), '60');
       assert.deepEqual(await defaultPage.locator('[data-act=capture][data-action=cw][data-index]').allTextContents(), ['↑', 'X']);
@@ -530,6 +549,8 @@ async function main() {
             assert.equal(profile.ui.volume, expected.ui.volume, `${label} ui.volume`);
             assert.equal(profile.ui.pieceCueTiming, 'next', `${label} ui.pieceCueTiming`);
             assert.equal(profile.ui.pieceCueVolume, 60, `${label} ui.pieceCueVolume`);
+            assert.equal(profile.ui.hairSkin, 'center', `${label} ui.hairSkin`);
+            assert.equal(profile.ui.outfitSkin, 'uniform', `${label} ui.outfitSkin`);
             assert.deepEqual(profile.practice, expected.practice, `${label} practice`);
             assert.deepEqual(profile.progress, expected.progress, `${label} progress`);
             for (const key of ['attempts', 'placements', 'perfect', 'faults', 'misses', 'bestStreak']) {
@@ -537,6 +558,7 @@ async function main() {
             }
             assert.deepEqual(profile.stats.bestTimes, expected.stats.bestTimes, `${label} stats.bestTimes`);
           }
+          assert.deepEqual(persisted.ui, saved.state.ui, 'startup persists every normalized UI field');
         };
         await checkMigratedProfile();
         await migrationPage.reload();

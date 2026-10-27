@@ -15,7 +15,7 @@ assert.ok(startupEnd > 0);
 
 function load(entries = {}, failure = '') {
   const values = new Map(Object.entries(entries)), calls = [];
-  const context = { MiruTet: E, localStorage: {
+  const context = { MiruTet: { ...E, mascot: require('../src/mascot.js') }, localStorage: {
     getItem(key) {
       calls.push(['get', key]);
       if (failure === 'get' || failure === 'all' || failure === 'legacy-get' && key === legacyKey) throw new Error('storage unavailable');
@@ -117,6 +117,8 @@ test('a fresh profile uses defaults and creates the new key on save', () => {
   assert.equal(state.settings.das, E.DEFAULT_SETTINGS.das);
   assert.equal(state.ui.pieceCueTiming, 'next');
   assert.equal(state.ui.pieceCueVolume, 60);
+  assert.equal(state.ui.hairSkin, 'center');
+  assert.equal(state.ui.outfitSkin, 'uniform');
   assert.equal(state.storageOK, true);
   assert.equal(values.size, 0);
   assert.deepEqual(calls, [['get', storageKey], ['get', legacyKey]]);
@@ -131,11 +133,15 @@ test('old current and legacy profiles persist normalized defaults on load withou
     assertProfile(loaded.state, saved);
     assert.equal(loaded.state.ui.pieceCueTiming, 'next');
     assert.equal(loaded.state.ui.pieceCueVolume, 60);
+    assert.equal(loaded.state.ui.hairSkin, 'center');
+    assert.equal(loaded.state.ui.outfitSkin, 'uniform');
     // Inspect storage before a user action or explicit save can hide a missing
     // startup write, as the browser migration check does.
     const persisted = JSON.parse(loaded.values.get(storageKey));
     assert.equal(persisted.ui.pieceCueTiming, 'next');
     assert.equal(persisted.ui.pieceCueVolume, 60);
+    assert.equal(persisted.ui.hairSkin, 'center');
+    assert.equal(persisted.ui.outfitSkin, 'uniform');
     assert.deepEqual(persisted.ui, loaded.state.ui);
     assert.deepEqual(persisted.settings, loaded.state.settings);
     assertProfile(persisted, saved);
@@ -260,5 +266,62 @@ test('unavailable storage leaves usable defaults without throwing', () => {
     assert.equal(values.has(storageKey), failure !== 'all');
     if (values.has(storageKey)) assert.deepEqual(JSON.parse(values.get(storageKey)).settings, E.DEFAULT_SETTINGS);
     assert.equal(values.get(legacyKey), raw);
+  }
+});
+
+test('hair choice persists without changing records, handling, keys or progress', () => {
+  for (const hairSkin of ['side', 'center', 'intake']) {
+    const saved = profile(); saved.ui.hairSkin = hairSkin;
+    const loaded = load({ [storageKey]: JSON.stringify(saved) });
+    assertProfile(loaded.state, saved);
+    assert.equal(loaded.state.ui.hairSkin, hairSkin);
+    loaded.save();
+    const reloaded = load(Object.fromEntries(loaded.values));
+    assert.equal(reloaded.state.ui.hairSkin, hairSkin);
+    assertProfile(reloaded.state, saved);
+  }
+});
+
+test('missing or invalid cosmetic choice falls back without losing an existing profile', () => {
+  for (const hairSkin of [undefined, null, '', 'original', 'lifted', '<svg>', false, 7, {}, []]) {
+    const saved = profile(); Object.assign(saved.ui, { hairSkin, outfitSkin: 'cape', pieceCueTiming: 'current', pieceCueVolume: 37 });
+    for (const key of [storageKey, legacyKey]) {
+      const loaded = load({ [key]: JSON.stringify(saved) });
+      assert.equal(loaded.state.ui.hairSkin, 'center');
+      assert.equal(loaded.state.ui.outfitSkin, 'cape');
+      assert.equal(loaded.state.ui.pieceCueTiming, 'current'); assert.equal(loaded.state.ui.pieceCueVolume, 37);
+      assert.equal(loaded.state.storageOK, true);
+      assertProfile(loaded.state, saved);
+      assert.deepEqual(JSON.parse(loaded.values.get(storageKey)).ui, loaded.state.ui);
+      assert.deepEqual(loaded.validate(saved).ui, loaded.state.ui);
+    }
+  }
+});
+
+test('outfit, hair and cue choices normalize and persist together before any user action', () => {
+  for (const outfitSkin of ['uniform', 'cape']) for (const hairSkin of ['side', 'center', 'intake']) {
+    const saved = profile(); Object.assign(saved.ui, { outfitSkin, hairSkin, pieceCueTiming: 'current', pieceCueVolume: 37 });
+    for (const key of [storageKey, legacyKey]) {
+      const loaded = load({ [key]: JSON.stringify(saved) });
+      const persisted = JSON.parse(loaded.values.get(storageKey));
+      assert.deepEqual(persisted.ui, loaded.state.ui, 'startup must persist the full normalized UI');
+      assert.deepEqual(loaded.validate(persisted).ui, loaded.state.ui, 'JSON import retains both features');
+      const state = load(Object.fromEntries(loaded.values)).state;
+      assertProfile(state, saved); assert.equal(state.ui.outfitSkin, outfitSkin); assert.equal(state.ui.hairSkin, hairSkin);
+      assert.equal(state.ui.pieceCueTiming, 'current'); assert.equal(state.ui.pieceCueVolume, 37);
+    }
+  }
+});
+
+test('invalid or missing outfit uses uniform without losing the profile or selected hair', () => {
+  for (const outfitSkin of [undefined, null, '', 'goth', 1, false, {}, []]) {
+    const saved = profile(); Object.assign(saved.ui, { outfitSkin, hairSkin: 'side', pieceCueTiming: 'off', pieceCueVolume: 24 });
+    for (const key of [storageKey, legacyKey]) {
+      const loaded = load({ [key]: JSON.stringify(saved) }), { state } = loaded;
+      assertProfile(state, saved); assert.equal(state.ui.outfitSkin, 'uniform'); assert.equal(state.ui.hairSkin, 'side');
+      assert.equal(state.ui.pieceCueTiming, 'off'); assert.equal(state.ui.pieceCueVolume, 24);
+      assert.deepEqual(JSON.parse(loaded.values.get(storageKey)).ui, state.ui);
+      assert.deepEqual(loaded.validate(saved).ui, state.ui);
+    }
   }
 });
