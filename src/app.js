@@ -153,7 +153,7 @@
     } catch (_) { /* Audio is optional. */ }
   }
   function header() {
-    return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ミルテト <small>FINESSE EDITION / フィネス編</small></span></button><div class="top-actions"><span class="tag mint-tag">● オフラインで練習できます</span>${screen !== 'menu' ? '<button class="quiet small" data-act="menu">タイトル</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
+    return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ミルテト <small>FINESSE EDITION / フィネス編</small></span></button><div class="top-actions">${screen !== 'menu' ? '<button class="quiet small" data-act="menu">タイトル</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
   }
   function footer() { return '<footer class="footer"><span>ミルテト学園 · 小さな一手を、きれいなフィネスに。</span><span>ORIGINAL ART & SYNTHESIZED SOUND · NO NETWORK</span></footer>'; }
   function menuHTML() {
