@@ -96,7 +96,7 @@ async function main() {
     const checkLesson = async () => {
       const s = await state();
       await checkViewport(`lesson ${s.lessonIndex + 1} ${s.tryMode ? 'try-it' : 'demo'}`, [
-        '.lesson-heading', '.lesson-coach .milfy', '.lesson-board .board-shell', '.lesson-board .column-labels',
+        '.lesson-heading', '.lesson-coach .speech', '.lesson-coach .milfy', '.lesson-board .board-shell', '.lesson-board .column-labels',
         '#demo-keys', '#demo-caption', '#tutorial-result', '.lesson-content', '.lesson-nav',
         '[data-act=previous-lesson]', '[data-act=next-lesson]', '.lesson-shortcuts'
       ]);
@@ -106,7 +106,7 @@ async function main() {
       ['.page-heading', '[data-act=close-settings]', '.settings-content', '.footer'], targetPage);
     const checkDrill = async () => {
       await checkLayout();
-      await checkViewport('drill', ['.board-shell', '.column-labels', '.board-note', '.practice-options',
+      await checkViewport('drill', ['.coach .speech', '.coach .milfy', '.board-shell', '.column-labels', '.board-note', '.practice-options',
         '.play-buttons', '.play-buttons button', '[data-act=pause]', '.play-footer']);
       await checkText();
     };
@@ -133,7 +133,7 @@ async function main() {
     await page.waitForFunction(() => !!window.__moetet);
     // Keep subsequent reloads intact: do not use an init script that clears data.
     await page.evaluate(() => localStorage.clear()); await page.reload();
-    await waitScreen('menu'); await checkViewport('menu', ['.menu-buttons', '.first-note', '.menu-art .speech', '.footer']);
+    await waitScreen('menu'); await checkViewport('menu', ['.menu-buttons', '.first-note', '.menu-art .speech', '.menu-art .milfy', '.mascot-caption', '.footer']);
     await checkText(); await shot('menu'); clean();
 
     // Start the first lesson using the focused menu button, then use genuine
@@ -371,6 +371,7 @@ async function main() {
     // Finish a short custom sprint with actual optimal key sequences. The
     // screenshot and saved best time exercise the same result path as 40/100.
     await click('menu'); await click('sprint');
+    await checkViewport('sprint setup', ['.sprint-setup .speech', '.sprint-setup .milfy']);
     assert.equal(await page.locator('[data-act=start-sprint][data-length="40"]').count(), 1);
     assert.equal(await page.locator('[data-act=start-sprint][data-length="100"]').count(), 1);
     await page.locator('#custom-length').fill('3'); await click('custom-sprint');
@@ -379,6 +380,7 @@ async function main() {
     assert.equal(s.sprintResult.completed, 3); assert.equal(s.sprintResult.perfect, 3);
     assert.equal(s.sprintResult.accuracy, 100); assert.ok(s.sprintResult.elapsed > 0);
     assert.equal(s.totalStats.bestTimes[3], s.sprintResult.elapsed);
+    await checkViewport('sprint results', ['.result-layout .speech', '.result-layout .milfy', '.result-summary']);
     await shot('sprint-result'); await page.reload();
     assert.ok((await state()).totalStats.bestTimes[3] > 0); clean();
 
@@ -408,7 +410,7 @@ async function main() {
       await defaultPage.goto(pathToFileURL(path.join(root, 'dist', 'moetet-finesse.html')).href);
       await defaultPage.waitForFunction(() => !!window.__moetet);
       assert.equal(await defaultPage.evaluate(() => localStorage.getItem(window.__moetet.storageKey)), null);
-      await checkViewport('clean title', ['.menu-buttons', '.menu-buttons button', '.first-note', '.menu-art .speech', '.footer'], defaultPage);
+      await checkViewport('clean title', ['.menu-buttons', '.menu-buttons button', '.first-note', '.menu-art .speech', '.menu-art .milfy', '.mascot-caption', '.footer'], defaultPage);
       await checkText(defaultPage); await shot('title', defaultPage);
       await defaultPage.locator('.topbar [data-act=settings]').click();
       await defaultPage.waitForFunction(() => window.__moetet.getState().screen === 'settings');

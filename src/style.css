@@ -458,7 +458,7 @@ kbd.pressed {
 
 .menu-art .speech {
   max-width:340px;
-  margin:0 auto -7px;
+  margin:0 auto 8px;
   text-align:left;
   z-index:1
 }
@@ -467,7 +467,7 @@ kbd.pressed {
   font-size:13px;
   color:#ad9cb7;
   letter-spacing:.15em;
-  margin-top:-14px
+  margin-top:10px
 }
 
 .float-block {

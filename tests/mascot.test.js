@@ -59,7 +59,7 @@ test('all five expressions are well-formed standalone SVGs with self-contained p
     const elements = parseXML(svg), root = elements[0];
     assert.equal(root.name, 'svg');
     assert.equal(root.attrs.xmlns, 'http://www.w3.org/2000/svg');
-    assert.equal(root.attrs.viewBox, '0 0 300 360');
+    assert.equal(root.attrs.viewBox, '0 0 300 328');
     assert.equal(root.attrs['data-expression'], expression);
     assert.equal(root.attrs.role, 'img');
     assert.ok(elements.some(el => el.name === 'title'));
@@ -77,7 +77,7 @@ test('all five expressions are well-formed standalone SVGs with self-contained p
         assert.ok(!/url\((?!#)/i.test(value), 'no external paints');
       }
     }
-    for (const part of ['eyebrows', 'eyes', 'mouth', 'cheeks', 'pose', 'front-hair', 'block-clip']) {
+    for (const part of ['eyebrows', 'eyes', 'mouth', 'cheeks', 'outfit', 'front-hair', 'block-clip', 'expression-accents']) {
       assert.ok(elements.some(el => el.name === 'g' && el.attrs['data-part'] === part), part);
     }
     assert.ok(elements.filter(el => /Gradient$/.test(el.name)).length >= 6, 'layered gradient artwork');
@@ -91,6 +91,26 @@ test('all five expressions are well-formed standalone SVGs with self-contained p
   }
   assert.equal(faces.size, 5, 'different mouths for every expression');
 });
+
+for (const expression of M.EXPRESSIONS) {
+  test(`${expression} is a chest-up portrait with no hands, fingers, arms, or sleeve groups`, () => {
+    const elements = parseXML(M.mascotSVG(expression));
+    const root = elements[0];
+    assert.equal(root.attrs.width, '300');
+    assert.equal(root.attrs.height, '328');
+    assert.equal(root.attrs.overflow, 'hidden', 'uniform crops at the chest even without CSS');
+    for (const { name, attrs } of elements) {
+      for (const attr of ['id', 'class', 'data-part']) {
+        assert.doesNotMatch(attrs[attr] || '', /hand|finger|arm|sleeve|cuff/i,
+          `${expression}: no limb-related ${attr} on ${name}`);
+      }
+      assert.notEqual(attrs['data-part'], 'pose', 'old raised/clasped/chin poses are removed');
+    }
+    for (const side of ['left', 'right']) {
+      assert.ok(elements.some(el => el.attrs.class === `milfy-tail--${side}`), 'hair conveys motion');
+    }
+  });
+}
 
 test('SVG options escape untrusted text and keep IDs safe; animation supports reduced motion', () => {
   const options = { width: 600, height: 720, title: 'ミルフィ & <test> "hello" \'x\'',
@@ -107,6 +127,8 @@ test('SVG options escape untrusted text and keep IDs safe; animation supports re
   for (const width of [0, -1, NaN, Infinity, '300']) assert.throws(() => M.mascotSVG('normal', { width }), RangeError);
   assert.match(M.MASCOT_CSS, /@keyframes milfy-bob/);
   assert.match(M.MASCOT_CSS, /@keyframes milfy-blink/);
+  assert.match(M.MASCOT_CSS, /@keyframes milfy-sway-left/);
+  assert.match(M.MASCOT_CSS, /@keyframes milfy-sway-right/);
   assert.match(M.MASCOT_CSS, /prefers-reduced-motion: reduce/);
   assert.ok(!/@import|https?:|url\(/i.test(M.MASCOT_CSS));
 });

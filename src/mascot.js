@@ -33,22 +33,36 @@
   // Include this string once in the app's stylesheet or a <style> element.
   // The happy face has its own closed smiling eyes; only open faces blink.
   const MASCOT_CSS = `
-.milfy { display: block; max-width: 100%; height: auto; overflow: visible; }
+.milfy { display: block; max-width: 100%; height: auto; overflow: hidden;
+  --milfy-sway: .7deg; --milfy-sway-time: 4.8s; }
+.milfy--happy { --milfy-sway: 1.4deg; --milfy-sway-time: 3s; }
+.milfy--surprised { --milfy-sway: 1.1deg; --milfy-sway-time: 2.6s; }
+.milfy--thinking { --milfy-sway: .5deg; --milfy-sway-time: 5.6s; }
+.milfy--sorry { --milfy-sway: .65deg; --milfy-sway-time: 5s; }
 .milfy .milfy-eyes-closed { opacity: 0; }
 .milfy--animated .milfy-bob { animation: milfy-bob 4s ease-in-out infinite; }
+.milfy--animated .milfy-tail--left { transform-origin: 68px 110px;
+  animation: milfy-sway-left var(--milfy-sway-time) ease-in-out infinite; }
+.milfy--animated .milfy-tail--right { transform-origin: 232px 110px;
+  animation: milfy-sway-right var(--milfy-sway-time) ease-in-out infinite; }
 .milfy--animated .milfy-eyes-open { animation: milfy-open 5.7s steps(1, end) infinite; }
 .milfy--animated .milfy-eyes-closed { animation: milfy-blink 5.7s steps(1, end) infinite; }
 .milfy--animated .milfy-sparkle { transform-box: fill-box; transform-origin: center;
   animation: milfy-twinkle 3.2s ease-in-out infinite; }
 .milfy--animated .milfy-sparkle:nth-child(even) { animation-delay: -1.6s; }
 @keyframes milfy-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes milfy-sway-left { 0%, 100% { transform: rotate(calc(-1 * var(--milfy-sway))); }
+  50% { transform: rotate(var(--milfy-sway)); } }
+@keyframes milfy-sway-right { 0%, 100% { transform: rotate(var(--milfy-sway)); }
+  50% { transform: rotate(calc(-1 * var(--milfy-sway))); } }
 @keyframes milfy-open { 0%, 43%, 46%, 100% { opacity: 1; } 44%, 45% { opacity: 0; } }
 @keyframes milfy-blink { 0%, 43%, 46%, 100% { opacity: 0; } 44%, 45% { opacity: 1; } }
 @keyframes milfy-twinkle { 0%, 100% { opacity: .5; transform: scale(.88); }
   50% { opacity: 1; transform: scale(1.08); } }
 @media (prefers-reduced-motion: reduce) {
   .milfy--animated .milfy-bob, .milfy--animated .milfy-eyes-open,
-  .milfy--animated .milfy-eyes-closed, .milfy--animated .milfy-sparkle { animation: none; }
+  .milfy--animated .milfy-eyes-closed, .milfy--animated .milfy-sparkle,
+  .milfy--animated .milfy-tail--left, .milfy--animated .milfy-tail--right { animation: none; }
   .milfy .milfy-eyes-open { opacity: 1; }
   .milfy .milfy-eyes-closed { opacity: 0; }
 }`;
@@ -59,14 +73,15 @@
   }
   let svgSerial = 0;
 
-  /** Bust-up original vector art, 300 × 360. opts: width, height (positive
+  /** Chest-up original vector art, 300 × 328. opts: width, height (positive
    * numbers), title, idPrefix, animated (default true), halo (default true).
    * Each call scopes all paint/clip/title IDs, including when idPrefix repeats.
-   * data-part groups keep eyebrows, eyes, mouth, and pose independently swappable.
+   * The uniform continues below the viewport for a natural portrait crop.
+   * data-part groups keep the face, hair, and effect marks independently swappable.
    */
   function mascotSVG(expression = 'normal', opts = {}) {
     if (!EXPRESSIONS.includes(expression)) throw new RangeError('Unknown expression: ' + expression);
-    const width = opts.width ?? 300, height = opts.height ?? 360;
+    const width = opts.width ?? 300, height = opts.height ?? 328;
     if (![width, height].every(n => Number.isFinite(n) && n > 0)) {
       throw new RangeError('Mascot dimensions must be positive numbers');
     }
@@ -122,8 +137,15 @@
     const closedEyes = `<path d="M91 160 Q109 ${happy ? 136 : 171} 128 160 M172 160 Q191 ${happy ? 136 : 171} 209 160"
       fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>
       <path d="M93 158 l-5-4 M207 158 l5-4" fill="none" stroke="#57465f" stroke-width="2.5" stroke-linecap="round"/>`;
+    const accents = [
+      happy ? '<g class="milfy-sparkle" fill="#fff0bc" stroke="#d6b7c2" stroke-width="1.1"><path d="M32 166 l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z"/></g>' : '',
+      happy || surprised ? '<g class="milfy-sparkle" fill="#e2d2fa" stroke="#b3a1cf" stroke-width="1.1"><path d="M263 46 l3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/></g>' : '',
+      surprised ? '<path d="M29 161 l1 14 M30 183 v1" stroke="#d6b7c2" stroke-width="3.5"/>' : '',
+      thinking ? '<path d="M257 71 Q256 60 265 59 Q276 59 275 68 Q275 73 266 77 L266 82 M266 90 v1" stroke="#b29cce" stroke-width="3.5"/>' : '',
+      sorry ? '<path d="M239 157 Q231 169 236 173 Q243 178 245 170 Q245 165 239 157Z" fill="#c5e4f3" stroke="#a5bedb" stroke-width="1.3"/>' : ''
+    ].join('');
 
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 300 360"
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 300 328" overflow="hidden"
       class="milfy milfy--${expression}${opts.animated === false ? '' : ' milfy--animated'}" role="img"
       aria-labelledby="${id}-title ${id}-desc" focusable="false" data-expression="${expression}">
       <title id="${id}-title">${xml(title)}</title>
@@ -158,10 +180,16 @@
       ${opts.halo === false ? '' : `<ellipse cx="150" cy="180" rx="144" ry="171" fill="${paint('halo')}"/>`}
       <g class="milfy-bob" stroke-linejoin="round">
         <g data-part="back-hair" stroke="#929cc3" stroke-width="1.8">
-          <path d="M72 88 C44 81 30 103 31 143 C33 182 10 212 17 258 C20 288 34 312 55 319 C41 291 61 270 63 242 C70 275 58 302 62 317 C89 296 91 262 82 224 C77 189 96 130 72 88Z" fill="${paint('tail')}"/>
-          <path d="M228 88 C256 81 270 103 269 143 C267 182 290 212 283 258 C280 288 266 312 245 319 C259 291 239 270 237 242 C230 275 242 302 238 317 C211 296 209 262 218 224 C223 189 204 130 228 88Z" fill="${paint('tail')}"/>
-          <path d="M62 117 C48 155 59 182 42 225 C31 258 37 281 45 294 M74 149 C66 189 77 221 71 254 M238 117 C252 155 241 182 258 225 C269 258 263 281 255 294 M226 149 C234 189 223 221 229 254" fill="none" opacity=".6"/>
-          <path d="M43 134 C48 106 54 105 58 110 C48 139 54 167 44 192 C47 168 40 156 43 134Z M257 134 C252 106 246 105 242 110 C252 139 246 167 256 192 C253 168 260 156 257 134Z" fill="#f3fff8" stroke="none" opacity=".65"/>
+          <g class="milfy-tail--left">
+            <path d="M72 88 C44 81 30 103 31 143 C33 182 10 212 17 258 C20 288 34 312 55 319 C41 291 61 270 63 242 C70 275 58 302 62 317 C89 296 91 262 82 224 C77 189 96 130 72 88Z" fill="${paint('tail')}"/>
+            <path d="M62 117 C48 155 59 182 42 225 C31 258 37 281 45 294 M74 149 C66 189 77 221 71 254" fill="none" opacity=".6"/>
+            <path d="M43 134 C48 106 54 105 58 110 C48 139 54 167 44 192 C47 168 40 156 43 134Z" fill="#f3fff8" stroke="none" opacity=".65"/>
+          </g>
+          <g class="milfy-tail--right">
+            <path d="M228 88 C256 81 270 103 269 143 C267 182 290 212 283 258 C280 288 266 312 245 319 C259 291 239 270 237 242 C230 275 242 302 238 317 C211 296 209 262 218 224 C223 189 204 130 228 88Z" fill="${paint('tail')}"/>
+            <path d="M238 117 C252 155 241 182 258 225 C269 258 263 281 255 294 M226 149 C234 189 223 221 229 254" fill="none" opacity=".6"/>
+            <path d="M257 134 C252 106 246 105 242 110 C252 139 246 167 256 192 C253 168 260 156 257 134Z" fill="#f3fff8" stroke="none" opacity=".65"/>
+          </g>
           <path d="M67 136 C54 79 77 29 144 25 C214 19 251 68 234 141 L227 223 Q207 250 187 238 L109 238 Q78 249 67 220Z" fill="${paint('hair')}"/>
         </g>
         <g data-part="hair-ribbons" stroke="#a08cbd" stroke-width="1.5">
@@ -172,11 +200,9 @@
         <g data-part="outfit" stroke="#b49ab8" stroke-width="1.8">
           <path d="M136 213 L134 238 Q150 253 166 238 L164 213" fill="${paint('skin')}"/>
           <path d="M134 227 Q150 236 166 227" stroke="#e7b8bd" fill="none"/>
-          <path d="M132 234 Q107 234 89 253 Q73 276 75 314 L88 324 L92 350 Q150 363 208 350 L212 324 L225 314 Q227 276 211 253 Q193 234 168 234 Q150 249 132 234Z" fill="${paint('uniform')}"/>
+          <path d="M132 234 Q107 234 89 253 Q77 271 75 300 L73 350 H227 L225 300 Q223 271 211 253 Q193 234 168 234 Q150 249 132 234Z" fill="${paint('uniform')}"/>
           <path d="M107 241 L94 261 L119 293 L150 261 L181 293 L206 261 L193 241 L166 238 L150 255 L134 238Z" fill="#c4b5de"/>
           <path d="M108 248 L101 260 L120 283 L144 260 M192 248 L199 260 L180 283 L156 260" stroke="#fff4fa" stroke-width="2.6" fill="none"/>
-          <path d="M93 279 Q101 294 94 315 M207 279 Q199 294 206 315 M108 316 L105 349 M192 316 L195 349" fill="none" stroke="#d8b5ce"/>
-          <path d="M76 305 L94 309 L93 324 L76 320Z M224 305 L206 309 L207 324 L224 320Z" fill="#fdf7ff"/>
           <path d="M150 268 Q124 249 124 268 L127 287 Q142 284 150 275 Q158 284 173 287 L176 268 Q176 249 150 268Z" fill="${paint('ribbon')}"/>
           <path d="M144 275 L137 301 L150 294 L163 301 L156 275" fill="#c6b0df"/>
           <rect x="144" y="264" width="12" height="15" rx="5" fill="#fff2cf" stroke="#d6b8bb"/>
@@ -213,16 +239,7 @@
           <path d="M76 81 h8 v8 h-8Z M88 69 h8 v8 h-8Z M88 81 h8 v8 h-8Z M100 81 h8 v8 h-8Z" fill="#f5cedf" stroke="none"/>
           <path d="M78 83 h4 M90 71 h4 M90 83 h4 M102 83 h4" stroke="#fffaf0" stroke-linecap="round"/>
         </g>
-        <g data-part="pose" stroke="#bc9aa9" stroke-width="1.7">
-          ${thinking ? `<path d="M212 303 Q194 286 177 241 L171 222 Q168 213 174 210 Q181 207 183 219 L187 232 Q193 225 198 231 L205 248 Q215 270 226 287Z" fill="${paint('skin')}"/><path d="M208 285 L225 278 L233 299 L216 310Z" fill="${paint('uniform')}"/><path d="M182 225 L186 238 M191 233 L195 241" fill="none" stroke="#e0b7bc"/>`
-            : happy || surprised ? `<path d="M87 296 L69 266 Q58 261 58 251 L56 238 Q57 230 64 234 L68 245 Q68 228 75 230 Q80 231 79 241 Q86 235 91 242 Q96 248 89 261 L103 281Z M213 296 L231 266 Q242 261 242 251 L244 238 Q243 230 236 234 L232 245 Q232 228 225 230 Q220 231 221 241 Q214 235 209 242 Q204 248 211 261 L197 281Z" fill="${paint('skin')}"/><path d="M80 282 L99 271 L110 292 L91 305Z M220 282 L201 271 L190 292 L209 305Z" fill="${paint('uniform')}"/><path d="M65 250 Q73 246 83 251 M235 250 Q227 246 217 251" fill="none" stroke="#e0b7bc"/>`
-              : `<path d="M93 324 Q110 326 129 315 Q139 308 149 317 Q160 309 170 315 Q190 326 207 324 L206 338 Q184 344 165 330 Q151 337 137 330 Q116 344 94 338Z" fill="${paint('skin')}"/><path d="M141 319 L151 325 L160 319 M135 325 L141 329 M165 325 L159 329" fill="none" stroke="#e0b7bc"/>`}
-        </g>
-        <g data-part="expression-accents" fill="none" stroke-linecap="round">
-          ${happy || surprised ? `<g class="milfy-sparkle" fill="#fff0bc" stroke="#d6b7c2" stroke-width="1.1"><path d="M32 166 l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z"/></g><g class="milfy-sparkle" fill="#e2d2fa" stroke="#b3a1cf" stroke-width="1.1"><path d="M263 46 l3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/></g><path d="M24 206 l-4 7 M276 206 l4 7" stroke="#d7badc" stroke-width="2.5"/>` : ''}
-          ${thinking ? '<path d="M257 71 Q256 60 265 59 Q276 59 275 68 Q275 73 266 77 L266 82 M266 90 v1" stroke="#b29cce" stroke-width="3.5"/>' : ''}
-          ${sorry ? '<path d="M239 157 Q231 169 236 173 Q243 178 245 170 Q245 165 239 157Z" fill="#c5e4f3" stroke="#a5bedb" stroke-width="1.3"/>' : ''}
-        </g>
+        <g data-part="expression-accents" fill="none" stroke-linecap="round">${accents}</g>
       </g>
     </svg>`;
   }
