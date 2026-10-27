@@ -7,7 +7,7 @@ const E=require('../src/engine.js');
 const R=require('./engine.reference.js');
 
 const expectedCounts={O:9,I:17,S:17,Z:17,T:34,J:34,L:34};
-const reports=['Moe Tet finesse table — empty 10×40 board; y up; target x = occupied left column.',
+const reports=['Miru Tet finesse table — empty 10×40 board; y up; target x = occupied left column.',
   'Hard drop costs 0. Tap / DAS / rotation cost 1. IRS costs 1.',
   'Strict Guideline SRS 90°; TETR.IO SRS+ 180 extension (separate I table).',
   'Each cost independently checked by top-down matrix iterative-deepening search.',

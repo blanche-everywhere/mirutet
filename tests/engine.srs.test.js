@@ -9,8 +9,8 @@ const R=require('./engine.reference.js');
 test('classic script and CommonJS work without DOM or imports',()=>{
   const context=vm.createContext({});
   vm.runInContext(fs.readFileSync(require.resolve('../src/engine.js'),'utf8'),context);
-  assert.equal(typeof context.MoeTet.InputHandler,'function');
-  assert.equal(context.MoeTet.allPlacements('O').length,9);
+  assert.equal(typeof context.MiruTet.InputHandler,'function');
+  assert.equal(context.MiruTet.allPlacements('O').length,9);
   assert.equal(Object.isFrozen(E.SHAPES.T[0][0]),true);
   assert.equal(Object.isFrozen(E.KICKS_I['0>R']),true);
 });

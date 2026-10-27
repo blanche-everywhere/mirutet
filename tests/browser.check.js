@@ -10,7 +10,7 @@ async function main() {
   const root = path.resolve(__dirname, '..');
   // Inspect the delivered text before Chrome launches, including inert JS
   // comments. This app has no text links; only SVG namespace URLs are allowed.
-  const html = fs.readFileSync(path.join(root, 'dist/moetet-finesse.html'), 'utf8');
+  const html = fs.readFileSync(path.join(root, 'dist/mirutet.html'), 'utf8');
   const urls = html.match(/https?:\/\/[^\s"'<>`\\)]+/gi) || [];
   assert.deepEqual(urls.filter(url => !['http://www.w3.org/2000/svg', 'http://www.w3.org/1999/xlink'].includes(url)), [], 'Unexpected URL in offline HTML');
   fs.mkdirSync(path.join(root, 'screens'), { recursive: true });
@@ -25,9 +25,9 @@ async function main() {
       targetPage.on('request', request => { if (!request.url().startsWith('file:') && !request.url().startsWith('data:')) requests.push(request.url()); });
     };
     observe(page);
-    const state = () => page.evaluate(() => window.__moetet.getState());
-    const waitScreen = screen => page.waitForFunction(value => window.__moetet.getState().screen === value, screen);
-    const ready = () => page.waitForFunction(() => !!window.__moetet.getState().active && !window.__moetet.getState().paused);
+    const state = () => page.evaluate(() => window.__mirutet.getState());
+    const waitScreen = screen => page.waitForFunction(value => window.__mirutet.getState().screen === value, screen);
+    const ready = () => page.waitForFunction(() => !!window.__mirutet.getState().active && !window.__mirutet.getState().paused);
     const shot = (name, targetPage = page) => targetPage.screenshot({ path: path.join(root, 'screens', name + '.png') });
     const click = act => page.locator(`[data-act="${act}"]`).first().click();
     const tabTo = async selector => {
@@ -55,7 +55,7 @@ async function main() {
       await pressAction('hardDrop');
     };
     const target = async (type, rot, x, delay) => {
-      await page.evaluate(({ type, rot, x, delay }) => window.__moetet.chooseTarget(type, { rot, x }, { delay }), { type, rot, x, delay });
+      await page.evaluate(({ type, rot, x, delay }) => window.__mirutet.chooseTarget(type, { rot, x }, { delay }), { type, rot, x, delay });
     };
     const settingsOpen = async () => { await click('settings'); await waitScreen('settings'); };
     const setNumber = async (key, value) => {
@@ -96,7 +96,7 @@ async function main() {
     const checkLesson = async () => {
       const s = await state();
       await checkViewport(`lesson ${s.lessonIndex + 1} ${s.tryMode ? 'try-it' : 'demo'}`, [
-        '.lesson-heading', '.lesson-coach .speech', '.lesson-coach .milfy', '.lesson-board .board-shell', '.lesson-board .column-labels',
+        '.lesson-heading', '.lesson-coach .speech', '.lesson-coach .mirufi', '.lesson-board .board-shell', '.lesson-board .column-labels',
         '#demo-keys', '#demo-caption', '#tutorial-result', '.lesson-content', '.lesson-nav',
         '[data-act=previous-lesson]', '[data-act=next-lesson]', '.lesson-shortcuts'
       ]);
@@ -106,7 +106,7 @@ async function main() {
       ['.page-heading', '[data-act=close-settings]', '.settings-content', '.footer'], targetPage);
     const checkDrill = async () => {
       await checkLayout();
-      await checkViewport('drill', ['.coach .speech', '.coach .milfy', '.board-shell', '.column-labels', '.board-note', '.practice-options',
+      await checkViewport('drill', ['.coach .speech', '.coach .mirufi', '.board-shell', '.column-labels', '.board-note', '.practice-options',
         '.play-buttons', '.play-buttons button', '[data-act=pause]', '.play-footer']);
       await checkText();
     };
@@ -129,11 +129,11 @@ async function main() {
     };
     function clean() { assert.deepEqual(errors, [], 'Browser errors:\n' + errors.join('\n')); assert.deepEqual(requests, [], 'External network requests'); }
 
-    await page.goto(pathToFileURL(path.join(root, 'dist', 'moetet-finesse.html')).href);
-    await page.waitForFunction(() => !!window.__moetet);
+    await page.goto(pathToFileURL(path.join(root, 'dist', 'mirutet.html')).href);
+    await page.waitForFunction(() => !!window.__mirutet);
     // Keep subsequent reloads intact: do not use an init script that clears data.
     await page.evaluate(() => localStorage.clear()); await page.reload();
-    await waitScreen('menu'); await checkViewport('menu', ['.menu-buttons', '.first-note', '.menu-art .speech', '.menu-art .milfy', '.mascot-caption', '.footer']);
+    await waitScreen('menu'); await checkViewport('menu', ['.menu-buttons', '.first-note', '.menu-art .speech', '.menu-art .mirufi', '.mascot-caption', '.footer']);
     await checkText(); await shot('menu'); clean();
 
     // Start the first lesson using the focused menu button, then use genuine
@@ -149,7 +149,7 @@ async function main() {
     await page.keyboard.up('ArrowLeft'); await page.keyboard.press('Enter'); await ready();
     await page.keyboard.press('KeyR'); await ready();
     await checkLesson(); await pressAction('hardDrop');
-    await page.waitForFunction(() => window.__moetet.getState().tryDone);
+    await page.waitForFunction(() => window.__mirutet.getState().tryDone);
     assert.ok((await state()).progress.completed.includes(0));
     await checkLesson();
     await page.locator('[data-act=next-lesson]').focus(); await page.keyboard.press('Enter'); assert.equal((await state()).lessonIndex, 1);
@@ -157,11 +157,11 @@ async function main() {
     await page.keyboard.press('ArrowRight'); assert.equal((await state()).lessonIndex, 3);
 
     // Both animated spawn-buffer demos run through actual InputHandler timers.
-    await page.waitForFunction(() => window.__moetet.getState().inputs?.some(input => input.irs));
+    await page.waitForFunction(() => window.__mirutet.getState().inputs?.some(input => input.irs));
     assert.equal((await state()).inputCount, 1);
     await checkLesson(); await shot('tutorial-irs');
     await page.locator('.demo-tabs [data-act="demo"][data-index="1"]').click();
-    await page.waitForFunction(() => window.__moetet.getState().flags?.ihs === true);
+    await page.waitForFunction(() => window.__mirutet.getState().flags?.ihs === true);
     assert.equal((await state()).heldPiece, 'T');
     await page.locator('.lesson-steps [data-index="4"]').click();
     await checkLesson();
@@ -169,7 +169,7 @@ async function main() {
     await click('try-it');
     for (let i = 0; i < 3; i++) {
       await placeOptimal();
-      await page.waitForFunction(index => window.__moetet.getState().tryIndex === index + 1, i);
+      await page.waitForFunction(index => window.__mirutet.getState().tryIndex === index + 1, i);
     }
     assert.ok((await state()).progress.completed.includes(4)); clean();
     await checkLesson();
@@ -371,7 +371,7 @@ async function main() {
     // Finish a short custom sprint with actual optimal key sequences. The
     // screenshot and saved best time exercise the same result path as 40/100.
     await click('menu'); await click('sprint');
-    await checkViewport('sprint setup', ['.sprint-setup .speech', '.sprint-setup .milfy']);
+    await checkViewport('sprint setup', ['.sprint-setup .speech', '.sprint-setup .mirufi']);
     assert.equal(await page.locator('[data-act=start-sprint][data-length="40"]').count(), 1);
     assert.equal(await page.locator('[data-act=start-sprint][data-length="100"]').count(), 1);
     await page.locator('#custom-length').fill('3'); await click('custom-sprint');
@@ -380,7 +380,7 @@ async function main() {
     assert.equal(s.sprintResult.completed, 3); assert.equal(s.sprintResult.perfect, 3);
     assert.equal(s.sprintResult.accuracy, 100); assert.ok(s.sprintResult.elapsed > 0);
     assert.equal(s.totalStats.bestTimes[3], s.sprintResult.elapsed);
-    await checkViewport('sprint results', ['.result-layout .speech', '.result-layout .milfy', '.result-summary']);
+    await checkViewport('sprint results', ['.result-layout .speech', '.result-layout .mirufi', '.result-summary']);
     await shot('sprint-result'); await page.reload();
     assert.ok((await state()).totalStats.bestTimes[3] > 0); clean();
 
@@ -407,14 +407,14 @@ async function main() {
     try {
       const defaultPage = await defaultContext.newPage();
       observe(defaultPage);
-      await defaultPage.goto(pathToFileURL(path.join(root, 'dist', 'moetet-finesse.html')).href);
-      await defaultPage.waitForFunction(() => !!window.__moetet);
-      assert.equal(await defaultPage.evaluate(() => localStorage.getItem(window.__moetet.storageKey)), null);
-      await checkViewport('clean title', ['.menu-buttons', '.menu-buttons button', '.first-note', '.menu-art .speech', '.menu-art .milfy', '.mascot-caption', '.footer'], defaultPage);
+      await defaultPage.goto(pathToFileURL(path.join(root, 'dist', 'mirutet.html')).href);
+      await defaultPage.waitForFunction(() => !!window.__mirutet);
+      assert.equal(await defaultPage.evaluate(() => localStorage.getItem(window.__mirutet.storageKey)), null);
+      await checkViewport('clean title', ['.menu-buttons', '.menu-buttons button', '.first-note', '.menu-art .speech', '.menu-art .mirufi', '.mascot-caption', '.footer'], defaultPage);
       await checkText(defaultPage); await shot('title', defaultPage);
       await defaultPage.locator('.topbar [data-act=settings]').click();
-      await defaultPage.waitForFunction(() => window.__moetet.getState().screen === 'settings');
-      const defaults = await defaultPage.evaluate(() => window.__moetet.getState());
+      await defaultPage.waitForFunction(() => window.__mirutet.getState().screen === 'settings');
+      const defaults = await defaultPage.evaluate(() => window.__mirutet.getState());
       assert.deepEqual(defaults.bindings.cw, ['ArrowUp', 'KeyX']);
       assert.deepEqual(defaults.bindings.hold, ['ShiftLeft', 'KeyC']);
       assert.equal(defaults.settings.das, 110); assert.equal(defaults.settings.are, 80);
@@ -440,9 +440,73 @@ async function main() {
       await defaultPage.locator('[data-act=reset-handling]').click();
       await defaultPage.locator('[data-act=close-settings]').click();
       assert.equal(await defaultPage.locator('#toast.visible').count(), 0);
-      assert.equal(await defaultPage.evaluate(() => window.__moetet.getState().screen), 'menu');
+      assert.equal(await defaultPage.evaluate(() => window.__mirutet.getState().screen), 'menu');
       clean();
     } finally { await defaultContext.close(); }
+
+    // Seed before app startup in isolated profiles. The legacy key comes from
+    // the app's single migration constant rather than duplicating its spelling.
+    const appSource = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
+    const legacyKey = appSource.match(/const LEGACY_STORAGE = '([^']+)'/)[1];
+    const storageKey = 'mirutet-finesse.v1';
+    const legacyProfile = { version: 1, settings: { das: 173, arr: 7, are: 95 },
+      ui: { sound: false, volume: .55 },
+      practice: { pieces: ['T', 'I'], area: 'custom', minColumn: 2, maxColumn: 8, weakSpot: true },
+      progress: { current: 4, completed: [0, 1, 3] },
+      stats: { attempts: 9, placements: 8, perfect: 6, faults: 2, misses: 1,
+        bestStreak: 4, bestTimes: { 40: 65000 } } };
+    const legacyRaw = JSON.stringify(legacyProfile, null, 2);
+    for (const hasNewProfile of [false, true]) {
+      const migrationContext = await browser.newContext();
+      try {
+        const migrationPage = await migrationContext.newPage();
+        observe(migrationPage);
+        // Playwright init scripts run before the inline app scripts.
+        const newProfile = { ...legacyProfile, settings: { das: 221, arr: 11, are: 120 },
+          stats: { ...legacyProfile.stats, perfect: 7 }, progress: { current: 8, completed: [0, 8] } };
+        const newRaw = hasNewProfile ? JSON.stringify(newProfile) : null;
+        await migrationPage.addInitScript(({ legacyKey, storageKey, legacyRaw, newRaw }) => {
+          // Reloads must inspect the migrated values without seeding them again.
+          if (sessionStorage.getItem('migration-seeded')) return;
+          localStorage.setItem(legacyKey, legacyRaw);
+          if (newRaw !== null) localStorage.setItem(storageKey, newRaw);
+          sessionStorage.setItem('migration-seeded', 'true');
+        }, { legacyKey, storageKey, legacyRaw, newRaw });
+        await migrationPage.goto(pathToFileURL(path.join(root, 'dist', 'mirutet.html')).href);
+        await migrationPage.waitForFunction(() => !!window.__mirutet);
+        const expected = hasNewProfile ? newProfile : legacyProfile;
+        const checkMigratedProfile = async () => {
+          const saved = await migrationPage.evaluate(legacyKey => ({
+            state: window.__mirutet.getState(), storageKey: window.__mirutet.storageKey,
+            raw: localStorage.getItem(window.__mirutet.storageKey), legacy: localStorage.getItem(legacyKey)
+          }), legacyKey);
+          assert.equal(saved.storageKey, storageKey);
+          assert.equal(saved.legacy, hasNewProfile ? legacyRaw : null);
+          assert.equal(saved.state.storageOK, true);
+          assert.equal(typeof saved.raw, 'string', 'The selected profile must be persisted');
+          // save() fills defaults and serializes compact JSON. Compare the
+          // seeded values in both the live state and the stored profile.
+          const persisted = JSON.parse(saved.raw);
+          assert.equal(persisted.version, 1);
+          for (const [label, profile] of [['live', { ...saved.state, stats: saved.state.totalStats }], ['saved', persisted]]) {
+            for (const key of ['das', 'arr', 'are']) assert.equal(profile.settings[key], expected.settings[key], `${label} settings.${key}`);
+            assert.equal(profile.ui.sound, expected.ui.sound, `${label} ui.sound`);
+            assert.equal(profile.ui.volume, expected.ui.volume, `${label} ui.volume`);
+            assert.deepEqual(profile.practice, expected.practice, `${label} practice`);
+            assert.deepEqual(profile.progress, expected.progress, `${label} progress`);
+            for (const key of ['attempts', 'placements', 'perfect', 'faults', 'misses', 'bestStreak']) {
+              assert.equal(profile.stats[key], expected.stats[key], `${label} stats.${key}`);
+            }
+            assert.deepEqual(profile.stats.bestTimes, expected.stats.bestTimes, `${label} stats.bestTimes`);
+          }
+        };
+        await checkMigratedProfile();
+        await migrationPage.reload();
+        await migrationPage.waitForFunction(() => !!window.__mirutet);
+        await checkMigratedProfile();
+        clean();
+      } finally { await migrationContext.close(); }
+    }
 
     // Graceful fallbacks for unavailable storage and AudioContext are covered
     // in a separate page, without altering the persistence tests above.
@@ -453,14 +517,14 @@ async function main() {
       Object.defineProperty(window, 'AudioContext', { value: undefined });
       Object.defineProperty(window, 'webkitAudioContext', { value: undefined });
     });
-    await fallback.goto(pathToFileURL(path.join(root, 'dist', 'moetet-finesse.html')).href);
+    await fallback.goto(pathToFileURL(path.join(root, 'dist', 'mirutet.html')).href);
     await fallback.locator('[data-act=drill]').click();
-    await fallback.waitForFunction(() => !!window.__moetet.getState().active);
-    await fallback.evaluate(() => window.__moetet.chooseTarget('O', { rot: 0, x: 4 }, { delay: 0 }));
+    await fallback.waitForFunction(() => !!window.__mirutet.getState().active);
+    await fallback.evaluate(() => window.__mirutet.chooseTarget('O', { rot: 0, x: 4 }, { delay: 0 }));
     await fallback.keyboard.press('Space');
-    assert.equal(await fallback.evaluate(() => window.__moetet.getState().lastResult.status), 'perfect');
+    assert.equal(await fallback.evaluate(() => window.__mirutet.getState().lastResult.status), 'perfect');
     clean();
-    console.log('Browser checks passed: all 12 lessons (demo/try-it/internal scroll), drill buttons, perfect/fault/miss, handling, IRS, pause, filters, clean default settings, settings persistence/scroll, toast expiry, sprint, offline fallbacks.');
+    console.log('Browser checks passed: all 12 lessons (demo/try-it/internal scroll), drill buttons, perfect/fault/miss, handling, IRS, pause, filters, clean default settings, settings persistence/scroll, v1 storage migration/new-key priority, toast expiry, sprint, offline fallbacks.');
     console.log('Screenshots: screens/{title,menu,tutorial,tutorial-irs,tutorial-t,drill-target,drill-1080,drill-perfect,drill-fault,settings,sprint-result}.png');
   } finally { await browser.close(); }
 }

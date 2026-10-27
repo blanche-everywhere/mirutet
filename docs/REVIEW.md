@@ -1,4 +1,4 @@
-# PASS 3 — 実装レビューと修正
+# ミルテト フィネス編 — PASS 3 実装レビューと修正
 
 対象：`SPEC.md` 全95行と PASS 3 の追加要件。`src/engine.js`、`src/mascot.js`、`src/app.js`、`src/style.css`、`build.js` を全行確認し、既存の独立参照テストも確認した。行番号はこのレビュー後のソースを指す。
 
@@ -27,7 +27,7 @@ rAFは従来から画面ごとの生成ではなく1本で、画面切替によ�
 | 要件 | 判定 | ファイル・行の根拠／検証 |
 |---|---|---|
 | 指定ファイル構成、DOMなしengine、classic scriptとCommonJS | PASS | [engine.js:9](../src/engine.js#L9)、[mascot.js:5](../src/mascot.js#L5)、[engine.srs.test.js:9](../tests/engine.srs.test.js#L9) |
-| file://、単一HTML、依存なしビルド、indexとdistが同一 | PASS | [build.js:23](../build.js#L23)、[index.template.html:1](../src/index.template.html#L1)、[review.regression.test.js:80](../tests/review.regression.test.js#L80) |
+| file://、単一HTML、依存なしビルド、`index.html`と`dist/mirutet.html`が同一 | PASS | [build.js:23](../build.js#L23)、[index.template.html:1](../src/index.template.html#L1)、[review.regression.test.js:80](../tests/review.regression.test.js#L80) |
 | 外部URL・CDN・フォント・ローカルsrc/hrefなし | PASS | [build.js:10](../build.js#L10)、[mascot.js:126](../src/mascot.js#L126)（SVG名前空間のみ）、[browser.check.js:11](../tests/browser.check.js#L11) |
 | 正式タイトル、日本語の操作説明・設定・結果、オリジナル素材 | PASS | [app.js:143](../src/app.js#L143)、[app.js:313](../src/app.js#L313)、[mascot.js:126](../src/mascot.js#L126)。装飾に英語の併記、操作略語にCW等を使用 |
 | 10列40行、y上向き、20行可視＋出現2行 | PASS | [engine.js:17](../src/engine.js#L17)、[engine.js:129](../src/engine.js#L129)、[app.js:525](../src/app.js#L525) |
@@ -98,7 +98,7 @@ rAFは従来から画面ごとの生成ではなく1本で、画面切替によ�
 
 ## 実行記録とsupervisorへの引継ぎ
 
-- `npm run build && npm test`：PASS。indexとdistを再生成。追加の純粋ロジックを含む全Nodeテストが合格。
+- `npm run build && npm test`：PASS。`index.html`と`dist/mirutet.html`を再生成。追加の純粋ロジックを含む全Nodeテストが合格。
 - 全 `tests/*.test.js` の直接実行：137テスト合格、0失敗。
 - `node --check src/app.js`、`node --check tests/browser.check.js`：PASS。
 - Chrome：未実行（依頼どおりsupervisorが実行）。全画面のTab/Enter/Esc巡回も検査に追加。レイアウト・実キータイミング・スクリーンショットの最終判定は `npm run test:browser`。

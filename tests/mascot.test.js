@@ -64,6 +64,7 @@ test('all five expressions are well-formed standalone SVGs with self-contained p
     assert.equal(root.attrs.role, 'img');
     assert.ok(elements.some(el => el.name === 'title'));
     assert.ok(elements.some(el => el.name === 'desc'));
+    assert.match(svg, /<desc[^>]*>ミルテト学園の案内役、ミルフィ。/);
     const ids = new Set(elements.filter(el => el.attrs.id).map(el => el.attrs.id));
     assert.equal(ids.size, elements.filter(el => el.attrs.id).length);
     for (const id of ids) { assert.ok(!seenIDs.has(id), 'IDs unique across inline instances'); seenIDs.add(id); }
@@ -82,10 +83,10 @@ test('all five expressions are well-formed standalone SVGs with self-contained p
     }
     assert.ok(elements.filter(el => /Gradient$/.test(el.name)).length >= 6, 'layered gradient artwork');
     faces.add(svg.match(/<g data-part="mouth">([\s\S]*?)<\/g>/)[1]);
-    if (expression === 'happy') assert.match(svg, /milfy-happy-eyes/);
+    if (expression === 'happy') assert.match(svg, /mirufi-happy-eyes/);
     else {
-      assert.match(svg, /milfy-eyes-open/);
-      assert.equal(elements.find(el => el.attrs.class === 'milfy-eyes-closed').attrs.opacity, '0',
+      assert.match(svg, /mirufi-eyes-open/);
+      assert.equal(elements.find(el => el.attrs.class === 'mirufi-eyes-closed').attrs.opacity, '0',
         'closed blink layer stays hidden even before CSS loads');
     }
   }
@@ -107,7 +108,7 @@ for (const expression of M.EXPRESSIONS) {
       assert.notEqual(attrs['data-part'], 'pose', 'old raised/clasped/chin poses are removed');
     }
     for (const side of ['left', 'right']) {
-      assert.ok(elements.some(el => el.attrs.class === `milfy-tail--${side}`), 'hair conveys motion');
+      assert.ok(elements.some(el => el.attrs.class === `mirufi-tail--${side}`), 'hair conveys motion');
     }
   });
 }
@@ -119,16 +120,16 @@ test('SVG options escape untrusted text and keep IDs safe; animation supports re
   assert.equal(els[0].attrs.width, '600'); assert.equal(els[0].attrs.height, '720');
   assert.ok(!els.some(el => el.attrs.onload));
   assert.match(svg, /ミルフィ &amp; &lt;test&gt; &quot;hello&quot; &apos;x&apos;/);
-  assert.ok(!svg.includes('milfy--animated'));
+  assert.ok(!svg.includes('mirufi--animated'));
   assert.ok(!els.some(el => el.name === 'ellipse' && el.attrs.cy === '180'));
   assert.notEqual(M.mascotSVG('normal', { idPrefix: 'same' }), M.mascotSVG('normal', { idPrefix: 'same' }));
   assert.match(M.mascotSVG(), /data-expression="normal"/);
   assert.throws(() => M.mascotSVG('unknown'), RangeError);
   for (const width of [0, -1, NaN, Infinity, '300']) assert.throws(() => M.mascotSVG('normal', { width }), RangeError);
-  assert.match(M.MASCOT_CSS, /@keyframes milfy-bob/);
-  assert.match(M.MASCOT_CSS, /@keyframes milfy-blink/);
-  assert.match(M.MASCOT_CSS, /@keyframes milfy-sway-left/);
-  assert.match(M.MASCOT_CSS, /@keyframes milfy-sway-right/);
+  assert.match(M.MASCOT_CSS, /@keyframes mirufi-bob/);
+  assert.match(M.MASCOT_CSS, /@keyframes mirufi-blink/);
+  assert.match(M.MASCOT_CSS, /@keyframes mirufi-sway-left/);
+  assert.match(M.MASCOT_CSS, /@keyframes mirufi-sway-right/);
   assert.match(M.MASCOT_CSS, /prefers-reduced-motion: reduce/);
   assert.ok(!/@import|https?:|url\(/i.test(M.MASCOT_CSS));
 });
@@ -138,24 +139,25 @@ test('XML validator rejects malformed SVG instead of just counting angle bracket
     '<svg a=unquoted/>', '<svg>&bare</svg>', '<svg><g>']) assert.throws(() => parseXML(bad));
 });
 
-test('classic scripts attach MoeTet.mascot while preserving every frozen engine export', () => {
+test('classic scripts attach MiruTet.mascot while preserving every frozen engine export', () => {
   const context = vm.createContext({});
   const engineSource = fs.readFileSync(path.join(__dirname, '../src/engine.js'), 'utf8');
   const mascotSource = fs.readFileSync(path.join(__dirname, '../src/mascot.js'), 'utf8');
   vm.runInContext(engineSource, context);
-  const original = context.MoeTet;
+  const original = context.MiruTet;
   assert.ok(Object.isFrozen(original));
   vm.runInContext(mascotSource, context);
-  for (const key of Object.keys(original)) assert.equal(context.MoeTet[key], original[key], key);
+  for (const key of Object.keys(original)) assert.equal(context.MiruTet[key], original[key], key);
   assert.ok(!('mascot' in original), 'frozen engine left untouched');
-  assert.equal(context.MoeTet.mascot.name, 'ミルフィ');
-  assert.equal(context.MoeTet.mascot.LESSONS.length, 12);
-  parseXML(context.MoeTet.mascot.mascotSVG('happy'));
+  assert.equal(context.MiruTet.mascot.name, 'ミルフィ');
+  assert.equal(context.MiruTet.mascot.LESSONS.length, 12);
+  parseXML(context.MiruTet.mascot.mascotSVG('happy'));
   assert.throws(() => vm.runInNewContext(mascotSource, {}), /engine.js before mascot.js/);
 });
 
 test('Japanese dialogue has enough varied praise, milestones, piece lines, and finesse tips', () => {
   assert.equal(M.name, 'ミルフィ');
+  assert.ok(M.WELCOME_LINES.some(line => line.includes('ミルテト学園')));
   assert.ok(M.PRAISE_LINES.length >= 15);
   assert.ok(M.TIPS.length >= 25);
   for (const lines of [M.PRAISE_LINES, M.TIPS, M.MISS_LINES, M.ENCOURAGEMENT_LINES, M.WELCOME_LINES]) {

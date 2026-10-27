@@ -62,9 +62,9 @@ function renderMascotPreview() {
 <body>
   <main>
     <header>
-      <div><p class="eyebrow">MOE TET · CHARACTER STUDY</p><h1>ミルフィの表情ノート</h1>
-        <p class="intro">テト学園の案内役です♪ いっしょに、最短ルートを覚えましょう。</p></div>
-      <span class="badge">萌えテト フィネス編</span>
+      <div><p class="eyebrow">MIRUTET · CHARACTER STUDY</p><h1>ミルフィの表情ノート</h1>
+        <p class="intro">ミルテト学園の案内役です♪ いっしょに、最短ルートを覚えましょう。</p></div>
+      <span class="badge">ミルテト フィネス編</span>
     </header>
     <section class="gallery" aria-label="ミルフィの5つの表情">${cards}
     </section>

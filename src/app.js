@@ -4,13 +4,15 @@
  */
 (function () {
   'use strict';
-  const E = globalThis.MoeTet, M = E.mascot;
+  const E = globalThis.MiruTet, M = E.mascot;
   const $ = (s, root = document) => root.querySelector(s);
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
   const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const copy = value => JSON.parse(JSON.stringify(value));
   const now = () => performance.now();
-  const STORAGE = 'moetet-finesse.v1';
+  const STORAGE = 'mirutet-finesse.v1';
+  // Legacy v1 key, used only to migrate existing profiles to the new series name.
+  const LEGACY_STORAGE = 'moetet-finesse.v1';
   const DEFAULT_KEYS = {
     left: ['ArrowLeft'], right: ['ArrowRight'], softDrop: ['ArrowDown'], hardDrop: ['Space'],
     cw: ['ArrowUp', 'KeyX'], ccw: ['KeyZ'], rotate180: ['KeyA'], hold: ['ShiftLeft', 'KeyC'],
@@ -45,7 +47,16 @@
     return result;
   }
   try {
-    const raw = localStorage.getItem(STORAGE);
+    let raw = localStorage.getItem(STORAGE);
+    if (raw === null) {
+      raw = localStorage.getItem(LEGACY_STORAGE);
+      if (raw !== null) {
+        try {
+          localStorage.setItem(STORAGE, raw);
+          localStorage.removeItem(LEGACY_STORAGE);
+        } catch (_) { storageOK = false; }
+      }
+    }
     if (raw) {
       const saved = JSON.parse(raw), checked = validatePreferences(saved);
       ({ settings, ui, bindings } = checked);
@@ -107,7 +118,7 @@
   function dismissToast() { $('#toast').classList.remove('visible'); toastUntil = 0; }
   function pick(lines) { return lines[Math.floor(Math.random() * lines.length)]; }
   function mascot(expr = 'normal', prefix = 'app') { return M.mascotSVG(expr, { idPrefix: prefix }); }
-  function speech(text, id = '') { return `<div class="speech" ${id ? `id="${id}"` : ''}><span class="speaker">テト学園のガイド · ミルフィ</span><span class="bubble-text">${escape(text)}</span></div>`; }
+  function speech(text, id = '') { return `<div class="speech" ${id ? `id="${id}"` : ''}><span class="speaker">ミルテト学園のガイド · ミルフィ</span><span class="bubble-text">${escape(text)}</span></div>`; }
   function setCoach(text, expr = 'normal') {
     bubble = text; expression = expr;
     const target = $('#coach-speech .bubble-text');
@@ -142,11 +153,11 @@
     } catch (_) { /* Audio is optional. */ }
   }
   function header() {
-    return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>萌えテト <small>FINESSE EDITION / フィネス編</small></span></button><div class="top-actions"><span class="tag mint-tag">● オフラインで練習できます</span>${screen !== 'menu' ? '<button class="quiet small" data-act="menu">タイトル</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
+    return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ミルテト <small>FINESSE EDITION / フィネス編</small></span></button><div class="top-actions"><span class="tag mint-tag">● オフラインで練習できます</span>${screen !== 'menu' ? '<button class="quiet small" data-act="menu">タイトル</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
   }
-  function footer() { return '<footer class="footer"><span>テト学園 · 小さな一手を、きれいなフィネスに。</span><span>ORIGINAL ART & SYNTHESIZED SOUND · NO NETWORK</span></footer>'; }
+  function footer() { return '<footer class="footer"><span>ミルテト学園 · 小さな一手を、きれいなフィネスに。</span><span>ORIGINAL ART & SYNTHESIZED SOUND · NO NETWORK</span></footer>'; }
   function menuHTML() {
-    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO TETO ACADEMY</div><h1 class="logo">萌え<span>テト</span><small>フィネス編</small></h1><p class="menu-intro">ひとつのミノに、いちばん短い道を。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>FREE PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p><p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech('テト学園へようこそ！ミルフィです♪\n最短の操作、いっしょに見つけましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR FINESSE COMPANION / ミルフィ</p></section></main>${footer()}`;
+    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span><small>フィネス編</small></h1><p class="menu-intro">ひとつのミノに、いちばん短い道を。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>FREE PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p><p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech('ミルテト学園へようこそ！ミルフィです♪\n最短の操作、いっしょに見つけましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR FINESSE COMPANION / ミルフィ</p></section></main>${footer()}`;
   }
   function mini(type, extra = '') { return `<canvas class="mini-piece" data-piece="${type || ''}" width="144" height="108" aria-label="${type || '空'}ミノ" ${extra}></canvas>`; }
   function boardHTML() {
@@ -793,7 +804,7 @@
 
   // Public, serializable browser-test seam. Gameplay is always driven by normal
   // KeyboardEvent dispatch or page.keyboard; no helper changes counts/results.
-  window.__moetet = Object.freeze({
+  window.__mirutet = Object.freeze({
     getState() {
       const handler = screen === 'tutorial' && !tryMode ? demo?.handler : session?.handler;
       return copy({ screen, settings, ui, bindings, practice, progress, lessonIndex, tryMode, tryIndex, tryDone,

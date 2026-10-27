@@ -33,8 +33,8 @@ function build() {
   assertOfflineHTML(html);
   fs.mkdirSync(path.join(root, 'dist'), { recursive: true });
   fs.writeFileSync(path.join(root, 'index.html'), html);
-  fs.writeFileSync(path.join(root, 'dist', 'moetet-finesse.html'), html);
-  console.log(`Built index.html and dist/moetet-finesse.html (${Buffer.byteLength(html).toLocaleString()} bytes each)`);
+  fs.writeFileSync(path.join(root, 'dist', 'mirutet.html'), html);
+  console.log(`Built index.html and dist/mirutet.html (${Buffer.byteLength(html).toLocaleString()} bytes each)`);
 }
 if (require.main === module) build();
 module.exports = { assertOfflineHTML, build };

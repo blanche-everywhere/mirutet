@@ -1,6 +1,8 @@
-# 萌えテト フィネス編
+# ミルテト フィネス編
 
-テト学園のミルフィと、テトリミノを最短の操作で置く練習をするデスクトップ用アプリです。日本語UI・キーボード操作対応。オリジナルSVGイラストと合成効果音を使用します。
+ミルテト学園のミルフィと、テトリミノを最短の操作で置く練習をするデスクトップ用アプリです。日本語UI・キーボード操作対応。オリジナルSVGイラストと合成効果音を使用します。
+
+v2（2.0.0）でシリーズ名を「ミルテト」に改称しました。旧版の設定・キー・進捗・通算記録は、新しい保存先にデータ形式を変えず自動移行します（新しい保存先にデータがある場合はそちらを優先します）。保存キーのデータ形式は引き続き `.v1` です。
 
 ```sh
 npm ci
@@ -9,7 +11,7 @@ npm test
 npm run test:browser
 ```
 
-`index.html` または `dist/moetet-finesse.html` をブラウザで直接開いてください。CSS・スクリプト・SVGはすべてインラインです。サーバー、ネットワーク接続、Webフォントは不要です。推奨画面は1280×720以上です。
+`index.html` または `dist/mirutet.html` をブラウザで直接開いてください。CSS・スクリプト・SVGはすべてインラインです。サーバー、ネットワーク接続、Webフォントは不要です。推奨画面は1280×720以上です。
 
 レッスンは12ステップ。実演は実際の `InputHandler` で再生し、DASの長押しやIRS/IHSの出現時操作に合わせてキーが光ります。各ミノの最短表はエンジンのソルバーから生成します。チャレンジの成績は通常の練習記録に混ぜず、達成したレッスンを保存します。
 
@@ -19,7 +21,7 @@ npm run test:browser
 
 操作設定はスライダーと数値入力を同期して即時適用します。ARR=0はDAS完了時に壁まで移動、SDF=41は固定なしの瞬間落下、重力0は落下なしです。DCDは出現・回転・ハードドロップ後の自動横移動にだけ適用されます。左右同時押しは最後に押した方向が優先され、以前の方向のDASチャージも維持します。IRSは出現時に回転キーを長押し、IHSはARE中のホールド入力を使用します。
 
-設定・キー・進捗・通算記録は `localStorage` の `moetet-finesse.v1` に保存します。保存禁止の環境でも起動中は利用できます。設定だけJSONでコピー・貼り付けできます。不正なJSONや重複キーは適用前に検証します。音声が使用できない環境では無音で継続します。
+設定・キー・進捗・通算記録は `localStorage` の `mirutet-finesse.v1` に保存します。保存禁止の環境でも起動中は利用できます。設定だけJSONでコピー・貼り付けできます。不正なJSONや重複キーは適用前に検証します。音声が使用できない環境では無音で継続します。
 
 実装は `src/engine.js`（DOMなし）、`src/mascot.js`（SVGと教材）、`src/app.js`（画面・入力・描画）、`src/style.css` に分離しています。ビルド時にマスコットの `MASCOT_CSS` をCSSへ組み込みます。内部座標はyが上向き、40行で、画面には20行と出現位置の2行を表示します。CanvasはDPR対応で、描画と入力には同じ `performance.now()` 時計を使います。OSキーリピートを無視し、一時停止やフォーカス喪失時にキーを解放します。
 
@@ -27,7 +29,7 @@ npm run test:browser
 
 `tests/browser.check.js` はplaywright-coreと `/usr/bin/google-chrome`（headless、`--no-sandbox`）を使用します。file://で起動し、コンソールエラー・ページ例外・外部通信を検出します。レッスン実演と練習、通常キー入力、Perfect/フォルト/ミス、DAS/ARR、実キー長押しによるARE・IRSの1入力判定、設定保存とJSON、キー競合のキーボード決定、一時停止、フィルター、短いスプリントと保存禁止時の動作を確認します。1280×720のタイトル・全12レッスン・ドリル・設定で文書全体のはみ出しを検査します。各レッスンの全実演とチャレンジで前後ボタンの矩形を測り、説明パネルをスクロールしてもボタン・盤面・マスコットが画面内に残ることを確認します。ドリルの各操作ボタン、設定の保存して戻るボタン、盤面下の列番号・説明の切れと文字サイズも確認します。ドリルは1920×1080での拡大も検査します。`screens/` にタイトル（title/menu）、通常レッスン、IRSレッスン、Tミノの最短表、固定前の目標、1080pドリル、成功、フォルト＋ヒント、設定、スプリント結果の11枚を保存します。title.pngとsettings.pngは保存テストとは別の新しいブラウザコンテキストで撮影し、CWの↑/X、ホールドの左Shift/C、DAS 110、ARE 80を確認します。トーストの自動消去と画面切替時の消去も検査します。ビルドのURL検査はSVG名前空間以外を拒否します。Chromeが起動できないサンドボックスでは、起動エラーを表示して失敗します。
 
-ブラウザテスト用に `window.__moetet.getState()`、`chooseTarget(type, {rot,x}, {delay})`、`dispatch(code, down)` を公開します。`chooseTarget` のxは占有セルの左端（0始まり）です。キーは通常の `KeyboardEvent` と同じ経路を通り、デバッグ操作で結果や入力数を書き換えません。
+ブラウザテスト用に `window.__mirutet.getState()`、`chooseTarget(type, {rot,x}, {delay})`、`dispatch(code, down)` を公開します。`chooseTarget` のxは占有セルの左端（0始まり）です。キーは通常の `KeyboardEvent` と同じ経路を通り、デバッグ操作で結果や入力数を書き換えません。
 
 補助文字は13px以上、吹き出しは15pxです。レッスン盤面は列番号・キー・説明・結果欄の高さを実測して残りの高さに収めます。説明・実演切替・チャレンジ・長い最短表は細いパステル色のスクロールバーがあるパネル内でスクロールし、前後のレッスンボタンを下端に残します。設定項目もパネル内だけをスクロールし、保存して戻るボタンは見出しに残します。盤面からTabで操作欄へ移動でき、Tabをゲーム操作に割り当てた場合もShift+Tabで移れます。ダイアログはTab・矢印で選択し、Enter/Spaceで決定、Escで閉じられます。監査の根拠と修正一覧は [docs/REVIEW.md](docs/REVIEW.md) にあります。
 
@@ -39,4 +41,4 @@ Idea: pre-show a target shadow and place the piece there with the optimal input 
 
 ## English
 
-An offline, Japanese finesse trainer with original mascot ミルフィ. Run `npm run build`, then open `dist/moetet-finesse.html` directly. Everything is inlined; no server or network is required. `npm test` runs the independent engine/mascot checks. `npm run test:browser` runs system Chrome through playwright-core and saves screenshots in `screens/`. The UI includes engine-driven lessons, filtered drills, sprint, handling/key settings, persistent statistics, and synthesized audio with graceful fallbacks.
+An offline, Japanese finesse trainer with original mascot ミルフィ. Run `npm run build`, then open `dist/mirutet.html` directly. Everything is inlined; no server or network is required. `npm test` runs the independent engine/mascot checks. `npm run test:browser` runs system Chrome through playwright-core and saves screenshots in `screens/`. The UI includes engine-driven lessons, filtered drills, sprint, handling/key settings, persistent statistics, and synthesized audio with graceful fallbacks.

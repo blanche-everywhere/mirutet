@@ -1,6 +1,6 @@
 {
-  "name": "moetet-finesse",
-  "version": "1.0.0",
+  "name": "mirutet",
+  "version": "2.0.0",
   "description": "Offline Japanese finesse trainer with ミルフィ",
   "main": "src/engine.js",
   "scripts": {

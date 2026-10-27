@@ -1,5 +1,5 @@
-/* Moe Tet: Finesse Edition — DOM-free, dependency-free engine.
- * Classic script: globalThis.MoeTet; Node: require('./src/engine.js').
+/* Miru Tet: Finesse Edition — DOM-free, dependency-free engine.
+ * Classic script: globalThis.MiruTet; Node: require('./src/engine.js').
  *
  * Coordinates are integer cells, x right, y UP. Board rows are bottom first.
  * State {type,x,y,rot}: x/y are the SRS MATRIX origin, rot is 0/1/2/3
@@ -10,7 +10,7 @@
   'use strict';
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
-  else root.MoeTet = api;
+  else root.MiruTet = api;
 })(globalThis, function () {
   'use strict';
 

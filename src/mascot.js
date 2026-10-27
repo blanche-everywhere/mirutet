@@ -1,5 +1,5 @@
-/* ミルフィ — original art and Japanese teaching material for Moe Tet.
- * Classic scripts: load engine.js first, then use MoeTet.mascot.
+/* ミルフィ — original art and Japanese teaching material for Miru Tet.
+ * Classic scripts: load engine.js first, then use MiruTet.mascot.
  * Node: require('./mascot.js'). No DOM, network, fonts, or image dependencies.
  */
 (function (root, factory) {
@@ -7,15 +7,15 @@
   if (typeof module === 'object' && module.exports) {
     module.exports = factory(require('./engine.js'));
   } else {
-    const api = factory(root.MoeTet);
+    const api = factory(root.MiruTet);
     // engine.js deliberately freezes its API. Preserve its exports in a new
     // namespace rather than changing the engine or mutating that frozen object.
-    root.MoeTet = Object.assign({}, root.MoeTet, { mascot: api });
+    root.MiruTet = Object.assign({}, root.MiruTet, { mascot: api });
   }
 })(globalThis, function (engine) {
   'use strict';
   if (!engine || typeof engine.allPlacements !== 'function') {
-    throw new Error('Load MoeTet engine.js before mascot.js');
+    throw new Error('Load MiruTet engine.js before mascot.js');
   }
 
   function deepFreeze(value) {
@@ -33,38 +33,38 @@
   // Include this string once in the app's stylesheet or a <style> element.
   // The happy face has its own closed smiling eyes; only open faces blink.
   const MASCOT_CSS = `
-.milfy { display: block; max-width: 100%; height: auto; overflow: hidden;
-  --milfy-sway: .7deg; --milfy-sway-time: 4.8s; }
-.milfy--happy { --milfy-sway: 1.4deg; --milfy-sway-time: 3s; }
-.milfy--surprised { --milfy-sway: 1.1deg; --milfy-sway-time: 2.6s; }
-.milfy--thinking { --milfy-sway: .5deg; --milfy-sway-time: 5.6s; }
-.milfy--sorry { --milfy-sway: .65deg; --milfy-sway-time: 5s; }
-.milfy .milfy-eyes-closed { opacity: 0; }
-.milfy--animated .milfy-bob { animation: milfy-bob 4s ease-in-out infinite; }
-.milfy--animated .milfy-tail--left { transform-origin: 68px 110px;
-  animation: milfy-sway-left var(--milfy-sway-time) ease-in-out infinite; }
-.milfy--animated .milfy-tail--right { transform-origin: 232px 110px;
-  animation: milfy-sway-right var(--milfy-sway-time) ease-in-out infinite; }
-.milfy--animated .milfy-eyes-open { animation: milfy-open 5.7s steps(1, end) infinite; }
-.milfy--animated .milfy-eyes-closed { animation: milfy-blink 5.7s steps(1, end) infinite; }
-.milfy--animated .milfy-sparkle { transform-box: fill-box; transform-origin: center;
-  animation: milfy-twinkle 3.2s ease-in-out infinite; }
-.milfy--animated .milfy-sparkle:nth-child(even) { animation-delay: -1.6s; }
-@keyframes milfy-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-@keyframes milfy-sway-left { 0%, 100% { transform: rotate(calc(-1 * var(--milfy-sway))); }
-  50% { transform: rotate(var(--milfy-sway)); } }
-@keyframes milfy-sway-right { 0%, 100% { transform: rotate(var(--milfy-sway)); }
-  50% { transform: rotate(calc(-1 * var(--milfy-sway))); } }
-@keyframes milfy-open { 0%, 43%, 46%, 100% { opacity: 1; } 44%, 45% { opacity: 0; } }
-@keyframes milfy-blink { 0%, 43%, 46%, 100% { opacity: 0; } 44%, 45% { opacity: 1; } }
-@keyframes milfy-twinkle { 0%, 100% { opacity: .5; transform: scale(.88); }
+.mirufi { display: block; max-width: 100%; height: auto; overflow: hidden;
+  --mirufi-sway: .7deg; --mirufi-sway-time: 4.8s; }
+.mirufi--happy { --mirufi-sway: 1.4deg; --mirufi-sway-time: 3s; }
+.mirufi--surprised { --mirufi-sway: 1.1deg; --mirufi-sway-time: 2.6s; }
+.mirufi--thinking { --mirufi-sway: .5deg; --mirufi-sway-time: 5.6s; }
+.mirufi--sorry { --mirufi-sway: .65deg; --mirufi-sway-time: 5s; }
+.mirufi .mirufi-eyes-closed { opacity: 0; }
+.mirufi--animated .mirufi-bob { animation: mirufi-bob 4s ease-in-out infinite; }
+.mirufi--animated .mirufi-tail--left { transform-origin: 68px 110px;
+  animation: mirufi-sway-left var(--mirufi-sway-time) ease-in-out infinite; }
+.mirufi--animated .mirufi-tail--right { transform-origin: 232px 110px;
+  animation: mirufi-sway-right var(--mirufi-sway-time) ease-in-out infinite; }
+.mirufi--animated .mirufi-eyes-open { animation: mirufi-open 5.7s steps(1, end) infinite; }
+.mirufi--animated .mirufi-eyes-closed { animation: mirufi-blink 5.7s steps(1, end) infinite; }
+.mirufi--animated .mirufi-sparkle { transform-box: fill-box; transform-origin: center;
+  animation: mirufi-twinkle 3.2s ease-in-out infinite; }
+.mirufi--animated .mirufi-sparkle:nth-child(even) { animation-delay: -1.6s; }
+@keyframes mirufi-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes mirufi-sway-left { 0%, 100% { transform: rotate(calc(-1 * var(--mirufi-sway))); }
+  50% { transform: rotate(var(--mirufi-sway)); } }
+@keyframes mirufi-sway-right { 0%, 100% { transform: rotate(var(--mirufi-sway)); }
+  50% { transform: rotate(calc(-1 * var(--mirufi-sway))); } }
+@keyframes mirufi-open { 0%, 43%, 46%, 100% { opacity: 1; } 44%, 45% { opacity: 0; } }
+@keyframes mirufi-blink { 0%, 43%, 46%, 100% { opacity: 0; } 44%, 45% { opacity: 1; } }
+@keyframes mirufi-twinkle { 0%, 100% { opacity: .5; transform: scale(.88); }
   50% { opacity: 1; transform: scale(1.08); } }
 @media (prefers-reduced-motion: reduce) {
-  .milfy--animated .milfy-bob, .milfy--animated .milfy-eyes-open,
-  .milfy--animated .milfy-eyes-closed, .milfy--animated .milfy-sparkle,
-  .milfy--animated .milfy-tail--left, .milfy--animated .milfy-tail--right { animation: none; }
-  .milfy .milfy-eyes-open { opacity: 1; }
-  .milfy .milfy-eyes-closed { opacity: 0; }
+  .mirufi--animated .mirufi-bob, .mirufi--animated .mirufi-eyes-open,
+  .mirufi--animated .mirufi-eyes-closed, .mirufi--animated .mirufi-sparkle,
+  .mirufi--animated .mirufi-tail--left, .mirufi--animated .mirufi-tail--right { animation: none; }
+  .mirufi .mirufi-eyes-open { opacity: 1; }
+  .mirufi .mirufi-eyes-closed { opacity: 0; }
 }`;
 
   function xml(text) {
@@ -86,7 +86,7 @@
       throw new RangeError('Mascot dimensions must be positive numbers');
     }
     const prefix = String(opts.idPrefix ?? 'portrait').replace(/[^A-Za-z0-9_-]/g, '-') || 'portrait';
-    const id = 'milfy-' + prefix + '-' + (++svgSerial);
+    const id = 'mirufi-' + prefix + '-' + (++svgSerial);
     const paint = name => `url(#${id}-${name})`;
     const title = opts.title ?? `ミルフィ：${EXPRESSION_LABELS[expression]}`;
     const happy = expression === 'happy', thinking = expression === 'thinking';
@@ -96,7 +96,7 @@
       const cy = surprised ? 155 : sorry ? 160 : 157;
       const ry = surprised ? 29 : thinking && side === 'right' ? 23 : 26;
       const pupilX = cx + (thinking ? 4 : 0);
-      return `<g class="milfy-eye milfy-eye--${side}">
+      return `<g class="mirufi-eye mirufi-eye--${side}">
         <path d="M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14}
           Q${cx + 24} ${cy + 21} ${cx} ${cy + 25} Q${cx - 23} ${cy + 21} ${cx - 22} ${cy - 15}Z"
           fill="#fffafa"/>
@@ -138,18 +138,18 @@
       fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>
       <path d="M93 158 l-5-4 M207 158 l5-4" fill="none" stroke="#57465f" stroke-width="2.5" stroke-linecap="round"/>`;
     const accents = [
-      happy ? '<g class="milfy-sparkle" fill="#fff0bc" stroke="#d6b7c2" stroke-width="1.1"><path d="M32 166 l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z"/></g>' : '',
-      happy || surprised ? '<g class="milfy-sparkle" fill="#e2d2fa" stroke="#b3a1cf" stroke-width="1.1"><path d="M263 46 l3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/></g>' : '',
+      happy ? '<g class="mirufi-sparkle" fill="#fff0bc" stroke="#d6b7c2" stroke-width="1.1"><path d="M32 166 l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z"/></g>' : '',
+      happy || surprised ? '<g class="mirufi-sparkle" fill="#e2d2fa" stroke="#b3a1cf" stroke-width="1.1"><path d="M263 46 l3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/></g>' : '',
       surprised ? '<path d="M29 161 l1 14 M30 183 v1" stroke="#d6b7c2" stroke-width="3.5"/>' : '',
       thinking ? '<path d="M257 71 Q256 60 265 59 Q276 59 275 68 Q275 73 266 77 L266 82 M266 90 v1" stroke="#b29cce" stroke-width="3.5"/>' : '',
       sorry ? '<path d="M239 157 Q231 169 236 173 Q243 178 245 170 Q245 165 239 157Z" fill="#c5e4f3" stroke="#a5bedb" stroke-width="1.3"/>' : ''
     ].join('');
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 300 328" overflow="hidden"
-      class="milfy milfy--${expression}${opts.animated === false ? '' : ' milfy--animated'}" role="img"
+      class="mirufi mirufi--${expression}${opts.animated === false ? '' : ' mirufi--animated'}" role="img"
       aria-labelledby="${id}-title ${id}-desc" focusable="false" data-expression="${expression}">
       <title id="${id}-title">${xml(title)}</title>
-      <desc id="${id}-desc">テト学園の案内役、ミルフィ。ミントとライラックのツインテール、きらきらした瞳、ブロックの髪飾りと桃色の制服です。</desc>
+      <desc id="${id}-desc">ミルテト学園の案内役、ミルフィ。ミントとライラックのツインテール、きらきらした瞳、ブロックの髪飾りと桃色の制服です。</desc>
       <defs>
         <linearGradient id="${id}-hair" x1=".15" y1="0" x2=".8" y2="1" gradientUnits="objectBoundingBox">
           <stop stop-color="#edfff3"/><stop offset=".34" stop-color="#afe5d9"/><stop offset=".7" stop-color="#c6d4f1"/><stop offset="1" stop-color="#c6a9e3"/>
@@ -178,14 +178,14 @@
         }).join('')}
       </defs>
       ${opts.halo === false ? '' : `<ellipse cx="150" cy="180" rx="144" ry="171" fill="${paint('halo')}"/>`}
-      <g class="milfy-bob" stroke-linejoin="round">
+      <g class="mirufi-bob" stroke-linejoin="round">
         <g data-part="back-hair" stroke="#929cc3" stroke-width="1.8">
-          <g class="milfy-tail--left">
+          <g class="mirufi-tail--left">
             <path d="M72 88 C44 81 30 103 31 143 C33 182 10 212 17 258 C20 288 34 312 55 319 C41 291 61 270 63 242 C70 275 58 302 62 317 C89 296 91 262 82 224 C77 189 96 130 72 88Z" fill="${paint('tail')}"/>
             <path d="M62 117 C48 155 59 182 42 225 C31 258 37 281 45 294 M74 149 C66 189 77 221 71 254" fill="none" opacity=".6"/>
             <path d="M43 134 C48 106 54 105 58 110 C48 139 54 167 44 192 C47 168 40 156 43 134Z" fill="#f3fff8" stroke="none" opacity=".65"/>
           </g>
-          <g class="milfy-tail--right">
+          <g class="mirufi-tail--right">
             <path d="M228 88 C256 81 270 103 269 143 C267 182 290 212 283 258 C280 288 266 312 245 319 C259 291 239 270 237 242 C230 275 242 302 238 317 C211 296 209 262 218 224 C223 189 204 130 228 88Z" fill="${paint('tail')}"/>
             <path d="M238 117 C252 155 241 182 258 225 C269 258 263 281 255 294 M226 149 C234 189 223 221 229 254" fill="none" opacity=".6"/>
             <path d="M257 134 C252 106 246 105 242 110 C252 139 246 167 256 192 C253 168 260 156 257 134Z" fill="#f3fff8" stroke="none" opacity=".65"/>
@@ -215,10 +215,10 @@
           <path d="M76 117 C75 83 99 65 150 65 C201 65 225 83 224 117 L224 166 C223 195 194 226 150 233 C106 226 77 195 76 166Z" fill="${paint('skin')}" stroke="#bd9aa9" stroke-width="1.6"/>
           <path d="M79 133 Q96 99 125 105 Q153 92 181 106 Q208 106 222 134 L222 111 Q209 71 151 72 Q93 72 78 110Z" fill="#e7c6cb" opacity=".24"/>
         </g>
-        <g class="milfy-expression" data-expression="${expression}">
+        <g class="mirufi-expression" data-expression="${expression}">
           <g data-part="eyebrows"><path d="${brows}" fill="none" stroke="#a092b3" stroke-width="2.8" stroke-linecap="round"/></g>
           <g data-part="eyes">
-            ${happy ? `<g class="milfy-happy-eyes">${closedEyes}</g>` : `<g class="milfy-eyes-open">${eye(109, 'left')}${eye(191, 'right')}</g><g class="milfy-eyes-closed" opacity="0">${closedEyes}</g>`}
+            ${happy ? `<g class="mirufi-happy-eyes">${closedEyes}</g>` : `<g class="mirufi-eyes-open">${eye(109, 'left')}${eye(191, 'right')}</g><g class="mirufi-eyes-closed" opacity="0">${closedEyes}</g>`}
           </g>
           <g data-part="cheeks">
             <ellipse cx="92" cy="187" rx="23" ry="13" fill="${paint('blush')}"/><ellipse cx="208" cy="187" rx="23" ry="13" fill="${paint('blush')}"/>
@@ -261,7 +261,7 @@
     '一手ずつの判断が実っていますね！',
     'いいリズムです！ミルフィもうれしいです♪',
     '狙いどおりです！そのルートはもう得意ですね。',
-    'テト学園の花まるをどうぞ♪ とても上手です！',
+    'ミルテト学園の花まるをどうぞ♪ とても上手です！',
     '最短の道を選べましたね！自信を持ってください。'
   ]);
   const STREAK_LINES = deepFreeze({
@@ -296,7 +296,7 @@
     '昨日の自分より、ひとつ気づけたら大成功です♪'
   ]);
   const WELCOME_LINES = Object.freeze([
-    'テト学園へようこそ！案内役のミルフィです♪',
+    'ミルテト学園へようこそ！案内役のミルフィです♪',
     'はじめまして、ミルフィです！いっしょに最短の操作を覚えましょうね。',
     'おかえりなさい♪ 今日も少しずつ、フィネスを練習しましょう！',
     '準備はできましたか？レッスンもドリルも、好きなところからどうぞ♪'
@@ -483,7 +483,7 @@
     const summaryTarget = engine.finesseFor('T', { rot: 2, x: 0 }, settings);
     return deepFreeze([
       { id: 'finesse', title: 'フィネスとは？', expression: 'normal', lines: [
-        'テト学園へようこそ！ミルフィです♪ フィネスは、目標の場所へ最少のキー入力でミノを運ぶことです。',
+        'ミルテト学園へようこそ！ミルフィです♪ フィネスは、目標の場所へ最少のキー入力でミノを運ぶことです。',
         '道順が短くなると、素早く置きやすくなり、押し間違いも減らせますよ。まずは正確に試しましょうね。',
         '左右のタップ、壁までの長押し、回転はそれぞれ1入力です。ソフトドロップも押すたびに1入力に数えます。',
         'ハードドロップは回数に数えません。ホールドも数えませんが、このドリルではスキップ扱いで目標が変わりますよ。',
