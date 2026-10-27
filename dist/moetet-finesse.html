@@ -26,22 +26,1688 @@
   .milfy .milfy-eyes-open { opacity: 1; }
   .milfy .milfy-eyes-closed { opacity: 0; }
 }
-:root{--ink:#49445e;--muted:#8c849e;--pink:#e58ba9;--purple:#9a82c8;--mint:#77bcab;--line:#e9e1f0;--paper:#fffdfefa;--shadow:0 8px 30px #72588d0a;--cell:min(24px,calc((100vh - 236px)/22));font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans CJK JP",sans-serif;color:var(--ink);font-size:14px;font-synthesis:none}
-*{box-sizing:border-box}body{margin:0;min-width:1000px;background:radial-gradient(ellipse at 8% 4%,#fcebf2 0,transparent 42%),radial-gradient(ellipse at 90% 80%,#eaf6f2 0,transparent 45%),#f8f5fc}button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 15px;transition:background .15s,transform .15s,box-shadow .15s}button:hover{background:#f6f0fc;border-color:#d2bfe7;transform:translateY(-1px)}button:active{transform:translateY(1px)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #b6a0da;outline-offset:3px}button:disabled{opacity:.42;cursor:default;transform:none}.primary{color:#fff;background:linear-gradient(125deg,#bd9cda,#a48aca);border-color:transparent;box-shadow:0 5px 14px #a183c52d}.primary:hover{background:#a086c2}.pink{background:#fbedf3;color:#b86f8b;border-color:#efd4df}.quiet{background:transparent;border-color:transparent}.small{font-size:12px;padding:7px 11px;border-radius:9px}.danger{color:#bc7288}.eyebrow{font-size:10px;letter-spacing:.2em;font-weight:800;color:#a38ab9;text-transform:uppercase}.muted{color:var(--muted)}.tiny{font-size:11px;color:var(--muted)}h1,h2,h3,p{margin:0}h2{font-size:23px;letter-spacing:.04em}h3{font-size:14px}.row{display:flex;align-items:center;gap:10px}.spread{justify-content:space-between}.stack{display:grid;gap:14px}.panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:18px}.tag{display:inline-flex;align-items:center;gap:6px;background:#f0eaf8;border:1px solid #e7dff0;color:#9278b3;border-radius:30px;padding:4px 9px;font-size:10px;letter-spacing:.06em}.mint-tag{color:#5b9e8e;background:#e9f5ef;border-color:#d2eade}.topbar{height:72px;padding:0 34px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e9e1f0aa;background:#fffc;gap:20px}.brand{display:flex;gap:11px;align-items:center;font-weight:800;letter-spacing:.08em}.brand-button{border:0;background:none;padding:0}.brand-mark{display:grid;grid-template-columns:repeat(3,8px);grid-template-rows:repeat(2,8px);gap:2px;transform:rotate(-7deg)}.brand-mark i{background:#b6a1d4;border-radius:2px}.brand-mark i:first-child{grid-column:2;background:#e7adc2}.brand small{display:block;font-size:9px;letter-spacing:.23em;font-weight:500;color:#a197ae;margin-top:3px}.top-actions{display:flex;gap:10px;align-items:center}.page{max-width:1140px;margin:auto;padding:28px 18px}.page-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}.page-heading p{margin-top:7px;color:var(--muted);font-size:12px}.footer{font-size:10px;color:#a69bb2;display:flex;justify-content:space-between;gap:15px;padding:15px 34px;letter-spacing:.04em}kbd{font:600 11px/1.2 inherit;display:inline-flex;align-items:center;justify-content:center;min-width:27px;min-height:26px;padding:4px 7px;border:1px solid #dfd5eb;border-bottom:3px solid #d9cde7;border-radius:6px;background:#fff;color:#7c668f;white-space:nowrap}kbd.pressed{background:#b498d0;color:#fff;border-color:#a284c2;transform:translateY(2px);box-shadow:0 0 13px #c3a6e680}.sequence{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-height:30px}.sequence .arrow{color:#c7bbd2;font-size:10px}.sequence small{font-size:8px;margin-left:4px;color:#b48ac0}.empty-route{font-size:12px;color:var(--muted)}
-/* Title screen */
-.menu{max-width:1080px;min-height:calc(100vh - 116px);margin:auto;display:grid;grid-template-columns:1.05fr 1fr;gap:58px;align-items:center;padding:32px}.menu-copy .eyebrow{display:flex;align-items:center;gap:10px}.menu-copy .eyebrow:before{content:"";width:22px;height:1px;background:#cdb7df}.logo{font-weight:900;line-height:1.17;font-size:66px;letter-spacing:.04em;margin:22px 0 15px;color:#a783bd;text-shadow:2px 3px 0 #fff}.logo span{color:#db93af}.logo small{display:block;font-size:30px;letter-spacing:.18em;margin-top:9px;color:#776787}.menu-intro{line-height:2;color:#93849f;font-size:13px;margin-bottom:26px}.menu-buttons{display:grid;grid-template-columns:1fr 1fr;gap:11px}.menu-buttons button{text-align:left;min-height:62px;display:flex;justify-content:space-between;align-items:center;padding:13px 17px}.menu-buttons button:first-child{grid-column:1/-1}.menu-buttons button b{display:block;font-size:14px;letter-spacing:.04em}.menu-buttons button small{display:block;font-size:9px;font-weight:400;letter-spacing:.14em;opacity:.7;margin-top:4px}.menu-buttons .button-arrow{opacity:.65;font-size:20px}.first-note{margin-top:15px;font-size:11px;color:#ac8cb4;display:flex;align-items:center;gap:8px}.menu-art{position:relative;text-align:center}.menu-art:before{content:"";position:absolute;inset:40px -10px 65px;border-radius:50%;background:radial-gradient(circle,#f0e6f7 0,#f9f5fc00 70%)}.menu-art .mascot-wrap{max-width:370px;margin:auto;position:relative}.speech{background:#fff;border:1px solid #e7dbee;border-radius:18px;padding:17px 19px;line-height:1.9;font-size:13px;position:relative;box-shadow:0 5px 20px #9c7baa0a}.speech:after{content:"";position:absolute;bottom:-7px;left:50%;height:12px;width:12px;background:#fff;border-right:1px solid #e7dbee;border-bottom:1px solid #e7dbee;transform:rotate(45deg)}.speaker{display:block;font-size:10px;font-weight:800;letter-spacing:.14em;color:#ad88bc;margin-bottom:5px}.menu-art .speech{max-width:340px;margin:0 auto -7px;text-align:left;z-index:1}.mascot-caption{font-size:10px;color:#ad9cb7;letter-spacing:.15em;margin-top:-14px}.float-block{position:absolute;width:19px;height:19px;border-radius:5px;background:#edc6d5;box-shadow:21px 0 #edc6d5,21px -21px #edc6d5,42px -21px #edc6d5;transform:rotate(13deg);left:17px;top:46%;opacity:.6}.float-block.two{left:auto;right:32px;top:67%;background:#bce3d6;box-shadow:21px 0 #bce3d6,-21px 0 #bce3d6,0 -21px #bce3d6;transform:rotate(-15deg)}
-/* Training workspace: all three columns fit at 1280 x 720. */
-.play-page{padding:17px 28px 0;max-width:1260px;margin:auto}.play-topline{height:30px;margin-bottom:12px}.play-title{font-size:17px;display:flex;align-items:center;gap:10px}.play-grid{display:grid;grid-template-columns:minmax(220px,1fr) 428px minmax(230px,1fr);gap:22px;align-items:start;height:calc(100vh - 166px)}.coach{display:flex;flex-direction:column;gap:12px;height:100%;min-height:0}.coach .speech{min-height:116px;font-size:12px}.coach .mascot-wrap{width:200px;max-height:234px;margin:0 auto;flex:1;min-height:120px}.coach .milfy{height:100%;width:100%;max-height:240px}.coach .speaker{font-size:9px}.coach-label{text-align:center;font-size:10px;color:#a293ae;letter-spacing:.12em;margin-top:-14px}.practice-options{padding:13px 15px}.practice-options h3{font-size:11px;color:#887794;margin-bottom:10px}.piece-filters{display:flex;gap:5px;flex-wrap:wrap}.piece-check input{position:absolute;opacity:0}.piece-check span{display:inline-flex;width:27px;height:27px;align-items:center;justify-content:center;border-radius:7px;border:1px solid var(--line);font-size:11px;cursor:pointer;color:#c4bbca}.piece-check input:checked+span{background:#f0eaf8;border-color:#cbb7df;color:#79618c;font-weight:800}.piece-check input:focus-visible+span{outline:2px solid #aa8fc7}.filter-line{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:9px;font-size:10px}.filter-line select{width:120px;padding:4px;border-radius:6px;border:1px solid var(--line);background:#fff}.filter-line input[type=number]{width:45px;padding:3px}.checkline{display:flex;align-items:center;gap:7px;font-size:11px;line-height:1.7}.checkline input{accent-color:#aa89c9}.filter-error{font-size:10px;color:#b35e7a;margin-top:6px}.board-stage{display:grid;grid-template-columns:76px calc(var(--cell)*10) 76px;gap:12px;justify-content:center}.board-column{position:relative}.board-heading{height:25px;display:flex;align-items:center;justify-content:space-between;font-size:9px;color:#a18eaf;letter-spacing:.14em}.board-shell{position:relative;border-radius:10px;overflow:hidden;border:1px solid #d8cde5;box-shadow:0 6px 24px #8a6da716;background:#faf9fd;width:calc(var(--cell)*10 + 2px);height:calc(var(--cell)*22 + 2px)}canvas.board{display:block;width:calc(var(--cell)*10);height:calc(var(--cell)*22)}.column-labels{display:grid;grid-template-columns:repeat(10,1fr);font-size:8px;text-align:center;color:#b6a9c0;padding-top:7px}.board-note{text-align:center;font-size:9px;color:#b4a3bf;margin-top:8px}.side-queue{padding-top:25px}.queue-box{background:#fffc;border:1px solid #e8dff0;border-radius:12px;overflow:hidden;text-align:center}.queue-title{font-size:9px;letter-spacing:.14em;color:#a18daf;padding:10px 0 3px}.mini-piece{display:block;width:72px;height:54px;margin:auto}.queue-box .mini-piece+.mini-piece{border-top:1px solid #f2edf6}.hold-note{font-size:9px;line-height:1.7;color:#ac9cb5;margin-top:9px;text-align:center}.key-help{display:flex;gap:7px;flex-wrap:wrap;margin-top:17px;justify-content:center}.key-help kbd{font-size:9px;min-width:25px;padding:3px;min-height:22px}.irs-flash{position:absolute;top:47px;left:50%;transform:translateX(-50%);background:#a485c9e8;color:#fff;font-size:11px;border-radius:20px;padding:5px 15px;letter-spacing:.18em;opacity:0;transition:opacity .12s;pointer-events:none}.irs-flash.visible{opacity:1}.are-track{position:absolute;top:0;left:0;right:0;height:3px;background:#e7def1;opacity:0}.are-track.visible{opacity:1}.are-fill{height:100%;background:#b396ce;width:0}.right-stack{display:grid;gap:12px}.stats-panel{padding:16px}.panel-label{font-size:9px;letter-spacing:.16em;color:#9e8eaa;font-weight:700;margin-bottom:12px}.stats-main{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat strong{font-size:27px;font-weight:600;letter-spacing:-.04em;line-height:1.2}.stat strong.accent{color:#b88bca}.stat small{font-size:10px;color:#ab9eb6}.stat label{display:block;font-size:9px;color:#a496af;margin-bottom:4px}.stats-strip{border-top:1px solid var(--line);display:flex;justify-content:space-between;margin-top:13px;padding-top:10px;font-size:10px;color:#9d8da9}.stats-strip b{color:#74627e;font-weight:600}.piece-bars{display:grid;gap:5px}.piece-bar{display:grid;grid-template-columns:12px 1fr 42px;gap:8px;font-size:9px;align-items:center}.bar-track{height:5px;background:#f0ebf5;border-radius:5px;overflow:hidden}.bar-fill{height:100%;border-radius:5px;background:#d6b2c6}.piece-bar span:last-child{text-align:right;color:#a89ab1}.result-panel{padding:16px;min-height:168px}.result-panel.perfect{border-color:#cee6dc;background:#fbfffd}.result-panel.fault{border-color:#eccbd9;background:#fffafc}.result-panel.miss{border-color:#e8d9bc}.result-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.result-head strong{font-size:17px;color:#9f83b7}.perfect .result-head strong{color:#6ca995}.fault .result-head strong{color:#ce8ba6}.result-head small{font-size:10px;color:#a193ac}.route-label{font-size:9px;letter-spacing:.08em;color:#a496b0;margin:9px 0 4px}.play-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.play-buttons button{font-size:11px;padding:9px 5px}.hint-route{margin-top:10px;border-top:1px dashed #e2d6eb;padding-top:7px}.play-footer{height:35px;padding-top:11px;font-size:9px;color:#ac9db8;text-align:center;letter-spacing:.04em}.sprint-progress{height:4px;background:#eadff1;border-radius:4px;margin-top:10px;overflow:hidden}.sprint-progress div{height:100%;background:#b298cf}.sprint-time{font-variant-numeric:tabular-nums;color:#9c7eaf;font-weight:700;font-size:20px}
-/* Lessons */
-.lesson-page{padding-top:20px}.lesson-heading{margin-bottom:17px}.lesson-steps{display:flex;gap:5px}.lesson-steps button{width:24px;height:24px;border-radius:50%;padding:0;font-size:9px;background:#fff}.lesson-steps button.active{background:#b59acf;color:#fff}.lesson-steps button.done{border-color:#a8d5c2;color:#70a98f}.lesson-grid{display:grid;grid-template-columns:240px 270px 1fr;gap:24px;align-items:start}.lesson-coach .speech{font-size:12px;min-height:140px}.lesson-coach .mascot-wrap{width:220px;margin:auto}.lesson-board .board-shell{margin:auto}.lesson-board .board-heading{width:calc(var(--cell)*10);margin:auto}.lesson-board .sequence{justify-content:center;margin-top:12px;min-height:35px}.lesson-content{max-height:calc(100vh - 198px);overflow:auto;padding:3px 7px 12px 0;scrollbar-width:thin}.lesson-text{font-size:12px;line-height:1.95;color:#897a95;margin:13px 0}.lesson-text p+p{margin-top:12px}.demo-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.demo-tabs button{font-size:10px;padding:6px 8px}.demo-tabs button.active{background:#eee5f7;border-color:#cbb8df}.try-box{background:#edf7f2;border:1px solid #d6e9de;border-radius:12px;padding:14px;margin:15px 0}.try-box h3{color:#699a88;font-size:13px}.try-box p{font-size:11px;color:#83a193;line-height:1.8;margin:6px 0 10px}.lesson-nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px}.lesson-table{width:100%;border-collapse:collapse;font-size:10px}.lesson-table th{font-weight:500;color:#ad9bb8;text-align:left;padding:7px 4px;border-bottom:1px solid var(--line)}.lesson-table td{padding:7px 4px;border-bottom:1px solid #efe9f4}.lesson-table button{border:none;background:none;padding:0;text-align:left;color:#9985ac;font-size:10px}.lesson-table kbd{font-size:9px;min-height:20px;min-width:20px;padding:2px 4px}.lesson-list{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.lesson-card{text-align:left;min-height:110px;padding:20px}.lesson-card b{display:block;margin:8px 0;font-size:14px}.lesson-card span{font-size:11px;color:var(--muted)}.lesson-status{color:#76ad99;font-size:11px;margin:8px 0;line-height:1.8}
-/* Settings / records / results */
-.settings-page{max-width:1140px}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.settings-grid h3{font-size:13px;margin-bottom:12px}.setting-row{padding:10px 0;border-top:1px solid #f0eaf5;display:grid;grid-template-columns:116px 1fr 65px;gap:11px;align-items:center}.setting-row label{font-weight:700;font-size:12px}.setting-row label small{display:block;font-size:9px;font-weight:400;color:#ad9cb8;margin-top:3px}.setting-row input[type=range]{width:100%;accent-color:#b398cf}.setting-row input[type=number],input[type=number]{border:1px solid var(--line);border-radius:7px;background:#fff;padding:6px;width:65px}.handling-note{font-size:10px;color:#ad9ab5;line-height:1.9;margin:10px 0}.toggle-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:10px}.toggle-grid .checkline{font-size:11px}.binding-list{display:grid;gap:0}.binding-row{display:flex;align-items:center;justify-content:space-between;border-top:1px solid #f0eaf5;min-height:41px;gap:6px}.binding-row>span{font-size:11px;color:#8c7b99}.binding-keys{display:flex;gap:4px;align-items:center}.binding-key{font-size:10px;padding:4px 7px;border-radius:6px;min-width:25px}.binding-add{font-size:14px;border:1px dashed #d8c6e5;border-radius:6px;padding:1px 7px;color:#ad96c0}.settings-bottom{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px}.settings-bottom textarea{width:100%;height:100px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:10px;font:11px/1.5 monospace;margin:10px 0;background:#fcfaff}.storage-note{font-size:10px;color:#b08a9f;margin-top:8px}.capture-overlay,.overlay{position:fixed;inset:0;background:#51415955;backdrop-filter:blur(7px);z-index:10;display:grid;place-items:center}.modal{width:420px;background:#fffcff;border:1px solid #e4d5ef;border-radius:24px;padding:30px;box-shadow:0 20px 80px #54416425;text-align:center}.modal h2{font-size:24px;margin:8px 0 12px}.modal p{font-size:12px;color:#9e8eaa;line-height:1.9;margin:10px 0 20px}.modal .stack{gap:9px}.capture-icon{font-size:35px;color:#c1a3d5;margin:15px}.capture-overlay .conflict{color:#bc7d96}.stats-full{display:grid;grid-template-columns:1fr 1fr;gap:20px}.big-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.big-stats .stat{padding:13px}.big-stats .stat strong{font-size:35px}.full-table{width:100%;border-collapse:collapse;font-size:12px}.full-table th,.full-table td{text-align:right;padding:10px 8px;border-bottom:1px solid #eee7f4}.full-table th{font-weight:500;font-size:10px;color:#aa9ab4}.full-table td:first-child,.full-table th:first-child{text-align:left}.sprint-setup{max-width:850px;margin:25px auto;display:grid;grid-template-columns:300px 1fr;gap:40px;align-items:center}.sprint-setup .mascot-wrap{width:290px}.sprint-choices{display:flex;gap:10px;margin:20px 0}.sprint-choices button{flex:1;padding:20px 10px;font-size:22px;color:#a383bd}.custom-sprint{display:flex;align-items:center;gap:10px;font-size:12px}.best-line{font-size:11px;color:#a691b5;margin:12px 0}.result-page{max-width:960px;margin:auto;padding-top:28px}.result-layout{display:grid;grid-template-columns:300px 1fr;gap:35px;align-items:center}.result-layout .mascot-wrap{width:290px}.result-time{font-size:62px;font-weight:700;letter-spacing:-.05em;color:#b18ac4;margin:10px 0;font-variant-numeric:tabular-nums}.result-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}.result-summary strong{font-size:24px}.result-best{color:#76b098;font-size:12px}.result-layout .piece-bars{margin:20px 0}.result-layout .piece-bar{font-size:11px}.result-layout .bar-track{height:7px}#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);padding:11px 20px;border:1px solid #dfcee9;background:#fffcff;border-radius:30px;box-shadow:var(--shadow);z-index:30;font-size:12px;color:#9d7cb0;opacity:0;pointer-events:none;transition:.2s}#toast.visible{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(min-height:850px){:root{--cell:28px}.play-page{padding-top:28px}.play-grid{gap:30px;grid-template-columns:minmax(240px,1fr) 472px minmax(250px,1fr);height:calc(100vh - 195px)}.coach .mascot-wrap{width:250px;max-height:330px}.coach .milfy{max-height:330px}.coach .speech{min-height:145px;font-size:13px}.practice-options{padding:18px}.right-stack{gap:18px}.stats-panel,.result-panel{padding:22px}.result-panel{min-height:210px}.lesson-grid{grid-template-columns:250px 300px 1fr}.menu{max-width:1150px;gap:90px}.menu-art .mascot-wrap{max-width:420px}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+:root {
+  --ink:#49445e;
+  --muted:#8c849e;
+  --pink:#e58ba9;
+  --purple:#9a82c8;
+  --mint:#77bcab;
+  --line:#e9e1f0;
+  --paper:#fffdfefa;
+  --shadow:0 8px 30px #72588d0a;
+  --cell:min(24px,calc((100vh - 236px)/22));
+  font-family:"Hiragino Maru Gothic ProN","Yu Gothic UI","Meiryo","Noto Sans CJK JP",sans-serif;
+  color:var(--ink);
+  font-size:14px;
+  font-synthesis:none
+}
 
-[hidden]{display:none!important}
-body[data-screen=play]{height:100vh;overflow:hidden}
-.right-stack .stats-panel{padding:12px}.right-stack .panel-label{margin-bottom:9px}.right-stack .stats-main strong{font-size:25px}.right-stack .stats-strip{margin-top:8px;padding-top:7px}.right-stack .piece-bars{gap:3px}.right-stack .piece-bar{line-height:1.05}.right-stack .result-panel{padding:13px;min-height:150px}.right-stack .result-head{margin-bottom:8px}.right-stack .route-label{margin-top:6px}.right-stack .sequence{min-height:27px}.right-stack .play-buttons button{padding:8px 5px}
+* {
+  box-sizing:border-box
+}
+
+body {
+  margin:0;
+  min-width:1000px;
+  background:radial-gradient(ellipse at 8% 4%,#fcebf2 0,transparent 42%),radial-gradient(ellipse at 90% 80%,#eaf6f2 0,transparent 45%),#f8f5fc
+}
+
+button,input,select,textarea {
+  font:inherit;
+  color:inherit
+}
+
+button {
+  cursor:pointer;
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:12px;
+  padding:10px 15px;
+  transition:background .15s,transform .15s,box-shadow .15s
+}
+
+button:hover {
+  background:#f6f0fc;
+  border-color:#d2bfe7;
+  transform:translateY(-1px)
+}
+
+button:active {
+  transform:translateY(1px)
+}
+
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible {
+  outline:3px solid #b6a0da;
+  outline-offset:3px
+}
+
+button:disabled {
+  opacity:.42;
+  cursor:default;
+  transform:none
+}
+
+.primary {
+  color:#fff;
+  background:linear-gradient(125deg,#bd9cda,#a48aca);
+  border-color:transparent;
+  box-shadow:0 5px 14px #a183c52d
+}
+
+.primary:hover {
+  background:#a086c2
+}
+
+.pink {
+  background:#fbedf3;
+  color:#b86f8b;
+  border-color:#efd4df
+}
+
+.quiet {
+  background:transparent;
+  border-color:transparent
+}
+
+.small {
+  font-size:12px;
+  padding:7px 11px;
+  border-radius:9px
+}
+
+.danger {
+  color:#bc7288
+}
+
+.eyebrow {
+  font-size:10px;
+  letter-spacing:.2em;
+  font-weight:800;
+  color:#a38ab9;
+  text-transform:uppercase
+}
+
+.muted {
+  color:var(--muted)
+}
+
+.tiny {
+  font-size:11px;
+  color:var(--muted)
+}
+
+h1,h2,h3,p {
+  margin:0
+}
+
+h2 {
+  font-size:23px;
+  letter-spacing:.04em
+}
+
+h3 {
+  font-size:14px
+}
+
+.row {
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+
+.spread {
+  justify-content:space-between
+}
+
+.stack {
+  display:grid;
+  gap:14px
+}
+
+.panel {
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  padding:18px
+}
+
+.tag {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:#f0eaf8;
+  border:1px solid #e7dff0;
+  color:#9278b3;
+  border-radius:30px;
+  padding:4px 9px;
+  font-size:10px;
+  letter-spacing:.06em
+}
+
+.mint-tag {
+  color:#5b9e8e;
+  background:#e9f5ef;
+  border-color:#d2eade
+}
+
+.topbar {
+  height:72px;
+  padding:0 34px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid #e9e1f0aa;
+  background:#fffc;
+  gap:20px
+}
+
+.brand {
+  display:flex;
+  gap:11px;
+  align-items:center;
+  font-weight:800;
+  letter-spacing:.08em
+}
+
+.brand-button {
+  border:0;
+  background:none;
+  padding:0
+}
+
+.brand-mark {
+  display:grid;
+  grid-template-columns:repeat(3,8px);
+  grid-template-rows:repeat(2,8px);
+  gap:2px;
+  transform:rotate(-7deg)
+}
+
+.brand-mark i {
+  background:#b6a1d4;
+  border-radius:2px
+}
+
+.brand-mark i:first-child {
+  grid-column:2;
+  background:#e7adc2
+}
+
+.brand small {
+  display:block;
+  font-size:9px;
+  letter-spacing:.23em;
+  font-weight:500;
+  color:#a197ae;
+  margin-top:3px
+}
+
+.top-actions {
+  display:flex;
+  gap:10px;
+  align-items:center
+}
+
+.page {
+  max-width:1140px;
+  margin:auto;
+  padding:28px 18px
+}
+
+.page-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:22px
+}
+
+.page-heading p {
+  margin-top:7px;
+  color:var(--muted);
+  font-size:12px
+}
+
+.footer {
+  font-size:10px;
+  color:#a69bb2;
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  padding:15px 34px;
+  letter-spacing:.04em
+}
+
+kbd {
+  font-family:inherit;
+  font-size:11px;
+  font-weight:600;
+  line-height:1.2;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:27px;
+  min-height:26px;
+  padding:4px 7px;
+  border:1px solid #dfd5eb;
+  border-bottom:3px solid #d9cde7;
+  border-radius:6px;
+  background:#fff;
+  color:#7c668f;
+  white-space:nowrap
+}
+
+kbd.pressed {
+  background:#b498d0;
+  color:#fff;
+  border-color:#a284c2;
+  transform:translateY(2px);
+  box-shadow:0 0 13px #c3a6e680
+}
+
+.sequence {
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  align-items:center;
+  min-height:30px
+}
+
+.sequence .arrow {
+  color:#c7bbd2;
+  font-size:10px
+}
+
+.sequence small {
+  font-size:8px;
+  margin-left:4px;
+  color:#b48ac0
+}
+
+.empty-route {
+  font-size:12px;
+  color:var(--muted)
+}
+
+/* Title screen */
+.menu {
+  max-width:1080px;
+  min-height:calc(100vh - 116px);
+  margin:auto;
+  display:grid;
+  grid-template-columns:1.05fr 1fr;
+  gap:58px;
+  align-items:center;
+  padding:32px
+}
+
+.menu-copy .eyebrow {
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+
+.menu-copy .eyebrow:before {
+  content:"";
+  width:22px;
+  height:1px;
+  background:#cdb7df
+}
+
+.logo {
+  font-weight:900;
+  line-height:1.17;
+  font-size:66px;
+  letter-spacing:.04em;
+  margin:22px 0 15px;
+  color:#a783bd;
+  text-shadow:2px 3px 0 #fff
+}
+
+.logo span {
+  color:#db93af
+}
+
+.logo small {
+  display:block;
+  font-size:30px;
+  letter-spacing:.18em;
+  margin-top:9px;
+  color:#776787
+}
+
+.menu-intro {
+  line-height:2;
+  color:#93849f;
+  font-size:13px;
+  margin-bottom:26px
+}
+
+.menu-buttons {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:11px
+}
+
+.menu-buttons button {
+  text-align:left;
+  min-height:62px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:13px 17px
+}
+
+.menu-buttons button:first-child {
+  grid-column:1/-1
+}
+
+.menu-buttons button b {
+  display:block;
+  font-size:14px;
+  letter-spacing:.04em
+}
+
+.menu-buttons button small {
+  display:block;
+  font-size:9px;
+  font-weight:400;
+  letter-spacing:.14em;
+  opacity:.7;
+  margin-top:4px
+}
+
+.menu-buttons .button-arrow {
+  opacity:.65;
+  font-size:20px
+}
+
+.first-note {
+  margin-top:15px;
+  font-size:11px;
+  color:#ac8cb4;
+  display:flex;
+  align-items:center;
+  gap:8px
+}
+
+.menu-art {
+  position:relative;
+  text-align:center
+}
+
+.menu-art:before {
+  content:"";
+  position:absolute;
+  inset:40px -10px 65px;
+  border-radius:50%;
+  background:radial-gradient(circle,#f0e6f7 0,#f9f5fc00 70%)
+}
+
+.menu-art .mascot-wrap {
+  max-width:370px;
+  margin:auto;
+  position:relative
+}
+
+.speech {
+  background:#fff;
+  border:1px solid #e7dbee;
+  border-radius:18px;
+  padding:17px 19px;
+  line-height:1.9;
+  font-size:13px;
+  position:relative;
+  box-shadow:0 5px 20px #9c7baa0a
+}
+
+.speech:after {
+  content:"";
+  position:absolute;
+  bottom:-7px;
+  left:50%;
+  height:12px;
+  width:12px;
+  background:#fff;
+  border-right:1px solid #e7dbee;
+  border-bottom:1px solid #e7dbee;
+  transform:rotate(45deg)
+}
+
+.speaker {
+  display:block;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.14em;
+  color:#ad88bc;
+  margin-bottom:5px
+}
+
+.menu-art .speech {
+  max-width:340px;
+  margin:0 auto -7px;
+  text-align:left;
+  z-index:1
+}
+
+.mascot-caption {
+  font-size:10px;
+  color:#ad9cb7;
+  letter-spacing:.15em;
+  margin-top:-14px
+}
+
+.float-block {
+  position:absolute;
+  width:19px;
+  height:19px;
+  border-radius:5px;
+  background:#edc6d5;
+  box-shadow:21px 0 #edc6d5,21px -21px #edc6d5,42px -21px #edc6d5;
+  transform:rotate(13deg);
+  left:17px;
+  top:46%;
+  opacity:.6
+}
+
+.float-block.two {
+  left:auto;
+  right:32px;
+  top:67%;
+  background:#bce3d6;
+  box-shadow:21px 0 #bce3d6,-21px 0 #bce3d6,0 -21px #bce3d6;
+  transform:rotate(-15deg)
+}
+
+/* Training workspace: all three columns fit at 1280 x 720. */
+.play-page {
+  padding:17px 28px 0;
+  max-width:1260px;
+  margin:auto
+}
+
+.play-topline {
+  height:30px;
+  margin-bottom:12px
+}
+
+.play-title {
+  font-size:17px;
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+
+.play-grid {
+  display:grid;
+  grid-template-columns:minmax(220px,1fr) 428px minmax(230px,1fr);
+  gap:22px;
+  align-items:start;
+  height:calc(100vh - 166px)
+}
+
+.coach {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  height:100%;
+  min-height:0
+}
+
+.coach .speech {
+  min-height:116px;
+  font-size:12px
+}
+
+.coach .mascot-wrap {
+  width:200px;
+  max-height:234px;
+  margin:0 auto;
+  flex:1;
+  min-height:120px
+}
+
+.coach .milfy {
+  height:100%;
+  width:100%;
+  max-height:240px
+}
+
+.coach .speaker {
+  font-size:9px
+}
+
+.coach-label {
+  text-align:center;
+  font-size:10px;
+  color:#a293ae;
+  letter-spacing:.12em;
+  margin-top:-14px
+}
+
+.practice-options {
+  padding:13px 15px
+}
+
+.practice-options h3 {
+  font-size:11px;
+  color:#887794;
+  margin-bottom:10px
+}
+
+.piece-filters {
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap
+}
+
+.piece-check input {
+  position:absolute;
+  opacity:0
+}
+
+.piece-check span {
+  display:inline-flex;
+  width:27px;
+  height:27px;
+  align-items:center;
+  justify-content:center;
+  border-radius:7px;
+  border:1px solid var(--line);
+  font-size:11px;
+  cursor:pointer;
+  color:#c4bbca
+}
+
+.piece-check input:checked+span {
+  background:#f0eaf8;
+  border-color:#cbb7df;
+  color:#79618c;
+  font-weight:800
+}
+
+.piece-check input:focus-visible+span {
+  outline:2px solid #aa8fc7
+}
+
+.filter-line {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:5px;
+  margin-top:9px;
+  font-size:10px
+}
+
+.filter-line select {
+  width:120px;
+  padding:4px;
+  border-radius:6px;
+  border:1px solid var(--line);
+  background:#fff
+}
+
+.filter-line input[type=number] {
+  width:45px;
+  padding:3px
+}
+
+.checkline {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:11px;
+  line-height:1.7
+}
+
+.checkline input {
+  accent-color:#aa89c9
+}
+
+.filter-error {
+  font-size:10px;
+  color:#b35e7a;
+  margin-top:6px
+}
+
+.board-stage {
+  display:grid;
+  grid-template-columns:76px calc(var(--cell)*10) 76px;
+  gap:12px;
+  justify-content:center
+}
+
+.board-column {
+  position:relative
+}
+
+.board-heading {
+  height:25px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:9px;
+  color:#a18eaf;
+  letter-spacing:.14em
+}
+
+.board-shell {
+  position:relative;
+  border-radius:10px;
+  overflow:hidden;
+  border:1px solid #d8cde5;
+  box-shadow:0 6px 24px #8a6da716;
+  background:#faf9fd;
+  width:calc(var(--cell)*10 + 2px);
+  height:calc(var(--cell)*22 + 2px)
+}
+
+canvas.board {
+  display:block;
+  width:calc(var(--cell)*10);
+  height:calc(var(--cell)*22)
+}
+
+.column-labels {
+  display:grid;
+  grid-template-columns:repeat(10,1fr);
+  font-size:8px;
+  text-align:center;
+  color:#b6a9c0;
+  padding-top:7px
+}
+
+.board-note {
+  text-align:center;
+  font-size:9px;
+  color:#b4a3bf;
+  margin-top:8px
+}
+
+.side-queue {
+  padding-top:25px
+}
+
+.queue-box {
+  background:#fffc;
+  border:1px solid #e8dff0;
+  border-radius:12px;
+  overflow:hidden;
+  text-align:center
+}
+
+.queue-title {
+  font-size:9px;
+  letter-spacing:.14em;
+  color:#a18daf;
+  padding:10px 0 3px
+}
+
+.mini-piece {
+  display:block;
+  width:72px;
+  height:54px;
+  margin:auto
+}
+
+.queue-box .mini-piece+.mini-piece {
+  border-top:1px solid #f2edf6
+}
+
+.hold-note {
+  font-size:9px;
+  line-height:1.7;
+  color:#ac9cb5;
+  margin-top:9px;
+  text-align:center
+}
+
+.key-help {
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+  margin-top:17px;
+  justify-content:center
+}
+
+.key-help kbd {
+  font-size:9px;
+  min-width:25px;
+  padding:3px;
+  min-height:22px
+}
+
+.irs-flash {
+  position:absolute;
+  top:47px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#a485c9e8;
+  color:#fff;
+  font-size:11px;
+  border-radius:20px;
+  padding:5px 15px;
+  letter-spacing:.18em;
+  opacity:0;
+  transition:opacity .12s;
+  pointer-events:none
+}
+
+.irs-flash.visible {
+  opacity:1
+}
+
+.are-track {
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:3px;
+  background:#e7def1;
+  opacity:0
+}
+
+.are-track.visible {
+  opacity:1
+}
+
+.are-fill {
+  height:100%;
+  background:#b396ce;
+  width:0
+}
+
+.right-stack {
+  display:grid;
+  gap:12px
+}
+
+.stats-panel {
+  padding:16px
+}
+
+.panel-label {
+  font-size:9px;
+  letter-spacing:.16em;
+  color:#9e8eaa;
+  font-weight:700;
+  margin-bottom:12px
+}
+
+.stats-main {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px
+}
+
+.stat strong {
+  font-size:27px;
+  font-weight:600;
+  letter-spacing:-.04em;
+  line-height:1.2
+}
+
+.stat strong.accent {
+  color:#b88bca
+}
+
+.stat small {
+  font-size:10px;
+  color:#ab9eb6
+}
+
+.stat label {
+  display:block;
+  font-size:9px;
+  color:#a496af;
+  margin-bottom:4px
+}
+
+.stats-strip {
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:space-between;
+  margin-top:13px;
+  padding-top:10px;
+  font-size:10px;
+  color:#9d8da9
+}
+
+.stats-strip b {
+  color:#74627e;
+  font-weight:600
+}
+
+.piece-bars {
+  display:grid;
+  gap:5px
+}
+
+.piece-bar {
+  display:grid;
+  grid-template-columns:12px 1fr 42px;
+  gap:8px;
+  font-size:9px;
+  align-items:center
+}
+
+.bar-track {
+  height:5px;
+  background:#f0ebf5;
+  border-radius:5px;
+  overflow:hidden
+}
+
+.bar-fill {
+  height:100%;
+  border-radius:5px;
+  background:#d6b2c6
+}
+
+.piece-bar span:last-child {
+  text-align:right;
+  color:#a89ab1
+}
+
+.result-panel {
+  padding:16px;
+  min-height:168px
+}
+
+.result-panel.perfect {
+  border-color:#cee6dc;
+  background:#fbfffd
+}
+
+.result-panel.fault {
+  border-color:#eccbd9;
+  background:#fffafc
+}
+
+.result-panel.miss {
+  border-color:#e8d9bc
+}
+
+.result-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px
+}
+
+.result-head strong {
+  font-size:17px;
+  color:#9f83b7
+}
+
+.perfect .result-head strong {
+  color:#6ca995
+}
+
+.fault .result-head strong {
+  color:#ce8ba6
+}
+
+.result-head small {
+  font-size:10px;
+  color:#a193ac
+}
+
+.route-label {
+  font-size:9px;
+  letter-spacing:.08em;
+  color:#a496b0;
+  margin:9px 0 4px
+}
+
+.play-buttons {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px
+}
+
+.play-buttons button {
+  font-size:11px;
+  padding:9px 5px
+}
+
+.hint-route {
+  margin-top:10px;
+  border-top:1px dashed #e2d6eb;
+  padding-top:7px
+}
+
+.play-footer {
+  height:35px;
+  padding-top:11px;
+  font-size:9px;
+  color:#ac9db8;
+  text-align:center;
+  letter-spacing:.04em
+}
+
+.sprint-progress {
+  height:4px;
+  background:#eadff1;
+  border-radius:4px;
+  margin-top:10px;
+  overflow:hidden
+}
+
+.sprint-progress div {
+  height:100%;
+  background:#b298cf
+}
+
+.sprint-time {
+  font-variant-numeric:tabular-nums;
+  color:#9c7eaf;
+  font-weight:700;
+  font-size:20px
+}
+
+/* Lessons */
+.lesson-page {
+  padding-top:20px
+}
+
+.lesson-heading {
+  margin-bottom:17px
+}
+
+.lesson-steps {
+  display:flex;
+  gap:5px
+}
+
+.lesson-steps button {
+  width:24px;
+  height:24px;
+  border-radius:50%;
+  padding:0;
+  font-size:9px;
+  background:#fff
+}
+
+.lesson-steps button.active {
+  background:#b59acf;
+  color:#fff
+}
+
+.lesson-steps button.done {
+  border-color:#a8d5c2;
+  color:#70a98f
+}
+
+.lesson-grid {
+  display:grid;
+  grid-template-columns:240px 270px 1fr;
+  gap:24px;
+  align-items:start
+}
+
+.lesson-coach .speech {
+  font-size:12px;
+  min-height:140px
+}
+
+.lesson-coach .mascot-wrap {
+  width:220px;
+  margin:auto
+}
+
+.lesson-board .board-shell {
+  margin:auto
+}
+
+.lesson-board .board-heading {
+  width:calc(var(--cell)*10);
+  margin:auto
+}
+
+.lesson-board .sequence {
+  justify-content:center;
+  margin-top:12px;
+  min-height:35px
+}
+
+.lesson-content {
+  max-height:calc(100vh - 198px);
+  overflow:auto;
+  padding:3px 7px 12px 0;
+  scrollbar-width:thin
+}
+
+.lesson-text {
+  font-size:12px;
+  line-height:1.95;
+  color:#897a95;
+  margin:13px 0
+}
+
+.lesson-text p+p {
+  margin-top:12px
+}
+
+.demo-tabs {
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin:12px 0
+}
+
+.demo-tabs button {
+  font-size:10px;
+  padding:6px 8px
+}
+
+.demo-tabs button.active {
+  background:#eee5f7;
+  border-color:#cbb8df
+}
+
+.try-box {
+  background:#edf7f2;
+  border:1px solid #d6e9de;
+  border-radius:12px;
+  padding:14px;
+  margin:15px 0
+}
+
+.try-box h3 {
+  color:#699a88;
+  font-size:13px
+}
+
+.try-box p {
+  font-size:11px;
+  color:#83a193;
+  line-height:1.8;
+  margin:6px 0 10px
+}
+
+.lesson-nav {
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:16px
+}
+
+.lesson-table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:10px
+}
+
+.lesson-table th {
+  font-weight:500;
+  color:#ad9bb8;
+  text-align:left;
+  padding:7px 4px;
+  border-bottom:1px solid var(--line)
+}
+
+.lesson-table td {
+  padding:7px 4px;
+  border-bottom:1px solid #efe9f4
+}
+
+.lesson-table button {
+  border:none;
+  background:none;
+  padding:0;
+  text-align:left;
+  color:#9985ac;
+  font-size:10px
+}
+
+.lesson-table kbd {
+  font-size:9px;
+  min-height:20px;
+  min-width:20px;
+  padding:2px 4px
+}
+
+.lesson-list {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px
+}
+
+.lesson-card {
+  text-align:left;
+  min-height:110px;
+  padding:20px
+}
+
+.lesson-card b {
+  display:block;
+  margin:8px 0;
+  font-size:14px
+}
+
+.lesson-card span {
+  font-size:11px;
+  color:var(--muted)
+}
+
+.lesson-status {
+  color:#76ad99;
+  font-size:11px;
+  margin:8px 0;
+  line-height:1.8
+}
+
+/* Settings / records / results */
+.settings-page {
+  max-width:1140px
+}
+
+.settings-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px
+}
+
+.settings-grid h3 {
+  font-size:13px;
+  margin-bottom:12px
+}
+
+.setting-row {
+  padding:10px 0;
+  border-top:1px solid #f0eaf5;
+  display:grid;
+  grid-template-columns:116px 1fr 65px;
+  gap:11px;
+  align-items:center
+}
+
+.setting-row label {
+  font-weight:700;
+  font-size:12px
+}
+
+.setting-row label small {
+  display:block;
+  font-size:9px;
+  font-weight:400;
+  color:#ad9cb8;
+  margin-top:3px
+}
+
+.setting-row input[type=range] {
+  width:100%;
+  accent-color:#b398cf
+}
+
+.setting-row input[type=number],input[type=number] {
+  border:1px solid var(--line);
+  border-radius:7px;
+  background:#fff;
+  padding:6px;
+  width:65px
+}
+
+.handling-note {
+  font-size:10px;
+  color:#ad9ab5;
+  line-height:1.9;
+  margin:10px 0
+}
+
+.toggle-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding-top:10px
+}
+
+.toggle-grid .checkline {
+  font-size:11px
+}
+
+.binding-list {
+  display:grid;
+  gap:0
+}
+
+.binding-row {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-top:1px solid #f0eaf5;
+  min-height:41px;
+  gap:6px
+}
+
+.binding-row>span {
+  font-size:11px;
+  color:#8c7b99
+}
+
+.binding-keys {
+  display:flex;
+  gap:4px;
+  align-items:center
+}
+
+.binding-key {
+  font-size:10px;
+  padding:4px 7px;
+  border-radius:6px;
+  min-width:25px
+}
+
+.binding-add {
+  font-size:14px;
+  border:1px dashed #d8c6e5;
+  border-radius:6px;
+  padding:1px 7px;
+  color:#ad96c0
+}
+
+.settings-bottom {
+  margin-top:20px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px
+}
+
+.settings-bottom textarea {
+  width:100%;
+  height:100px;
+  resize:vertical;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  font:11px/1.5 monospace;
+  margin:10px 0;
+  background:#fcfaff
+}
+
+.storage-note {
+  font-size:10px;
+  color:#b08a9f;
+  margin-top:8px
+}
+
+.capture-overlay,.overlay {
+  position:fixed;
+  inset:0;
+  background:#51415955;
+  backdrop-filter:blur(7px);
+  z-index:10;
+  display:grid;
+  place-items:center
+}
+
+.modal {
+  width:420px;
+  background:#fffcff;
+  border:1px solid #e4d5ef;
+  border-radius:24px;
+  padding:30px;
+  box-shadow:0 20px 80px #54416425;
+  text-align:center
+}
+
+.modal h2 {
+  font-size:24px;
+  margin:8px 0 12px
+}
+
+.modal p {
+  font-size:12px;
+  color:#9e8eaa;
+  line-height:1.9;
+  margin:10px 0 20px
+}
+
+.modal .stack {
+  gap:9px
+}
+
+.capture-icon {
+  font-size:35px;
+  color:#c1a3d5;
+  margin:15px
+}
+
+.capture-overlay .conflict {
+  color:#bc7d96
+}
+
+.stats-full {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px
+}
+
+.big-stats {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px
+}
+
+.big-stats .stat {
+  padding:13px
+}
+
+.big-stats .stat strong {
+  font-size:35px
+}
+
+.full-table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px
+}
+
+.full-table th,.full-table td {
+  text-align:right;
+  padding:10px 8px;
+  border-bottom:1px solid #eee7f4
+}
+
+.full-table th {
+  font-weight:500;
+  font-size:10px;
+  color:#aa9ab4
+}
+
+.full-table td:first-child,.full-table th:first-child {
+  text-align:left
+}
+
+.sprint-setup {
+  max-width:850px;
+  margin:25px auto;
+  display:grid;
+  grid-template-columns:300px 1fr;
+  gap:40px;
+  align-items:center
+}
+
+.sprint-setup .mascot-wrap {
+  width:290px
+}
+
+.sprint-choices {
+  display:flex;
+  gap:10px;
+  margin:20px 0
+}
+
+.sprint-choices button {
+  flex:1;
+  padding:20px 10px;
+  font-size:22px;
+  color:#a383bd
+}
+
+.custom-sprint {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:12px
+}
+
+.best-line {
+  font-size:11px;
+  color:#a691b5;
+  margin:12px 0
+}
+
+.result-page {
+  max-width:960px;
+  margin:auto;
+  padding-top:28px
+}
+
+.result-layout {
+  display:grid;
+  grid-template-columns:300px 1fr;
+  gap:35px;
+  align-items:center
+}
+
+.result-layout .mascot-wrap {
+  width:290px
+}
+
+.result-time {
+  font-size:62px;
+  font-weight:700;
+  letter-spacing:-.05em;
+  color:#b18ac4;
+  margin:10px 0;
+  font-variant-numeric:tabular-nums
+}
+
+.result-summary {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin:20px 0
+}
+
+.result-summary strong {
+  font-size:24px
+}
+
+.result-best {
+  color:#76b098;
+  font-size:12px
+}
+
+.result-layout .piece-bars {
+  margin:20px 0
+}
+
+.result-layout .piece-bar {
+  font-size:11px
+}
+
+.result-layout .bar-track {
+  height:7px
+}
+
+#toast {
+  position:fixed;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%) translateY(20px);
+  padding:11px 20px;
+  border:1px solid #dfcee9;
+  background:#fffcff;
+  border-radius:30px;
+  box-shadow:var(--shadow);
+  z-index:30;
+  font-size:12px;
+  color:#9d7cb0;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s
+}
+
+#toast.visible {
+  opacity:1;
+  transform:translateX(-50%) translateY(0)
+}
+
+@media(min-height:850px) {
+  :root {
+    --cell:28px
+  }
+
+  .play-page {
+    padding-top:28px
+  }
+
+  .play-grid {
+    gap:30px;
+    grid-template-columns:minmax(240px,1fr) 472px minmax(250px,1fr);
+    height:calc(100vh - 195px)
+  }
+
+  .coach .mascot-wrap {
+    width:250px;
+    max-height:330px
+  }
+
+  .coach .milfy {
+    max-height:330px
+  }
+
+  .coach .speech {
+    min-height:145px;
+    font-size:13px
+  }
+
+  .practice-options {
+    padding:18px
+  }
+
+  .right-stack {
+    gap:18px
+  }
+
+  .stats-panel,.result-panel {
+    padding:22px
+  }
+
+  .result-panel {
+    min-height:210px
+  }
+
+  .lesson-grid {
+    grid-template-columns:250px 300px 1fr
+  }
+
+  .menu {
+    max-width:1150px;
+    gap:90px
+  }
+
+  .menu-art .mascot-wrap {
+    max-width:420px
+  }
+
+}
+
+@media(prefers-reduced-motion:reduce) {
+  *,*:before,*:after {
+    animation:none!important;
+    transition:none!important;
+    scroll-behavior:auto!important
+  }
+
+}
+
+[hidden] {
+  display:none!important
+}
+
+body[data-screen=play] {
+  height:100vh;
+  overflow:hidden
+}
+
+.right-stack .stats-panel {
+  padding:12px
+}
+
+.right-stack .panel-label {
+  margin-bottom:9px
+}
+
+.right-stack .stats-main strong {
+  font-size:25px
+}
+
+.right-stack .stats-strip {
+  margin-top:8px;
+  padding-top:7px
+}
+
+.right-stack .piece-bars {
+  gap:3px
+}
+
+.right-stack .piece-bar {
+  line-height:1.05
+}
+
+.right-stack .result-panel {
+  padding:13px;
+  min-height:150px
+}
+
+.right-stack .result-head {
+  margin-bottom:8px
+}
+
+.right-stack .route-label {
+  margin-top:6px
+}
+
+.right-stack .sequence {
+  min-height:27px
+}
+
+.right-stack .play-buttons button {
+  padding:8px 5px
+}
+
+.right-stack {
+  height:100%;
+  grid-template-rows:auto auto minmax(0,1fr) auto;
+}
+
+.right-stack .piece-bars {
+  grid-template-columns:1fr 1fr;
+  column-gap:12px;
+  row-gap:6px;
+}
+
+.right-stack .result-panel {
+  min-height:0;
+  overflow:auto;
+  scrollbar-width:thin;
+}
+
+.right-stack .hint-route {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:6px;
+}
+
+.right-stack .hint-route .route-label {
+  margin:0;
+}
+
+.right-stack .result-panel .sequence {
+  max-height:60px;
+  overflow:auto;
+  align-content:start;
+}
+
+body[data-keycaps=off] .sequence kbd {
+  border:0;
+  background:transparent;
+  box-shadow:none;
+  min-height:0;
+  min-width:0;
+  padding:2px;
+}
+
+body[data-keycaps=off] .sequence kbd.pressed {
+  color:#9d72bf;
+  text-decoration:underline;
+  font-weight:800;
+}
 </style>
 </head>
 <body>
@@ -1469,7 +3135,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
     pause: '一時停止', skip: '次の目標', settings: '設定を開く', hint: 'ヒント切替' };
   const UI_DEFAULTS = { zeroFault: false, repeatOnFault: false, repeatOnMiss: true, showTarget: true,
     showOptimal: true, showKeys: true, ghost: true, sound: true, volume: .3, bubbles: true };
-  const PRACTICE_DEFAULTS = { pieces: [...E.PIECE_TYPES], area: 'all', minColumn: 1, maxColumn: 9, weakSpot: false };
+  const PRACTICE_DEFAULTS = { pieces: [...E.PIECE_TYPES], area: 'all', minColumn: 1, maxColumn: 10, weakSpot: false };
   let settings = { ...E.DEFAULT_SETTINGS }, ui = { ...UI_DEFAULTS }, bindings = copy(DEFAULT_KEYS);
   let practice = copy(PRACTICE_DEFAULTS), progress = { current: 0, completed: [] };
   let totalStats = new E.Stats(), storageOK = true;
@@ -1513,7 +3179,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
         const p = saved.practice;
         if (Array.isArray(p.pieces) && p.pieces.length && p.pieces.every(t => E.PIECE_TYPES.includes(t))) practice.pieces = [...new Set(p.pieces)];
         if (['all', 'left', 'center', 'right', 'custom'].includes(p.area)) practice.area = p.area;
-        for (const key of ['minColumn', 'maxColumn']) if (Number.isInteger(p[key])) practice[key] = Math.max(1, Math.min(9, p[key]));
+        for (const key of ['minColumn', 'maxColumn']) if (Number.isInteger(p[key])) practice[key] = Math.max(1, Math.min(10, p[key]));
         if (practice.minColumn > practice.maxColumn) practice.maxColumn = practice.minColumn;
         practice.weakSpot = p.weakSpot === true;
       }
@@ -1532,8 +3198,9 @@ body[data-screen=play]{height:100vh;overflow:hidden}
   let screen = 'menu', session = null, demo = null, lessonIndex = progress.current;
   let lessons = M.createLessons(settings), tryMode = false, tryIndex = 0, tryDone = false;
   let lessonMessage = '', sessionEventQueue = [], trace = [], irsUntil = 0, irsCount = 0;
-  let hint = false, lastResult = null, resultActions = [], lastTargetActions = [];
+  let hint = false, lastResult = null, resultActions = [];
   let expression = 'normal', bubble = '', tipIndex = 0, particles = [];
+  let feedbackAt = 0, lastTipAttempt = 0;
   let settingsReturn = 'menu', capture = null, toastUntil = 0, lastHUD = 0, sprintResult = null;
   let demoVariant = 0, selectedDemo = null, lastQueue = '', statsScope = 'total';
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1603,11 +3270,11 @@ body[data-screen=play]{height:100vh;overflow:hidden}
   }
   function footer() { return '<footer class="footer"><span>テト学園 · 小さな一手を、きれいなフィネスに。</span><span>ORIGINAL ART & SYNTHESIZED SOUND · NO NETWORK</span></footer>'; }
   function menuHTML() {
-    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO TETO ACADEMY</div><h1 class="logo">萌え<span>テト</span><small>フィネス編</small></h1><p class="menu-intro">ひとつのミノに、いちばん短い道を。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>FREE PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button><button data-act="lessons"><span><b>レッスン一覧</b><small>LEARN AT YOUR PACE</small></span><span>▤</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}</p><p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech('テト学園へようこそ！ミルフィです♪\n最短の操作、いっしょに見つけましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR FINESSE COMPANION / ミルフィ</p></section></main>${footer()}`;
+    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO TETO ACADEMY</div><h1 class="logo">萌え<span>テト</span><small>フィネス編</small></h1><p class="menu-intro">ひとつのミノに、いちばん短い道を。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>FREE PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p><p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech('テト学園へようこそ！ミルフィです♪\n最短の操作、いっしょに見つけましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR FINESSE COMPANION / ミルフィ</p></section></main>${footer()}`;
   }
   function mini(type, extra = '') { return `<canvas class="mini-piece" data-piece="${type || ''}" width="144" height="108" aria-label="${type || '空'}ミノ" ${extra}></canvas>`; }
   function boardHTML() {
-    return `<div class="board-heading"><span>SPAWN / 21–22</span><span>10 × 20</span></div><div class="board-shell"><canvas id="board" class="board" role="img" aria-label="練習フィールド、10列20行と出現2行"></canvas><div id="irs-indicator" class="irs-flash" aria-live="polite">IRS ✧</div><div id="are-bar" class="are-track" role="progressbar" aria-label="出現までの待ち時間" aria-valuemin="0" aria-valuemax="100"><div class="are-fill"></div></div></div><div class="column-labels">${Array.from({ length: 10 }, (_, i) => `<span>${i + 1}</span>`).join('')}</div>`;
+    return `<div class="board-heading"><span>SPAWN / 21–22</span><span>10 × 20</span></div><div class="board-shell"><canvas id="board" class="board" tabindex="-1" role="img" aria-label="練習フィールド、10列20行と出現2行"></canvas><div id="irs-indicator" class="irs-flash" aria-live="polite">IRS ✧</div><div id="are-bar" class="are-track" role="progressbar" aria-label="出現までの待ち時間" aria-valuemin="0" aria-valuemax="100"><div class="are-fill"></div></div></div><div class="column-labels">${Array.from({ length: 10 }, (_, i) => `<span>${i + 1}</span>`).join('')}</div>`;
   }
   function pieceBars(stats) {
     return E.PIECE_TYPES.map(type => {
@@ -1616,11 +3283,11 @@ body[data-screen=play]{height:100vh;overflow:hidden}
     }).join('');
   }
   function practiceHTML() {
-    return `<section class="panel practice-options"><h3>練習するミノ / 目標のエリア</h3><div class="piece-filters">${E.PIECE_TYPES.map(type => `<label class="piece-check"><input type="checkbox" data-piece-filter="${type}" ${practice.pieces.includes(type) ? 'checked' : ''}><span>${type}</span></label>`).join('')}</div><label class="filter-line">列のエリア<select id="area" aria-label="列のエリア">${[['all','すべて'],['left','左 / 1–3列'],['center','中央 / 4–6列'],['right','右 / 7–10列'],['custom','列を指定']].map(([value, label]) => `<option value="${value}" ${practice.area === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>${practice.area === 'custom' ? `<div class="filter-line">左端の列 <input id="min-column" aria-label="開始列" type="number" min="1" max="9" value="${practice.minColumn}"> 〜 <input id="max-column" aria-label="終了列" type="number" min="1" max="9" value="${practice.maxColumn}"></div>` : ''}<label class="checkline" style="margin-top:8px"><input data-practice="weakSpot" type="checkbox" ${practice.weakSpot ? 'checked' : ''}>苦手な目標を多めに</label><label class="checkline"><input data-ui="zeroFault" type="checkbox" ${ui.zeroFault ? 'checked' : ''}>ゼロフォルト（成功まで再挑戦）</label><p class="tiny" style="margin-top:5px">変更は次の目標から反映・成績は引き継ぎます</p></section>`;
+    return `<section class="panel practice-options"><h3>練習するミノ / 目標のエリア</h3><div class="piece-filters">${E.PIECE_TYPES.map(type => `<label class="piece-check"><input type="checkbox" data-piece-filter="${type}" ${practice.pieces.includes(type) ? 'checked' : ''}><span>${type}</span></label>`).join('')}</div><label class="filter-line">列のエリア<select id="area" aria-label="列のエリア">${[['all','すべて'],['left','左 / 1–3列'],['center','中央 / 4–6列'],['right','右 / 7–10列'],['custom','列を指定']].map(([value, label]) => `<option value="${value}" ${practice.area === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>${practice.area === 'custom' ? `<div class="filter-line">左端の列 <input id="min-column" aria-label="開始列" type="number" min="1" max="10" value="${practice.minColumn}"> 〜 <input id="max-column" aria-label="終了列" type="number" min="1" max="10" value="${practice.maxColumn}"></div>` : ''}<label class="checkline" style="margin-top:8px"><input data-practice="weakSpot" type="checkbox" ${practice.weakSpot ? 'checked' : ''}>苦手な目標を多めに</label><label class="checkline"><input data-ui="zeroFault" type="checkbox" ${ui.zeroFault ? 'checked' : ''}>ゼロフォルト（成功まで再挑戦）</label><p class="tiny" style="margin-top:5px">変更は次の目標から反映・成績は引き継ぎます</p></section>`;
   }
   function playHTML() {
     const sprint = session.sprintLength;
-    return `<main class="play-page"><div class="row spread play-topline"><h1 class="play-title">${sprint ? 'スプリント' : 'フィネス・ドリル'}<span class="tag">${sprint ? sprint + ' PLACEMENTS' : 'FREE PRACTICE'}</span></h1><div class="row"><span id="sprint-time" class="sprint-time">00:00.00</span><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div></div><div class="play-grid"><aside class="coach">${speech(ui.bubbles ? bubble : 'ミルフィが応援中です♪', 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div class="coach-label">ミルフィと、ひとつずつ。</div><div id="practice-wrap">${practiceHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">HOLD</div><div id="hold-preview">${mini(null)}</div></div><p id="hold-note" class="hold-note">${session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効'}</p><div class="key-help">${['left', 'right', 'cw', 'ccw', 'rotate180'].map(a => `<kbd data-live-key="${a}" title="${ACTION_NAMES[a]}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><div class="queue-box"><div class="queue-title">NEXT 5</div><div id="next-preview"></div></div><p class="hold-note">${escape(friendly(bindings.hardDrop[0]))}<br>ハードドロップ</p></aside></section><aside class="right-stack"><section class="panel stats-panel"><div class="row spread panel-label"><span>SESSION / この練習</span><button class="quiet small" style="padding:0;font-size:9px" data-act="records-session">全記録 ↗</button></div><div class="stats-main"><div class="stat"><label>連続 PERFECT</label><strong class="accent" id="streak">0</strong><small> streak</small></div><div class="stat"><label>フィネス正確率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>BEST <b id="best-streak">0</b></span><span>PPS <b id="pps">0.00</b></span><span>成功 <b id="completed">0${sprint ? '/' + sprint : ''}</b></span></div>${sprint ? '<div class="sprint-progress"><div id="sprint-progress"></div></div>' : ''}<div class="stats-strip"><span>平均入力 <b id="average">0 / 0</b></span><span>ミス <b id="misses">0</b></span></div></section><section class="panel stats-panel"><div class="panel-label">FAULTS / ATTEMPTS · ミノ別</div><div id="piece-bars" class="piece-bars">${pieceBars(session.stats)}</div></section><section id="result-panel" class="panel result-panel"></section><div class="play-buttons"><button data-act="retry">↻ 同じ目標</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の目標 →</button><button data-act="settings">操作の設定</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
+    return `<main class="play-page"><div class="row spread play-topline"><h1 class="play-title">${sprint ? 'スプリント' : 'フィネス・ドリル'}<span class="tag">${sprint ? sprint + ' PLACEMENTS' : 'FREE PRACTICE'}</span></h1><div class="row"><span id="sprint-time" class="sprint-time">00:00.00</span><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div></div><div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div class="coach-label">ミルフィと、ひとつずつ。</div><div id="practice-wrap">${practiceHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">HOLD</div><div id="hold-preview">${mini(null)}</div></div><p id="hold-note" class="hold-note">${session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効'}</p><div class="key-help">${['left', 'right', 'cw', 'ccw', 'rotate180'].map(a => `<kbd data-live-key="${a}" title="${ACTION_NAMES[a]}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><div class="queue-box"><div class="queue-title">NEXT 5</div><div id="next-preview"></div></div><p class="hold-note">${escape(friendly(bindings.hardDrop[0]))}<br>ハードドロップ</p></aside></section><aside class="right-stack"><section class="panel stats-panel"><div class="row spread panel-label"><span>SESSION / この練習</span><button class="quiet small" style="padding:0;font-size:9px" data-act="records-session">全記録 ↗</button></div><div class="stats-main"><div class="stat"><label>連続 PERFECT</label><strong class="accent" id="streak">0</strong><small> streak</small></div><div class="stat"><label>フィネス正確率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>BEST <b id="best-streak">0</b></span><span>PPS <b id="pps">0.00</b></span><span>成功 <b id="completed">0${sprint ? '/' + sprint : ''}</b></span></div>${sprint ? '<div class="sprint-progress"><div id="sprint-progress"></div></div>' : ''}<div class="stats-strip"><span>平均入力 <b id="average">0 / 0</b></span><span>ミス <b id="misses">0</b></span></div></section><section class="panel stats-panel"><div class="panel-label">FAULTS / ATTEMPTS · ミノ別</div><div id="piece-bars" class="piece-bars">${pieceBars(session.stats)}</div></section><section id="result-panel" class="panel result-panel"></section><div class="play-buttons"><button data-act="retry">↻ 同じ目標</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の目標 →</button><button data-act="settings">操作の設定</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
   }
   function lessonsHTML() {
     return `<main class="page"><div class="page-heading"><div><div class="eyebrow">FINESSE CLASSROOM</div><h2 style="margin-top:6px">レッスン一覧</h2><p>実演を見て、3つの目標で練習。好きなところから復習できます。</p></div><span class="tag mint-tag">${progress.completed.length} / 12 チャレンジ達成</span></div><div class="lesson-list">${lessons.map((lesson, i) => `<button class="lesson-card" data-act="lesson" data-index="${i}"><span class="eyebrow">LESSON ${String(i + 1).padStart(2, '0')} ${progress.completed.includes(i) ? ' · ✔' : ''}</span><b>${escape(lesson.title)}</b><span>${i >= 4 && i <= 10 ? 'ミノ別の最短表・実演・3つの目標' : '実演とミニチャレンジ'}</span></button>`).join('')}</div></main>${footer()}`;
@@ -1636,7 +3303,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
   }
   function toggle(key, label, engine = false) { return `<label class="checkline"><input type="checkbox" ${engine ? 'data-engine-toggle' : 'data-ui'}="${key}" ${(engine ? settings : ui)[key] ? 'checked' : ''}>${label}</label>`; }
   function settingsHTML() {
-    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">操作と表示の設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-grid"><section class="panel"><div class="row spread"><h3>ハンドリング</h3><button class="quiet small" data-act="reset-handling">初期値に戻す</button></div>${handlingRow('das','DAS','長押しの待ち時間 ms')}${handlingRow('arr','ARR','連続移動の間隔 ms')}${handlingRow('sdf','SDF','ソフト落下倍率 / 41 = ∞')}${handlingRow('dcd','DCD','自動移動の待機 ms')}${handlingRow('are','ARE','次の出現まで ms')}${handlingRow('gravity','重力 G','0 = OFF / cells per frame',.1)}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('ghost','着地の影を表示')}${toggle('showOptimal','最短手順を表示')}${toggle('showKeys','操作キーを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div><label class="filter-line" style="margin-top:17px">音量 <input aria-label="音量" data-ui="volume" type="range" min="0" max="1" step=".05" value="${ui.volume}"></label></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0;font-size:10px" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では、矢印キーで数値を調整できます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></main>${footer()}`;
+    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">操作と表示の設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-grid"><section class="panel"><div class="row spread"><h3>ハンドリング</h3><button class="quiet small" data-act="reset-handling">初期値に戻す</button></div>${handlingRow('das','DAS','長押しの待ち時間 ms')}${handlingRow('arr','ARR','連続移動の間隔 ms')}${handlingRow('sdf','SDF','ソフト落下倍率 / 41 = ∞')}${handlingRow('dcd','DCD','自動移動の待機 ms')}${handlingRow('are','ARE','次の出現まで ms')}${handlingRow('gravity','重力 G','0 = OFF / cells per frame',.1)}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('ghost','着地の影を表示')}${toggle('showOptimal','最短手順を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div><label class="filter-line" style="margin-top:17px">音量 <input aria-label="音量" data-ui="volume" type="range" min="0" max="1" step=".05" value="${ui.volume}"></label></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0;font-size:10px" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では、矢印キーで数値を調整できます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></main>${footer()}`;
   }
   function statsHTML() {
     const stats = statsScope === 'session' && session ? session.stats.snapshot() : totalStats.snapshot();
@@ -1654,12 +3321,13 @@ body[data-screen=play]{height:100vh;overflow:hidden}
     app.innerHTML = header() + ({ menu: menuHTML, play: playHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
       settings: settingsHTML, records: statsHTML, sprint: sprintHTML, result: resultHTML }[screen])();
     document.body.dataset.screen = screen;
+    document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
     lastQueue = ''; lastHUD = 0;
     if (screen === 'play') { updateResult(); updateHUD(now()); }
     if (screen === 'tutorial' && !tryMode) beginDemo();
     drawMinis();
     if (focus) {
-      const target = $('main .primary:not(:disabled)') || $('main button:not(:disabled)');
+      const target = screen === 'play' ? $('#board') : $('main .primary:not(:disabled)') || $('main button:not(:disabled)');
       target?.focus({ preventScroll: true });
     }
     if (session?.pausedAt !== null && screen === 'play') showPause();
@@ -1687,7 +3355,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
   }
   function closeSettings() {
     screen = settingsReturn; lessons = M.createLessons(settings); window.scrollTo(0, 0); render();
-    if (screen === 'tutorial' && tryMode) session?.resume(now());
+    if (screen === 'tutorial' && tryMode && !tryDone) session?.resume(now());
     // A live drill returns to the pause overlay so held keys cannot jump ahead.
   }
   function updateSettings(patch) {
@@ -1696,6 +3364,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
     save();
   }
   function updateOptions() {
+    document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
     if (session) {
       session.zeroFault = ui.zeroFault; session.repeatOnFault = ui.repeatOnFault;
       session.repeatOnMiss = ui.repeatOnMiss;
@@ -1715,7 +3384,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
   function startPlay(length = 0) {
     releaseAll(); sessionEventQueue = []; demo = null; tryMode = false;
     session = newSession({ ...sessionOptions(), sprintLength: length });
-    lastResult = null; particles = []; hint = false; irsUntil = 0; irsCount = 0;
+    lastResult = null; particles = []; hint = false; irsUntil = 0; irsCount = 0; lastTipAttempt = 0;
     setCoach('目標の輪郭へ、最短ルートでどうぞ♪ 迷ったらヒントを見てくださいね。');
     screen = 'play'; session.start(now()); window.scrollTo(0, 0); render(); processEvents();
   }
@@ -1735,7 +3404,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
       session.skip(now());
       $('#practice-wrap').innerHTML = practiceHTML();
       $('#hold-note').innerHTML = session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効';
-      updateHUD(now());
+      updateHUD(now()); $('#board')?.focus({ preventScroll: true });
     }
   }
   function showPause() {
@@ -1774,7 +3443,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
       if (source !== session) continue;
       trace.push({ kind: event.kind, t: event.t, type: event.type, status: event.result?.status });
       if (trace.length > 150) trace.shift();
-      if (event.kind === 'target') { lastTargetActions = event.round.target.actions.slice(); updateHint(); }
+      if (event.kind === 'target') updateHint();
       if (event.kind === 'spawn' && source.handler.inputs.some(input => input.irs)) { irsUntil = now() + 850; irsCount++; }
       if (event.kind === 'pause' && screen === 'play') showPause();
       if (event.kind === 'resume') $('.overlay')?.remove();
@@ -1782,7 +3451,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
       if (event.kind === 'settings') openSettings();
       if (event.kind === 'result') {
         const r = event.result;
-        lastResult = r;
+        lastResult = r; feedbackAt = now();
         resultActions = r.optimalSequence.map(label => Object.keys(E.ACTION_LABELS).find(key => E.ACTION_LABELS[key] === label));
         if (screen === 'tutorial' && tryMode) {
           const requiresIRS = lessons[lessonIndex].tryIt.requireIRS;
@@ -1802,6 +3471,9 @@ body[data-screen=play]{height:100vh;overflow:hidden}
             choosePracticeTarget();
           }
           $('#tutorial-result').textContent = lessonMessage;
+          const exercise = lessons[lessonIndex].tryIt;
+          $('#demo-caption').textContent = tryDone ? 'チャレンジ達成！花まるです♪' : `チャレンジ ${tryIndex + 1} / ${exercise.targets.length} · 最短 ${exercise.targets[tryIndex].count} 入力`;
+          $('[data-act=try-it]').textContent = tryDone ? 'もう一度チャレンジ' : `目標 ${tryIndex + 1} / ${exercise.targets.length} · 最初から`;
           $('#demo-keys').innerHTML = route(lessons[lessonIndex].tryIt.targets[Math.min(tryIndex, lessons[lessonIndex].tryIt.targets.length - 1)].actions);
           save(); sound(r.status === 'perfect' ? 'perfect' : 'fault');
         } else {
@@ -1892,7 +3564,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
     demo = { handler, events, end: cursor + 1550, target, actions, variant, lock: null };
     handler.callbacks.onLock = result => { if (demo?.handler === handler) demo.lock = result.state; };
     $('#demo-keys').innerHTML = route(variant.type === 'ihs' ? ['hold'] : actions);
-    $('#demo-caption').textContent = variant.type === 'irs' ? 'ARE中に回転を長押し → 出現時にIRS（1入力）' : variant.type === 'ihs' ? 'ARE中にホールド → 出現時にIHS（0入力）' : `${type}ミノ · ${actions.length}入力 + ハードドロップ`;
+    $('#demo-caption').textContent = variant.type === 'irs' ? 'ARE中に回転を長押し → 出現時にIRS（1入力）' : variant.type === 'ihs' ? 'ARE中にホールド → 出現時にIHS（0入力）' : `${type}ミノ · ${actions.length}入力 + ハードドロップ（ゆっくり実演）`;
   }
   function updateDemo(t) {
     if (!demo) return;
@@ -1982,7 +3654,8 @@ body[data-screen=play]{height:100vh;overflow:hidden}
     const bar = $('#are-bar'), pending = handler.pending;
     if (bar) {
       bar.classList.toggle('visible', !!pending);
-      const percent = pending ? Math.max(0, Math.min(100, 100 * (handler.time - pending.since) / Math.max(1, pending.at - pending.since))) : 0;
+      const displayTime = handler.paused ? handler.pauseStarted : handler.time;
+      const percent = pending ? Math.max(0, Math.min(100, 100 * (displayTime - pending.since) / Math.max(1, pending.at - pending.since))) : 0;
       $('.are-fill', bar).style.width = percent + '%'; bar.setAttribute('aria-valuenow', Math.round(percent));
     }
     for (const cap of $$('[data-live-key]')) cap.classList.toggle('pressed', [...handler.held.values()].some(k => k.action === cap.dataset.liveKey));
@@ -2074,7 +3747,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
   document.addEventListener('change', event => {
     const input = event.target;
     if (input.dataset.engineToggle) updateSettings({ [input.dataset.engineToggle]: input.checked });
-    else if (input.dataset.ui && input.dataset.ui !== 'volume') { ui[input.dataset.ui] = input.checked; updateOptions(); }
+    else if (input.dataset.ui && input.dataset.ui !== 'volume') { ui[input.dataset.ui] = input.checked; updateOptions(); if (screen === 'play') $('#board')?.focus({ preventScroll: true }); }
     else if (input.dataset.setting) input.value = settings[input.dataset.setting];
     else if (input.dataset.pieceFilter) {
       const pieces = $$('[data-piece-filter]:checked').map(el => el.dataset.pieceFilter);
@@ -2083,7 +3756,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
     } else if (input.id === 'area') updatePractice({ ...practice, area: input.value });
     else if (input.id === 'min-column' || input.id === 'max-column') {
       const min = Number($('#min-column').value), max = Number($('#max-column').value);
-      if (!Number.isInteger(min) || !Number.isInteger(max) || min < 1 || max > 9 || min > max) { toast('列は1〜9で、開始列≦終了列にしてください。'); $('#practice-wrap').innerHTML = practiceHTML(); }
+      if (!Number.isInteger(min) || !Number.isInteger(max) || min < 1 || max > 10 || min > max) { toast('列は1〜10で、開始列≦終了列にしてください。'); $('#practice-wrap').innerHTML = practiceHTML(); }
       else updatePractice({ ...practice, minColumn: min, maxColumn: max });
     } else if (input.dataset.practice) updatePractice({ ...practice, [input.dataset.practice]: input.checked });
   });
@@ -2118,7 +3791,7 @@ body[data-screen=play]{height:100vh;overflow:hidden}
       if (['ArrowRight', 'Enter', 'Space'].includes(event.code)) { event.preventDefault(); if (!event.repeat) lessonIndex === 11 ? startPlay() : startLesson(lessonIndex + 1); return; }
       if (event.code === 'ArrowLeft') { event.preventDefault(); if (!event.repeat) startLesson(lessonIndex - 1); return; }
     }
-    if (event.code === 'Escape' && screen !== 'menu') { event.preventDefault(); go('menu'); return; }
+    if (event.code === 'Escape' && screen !== 'menu' && screen !== 'play') { event.preventDefault(); go('menu'); return; }
     if (action === 'settings' && !editable(event.target)) { event.preventDefault(); if (!event.repeat) openSettings(); return; }
     if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.code) && !editable(event.target)) {
       const root = $('.overlay') || $('main');
@@ -2151,7 +3824,13 @@ body[data-screen=play]{height:100vh;overflow:hidden}
     if (screen === 'play' || screen === 'tutorial' && tryMode) { session?.update(t); processEvents(); }
     if (screen === 'tutorial' && !tryMode) updateDemo(t);
     if (screen === 'play' || screen === 'tutorial') renderBoard(t);
-    if (screen === 'play' && t - lastHUD > 90) { lastHUD = t; updateHUD(t); }
+    if (screen === 'play' && t - lastHUD > 90) {
+      lastHUD = t; updateHUD(t);
+      const attempts = session.stats.attempts;
+      if (attempts && attempts % 7 === 0 && attempts !== lastTipAttempt && t - feedbackAt > 3200) {
+        lastTipAttempt = attempts; setCoach(M.TIPS[tipIndex++ % M.TIPS.length], 'normal');
+      }
+    }
     if (toastUntil && t >= toastUntil) { $('#toast').classList.remove('visible'); toastUntil = 0; }
     requestAnimationFrame(frame);
   }

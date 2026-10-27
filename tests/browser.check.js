@@ -134,7 +134,7 @@ async function main() {
     // validation, and persistent settings/bindings survive file:// reload.
     await settingsOpen();
     await setNumber('das', 300); await setNumber('arr', 0); await setNumber('are', 400);
-    await page.locator('input[type=range][data-setting=arr]').fill('80');
+    await page.locator('input[type=range][data-setting=arr]').evaluate(el => { el.value = '80'; el.dispatchEvent(new Event('input', { bubbles: true })); });
     assert.equal(await page.locator('#setting-arr').inputValue(), '80');
     await setNumber('arr', 0);
     await page.locator('input[data-engine-toggle=irs]').check();
