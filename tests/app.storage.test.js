@@ -210,3 +210,21 @@ test('missing or invalid cosmetic choice falls back without losing an existing p
     }
   }
 });
+
+test('outfit and hair choices persist independently and preserve existing profiles', () => {
+  for (const outfitSkin of ['uniform', 'cape']) for (const hairSkin of ['side', 'center', 'intake']) {
+    const saved = profile(); Object.assign(saved.ui, { outfitSkin, hairSkin });
+    for (const key of [storageKey, legacyKey]) {
+      const loaded = load({ [key]: JSON.stringify(saved) }); loaded.save();
+      const state = load(Object.fromEntries(loaded.values)).state;
+      assertProfile(state, saved); assert.equal(state.ui.outfitSkin, outfitSkin); assert.equal(state.ui.hairSkin, hairSkin);
+    }
+  }
+});
+test('invalid or missing outfit uses uniform without losing the profile or selected hair', () => {
+  for (const outfitSkin of [undefined, null, '', 'goth', 1, false, {}, []]) {
+    const saved = profile(); Object.assign(saved.ui, { outfitSkin, hairSkin: 'side' });
+    const { state } = load({ [storageKey]: JSON.stringify(saved) });
+    assertProfile(state, saved); assert.equal(state.ui.outfitSkin, 'uniform'); assert.equal(state.ui.hairSkin, 'side');
+  }
+});

@@ -39,10 +39,12 @@ npm run test:browser
 
 Idea: pre-show a target shadow and place the piece there with the optimal input sequence. The current drill already implements this core loop; a dedicated quiz mode with a pre-filled stack and multiple pieces is future work.
 
-前髪は「設定 → ミルフィの前髪」で 7:3・真ん中分け・控えめインテークから選べます。初期値は真ん中分けです。選択は全画面に反映され、既存の表示設定と一緒に自動保存・JSON入出力されます。古いデータで選択がない場合や未知の値は真ん中分けになります。記録・進捗・キー設定は維持します。保存不可環境では起動中のみ選択を保持します。
+前髪は「設定 → ミルフィの見た目」で 7:3・真ん中分け・控えめインテークから選べます。初期値は真ん中分けです。選択は全画面に反映され、既存の表示設定と一緒に自動保存・JSON入出力されます。古いデータで選択がない場合や未知の値は真ん中分けになります。記録・進捗・キー設定は維持します。保存不可環境では起動中のみ選択を保持します。
 
 `npm run test:appearance` は本体で前髪切替・保存・入出力・各画面・キーボード操作・保存不可環境を検証します。ブラウザテストは `CHROME_PATH` でChrome実行ファイルを指定できます（未指定は `/usr/bin/google-chrome`）。
 
 ## English
 
 An offline, Japanese finesse trainer with original mascot ミルフィ. Run `npm run build`, then open `dist/mirutet.html` directly. Everything is inlined; no server or network is required. `npm test` runs the independent engine/mascot checks. `npm run test:browser` runs system Chrome through playwright-core and saves screenshots in `screens/`. The UI includes engine-driven lessons, filtered drills, sprint, handling/key settings, persistent statistics, and synthesized audio with graceful fallbacks.
+
+衣装は制服／黒ケープから前髪とは独立して選択できます。初期値と不正値のフォールバックは制服です。衣装も表示設定 `ui.outfitSkin` に保存され、JSON入出力に含まれます。

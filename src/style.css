@@ -1766,6 +1766,7 @@ body:is([data-screen=menu],[data-screen=tutorial],[data-screen=settings],[data-s
 .settings-page [data-act=close-settings] { flex-shrink:0; }
 .settings-content { flex:1; min-height:0; overflow:auto; padding:4px 10px 12px 4px; scrollbar-width:thin; }
 .appearance-panel { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px; }
+.appearance-panel .outfit-label { display:block; margin-top:12px; }
 .appearance-panel select { max-width:100%; }
 #appearance-preview { display:flex; flex-shrink:0; }
 #appearance-preview .mirufi { width:130px; }

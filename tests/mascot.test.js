@@ -351,3 +351,22 @@ test('preview tool writes all five inline SVGs with no external resources at the
   assert.ok(!/\b(?:src|href)\s*=|@import|url\((?!#)/i.test(preview));
   for (const expression of M.EXPRESSIONS) assert.ok(preview.includes(`data-expression="${expression}"`));
 });
+
+test('outfit choices cover all 30 combinations without changing hair or face', () => {
+  const normalize = s => s.replace(/mirufi-outfit-\d+/g, 'mirufi-outfit')
+    .replace(/ data-outfit-skin="[^"]+"/, '').replace(/<desc[^>]*>[\s\S]*?<\/desc>/, '')
+    .replace(/<g data-part="outfit"[\s\S]*?<\/g>/, '');
+  const seen = new Set();
+  for (const hairSkin of M.HAIR_SKINS) for (const expression of M.EXPRESSIONS) {
+    const uniform = M.mascotSVG(expression, { hairSkin, idPrefix: 'outfit' });
+    for (const outfitSkin of M.OUTFIT_SKINS) {
+      const svg = M.mascotSVG(expression, { hairSkin, outfitSkin, idPrefix: 'outfit' });
+      assert.equal(normalize(svg), normalize(uniform));
+      const ids = new Set(parseXML(svg).map(e => e.attrs.id).filter(Boolean));
+      for (const id of ids) { assert(!seen.has(id)); seen.add(id); }
+      for (const match of svg.matchAll(/url\(#([^)]+)\)/g)) assert(ids.has(match[1]));
+      assert(svg.includes(`data-outfit-skin="${outfitSkin}"`));
+    }
+  }
+  for (const value of [undefined, null, '', 'goth', 1, false, {}, []]) assert.equal(M.normalizeOutfitSkin(value), 'uniform');
+});
