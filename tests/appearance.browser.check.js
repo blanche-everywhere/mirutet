@@ -35,6 +35,16 @@ async function main() {
       await page.waitForFunction(()=>!!window.__mirutet.getState().active);
       await page.locator('#board').focus();await page.keyboard.press('Space');
       await page.waitForFunction(()=>!!document.querySelector('#coach-mascot .mirufi--happy'));await check(skin);
+      // The actual game happy face must blink without duplicate or missing eyes.
+      for (const time of [0, 2440, 2510, 2550, 2630, 3000, 5700, 8250]) {
+        const eyes = await page.locator('#coach-mascot svg').evaluate((svg, time) => {
+          svg.getAnimations({subtree:true}).forEach(a => { a.pause(); a.currentTime=time; });
+          return ['.mirufi-eyes-open','.mirufi-eyes-closed'].map(s => Number(getComputedStyle(svg.querySelector(s)).opacity));
+        }, time);
+        assert.deepEqual(eyes, [2510,2550,8250].includes(time) ? [0,1] : [1,0]);
+      }
+      await page.locator('#coach-mascot svg').evaluate(svg => svg.getAnimations({subtree:true}).forEach(a=>{a.currentTime=0;a.play();}));
+
       await click('hint');await check(skin);
       await click('menu');await click('sprint');await check(skin);
       await page.locator('#custom-length').fill('1');await click('custom-sprint');

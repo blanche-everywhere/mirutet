@@ -112,8 +112,7 @@ test('all five expressions are well-formed standalone SVGs with self-contained p
     }
     assert.ok(elements.filter(el => /Gradient$/.test(el.name)).length >= 6, 'layered gradient artwork');
     faces.add(svg.match(/<g data-part="mouth">([\s\S]*?)<\/g>/)[1]);
-    if (expression === 'happy') assert.match(svg, /mirufi-happy-eyes/);
-    else {
+    {
       assert.match(svg, /mirufi-eyes-open/);
       assert.equal(elements.find(el => el.attrs.class === 'mirufi-eyes-closed').attrs.opacity, '0',
         'closed blink layer stays hidden even before CSS loads');

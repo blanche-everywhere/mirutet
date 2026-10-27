@@ -31,7 +31,7 @@
     surprised: '応援', thinking: 'ヒント', sorry: 'もう一度' });
 
   // Include this string once in the app's stylesheet or a <style> element.
-  // The happy face has its own closed smiling eyes; only open faces blink.
+  // Every expression keeps an open-eye layer and the same natural blink timing.
   const MASCOT_CSS = `
 .mirufi { display: block; max-width: 100%; height: auto; overflow: hidden;
   --mirufi-sway: .7deg; --mirufi-sway-time: 4.8s; }
@@ -200,7 +200,7 @@
       const pupilX = cx + (thinking ? 4 : 0);
       return `<g class="mirufi-eye mirufi-eye--${side}">
         <path d="M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14}
-          Q${cx + 24} ${cy + 21} ${cx} ${cy + 25} Q${cx - 23} ${cy + 21} ${cx - 22} ${cy - 15}Z"
+          Q${cx + 24} ${cy + (happy ? 17 : 21)} ${cx} ${cy + (happy ? 21 : 25)} Q${cx - 23} ${cy + (happy ? 17 : 21)} ${cx - 22} ${cy - 15}Z"
           fill="#fffafa"/>
         <g clip-path="${paint('eye-' + side)}">
           <ellipse cx="${pupilX}" cy="${cy}" rx="18" ry="${ry}" fill="${paint('iris')}"/>
@@ -218,27 +218,25 @@
         <path d="M${cx - 19} ${cy - 18} l-7-7 M${cx - 12} ${cy - 22} l-3-6"
           fill="none" stroke="#57465f" stroke-width="3.1" stroke-linecap="round"
           ${side === 'right' ? `transform="translate(${cx * 2} 0) scale(-1 1)"` : ''}/>
-        <path d="M${cx - 14} ${cy + 23} Q${cx} ${cy + 29} ${cx + 13} ${cy + 23}"
+        <path d="M${cx - 14} ${cy + (happy ? 19 : 23)} Q${cx} ${cy + (happy ? 23 : 29)} ${cx + 13} ${cy + (happy ? 19 : 23)}"
           fill="none" stroke="#bb8d9e" stroke-width="1.5" stroke-linecap="round"/>
       </g>`;
     }
 
     const brows = happy
-      ? 'M92 119 Q107 109 121 119 M179 119 Q193 109 208 119'
+      ? 'M93 118 Q107 110 121 117 M179 117 Q193 110 207 118'
       : surprised ? 'M92 116 Q105 104 121 112 M179 112 Q195 104 208 116'
       : thinking ? 'M93 124 Q108 119 122 121 M179 115 Q195 111 207 119'
       : sorry ? 'M93 125 Q110 126 123 116 M177 116 Q190 126 207 125'
       : 'M93 120 Q107 113 122 119 M178 119 Q193 113 207 120';
     const mouth = happy
-      ? '<path d="M140 195 Q150 199 160 195 C159 205 155 211 150 211 C145 211 141 205 140 195Z" fill="#a9607b"/><path d="M145 207 Q150 203 155 207 Q150 212 145 207Z" fill="#f9a9b8"/>'
+      ? '<path d="M137 194 Q150 199 163 194 C160 203 156 208 150 208 C144 208 140 203 137 194Z" fill="#a9607b"/><path d="M144 204 Q150 201 156 204 Q150 210 144 204Z" fill="#f9a9b8"/>'
       : surprised ? '<ellipse cx="150" cy="202" rx="7" ry="9" fill="#b66d85"/><ellipse cx="150" cy="206" rx="4" ry="3" fill="#ffc0c7"/>'
       : thinking ? '<path d="M144 201 Q149 198 155 201" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/>'
       : sorry ? '<path d="M141 205 Q150 197 159 205" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/>'
       : '<path d="M140 198 Q150 208 160 198" fill="none" stroke="#a96780" stroke-width="2.5" stroke-linecap="round"/>';
 
-    const closedEyes = happy
-      ? '<path d="M93 159 C101 148 116 146 126 156 M174 156 C184 146 199 148 207 159" fill="none" stroke="#5d4965" stroke-width="3.6" stroke-linecap="round"/><path d="M94 157 Q90 157 88 153 M206 157 Q210 157 212 153" fill="none" stroke="#5d4965" stroke-width="2.3" stroke-linecap="round"/>'
-      : `<path d="M91 160 Q109 171 128 160 M172 160 Q191 171 209 160"
+    const closedEyes = `<path d="M91 160 Q109 171 128 160 M172 160 Q191 171 209 160"
       fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>
       <path d="M93 158 l-5-4 M207 158 l5-4" fill="none" stroke="#57465f" stroke-width="2.5" stroke-linecap="round"/>`;
     const accents = [
@@ -278,7 +276,7 @@
         ${['left', 'right'].map((side, i) => {
           const cx = i ? 191 : 109, cy = surprised ? 155 : sorry ? 160 : 157;
           const ry = surprised ? 29 : thinking && side === 'right' ? 23 : 26;
-          return `<clipPath id="${id}-eye-${side}"><path d="M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14} Q${cx + 24} ${cy + 21} ${cx} ${cy + 25} Q${cx - 23} ${cy + 21} ${cx - 22} ${cy - 15}Z"/></clipPath>`;
+          return `<clipPath id="${id}-eye-${side}"><path d="M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14} Q${cx + 24} ${cy + (happy ? 17 : 21)} ${cx} ${cy + (happy ? 21 : 25)} Q${cx - 23} ${cy + (happy ? 17 : 21)} ${cx - 22} ${cy - 15}Z"/></clipPath>`;
         }).join('')}
       </defs>
       ${opts.halo === false ? '' : `<ellipse cx="150" cy="180" rx="144" ry="171" fill="${paint('halo')}"/>`}
@@ -311,7 +309,7 @@
         <g class="mirufi-expression" data-expression="${expression}">
           <g data-part="eyebrows"><path d="${brows}" fill="none" stroke="#a092b3" stroke-width="2.8" stroke-linecap="round"/></g>
           <g data-part="eyes">
-            ${happy ? `<g class="mirufi-happy-eyes">${closedEyes}</g>` : `<g class="mirufi-eyes-open">${eye(109, 'left')}${eye(191, 'right')}</g><g class="mirufi-eyes-closed" opacity="0">${closedEyes}</g>`}
+            <g class="mirufi-eyes-open">${eye(109, 'left')}${eye(191, 'right')}</g><g class="mirufi-eyes-closed" opacity="0">${closedEyes}</g>
           </g>
           <g data-part="cheeks"${happy ? ' transform="translate(0 -3)"' : ''}>
             <ellipse cx="92" cy="187" rx="${happy ? 21 : 23}" ry="${happy ? 12 : 13}" fill="${paint('blush')}"/><ellipse cx="208" cy="187" rx="${happy ? 21 : 23}" ry="${happy ? 12 : 13}" fill="${paint('blush')}"/>
