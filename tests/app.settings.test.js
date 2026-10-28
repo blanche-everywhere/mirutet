@@ -43,8 +43,8 @@ function loadApp(saved, storageBlocked = false) {
     nodes,
     state: () => JSON.parse(JSON.stringify(window.__mirutet.getState())),
     persisted: () => JSON.parse(values.get('mirutet-finesse.v1')),
-    click(act) {
-      const button = { dataset: { act }, disabled: false };
+    click(act, dataset = {}) {
+      const button = { dataset: { act, ...dataset }, disabled: false };
       listeners.get('click')({ target: { closest: () => button } });
     },
     change(dataset, value, event = 'change') {
@@ -125,4 +125,39 @@ test('appearance choices and cues remain usable when saving fails', () => {
   assert.equal(app.state().ui.pieceCueTiming, 'off'); assert.equal(app.state().ui.pieceCueVolume, 0);
   app.click('close-settings');
   assert.match(app.nodes['#app'].innerHTML, /data-hair-skin="side" data-outfit-skin="cape"/);
+});
+
+
+test('numeric settings clamp invalid commits and preserve repeated edits across presets and reload', () => {
+  const app = loadApp({settings:{das:173,arr:19,sdf:12,dcd:9,gravity:0.3,spawnDrop:true}});
+  app.click('settings');
+  for (const [key, [min,max]] of Object.entries(E.SETTING_LIMITS)) {
+    app.change({setting:key}, String(max+100), 'input');
+    assert.equal(app.state().settings[key],max);
+    app.change({setting:key}, String(min-100), 'input');
+    assert.equal(app.state().settings[key],min);
+    for (const invalid of ['', 'NaN', 'Infinity', 'abc']) {
+      app.change({setting:key},invalid,'input');app.change({setting:key},invalid);
+      assert.equal(app.state().settings[key],min);
+    }
+  }
+  app.change({setting:'das'},'173','input');
+  app.change({setting:'dcd'},'9','input');
+  for(let i=0;i<50;i++) app.click('adjust-handling',{handlingKey:'das',step:'1'});
+  assert.equal(app.state().settings.das,223);
+  for(const preset of ['ppt2','tec','tgm3']) {
+    app.change({setting:'arr'},'19','input');
+    app.click('handling-preset',{preset});
+    const value=app.state().settings;
+    assert.equal(value.are,{ppt2:117,tec:100,tgm3:67}[preset]);
+    assert.equal(value.arr,preset==='tgm3'?19:33);
+    assert.equal(value.irs,preset!=='ppt2');assert.equal(value.ihs,preset!=='ppt2');
+    assert.equal(value.allow180,false);assert.equal(value.spawnDrop,true);
+    assert.equal(value.das,223);assert.equal(value.dcd,9);
+    assert.deepEqual(app.persisted().settings,value);
+  }
+  app.change({setting:'are'},'81','input');assert.equal(app.state().settings.are,81);
+  const reloaded=loadApp(app.persisted());assert.deepEqual(reloaded.state().settings,app.state().settings);
+  app.click('reset-handling');assert.deepEqual(app.state().settings,E.DEFAULT_SETTINGS);
+  app.click('close-settings');assert.equal(app.state().screen,'menu');
 });
