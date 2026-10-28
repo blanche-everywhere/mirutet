@@ -877,6 +877,7 @@
       if ($('#play-stats')) $('#play-stats').hidden = handlingOpen;
       $('#board')?.focus({ preventScroll: true });
     } else if (act === 'adjust-handling') {
+      if (document.activeElement && numericEditor(document.activeElement)) commitNumeric(document.activeElement);
       const field = HANDLING.find(field => field.key === button.dataset.handlingKey);
       const value = Number((settings[field.key] + Number(button.dataset.step) * field.step).toFixed(10));
       updateSettings({ [field.key]: value });
@@ -938,8 +939,32 @@
     if (event.target.dataset?.setting && event.target.closest?.('[data-live-handling]')) releaseAll();
   });
   document.addEventListener('click', event => { const button = event.target.closest('button[data-act]'); if (button && !button.disabled) clickAction(button); });
+  function numericEditor(input) {
+    return input.type === 'number' && (input.dataset?.setting || UI_NUMERIC[input.dataset?.ui]);
+  }
+  function commitNumeric(input) {
+    const key = input.dataset.setting, uiKey = input.dataset.ui;
+    if (!key && !UI_NUMERIC[uiKey]) return;
+    if (input.value.trim() && Number.isFinite(Number(input.value))) {
+      if (key) {
+        const field = HANDLING.find(field => field.key === key);
+        const value = snapNumeric(Number(input.value), ...E.SETTING_LIMITS[key], field.step);
+        if (value !== settings[key]) { updateSettings({ [key]: value }); processEvents(); }
+      } else {
+        const value = snapNumeric(Number(input.value), ...UI_NUMERIC[uiKey]);
+        if (value !== ui[uiKey]) updateNumericUI(uiKey, value);
+      }
+    }
+    input.value = key ? settings[key] : ui[uiKey];
+  }
+  // A number editor owns its raw draft until commit. In particular, assigning
+  // .value during input destroys native intermediate text such as '.' or '0.'.
+  document.addEventListener('focusout', event => {
+    if (numericEditor(event.target)) commitNumeric(event.target);
+  });
   document.addEventListener('input', event => {
     const input = event.target;
+    if (numericEditor(input)) return;
     if (input.dataset.setting) {
       if (!input.value || !Number.isFinite(Number(input.value))) return;
       const key = input.dataset.setting, raw = input.value, value = Number(raw);
@@ -957,6 +982,7 @@
   });
   document.addEventListener('change', event => {
     const input = event.target;
+    if (numericEditor(input)) { commitNumeric(input); return; }
     if (input.hasAttribute('data-hair-skin') || input.hasAttribute('data-outfit-skin')) {
       const isHair = input.hasAttribute('data-hair-skin');
       const key = isHair ? 'hairSkin' : 'outfitSkin';
@@ -1005,6 +1031,11 @@
       // initial prompt itself captures Enter/Space so either can be rebound.
       if (event.target.closest?.('button') && ['Enter', 'Space'].includes(event.code)) return;
       event.preventDefault(); if (!event.repeat) acceptKey(event.code); return;
+    }
+    if (numericEditor(event.target) && event.code === 'Enter') {
+      event.preventDefault(); commitNumeric(event.target);
+      if (event.target.closest?.('[data-live-handling]')) { event.target.blur(); $('#board')?.focus({ preventScroll: true }); }
+      return;
     }
     const action = Object.keys(bindings).find(name => bindings[name].includes(event.code));
     // Also guard programmatic/assistive focus on these pointer-only buttons:

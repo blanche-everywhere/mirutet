@@ -36,6 +36,33 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
     const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem(window.__mirutet.storageKey)));
     assert.equal(stored[attribute==='ui'?'ui':'settings'][key],expected);
   }
+  // Real keystrokes, not fill(): intermediate decimal text must survive.
+  for (const [key, group, raw, expected, commit] of [
+    ['volume','ui','.324',.3,'blur'], ['volume','ui','.349',.35,'Enter'],
+    ['volume','ui','0.325',.35,'Tab'], ['gravity','setting','.349',.3,'Enter'],
+    ['gravity','setting','0.349',.3,'blur'], ['gravity','setting','.451',.5,'Tab']
+  ]) {
+    const number=page.locator(`[data-${group}=${key}][type=number]`);
+    const range=page.locator(`[data-${group}=${key}][type=range]`);
+    const before=(await state())[group==='ui'?'ui':'settings'][key];
+    await number.focus();await number.press('ControlOrMeta+A');await number.press('Backspace');
+    for(const char of raw) {
+      await number.pressSequentially(char);
+      assert.equal((await state())[group==='ui'?'ui':'settings'][key],before,'draft must not reach engine/audio');
+      assert.equal(await range.inputValue(),String(before));
+    }
+    assert.equal(Number(await number.inputValue()),Number(raw),'all typed digits survive');
+    if(commit==='blur') await number.blur(); else await number.press(commit);
+    assert.equal(await number.inputValue(),String(expected));assert.equal(await range.inputValue(),String(expected));
+    const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem(window.__mirutet.storageKey)));
+    assert.equal(stored[group==='ui'?'ui':'settings'][key],expected);
+  }
+  for(const raw of ['.', '-', '1e', '']) {
+    const number=page.locator('#ui-volume'),before=(await state()).ui.volume;
+    await number.focus();await number.press('ControlOrMeta+A');await number.press('Backspace');
+    await number.pressSequentially(raw);await number.blur();
+    assert.equal(await number.inputValue(),String(before));assert.equal((await state()).ui.volume,before);
+  }
   await page.locator('#setting-das').fill('173');
   for(let i=0;i<24;i++) await page.locator('[data-act=handling-preset]').nth(i%3).click();
   assert.equal((await state()).settings.das,173);
@@ -61,7 +88,12 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
   await click('mode-free');await click('free');await page.waitForFunction(()=>!!window.__mirutet.getState().active);
   await click('toggle-handling');
   const live=page.locator('[data-live-handling] input[type=number][data-setting=das]');
-  await live.fill('181.6');assert.equal((await state()).settings.das,182);
+  await live.focus();await live.press('ControlOrMeta+A');await live.press('Backspace');
+  await live.pressSequentially('181.6');await live.press('Enter');assert.equal((await state()).settings.das,182);
+  await live.focus();await live.press('ControlOrMeta+A');await live.press('Backspace');await live.pressSequentially('191.6');
+  await page.locator('[data-act=adjust-handling][data-handling-key=das][data-step="1"]').click();
+  assert.equal((await state()).settings.das,193,'pointer stepper commits draft before incrementing');
+  await live.focus();
   const active=(await state()).active;
   await page.keyboard.press('ArrowRight');await page.keyboard.press('Space');
   assert.equal((await state()).active.x,active.x);assert.equal((await state()).active.rot,active.rot);

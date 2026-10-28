@@ -47,10 +47,10 @@ function loadApp(saved, storageBlocked = false) {
       const button = { dataset: { act, ...dataset }, disabled: false };
       listeners.get('click')({ target: { closest: () => button } });
     },
-    change(dataset, value, event = 'change') {
-      const input = { dataset, value, hasAttribute: attr =>
+    change(dataset, value, event = 'change', type) {
+      const input = { dataset, value, type, hasAttribute: attr =>
         attr === 'data-hair-skin' && 'hairSkin' in dataset || attr === 'data-outfit-skin' && 'outfitSkin' in dataset };
-      listeners.get(event)({ target: input });
+      listeners.get(event)({ target: input }); return input;
     }
   };
 }
@@ -183,4 +183,28 @@ test('direct numeric edits snap to slider steps before saving, including decimal
   const restored=loadApp(app.persisted());
   assert.deepEqual(restored.state().settings,app.state().settings);
   assert.deepEqual(restored.state().ui,app.state().ui);
+});
+
+
+test('number drafts preserve incomplete text and only commit on change or focusout', () => {
+  const app = loadApp({ui:{volume:.55}}); app.click('settings');
+  for (const [dataset, group, key, raw, expected, event] of [
+    [{ui:'volume'},'ui','volume','.324',.3,'change'],
+    [{setting:'gravity'},'settings','gravity','.349',.3,'focusout'],
+    [{ui:'volume'},'ui','volume','.349',.35,'focusout']
+  ]) {
+    const before=app.state()[group][key];
+    for(let i=1;i<=raw.length;i++) {
+      const draft=raw.slice(0,i), input=app.change(dataset,draft,'input','number');
+      assert.equal(input.value,draft);assert.equal(app.state()[group][key],before);
+    }
+    app.change(dataset,raw,event,'number');
+    assert.equal(app.state()[group][key],expected);assert.equal(app.persisted()[group][key],expected);
+  }
+  for(const raw of ['', '.', '-', '1e']) {
+    const before=app.state().ui.volume;
+    app.change({ui:'volume'},raw,'input','number');
+    const input=app.change({ui:'volume'},raw,'focusout','number');
+    assert.equal(Number(input.value),before);assert.equal(app.state().ui.volume,before);
+  }
 });
