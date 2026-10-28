@@ -348,8 +348,13 @@ kbd.pressed {
 }
 
 .menu-mode {
+  display:flex;
+  gap:8px;
   margin-bottom:12px
 }
+
+.menu-mode button { padding:7px 16px; font-size:14px; }
+.menu-mode button[aria-pressed=true] { background:#eee5f7; border-color:#bda5d1; color:#795b93; }
 
 .menu-buttons button {
   text-align:left;
@@ -731,7 +736,7 @@ canvas.board {
   min-height:22px
 }
 
-/* Finesse play screens reserve this space even below two successes. The pop
+/* Play screens reserve this space even below two successes. The pop
    stays inside the queue/coach column, clear of the board and speech bubble. */
 .finesse-combo {
   position:relative;
@@ -1549,6 +1554,11 @@ canvas.board {
   font-size:24px
 }
 
+.gameover .result-summary {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  font-variant-numeric:tabular-nums
+}
+
 .result-best {
   color:#76b098;
   font-size:13px
@@ -1899,3 +1909,34 @@ kbd,.key-help kbd { font-size:13px; }
   .mini-piece { width:82px; height:64px; }
 }
 .board-shell:focus-within { outline:3px solid #b6a0da; outline-offset:3px; }
+
+/* Endless play shares the board/queues and leaves its side panels quiet. */
+body[data-screen=play][data-mode=free] { min-width:800px; }
+.free-play {
+  --queue:76px;
+  /* Keep the 800px play layout scrollable in smaller windows. */
+  --cell:max(16px,min(36px,calc((100vh - 240px)/22),calc((max(800px,100vw) - 550px)/10)));
+}
+.free-play .right-stack { grid-template-rows:auto auto 1fr; }
+.free-play .free-stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px 10px; padding:20px; }
+.free-stats strong { display:block; font-size:30px; font-variant-numeric:tabular-nums; }
+.free-stats #elapsed { font-size:24px; }
+.free-play .mini-piece { width:100%; }
+.free-play .result-panel { min-height:55px; overflow:visible; }
+.free-play .result-panel:empty { visibility:hidden; }
+.free-play .result-head { margin:0; flex-wrap:wrap; gap:8px; }
+.free-play .play-buttons { align-self:end; }
+@media(max-height:680px) {
+  .free-play #next-preview .mini-piece { height:44px; }
+}
+@media(max-width:1050px) {
+  .free-play { padding-right:16px; padding-left:16px; }
+  .free-play .play-grid { gap:12px; }
+  .free-play .free-stats { grid-template-columns:1fr; gap:12px; padding:14px; }
+  .free-play .free-stats .stat { display:flex; align-items:baseline; justify-content:space-between; gap:6px; }
+  .free-stats strong,.free-stats #elapsed { font-size:20px; }
+  .free-play .key-help { gap:3px; }
+  .free-play .key-help kbd { min-width:22px; padding:3px; }
+  .free-play .play-buttons { grid-template-columns:1fr; }
+  .free-play .coach .speech { padding:10px; }
+}

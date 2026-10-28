@@ -143,22 +143,28 @@ async function main() {
       assert.equal(overlaps, false, 'COMBO must stay clear of the board, mascot and controls');
       assert.equal(await page.locator('.topbar #combo-display,.footer #combo-display').count(), 0);
     };
-    const checkLayout = async () => {
+    const checkLayout = async (minimumWidth = 0) => {
       const layout = await page.evaluate(() => {
         const board = document.querySelector('.board-shell').getBoundingClientRect();
-        const overlaps = [...document.querySelectorAll('.coach,.right-stack,.play-buttons')].some(el => {
+        const canvas = document.querySelector('#board').getBoundingClientRect();
+        const overlaps = [...document.querySelectorAll('.coach,.right-stack,.play-buttons,.side-queue')].some(el => {
           const r = el.getBoundingClientRect();
           return r.left < board.right && r.right > board.left && r.top < board.bottom && r.bottom > board.top;
         });
         return { scrollWidth: document.documentElement.scrollWidth, scrollHeight: document.documentElement.scrollHeight,
-          width: innerWidth, height: innerHeight, board: { top: board.top, bottom: board.bottom, center: (board.left + board.right) / 2 },
+          width: innerWidth, height: innerHeight, canvas: { width: canvas.width, height: canvas.height },
+          board: { top: board.top, bottom: board.bottom, left: board.left, right: board.right, center: (board.left + board.right) / 2 },
           controlsBottom: document.querySelector('.play-buttons').getBoundingClientRect().bottom, overlaps };
       });
-      assert.ok(layout.scrollWidth <= layout.width, JSON.stringify(layout));
+      const playWidth = Math.max(layout.width, minimumWidth);
+      assert.ok(layout.scrollWidth <= playWidth, JSON.stringify(layout));
       assert.ok(layout.scrollHeight <= layout.height, JSON.stringify(layout));
+      assert.ok(layout.canvas.width >= 120 && layout.canvas.height >= 264, `Unusable board: ${JSON.stringify(layout)}`);
+      assert.ok(layout.board.left >= 0 && layout.board.right <= playWidth, JSON.stringify(layout));
       assert.ok(layout.board.bottom < layout.height && layout.controlsBottom <= layout.height, JSON.stringify(layout));
-      assert.ok(Math.abs(layout.board.center - layout.width / 2) < 5, JSON.stringify(layout));
+      assert.ok(Math.abs(layout.board.center - playWidth / 2) < 5, JSON.stringify(layout));
       assert.equal(layout.overlaps, false);
+      return layout;
     };
     function clean() { assert.deepEqual(errors, [], 'Browser errors:\n' + errors.join('\n')); assert.deepEqual(requests, [], 'External network requests'); }
 
@@ -496,6 +502,76 @@ async function main() {
     await page.keyboard.press('Escape'); await waitScreen('menu');
     await checkViewport('menu after keyboard tour', ['.menu-buttons', '.footer']); clean();
 
+    // Free play uses the shared physical inputs on an accumulating board.
+    // The saved drill profile has a singleton filter and zero-fault preferences;
+    // neither may constrain the full seven-bag or end this session.
+    assert.equal(await page.locator('[data-act=mode-free]').innerText(), 'フリーモード');
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'tutorial');
+    await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowUp');
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'mode-finesse');
+    await page.keyboard.press('ArrowRight');
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'mode-free');
+    await page.keyboard.press('Enter');
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'free');
+    await page.keyboard.press('Enter'); await ready();
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'board');
+    assert.equal((await state()).mode, 'free');
+    assert.doesNotMatch(await page.locator('.topbar').innerText(), /フィネス編|フリーモード/);
+    assert.equal(await page.locator('.practice-options,[data-setting],#hint-route').count(), 0);
+    const freeTotal = (await state()).totalStats;
+    await page.waitForTimeout(150);
+    for (let i = 1; i <= 4; i++) {
+      await ready(); await pressAction('hardDrop');
+      await page.waitForFunction(n => Number(document.querySelector('#pieces').textContent) === n, i);
+      assert.equal((await state()).stats.pieces, i);
+      assert.ok(Number(await page.locator('#pps').innerText()) > 0);
+      assert.doesNotMatch(await page.locator('#result-panel').innerText(), /最短|\d+\s*\//);
+    }
+    assert.notEqual(await page.locator('#elapsed').innerText(), '00:00.00');
+    assert.equal(await page.locator('#next-preview canvas').count(), 5);
+    await checkLayout();
+    await checkViewport('free desktop', ['.coach .speech', '.coach .mirufi', '.board-shell', '.column-labels', '.board-note',
+      '#hold-preview', '#next-preview', '.free-stats', '.free-stats .stat', '.play-buttons', '.play-buttons button']);
+    await checkText();
+    await page.setViewportSize({ width: 800, height: 600 });
+    await checkLayout(); await checkViewport('free 800x600', ['.coach .speech', '.coach .mirufi', '.board-shell',
+      '#hold-preview', '#next-preview', '.free-stats', '.free-stats .stat', '.play-buttons', '.play-buttons button']);
+    for (const width of [550, 480, 390]) {
+      await page.setViewportSize({ width, height: 600 });
+      const layout = await checkLayout(800);
+      assert.ok(layout.scrollWidth >= 800 && layout.scrollWidth > width, 'Small windows retain a scrollable play layout');
+      assert.ok(layout.canvas.width >= 160 && layout.canvas.height >= 352, JSON.stringify(layout));
+    }
+    await page.setViewportSize({ width: 1280, height: 720 });
+    for (let i = 0; i < 20 && !(await state()).stats.gameOver; i++) {
+      await ready(); await pressAction('hardDrop');
+      await page.waitForTimeout((await state()).settings.are + 30);
+    }
+    assert.equal((await state()).stats.gameOver, true);
+    assert.equal(await page.getByRole('dialog', { name: 'ゲームオーバー' }).count(), 1);
+    const freeEnd = await state();
+    assert.deepEqual(await page.locator('.gameover .stat label').allTextContents(), ['ライン', 'ミノ', '時間', 'PPS']);
+    assert.deepEqual(await page.locator('.gameover .stat strong').allTextContents(),
+      await Promise.all(['lines', 'pieces', 'elapsed', 'pps'].map(id => page.locator('#' + id).textContent())));
+    await checkViewport('game over', ['.gameover .modal', '.gameover .stat', '.gameover button']);
+    await page.setViewportSize({ width: 800, height: 600 });
+    await checkViewport('game over 800x600', ['.gameover .modal', '.gameover .stat', '.gameover button']);
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.waitForTimeout(550);
+    assert.equal((await state()).stats.elapsed, freeEnd.stats.elapsed);
+    assert.deepEqual(await page.locator('.gameover .primary').evaluate((button, codes) => codes.map(code =>
+      button.dispatchEvent(new KeyboardEvent('keydown', { code, repeat: true, bubbles: true, cancelable: true }))),
+    ['Space', 'Enter', freeEnd.bindings.retry[0]]), [false, false, false], 'Dialog key repeats must cancel native activation');
+    assert.equal((await state()).stats.gameOver, true);
+    await pressAction('retry'); await ready();
+    assert.equal((await state()).stats.gameOver, false); assert.equal((await state()).stats.pieces, 0);
+    assert.equal(await page.locator('.gameover').count(), 0);
+    assert.equal((await state()).heldPiece, null); assert.equal((await state()).lastResult, null);
+    await pressAction('hardDrop'); await click('restart'); await ready();
+    assert.equal((await state()).stats.pieces, 0); assert.equal((await state()).stats.lines, 0);
+    assert.deepEqual((await state()).totalStats, freeTotal, 'free placements do not change practice records');
+    await click('menu'); await click('mode-finesse'); clean();
+
     // Capture defaults from a genuinely fresh profile, isolated from all the
     // edits/reloads above. Resetting the persistence profile would hide leaks.
     const defaultContext = await browser.newContext({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 });
@@ -631,7 +707,7 @@ async function main() {
     await fallback.keyboard.press('Space');
     assert.equal(await fallback.evaluate(() => window.__mirutet.getState().lastResult.status), 'perfect');
     clean();
-    console.log('Browser checks passed: all 12 lessons (demo/try-it/internal scroll), drill buttons, perfect/fault/miss, combo counting/reset/layout, handling, IRS, pause, filters, clean default settings, settings persistence/scroll, v1 storage migration/new-key priority, toast expiry, sprint, offline fallbacks.');
+    console.log('Browser checks passed: all 12 lessons, drill/sprint, combo, handling/IRS/pause, settings/storage, free-mode stats/top-out/restart/desktop/800x600, offline fallbacks.');
     console.log('Screenshots: screens/{title,menu,tutorial,tutorial-irs,tutorial-t,drill-target,drill-1080,drill-perfect,combo,drill-fault,settings,sprint-result}.png');
   } finally { await browser.close(); }
 }

@@ -423,6 +423,9 @@
       this.pieceProvider = options.pieceProvider || (() => this.bag.next());
       this.autoNext = options.autoNext !== false;
       this.lockToBoard = !!options.lockToBoard;
+      // Endless play opts into timed locking; practice keeps manual locking.
+      this.lockDelay = options.lockDelay ?? Infinity;
+      this.lockAt = this.lockDeadline = Infinity; this.lockResets = 0;
       this.holdEnabled = options.holdEnabled !== false;
       this.callbacks = options;
       this.active = null; this.pending = null; this.heldPiece = null; this.holdUsed = false;
@@ -488,6 +491,19 @@
       this.cutUntil = this.cutAt + this.settings.dcd;
       this._wakeHorizontal();
     }
+    _grounded(reset = false) {
+      if (!this.active || movePiece(this.board, this.active, 0, -1)) this.lockAt = Infinity;
+      else {
+        // Airborne time disables locking, but never erases the contact deadline
+        // or replenishes the reset budget. An expired piece locks on recontact.
+        if (this.lockDeadline === Infinity) this.lockDeadline = this.time + this.lockDelay;
+        else if (reset && this.lockResets < 15) {
+          this.lockResets++;
+          this.lockDeadline = this.time + this.lockDelay;
+        }
+        this.lockAt = Math.max(this.time, this.lockDeadline);
+      }
+    }
     _horizontal(key, automatic, initial = false) {
       const delta = key.action === 'left' ? -1 : 1;
       const next = automatic && this.settings.arr === 0 ? slidePiece(this.board, this.active, delta) :
@@ -497,7 +513,7 @@
         const entry = this._record(key.action, key, { initial });
         if (automatic) { entry.slide = true; entry.label = delta < 0 ? 'DAS←' : 'DAS→'; }
       }
-      if (moved) { this.active = next; this._emit('move', { action: key.action, automatic, state: { ...next } }); this._wakeFall(); }
+      if (moved) { this.active = next; this._grounded(true); this._emit('move', { action: key.action, automatic, state: { ...next } }); this._wakeFall(); }
       if (automatic) key.nextAt = this.settings.arr === 0 ? Infinity : this.time + this.settings.arr;
     }
     _fall(instant = false) {
@@ -512,11 +528,13 @@
         this._wakeHorizontal();
       }
       this.fallAt = !instant && moved ? this.time + this._interval() : Infinity;
+      this._grounded();
     }
     _spawn(type, { initialHold = true, holdUsed = false, ihs = false, queueDrawn = false } = {}) {
       const bufferedHold = this.initialHoldBuffered;
       this.initialHoldBuffered = false;
       this.pending = null; this.pieceId++;
+      this.lockAt = this.lockDeadline = Infinity; this.lockResets = 0;
       this.active = spawnPiece(type, { board: this.board });
       this.holdUsed = holdUsed; this.inputs = []; this.inputCount = 0;
       this.flags = { ihs, softDrop: false }; this.blocked = false;
@@ -542,6 +560,7 @@
         if (direction.since + this.settings.das > this.time) this._horizontal(direction, false, true);
       }
       this._resetFall();
+      this._grounded();
     }
     _hold(initial) {
       if (!this.active || this.holdUsed || !this.holdEnabled) return false;
@@ -559,14 +578,14 @@
       const result = { t: this.time, type: state.type, state, cells: cells(state),
         used: this.inputCount, inputs: this.inputs.map(e => ({ ...e })), flags: { ...this.flags } };
       if (this.lockToBoard) this.board.lock(state);
-      this.active = null; this.fallAt = Infinity; this._cut();
+      this.active = null; this.fallAt = this.lockAt = this.lockDeadline = Infinity; this._cut();
       this._emit('lock', result);
       if (this.callbacks.onLock) this.callbacks.onLock(result, this);
       if (this.autoNext && !this.pending && !this.active) this._schedule(pieceType(this.pieceProvider()), this.settings.are);
     }
     _schedule(type, delay) {
       if (!Number.isFinite(delay) || delay < 0) throw new RangeError('Invalid spawn delay');
-      this.active = null; this.fallAt = Infinity;
+      this.active = null; this.fallAt = this.lockAt = this.lockDeadline = Infinity;
       const since = this.paused ? this.pauseStarted : this.time;
       this.initialHoldBuffered = false;
       this.pending = { type: pieceType(type), since, at: since + delay };
@@ -588,12 +607,14 @@
           const spawnAt = this.pending ? this.pending.at : Infinity;
           const horizontalAt = this.active && direction ? Math.max(direction.nextAt, this.cutUntil) : Infinity;
           const fallAt = this.active ? this.fallAt : Infinity;
-          const at = Math.min(spawnAt, horizontalAt, fallAt);
+          const lockAt = this.active ? this.lockAt : Infinity;
+          const at = Math.min(spawnAt, horizontalAt, fallAt, lockAt);
           if (at > t || at === Infinity) break;
           this.time = at;
           if (spawnAt === at) this._spawn(this.pending.type);
           else if (horizontalAt === at) this._horizontal(direction, true, true);
-          else this._fall(this._interval() === 0);
+          else if (fallAt === at) this._fall(this._interval() === 0);
+          else this._lock();
           if (this.paused) break; // A spawn/input callback may pause mid-update.
         }
         this.time = t;
@@ -624,7 +645,7 @@
         else if (action in ROTATE_ACTIONS) {
           this._record(action, key);
           const next = rotatePiece(this.board, this.active, ROTATE_ACTIONS[action], this.settings);
-          if (next) { this.active = next; this._cut(); this._wakeFall(); this._emit('rotate', { action, state: { ...next } }); }
+          if (next) { this.active = next; this._grounded(true); this._cut(); this._wakeFall(); this._emit('rotate', { action, state: { ...next } }); }
         } else if (action === 'softDrop') {
           this._record(action, key);
           if (this.settings.sdf === 41) this._fall(true); else { this._fall(); this._resetFall(); }
@@ -635,22 +656,23 @@
     }
     keyUp(action, t = this.clock(), options = {}) {
       this.update(t);
-      const before = this._direction(), code = options.code || action;
+      const before = this._direction(), interval = this._interval(), code = options.code || action;
       const key = this.held.get(code);
       if (!key || key.action !== action) return false;
       this.held.delete(code);
       const after = this._direction();
       const effectiveTime = this.paused ? this.pauseStarted : t;
       if (after && before !== after) after.nextAt = Math.max(effectiveTime, after.since + this.settings.das);
-      if (action === 'softDrop') this._resetFall();
+      if (this._interval() !== interval) this._resetFall();
       this.update(t); return true;
     }
     // Atomic focus/pause cleanup: sequential keyUp calls could wake an older
     // charged direction between releases. Also discard a released IHS ARE tap.
     releaseAll(t = this.clock()) {
       this.update(t);
+      const interval = this._interval();
       this.held.clear(); this.initialHoldBuffered = false;
-      this._resetFall();
+      if (this._interval() !== interval) this._resetFall();
       return this;
     }
     setSettings(patch, t = this.clock()) {
@@ -675,12 +697,13 @@
       for (const key of this.held.values()) { key.since += delta; key.nextAt += delta; }
       if (this.pending) { this.pending.since += delta; this.pending.at += delta; }
       this.cutAt += delta; this.cutUntil += delta; this.fallAt += delta;
+      this.lockAt += delta; this.lockDeadline += delta;
       this.paused = false; this.pauseStarted = null;
       this._emit('resume'); this.update(t); return this;
     }
   }
 
-  // Finesse-mode feedback only; independent of persisted lifetime statistics.
+  // Placement feedback, shared by practice and endless play; never persisted.
   const COMBO_MILESTONES = Object.freeze([5, 10, 20, 50]);
   class ComboTracker {
     constructor() { this.reset(); }
@@ -753,6 +776,133 @@
     reset() { Object.assign(this, new Stats()); return this; }
   }
 
+  // Shared session clock and input boundary. Pauses freeze every engine timer.
+  class PlaySession {
+    constructor(options) {
+      this.clock = options.clock || defaultClock;
+      this.onEvent = options.onEvent;
+      this.startedAt = null; this.endedAt = null;
+      this.pausedAt = null; this.pausedDuration = 0;
+      this.running = false; this.lastResult = null;
+      this.combo = new ComboTracker();
+    }
+    _emit(kind, data = {}) { if (this.onEvent) this.onEvent({ kind, ...data }, this); }
+    _touch(t) { if (this.running && this.startedAt === null) this.startedAt = t; }
+    pause(t = this.clock()) {
+      this.update(t);
+      if (this.running && this.pausedAt === null) { this.pausedAt = t; this.handler.pause(t); }
+      return this;
+    }
+    resume(t = this.clock()) {
+      this.update(t);
+      if (this.pausedAt !== null) {
+        if (this.startedAt !== null) this.pausedDuration += t - this.pausedAt;
+        this.pausedAt = null; this.handler.resume(t);
+      }
+      return this;
+    }
+    update(t = this.clock()) { this.handler.update(t); return this; }
+    keyDown(action, t = this.clock(), options) {
+      if (!this.running) return false;
+      return this.handler.keyDown(action, t, options);
+    }
+    keyUp(action, t = this.clock(), options) { return this.handler.keyUp(action, t, options); }
+    elapsed(t = this.clock()) {
+      return this.startedAt === null ? 0 : Math.max(0, (this.endedAt ?? this.pausedAt ?? t) - this.startedAt - this.pausedDuration);
+    }
+  }
+
+  function judgePlacement(lock, optimal, correct = true) {
+    const status = !correct ? 'miss' : !optimal ? 'unjudged' :
+      lock.used === optimal.count ? 'perfect' : 'fault';
+    return { ...lock, status, optimal: optimal?.count ?? null, targetKey: optimal?.key ?? null,
+      targetCells: optimal?.cells.map(c => c.slice()) || [], optimalSequence: optimal?.sequence.slice() || [],
+      extra: optimal ? Math.max(0, lock.used - optimal.count) : 0 };
+  }
+
+  // Endless, unfiltered seven-bag play. The solver judges against the board
+  // BEFORE lock/clear. Deliberate descent/tucks outside its graph are unjudged.
+  class FreeSession extends PlaySession {
+    constructor(options = {}) {
+      super(options);
+      this.settings = this._settings(options.settings);
+      this.rng = options.rng || (options.seed === undefined ? Math.random : createRNG(options.seed));
+      this._reset(options.time ?? this.clock());
+    }
+    _settings(patch) {
+      const settings = normalizeSettings(patch);
+      // A zero-gravity training profile still gives normal falling play.
+      if (!settings.gravity) settings.gravity = 1 / 60;
+      return settings;
+    }
+    _reset(t) {
+      this.bag = new Bag({ rng: this.rng });
+      this.lines = 0; this.pieces = 0; this.gameOver = false; this.reason = null;
+      this.startedAt = this.endedAt = this.pausedAt = null; this.pausedDuration = 0;
+      this.running = false; this.lastResult = null; this.cueDrawPending = false; this.combo.reset();
+      this.handler = new InputHandler({ clock: this.clock, time: t, settings: this.settings,
+        bag: this.bag, autoNext: false, lockDelay: 500,
+        onLock: lock => this._onLock(lock),
+        onCommand: (action, time) => {
+          if (action === 'retry') this.restart(time);
+          else if (action === 'pause') this.pausedAt === null ? this.pause(time) : this.resume(time);
+          else if (action === 'settings') this._emit(action, { t: time });
+        },
+        onEvent: event => {
+          if (event.kind === 'spawn') {
+            this._touch(event.t);
+            const queueDrawn = this.cueDrawPending || event.queueDrawn;
+            this.cueDrawPending = false;
+            this._emit('spawn', { ...event, queueDrawn, nextType: this.bag.peek(1)[0] });
+          } else if (event.kind === 'blockout') this._gameOver('blockout', event.t);
+          else this._emit(event.kind, event);
+        }
+      });
+    }
+    _schedule(t) {
+      this.cueDrawPending = true;
+      this.handler.scheduleSpawn(this.bag.next(), t, this.settings.are);
+    }
+    start(t = this.clock()) {
+      if (this.running || this.endedAt !== null) throw new Error('Session already started');
+      this.running = true; this._schedule(t); return this;
+    }
+    restart(t = this.clock()) {
+      this.update(t); this._reset(t); this._emit('restart', { t }); return this.start(t);
+    }
+    _onLock(lock) {
+      const board = this.handler.board;
+      const optimal = finesseFor(lock.type, lock.cells, { board, ...this.settings });
+      const result = judgePlacement(lock, optimal && lock.used >= optimal.count ? optimal : null);
+      result.combo = result.status === 'unjudged' ? this.combo.reset() : this.combo.next(result);
+      board.lock(lock.state);
+      result.lines = board.clearLines(); this.lines += result.lines; this.pieces++;
+      this.lastResult = result; this._emit('result', { result });
+      if (lock.cells.every(([, y]) => y >= VISIBLE_HEIGHT)) this._gameOver('lockout', lock.t);
+      else this._schedule(lock.t);
+    }
+    _gameOver(reason, t) {
+      this.running = false; this.gameOver = true; this.reason = reason; this.endedAt = t;
+      this.cueDrawPending = false;
+      this.handler.active = this.handler.pending = null;
+      this.handler.fallAt = this.handler.lockAt = Infinity;
+      this.handler.held.clear(); this.handler.initialHoldBuffered = false;
+      this._emit('gameover', { t, reason });
+    }
+    setSettings(patch, t = this.clock()) {
+      this.update(t); this.settings = this._settings({ ...this.settings, ...patch });
+      this.handler.setSettings(this.settings, t); return this;
+    }
+    nextQueue(count = 5) {
+      return this.handler.pending ? [this.handler.pending.type].concat(this.bag.peek(Math.max(0, count - 1))).slice(0, count) : this.bag.peek(count);
+    }
+    snapshot(t = this.clock()) {
+      const elapsed = this.elapsed(t);
+      return { lines: this.lines, pieces: this.pieces, elapsed, pps: elapsed ? this.pieces * 1000 / elapsed : 0,
+        running: this.running, gameOver: this.gameOver, reason: this.reason };
+    }
+  }
+
   /* DrillSession keeps an empty practice board for every attempt. No lines
    * accumulate. It exposes round/target during ARE and nextQueue(5) for UI.
    * Column filters constrain the occupied LEFT column (inclusive); area aliases
@@ -765,9 +915,9 @@
    * Timer starts on first gameplay input, including IRS/HD/IHS; pauses excluded.
    * Persistence is data-only via Stats.toJSON(); storage belongs to the UI.
    */
-  class DrillSession {
+  class DrillSession extends PlaySession {
     constructor(options = {}) {
-      this.clock = options.clock || defaultClock;
+      super(options);
       this.pieces = normalizePieces(options.pieces);
       this.settings = normalizeSettings(options.settings);
       this.rng = options.rng || (options.seed === undefined ? Math.random : createRNG(options.seed));
@@ -784,13 +934,9 @@
       this.sprintLength = options.sprintLength || 0;
       if (!Number.isInteger(this.sprintLength) || this.sprintLength < 0) throw new RangeError('Invalid sprint length');
       this.stats = new Stats();
-      this.combo = new ComboTracker();
       this.totalStats = options.totalStats instanceof Stats ? options.totalStats : new Stats(options.totalStats);
-      this.completed = 0; this.startedAt = null; this.endedAt = null;
-      this.pausedAt = null; this.pausedDuration = 0;
-      this.round = null; this.lastResult = null; this.running = false; this.serial = 0;
+      this.completed = 0; this.round = null; this.serial = 0;
       this.cueDrawPending = false;
-      this.onEvent = options.onEvent;
       this.handler = new InputHandler({ clock: this.clock, time: options.time, settings: this.settings,
         board: this.boardTemplate.clone(), bag: this.bag, autoNext: false,
         holdEnabled: this.pieces.length > 1,
@@ -823,8 +969,6 @@
       // Fail before play if ANY selected piece has no target under the filter.
       for (const type of this.pieces) if (!this._candidates(type).length) throw new RangeError('No targets for ' + type);
     }
-    _emit(kind, data = {}) { if (this.onEvent) this.onEvent({ kind, ...data }, this); }
-    _touch(t) { if (this.running && this.startedAt === null) this.startedAt = t; }
     _candidates(type) {
       const ranges = { all: [0, 9], left: [0, 2], center: [3, 5], right: [6, 9] };
       const [min, max] = this.columnRange || ranges[this.area];
@@ -861,11 +1005,10 @@
     }
     _onLock(lock) {
       const correct = sameCells(lock.cells, this.round.target.cells);
-      const status = !correct ? 'miss' : lock.used === this.round.optimal ? 'perfect' : 'fault';
+      const result = judgePlacement(lock, this.round.target, correct);
+      const status = result.status;
       const advanced = correct && !(status === 'fault' && this.zeroFault);
-      const result = { ...lock, status, optimal: this.round.optimal, targetKey: this.round.target.key,
-        targetCells: this.round.target.cells.map(c => c.slice()),
-        optimalSequence: this.round.target.sequence.slice(), extra: Math.max(0, lock.used - this.round.optimal), advanced };
+      result.advanced = advanced;
       result.combo = this.combo.next(result);
       this.stats.record(result); this.totalStats.record(result); this.lastResult = result;
       if (advanced) this.completed++;
@@ -900,30 +1043,8 @@
       if (this.round) this._newRound(this.round.type, this.round.target);
       this.handler.setSettings(patch, t); return this;
     }
-    pause(t = this.clock()) {
-      this.update(t);
-      if (this.running && this.pausedAt === null) { this.pausedAt = t; this.handler.pause(t); }
-      return this;
-    }
-    resume(t = this.clock()) {
-      this.update(t);
-      if (this.pausedAt !== null) {
-        if (this.startedAt !== null) this.pausedDuration += t - this.pausedAt;
-        this.pausedAt = null; this.handler.resume(t);
-      }
-      return this;
-    }
-    update(t = this.clock()) { this.handler.update(t); return this; }
-    keyDown(action, t = this.clock(), options) {
-      if (!this.running) return false;
-      return this.handler.keyDown(action, t, options);
-    }
-    keyUp(action, t = this.clock(), options) { return this.handler.keyUp(action, t, options); }
     nextQueue(count = 5) {
       return this.handler.pending ? [this.round.type].concat(this.bag.peek(Math.max(0, count - 1))).slice(0, count) : this.bag.peek(count);
-    }
-    elapsed(t = this.clock()) {
-      return this.startedAt === null ? 0 : Math.max(0, (this.endedAt ?? this.pausedAt ?? t) - this.startedAt - this.pausedDuration);
     }
     snapshot(t = this.clock()) {
       const elapsed = this.elapsed(t);
@@ -938,5 +1059,5 @@
     cells, cellsKey, sameCells, bounds, Board, spawnPiece, movePiece, rotatePiece,
     slidePiece, hardDrop, createRNG, Bag, ACTION_LABELS, applyAction, placementFor,
     finesseFor, allPlacements, DEFAULT_SETTINGS, SETTING_LIMITS, normalizeSettings,
-    INPUT_ACTIONS, validateBindings, rebindKeys, InputHandler, COMBO_MILESTONES, ComboTracker, Stats, DrillSession });
+    INPUT_ACTIONS, validateBindings, rebindKeys, InputHandler, COMBO_MILESTONES, ComboTracker, Stats, DrillSession, FreeSession });
 });

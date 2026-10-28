@@ -19,7 +19,7 @@
     retry: ['KeyR'], pause: ['Escape'], skip: ['KeyN'], settings: ['Comma'], hint: ['KeyH']
   };
   const ACTION_NAMES = { left: '左へ', right: '右へ', softDrop: 'ソフトドロップ', hardDrop: 'ハードドロップ',
-    cw: '右回転 CW', ccw: '左回転 CCW', rotate180: '180°回転', hold: 'ホールド', retry: '同じ目標をリトライ',
+    cw: '右回転 CW', ccw: '左回転 CCW', rotate180: '180°回転', hold: 'ホールド', retry: 'リトライ / 再スタート',
     pause: '一時停止', skip: '次の目標', settings: '設定を開く', hint: 'ヒント切替' };
   const UI_DEFAULTS = { zeroFault: false, repeatOnFault: false, repeatOnMiss: true, showTarget: true,
     showOptimal: true, showKeys: true, ghost: true, sound: true, volume: .3, bubbles: true,
@@ -95,11 +95,14 @@
     } catch (_) { storageOK = false; }
   }
   let screen = 'menu', session = null, demo = null, lessonIndex = progress.current;
+  let menuMode = 'finesse';
+  const isFree = () => session instanceof E.FreeSession;
   let lessons = M.createLessons(settings), tryMode = false, tryIndex = 0, tryDone = false;
   let lessonMessage = '', sessionEventQueue = [], trace = [], irsUntil = 0, irsCount = 0;
   let hint = false, lastResult = null, resultActions = [];
   let expression = 'normal', bubble = '', tipIndex = 0, particles = [];
   let feedbackAt = 0, lastTipAttempt = 0;
+  let gameOverInputUntil = 0;
   let settingsReturn = 'menu', capture = null, toastUntil = 0, lastHUD = 0, sprintResult = null;
   let demoVariant = 0, selectedDemo = null, lastQueue = '', statsScope = 'total';
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -154,7 +157,7 @@
     if (hidden) {
       audio.stopCombo();
       if (announcement?.textContent) announcement.textContent = '';
-      if (Object.values(M.COMBO_LINES).some(lines => lines.includes(bubble))) setCoach(pick(M.ENCOURAGEMENT_LINES));
+      if (Object.values(M.COMBO_LINES).some(lines => lines.includes(bubble))) setCoach(isFree() ? 'あなたのペースで大丈夫ですっ♪' : pick(M.ENCOURAGEMENT_LINES));
     }
     // A judged lock also queues a target event. Reuse this view on that event,
     // skips and other target changes rather than rewriting an unchanged count.
@@ -183,11 +186,11 @@
   }
   function footer() { return '<footer class="footer"><span>ミルテト学園 · 小さな一手で、もっと楽しく。</span><span>ORIGINAL ART & SYNTHESIZED SOUND · NO NETWORK</span></footer>'; }
   function menuHTML() {
-    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><p class="menu-mode"><span class="tag">フィネス編</span></p><nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>FREE PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p><p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
+    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="menu-mode" aria-label="モード"><button data-act="mode-finesse" aria-pressed="${menuMode === 'finesse'}">フィネス編</button><button data-act="mode-free" aria-pressed="${menuMode === 'free'}">フリーモード</button></nav>${menuMode === 'free' ? '<nav class="menu-buttons" aria-label="フリーモード"><button class="primary" data-act="free"><b>はじめる</b><span>→</span></button><button data-act="settings"><b>設定</b><span>⚙</span></button></nav>' : `<nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>TARGET PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p>`}<p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
   }
   function mini(type, extra = '') { return `<canvas class="mini-piece" data-piece="${type || ''}" width="144" height="108" aria-label="${type || '空'}ミノ" ${extra}></canvas>`; }
   function boardHTML() {
-    return `<div class="board-heading"><span>出現 / 21–22行</span><span>10 × 20</span></div><div class="board-shell"><canvas id="board" class="board" tabindex="0" role="img" aria-label="練習フィールド、10列20行と出現2行"></canvas><div id="irs-indicator" class="irs-flash" aria-live="polite">IRS ✧</div><div id="are-bar" class="are-track" role="progressbar" aria-label="出現までの待ち時間" aria-valuemin="0" aria-valuemax="100"><div class="are-fill"></div></div></div><div class="column-labels">${Array.from({ length: 10 }, (_, i) => `<span>${i + 1}</span>`).join('')}</div>`;
+    return `<div class="board-heading"><span>出現 / 21–22行</span><span>10 × 20</span></div><div class="board-shell"><canvas id="board" class="board" tabindex="0" role="img" aria-label="フィールド、10列20行と出現2行"></canvas><div id="irs-indicator" class="irs-flash" aria-live="polite">IRS ✧</div><div id="are-bar" class="are-track" role="progressbar" aria-label="出現までの待ち時間" aria-valuemin="0" aria-valuemax="100"><div class="are-fill"></div></div></div><div class="column-labels">${Array.from({ length: 10 }, (_, i) => `<span>${i + 1}</span>`).join('')}</div>`;
   }
   function pieceBars(stats) {
     return E.PIECE_TYPES.map(type => {
@@ -198,9 +201,23 @@
   function practiceHTML() {
     return `<section class="panel practice-options"><h3>練習するミノ / 目標のエリア</h3><div class="piece-filters">${E.PIECE_TYPES.map(type => `<label class="piece-check"><input type="checkbox" data-piece-filter="${type}" ${practice.pieces.includes(type) ? 'checked' : ''}><span>${type}</span></label>`).join('')}</div><label class="filter-line">列のエリア<select id="area" aria-label="列のエリア">${[['all','すべて'],['left','左 / 1–3列'],['center','中央 / 4–6列'],['right','右 / 7–10列'],['custom','列を指定']].map(([value, label]) => `<option value="${value}" ${practice.area === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>${practice.area === 'custom' ? `<div class="filter-line">左端の列 <input id="min-column" aria-label="開始列" type="number" min="1" max="10" value="${practice.minColumn}"> 〜 <input id="max-column" aria-label="終了列" type="number" min="1" max="10" value="${practice.maxColumn}"></div>` : ''}<label class="checkline" style="margin-top:8px"><input data-practice="weakSpot" type="checkbox" ${practice.weakSpot ? 'checked' : ''}>苦手な目標を多めに</label><label class="checkline"><input data-ui="zeroFault" type="checkbox" ${ui.zeroFault ? 'checked' : ''}>ゼロフォルト（成功まで再挑戦）</label><p class="tiny" style="margin-top:5px">変更は次の目標から反映・成績は引き継ぎます</p></section>`;
   }
+  function practiceStatsHTML(sprint) {
+    return `<section class="panel stats-panel"><div class="row spread panel-label"><span>SESSION / この練習</span><button class="quiet small" style="padding:0" data-act="records-session">全記録 ↗</button></div><div class="stats-main"><div class="stat"><label>連続パーフェクト</label><strong class="accent" id="streak">0</strong><small> 連続</small></div><div class="stat"><label>フィネス正確率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>最高 <b id="best-streak">0</b></span><span>PPS <b id="pps">0.00</b></span><span>成功 <b id="completed">0${sprint ? '/' + sprint : ''}</b></span></div>${sprint ? '<div class="sprint-progress"><div id="sprint-progress"></div></div>' : ''}<div class="stats-strip"><span>平均入力 <b id="average">0 / 0</b></span><span>ミス <b id="misses">0</b></span></div></section><section class="panel stats-panel"><div class="panel-label">フォルト / 試行 · ミノ別</div><div id="piece-bars" class="piece-bars">${pieceBars(session.stats)}</div></section>`;
+  }
+  function freeStatsHTML() {
+    return `<section class="panel stats-panel free-stats" aria-label="プレイ記録">${[['lines', 'ライン'], ['pieces', 'ミノ'], ['elapsed', '時間'], ['pps', 'PPS']].map(([id, label]) => `<div class="stat"><label>${label}</label><strong id="${id}">${id === 'elapsed' ? '00:00.00' : id === 'pps' ? '0.00' : '0'}</strong></div>`).join('')}</section>`;
+  }
+  function freeStatsValues(stats) {
+    return { lines: stats.lines, pieces: stats.pieces, elapsed: timeText(stats.elapsed), pps: stats.pps.toFixed(2) };
+  }
   function playHTML() {
-    const sprint = session.sprintLength;
-    return `<main class="play-page"><div class="row spread play-topline"><h1 class="play-title">${sprint ? 'スプリント' : 'フィネス・ドリル'}<span class="tag">${sprint ? sprint + ' PLACEMENTS' : 'FREE PRACTICE'}</span></h1><div class="row"><span id="sprint-time" class="sprint-time">00:00.00</span><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div></div><div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div id="practice-wrap">${practiceHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">ホールド</div><div id="hold-preview">${mini(null)}</div></div><p id="hold-note" class="hold-note">${session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効'}</p><div class="key-help">${['left', 'right', 'cw', 'ccw', 'rotate180'].map(a => `<kbd data-live-key="${a}" title="${ACTION_NAMES[a]}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><div class="queue-box"><div class="queue-title">次の5個</div><div id="next-preview"></div></div><p class="hold-note">${escape(friendly(bindings.hardDrop[0]))}<br>ハードドロップ</p>${comboHTML()}</aside></section><aside class="right-stack"><section class="panel stats-panel"><div class="row spread panel-label"><span>SESSION / この練習</span><button class="quiet small" style="padding:0" data-act="records-session">全記録 ↗</button></div><div class="stats-main"><div class="stat"><label>連続パーフェクト</label><strong class="accent" id="streak">0</strong><small> 連続</small></div><div class="stat"><label>フィネス正確率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>最高 <b id="best-streak">0</b></span><span>PPS <b id="pps">0.00</b></span><span>成功 <b id="completed">0${sprint ? '/' + sprint : ''}</b></span></div>${sprint ? '<div class="sprint-progress"><div id="sprint-progress"></div></div>' : ''}<div class="stats-strip"><span>平均入力 <b id="average">0 / 0</b></span><span>ミス <b id="misses">0</b></span></div></section><section class="panel stats-panel"><div class="panel-label">フォルト / 試行 · ミノ別</div><div id="piece-bars" class="piece-bars">${pieceBars(session.stats)}</div></section><section id="result-panel" class="panel result-panel"></section><div class="play-buttons"><button data-act="retry">↻ 同じ目標</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の目標 →</button><button data-act="settings">操作の設定</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
+    const free = isFree(), sprint = session.sprintLength;
+    return `<main class="play-page${free ? ' free-play' : ''}">
+      <div class="row spread play-topline"><h1 class="play-title">${free ? 'フリーモード' : sprint ? 'スプリント' : 'フィネス・ドリル'}${free ? '' : `<span class="tag">${sprint ? sprint + ' PLACEMENTS' : 'TARGET PRACTICE'}</span>`}</h1><div class="row">${free ? '' : '<span id="sprint-time" class="sprint-time">00:00.00</span>'}<button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div></div>
+      <div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div>${free ? '' : `<div id="practice-wrap">${practiceHTML()}</div>`}</aside>
+      <section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">ホールド</div><div id="hold-preview">${mini(null)}</div></div><p id="hold-note" class="hold-note">${session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効'}</p><div class="key-help">${['left', 'right', 'cw', 'ccw', 'rotate180'].map(a => `<kbd data-live-key="${a}" title="${ACTION_NAMES[a]}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">${free ? '半透明：着地の影' : '破線：目標 · 半透明：着地の影'}</p></div><aside class="side-queue"><div class="queue-box"><div class="queue-title">次の5個</div><div id="next-preview"></div></div><p class="hold-note">${escape(friendly(bindings.hardDrop[0]))}<br>${free ? '固定' : 'ハードドロップ'}</p>${comboHTML()}</aside></section>
+      <aside class="right-stack">${free ? freeStatsHTML() : practiceStatsHTML(sprint)}<section id="result-panel" class="panel result-panel" aria-live="polite"></section><div class="play-buttons">${free ? `<button data-act="restart">↻ もう一度 ${escape(friendly(bindings.retry[0]))}</button><button data-act="menu">タイトルへ</button>` : `<button data-act="retry">↻ 同じ目標</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の目標 →</button><button data-act="settings">操作の設定</button>`}</div></aside></div>
+      <div class="play-footer" id="play-footer"></div></main>`;
   }
   function lessonsHTML() {
     return `<main class="page"><div class="page-heading"><div><div class="eyebrow">FINESSE CLASSROOM</div><h2 style="margin-top:6px">レッスン一覧</h2><p>実演を見て、3つの目標で練習。好きなところから復習できます。</p></div><span class="tag mint-tag">${progress.completed.length} / 12 チャレンジ達成</span></div><div class="lesson-list">${lessons.map((lesson, i) => `<button class="lesson-card" data-act="lesson" data-index="${i}"><span class="eyebrow">LESSON ${String(i + 1).padStart(2, '0')} ${progress.completed.includes(i) ? ' · ✔' : ''}</span><b>${escape(lesson.title)}</b><span>${i >= 4 && i <= 10 ? 'ミノ別の最短表・実演・3つの目標' : '実演とミニチャレンジ'}</span></button>`).join('')}</div></main>${footer()}`;
@@ -225,7 +242,7 @@
     return `<div class="cue-settings"><h3>ミノを音でお知らせ</h3><label class="filter-line">鳴らすタイミング<select data-ui="pieceCueTiming" aria-label="ミノの音のタイミング">${[['next', 'NEXT（次のミノ）'], ['current', '現在のミノ'], ['off', 'オフ']].map(([value, label]) => `<option value="${value}" ${ui.pieceCueTiming === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p class="tiny">出現時に、NEXTの先頭に来たミノをお知らせします♪<br>現在のミノにも切替できます。同じ目標のリトライやホールド交換では鳴りません。</p><label class="filter-line">ミノの音量<input aria-label="ミノの音量" data-ui="pieceCueVolume" type="range" min="0" max="100" step="1" value="${ui.pieceCueVolume}"><output id="cue-volume">${ui.pieceCueVolume}</output></label><div class="cue-preview" role="group" aria-label="ミノの音を試聴">${E.PIECE_TYPES.map(type => `<button class="small" data-act="preview-cue" data-piece="${type}" aria-label="${type}ミノの音を試聴">${type}</button>`).join('')}</div><p class="tiny">ミノを選んで試聴できます。効果音のオン・オフと全体の音量も反映します。</p></div>`;
   }
   function settingsHTML() {
-    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">操作と表示の設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目">${appearanceHTML()}<div class="settings-grid"><section class="panel"><div class="row spread"><h3>共通のハンドリング</h3><button class="quiet small" data-act="reset-handling">初期値に戻す</button></div>${handlingRow('das','DAS','長押しの待ち時間 ms')}${handlingRow('arr','ARR','連続移動の間隔 ms')}${handlingRow('sdf','SDF','ソフト落下倍率 / 41 = ∞')}${handlingRow('dcd','DCD','自動移動の待機 ms')}${handlingRow('are','ARE','次の出現まで ms')}${handlingRow('gravity','重力 G','0 = なし / マス数（60分の1秒）',.1)}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}</div><div class="settings-group" role="group" aria-labelledby="shared-display-sound"><h3 id="shared-display-sound">共通の表示・サウンド</h3><div class="toggle-grid">${toggle('ghost','着地の影を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div><label class="filter-line" style="margin-top:17px">音量 <input aria-label="音量" data-ui="volume" type="range" min="0" max="1" step=".05" value="${ui.volume}"></label>${cueSettingsHTML()}</div><div class="settings-group" role="group" aria-labelledby="finesse-settings"><h3 id="finesse-settings">フィネス編の練習</h3><div class="toggle-grid">${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('showOptimal','最短手順を表示')}</div></div></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">移動・回転などは共通、リトライ・次の目標・ヒントはフィネス編の操作です。<br>キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
+    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">操作と表示の設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目">${appearanceHTML()}<div class="settings-grid"><section class="panel"><div class="row spread"><h3>共通のハンドリング</h3><button class="quiet small" data-act="reset-handling">初期値に戻す</button></div>${handlingRow('das','DAS','長押しの待ち時間 ms')}${handlingRow('arr','ARR','連続移動の間隔 ms')}${handlingRow('sdf','SDF','ソフト落下倍率 / 41 = ∞')}${handlingRow('dcd','DCD','自動移動の待機 ms')}${handlingRow('are','ARE','次の出現まで ms')}${handlingRow('gravity','重力 G','マス/フレーム · 0：フィネス編はなし／フリーは毎秒1マス',.1)}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}</div><div class="settings-group" role="group" aria-labelledby="shared-display-sound"><h3 id="shared-display-sound">共通の表示・サウンド</h3><div class="toggle-grid">${toggle('ghost','着地の影を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div><label class="filter-line" style="margin-top:17px">音量 <input aria-label="音量" data-ui="volume" type="range" min="0" max="1" step=".05" value="${ui.volume}"></label>${cueSettingsHTML()}</div><div class="settings-group" role="group" aria-labelledby="finesse-settings"><h3 id="finesse-settings">フィネス編の練習</h3><div class="toggle-grid">${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('showOptimal','最短手順を表示')}</div></div></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">移動・回転などは共通です。リトライはフリーモードでは再スタート。<br>次の目標・ヒントはフィネス編の操作です。<br>キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
   }
   function statsHTML() {
     const stats = statsScope === 'session' && session ? session.stats.snapshot() : totalStats.snapshot();
@@ -247,6 +264,7 @@
     app.innerHTML = header() + ({ menu: menuHTML, play: playHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
       settings: settingsHTML, records: statsHTML, sprint: sprintHTML, result: resultHTML }[screen])();
     document.body.dataset.screen = screen;
+    document.body.dataset.mode = isFree() ? 'free' : 'finesse';
     document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
     lastQueue = ''; lastHUD = 0;
     updateCombo();
@@ -269,7 +287,8 @@
         Object.keys(focusKey).length && Object.entries(focusKey).every(([key, value]) => el.dataset[key] === value));
       (target || $('main button:not(:disabled)'))?.focus({ preventScroll: true });
     }
-    if (session && session.pausedAt !== null && !tryDone) showPause();
+    if (isFree() && session.gameOver) showGameOver();
+    else if (session && session.pausedAt !== null && !tryDone) showPause();
   }
   function releaseAll() {
     if (!session) return;
@@ -308,14 +327,14 @@
   function updateOptions() {
     audio.configure();
     document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
-    if (session) {
+    if (session && !isFree()) {
       session.zeroFault = ui.zeroFault; session.repeatOnFault = ui.repeatOnFault;
       session.repeatOnMiss = ui.repeatOnMiss;
     }
     save();
   }
-  function newSession(options) {
-    const s = new E.DrillSession({ clock: now, time: now(), settings, totalStats, ...options,
+  function newSession(options, Session = E.DrillSession) {
+    const s = new Session({ clock: now, time: now(), settings, totalStats, ...options,
       onEvent: (event, source) => sessionEventQueue.push({ event, source }) });
     return s;
   }
@@ -324,13 +343,14 @@
       columnRange: practice.area === 'custom' ? [practice.minColumn - 1, practice.maxColumn - 1] : null,
       weakSpot: practice.weakSpot, zeroFault: ui.zeroFault, repeatOnFault: ui.repeatOnFault, repeatOnMiss: ui.repeatOnMiss };
   }
-  function startPlay(length = 0) {
+  function startPlay(length = 0, free = false) {
     resetCombo();
     audio.stopCues();
     releaseAll(); sessionEventQueue = []; demo = null; tryMode = false; tryDone = false;
-    session = newSession({ ...sessionOptions(), sprintLength: length });
+    menuMode = free ? 'free' : 'finesse';
+    session = free ? newSession({}, E.FreeSession) : newSession({ ...sessionOptions(), sprintLength: length });
     lastResult = null; particles = []; hint = false; irsUntil = 0; irsCount = 0; lastTipAttempt = 0;
-    setCoach('目標の輪郭へ、最短ルートですっ♪ 迷ったらヒントをどうぞ。わたしもついていますよ。');
+    setCoach(free ? 'あなたのペースで、わたしも応援ですっ♪' : '目標の輪郭へ、最短ルートですっ♪ 迷ったらヒントをどうぞ。わたしもついていますよ。');
     screen = 'play'; session.start(now()); window.scrollTo(0, 0); render(); processEvents();
   }
   function updatePractice(next) {
@@ -359,16 +379,32 @@
     }
   }
   function showPause() {
-    if ($('.overlay') || !['play', 'tutorial'].includes(screen) || screen === 'tutorial' && tryDone) return;
+    if ($('.overlay') || !session?.running || !['play', 'tutorial'].includes(screen) || screen === 'tutorial' && tryDone) return;
     releaseAll();
-    app.insertAdjacentHTML('beforeend', `<div class="overlay" role="dialog" aria-modal="true" aria-label="一時停止"><div class="modal"><div class="eyebrow">TAKE A LITTLE BREAK</div><h2>ひとやすみしましょう♪</h2><p>タイマーもミノも止まっています。<br>準備ができたら、また一緒に。</p><div class="stack"><button class="primary" data-act="resume">練習を再開 ${escape(friendly(bindings.pause[0]))}</button><button data-act="settings">操作の設定</button><button class="quiet" data-act="menu">タイトルへ戻る</button></div></div></div>`);
+    app.insertAdjacentHTML('beforeend', `<div class="overlay" role="dialog" aria-modal="true" aria-label="一時停止"><div class="modal"><div class="eyebrow">TAKE A LITTLE BREAK</div><h2>ひとやすみしましょう♪</h2><p>タイマーもミノも止まっています。<br>準備ができたら、また一緒に。</p><div class="stack"><button class="primary" data-act="resume">再開 ${escape(friendly(bindings.pause[0]))}</button><button data-act="settings">操作の設定</button><button class="quiet" data-act="menu">タイトルへ戻る</button></div></div></div>`);
     $('.overlay .primary').focus({ preventScroll: true });
   }
   function resumePlay() {
     $('.overlay')?.remove(); releaseAll(); session?.resume(now()); $('#board')?.focus({ preventScroll: true });
   }
+  function showGameOver() {
+    if ($('.overlay') || screen !== 'play') return;
+    const stats = freeStatsValues(session.snapshot(now()));
+    app.insertAdjacentHTML('beforeend', `<div class="overlay gameover" role="dialog" aria-modal="true" aria-label="ゲームオーバー"><div class="modal"><h2>ゲームオーバー</h2><div class="result-summary">${[['lines', 'ライン'], ['pieces', 'ミノ'], ['elapsed', '時間'], ['pps', 'PPS']].map(([id, label]) => `<div class="stat"><label>${label}</label><strong>${stats[id]}</strong></div>`).join('')}</div><div class="stack"><button class="primary" data-act="restart">もう一度 ${escape(friendly(bindings.retry[0]))}</button><button data-act="menu">タイトルへ</button></div></div></div>`);
+    $('.overlay .primary').focus({ preventScroll: true });
+  }
+  function restartFree() {
+    if (!isFree()) return;
+    audio.stopCues(); sessionEventQueue = []; session.restart(now()); processEvents();
+  }
   function updateResult() {
     const panel = $('#result-panel'); if (!panel) return;
+    if (isFree()) {
+      const r = lastResult;
+      panel.className = 'panel result-panel' + (r ? ' ' + r.status : '');
+      panel.innerHTML = r ? `<div class="result-head"><strong>${r.status === 'perfect' ? '✔ Perfect' : r.status === 'fault' ? 'フォルト +' + r.extra : '固定'}</strong></div>` : '';
+      return;
+    }
     if (!lastResult) {
       panel.className = 'panel result-panel';
       panel.innerHTML = `<div class="result-head"><strong>目標を見てみよう</strong><small id="target-optimal"></small></div><p class="tiny" style="line-height:1.9">破線の目標と着地の影を重ねて、<br>${escape(friendly(bindings.hardDrop[0]))} で固定します。</p><div id="hint-route" class="hint-route" ${hint && ui.showOptimal ? '' : 'hidden'}></div>`;
@@ -404,6 +440,16 @@
       if (event.kind === 'pause') { audio.stopCues(); showPause(); }
       if (event.kind === 'blockout') audio.stopCues();
       if (event.kind === 'resume') $('.overlay')?.remove();
+      if (event.kind === 'restart') {
+        lastResult = null; particles = []; irsUntil = 0; irsCount = 0;
+        setCoach('あなたのペースで、わたしも応援ですっ♪'); render();
+      }
+      if (event.kind === 'gameover') {
+        audio.stopCues(); audio.stopCombo();
+        gameOverInputUntil = now() + 500;
+        setCoach('おつかれさまですっ。わたしと、もう一度どうぞ♪', 'sorry');
+        updateHUD(event.t); showGameOver();
+      }
       if (event.kind === 'hint') { hint = !hint; updateHint(); }
       if (event.kind === 'settings') openSettings();
       if (event.kind === 'result') {
@@ -441,16 +487,16 @@
           save();
         } else {
           if (r.status === 'perfect') {
-            setCoach(source.stats.streak % 3 === 0 ? pick(M.PIECE_PRAISE[r.type]) : pick(M.PRAISE_LINES), 'happy');
+            setCoach(isFree() ? 'きれいな操作ですっ♪' : source.stats.streak % 3 === 0 ? pick(M.PIECE_PRAISE[r.type]) : pick(M.PRAISE_LINES), 'happy');
             if (!reducedMotion) for (let i = 0; i < 28; i++) particles.push({ x: 5, y: 2, vx: (Math.random() - .5) * 10, vy: 2 + Math.random() * 9, start: now(), color: ['#d9a6ce','#b5ddc8','#c5ade1','#efcf95'][i % 4] });
           } else if (r.status === 'fault') {
-            setCoach(M.hintText(r.type, r.used, r.optimal, resultActions.map(actionLabel)), 'thinking');
-          } else setCoach(pick(M.MISS_LINES), 'sorry');
-          updateResult(); save();
+            setCoach(isFree() ? `…${r.extra}入力多い。` : M.hintText(r.type, r.used, r.optimal, resultActions.map(actionLabel)), 'thinking');
+          } else if (r.status === 'miss') setCoach(pick(M.MISS_LINES), 'sorry');
+          updateResult(); if (!isFree()) save();
           // Lesson corrections, progress and completion keep their own feedback.
           if (r.combo.milestone && ui.bubbles) setCoach(pick(M.COMBO_LINES[r.combo.milestone]), 'happy');
         }
-        sound(r.status === 'perfect' ? 'perfect' : 'fault');
+        if (r.status !== 'unjudged') sound(r.status === 'perfect' ? 'perfect' : 'fault');
         if (r.combo.count >= 2) audio.combo(r.combo.count); else audio.stopCombo();
         updateCombo(r.combo, true);
       }
@@ -464,12 +510,13 @@
   function updateHUD(t) {
     if (screen !== 'play' || !session) return;
     const stats = session.snapshot(t), handler = session.handler;
-    const values = { streak: stats.streak, accuracy: stats.accuracy.toFixed(0), 'best-streak': stats.bestStreak,
+    const values = isFree() ? freeStatsValues(stats) :
+      { streak: stats.streak, accuracy: stats.accuracy.toFixed(0), 'best-streak': stats.bestStreak,
       pps: stats.pps.toFixed(2), completed: stats.completed + (session.sprintLength ? '/' + session.sprintLength : ''),
       average: stats.averageInputs.toFixed(1) + ' / ' + stats.averageOptimal.toFixed(1), misses: stats.misses,
       'sprint-time': timeText(stats.elapsed) };
     for (const [id, value] of Object.entries(values)) { const el = $('#' + id); if (el) el.textContent = value; }
-    $('#piece-bars').innerHTML = pieceBars(session.stats);
+    if ($('#piece-bars')) $('#piece-bars').innerHTML = pieceBars(session.stats);
     if ($('#target-optimal')) $('#target-optimal').textContent = '最短 ' + session.round.optimal + ' 入力';
     if ($('#sprint-progress')) $('#sprint-progress').style.width = 100 * session.completed / session.sprintLength + '%';
     const queue = session.nextQueue(), key = queue.join('') + ':' + handler.heldPiece;
@@ -479,6 +526,7 @@
     }
     $('#hold-preview').style.opacity = !handler.holdEnabled || handler.holdUsed ? '.4' : '1';
     $('.key-help').hidden = !ui.showKeys;
+    if (isFree()) return;
     const tip = M.TIPS[tipIndex % M.TIPS.length];
     $('#play-footer').textContent = '✧ ' + tip;
     if (session.stats.attempts && session.stats.attempts % 7 === 0) tipIndex = Math.floor(session.stats.attempts / 7);
@@ -674,8 +722,12 @@
     save(); endCapture(true); toast('キー設定の保存、完了ですっ。');
   }
   function clickAction(button) {
+    if (button.closest?.('.gameover') && now() < gameOverInputUntil) return;
     const act = button.dataset.act;
     if (act === 'menu') { save(); go('menu'); }
+    else if (act === 'mode-finesse' || act === 'mode-free') { menuMode = act === 'mode-free' ? 'free' : 'finesse'; render(); }
+    else if (act === 'free') startPlay(0, true);
+    else if (act === 'restart') restartFree();
     else if (act === 'drill') startPlay();
     else if (act === 'tutorial') startLesson(progress.current);
     else if (act === 'lessons') go('lessons');
@@ -808,6 +860,17 @@
     if (screen === 'tutorial' && event.code === 'Escape') { event.preventDefault(); if (!event.repeat) go('menu'); return; }
     const overlay = $('.overlay');
     if (overlay) {
+      if (isFree() && session.gameOver) {
+        // Cancel native button activation too, including Space held at top-out.
+        if (event.repeat || now() < gameOverInputUntil && (['Enter', 'Space'].includes(event.code) || action === 'retry')) {
+          event.preventDefault(); return;
+        }
+        if (event.target.closest?.('button') && ['Enter', 'Space'].includes(event.code)) return;
+        if (action === 'retry') { event.preventDefault(); if (!event.repeat) restartFree(); }
+        else if (event.code === 'Escape') { event.preventDefault(); if (!event.repeat) go('menu'); }
+        else navigateDialog(event, overlay);
+        return;
+      }
       if (event.code === 'Escape') { event.preventDefault(); if (!event.repeat) resumePlay(); }
       else if (event.target.closest?.('button') && ['Enter', 'Space'].includes(event.code)) return;
       else if (action === 'pause') { event.preventDefault(); if (!event.repeat) resumePlay(); }
@@ -878,7 +941,7 @@
     if (screen === 'play' || screen === 'tutorial') renderBoard(t);
     if (screen === 'play' && t - lastHUD > 90) {
       lastHUD = t; updateHUD(t);
-      const attempts = session.stats.attempts;
+      const attempts = session.stats?.attempts;
       if (attempts && attempts % 7 === 0 && attempts !== lastTipAttempt && t - feedbackAt > 3200) {
         lastTipAttempt = attempts; setCoach(M.TIPS[tipIndex++ % M.TIPS.length], 'normal');
       }
@@ -892,7 +955,7 @@
   window.__mirutet = Object.freeze({
     getState() {
       const handler = screen === 'tutorial' && !tryMode ? demo?.handler : session?.handler;
-      return copy({ screen, settings, ui, bindings, practice, progress, lessonIndex, tryMode, tryIndex, tryDone,
+      return copy({ screen, menuMode, mode: session ? isFree() ? 'free' : 'finesse' : null, settings, ui, bindings, practice, progress, lessonIndex, tryMode, tryIndex, tryDone,
         expression, bubble, irsCount, storageOK, hint, lastResult, trace, combo: session?.combo.snapshot(),
         round: session?.round, stats: session?.snapshot(), totalStats: totalStats.snapshot(),
         active: handler?.active, pending: handler?.pending, inputs: handler?.inputs, inputCount: handler?.inputCount,
@@ -901,7 +964,7 @@
         demo: demo ? { type: demo.variant.type, actions: demo.actions, target: demo.target } : null, sprintResult });
     },
     chooseTarget(type, target, { delay } = {}) {
-      if (!session?.running || session.pausedAt !== null) throw new Error('Open a running drill first');
+      if (!session?.running || isFree() || session.pausedAt !== null) throw new Error('Open a running drill first');
       const optimal = E.finesseFor(type, target, session.settings);
       if (!optimal) throw new Error('Unreachable debug target');
       releaseAll(); session._newRound(type, optimal); session.handler.board = session.boardTemplate.clone();

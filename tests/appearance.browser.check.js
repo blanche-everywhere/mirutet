@@ -95,13 +95,39 @@ async function main() {
     const rect=await page.locator('#hair-skin').boundingBox();assert(rect.x>=0&&rect.x+rect.width<=800);assert(rect.y>=0&&rect.y+rect.height<=600);
     await page.selectOption('#hair-skin','side');await check('side');await page.screenshot({path:path.resolve(__dirname,'../screens/appearance-small.png')});
     await click('close-settings');await page.reload();await check('side');
+    // Capture endless play at desktop and at the smaller supported viewport.
+    await page.setViewportSize({width:1280,height:720});
+    await click('mode-free');await click('free');
+    for(let i=0;i<4;i++) {
+      await page.waitForFunction(()=>!!window.__mirutet.getState().active);
+      await page.locator('#board').focus();await page.keyboard.press('Space');
+    }
+    await page.waitForFunction(()=>document.querySelector('#pieces').textContent==='4');
+    const checkFree=async()=>{
+      await check('side');
+      assert.doesNotMatch(await page.locator('.topbar').innerText(),/フィネス編|フリーモード/);
+      const board=await page.locator('#board').boundingBox();
+      assert(board&&board.width>=160&&board.height>=352,`Unusable free board: ${JSON.stringify(board)}`);
+      assert.doesNotMatch(await page.locator('#result-panel').innerText(),/最短|\d+\s*\//);
+      const layout=await page.evaluate(()=>({width:innerWidth,height:innerHeight,
+        scrollWidth:document.scrollingElement.scrollWidth,scrollHeight:document.scrollingElement.scrollHeight,
+        rects:[...document.querySelectorAll('.coach .speech,.coach .mirufi,.board-shell,.column-labels,.board-note,#hold-preview,#next-preview,.free-stats,.free-stats .stat,.play-buttons button')].map(el=>{
+          const r=el.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth};
+        })}));
+      assert(layout.scrollWidth<=layout.width&&layout.scrollHeight<=layout.height,JSON.stringify(layout));
+      for(const r of layout.rects)assert(r.top>=0&&r.bottom<=layout.height&&r.left>=0&&r.right<=layout.width&&r.scrollWidth<=r.clientWidth,JSON.stringify(r));
+    };
+    await checkFree();await page.screenshot({path:path.resolve(__dirname,'../screens/free.png')});
+    await page.setViewportSize({width:800,height:600});await checkFree();
+    await page.screenshot({path:path.resolve(__dirname,'../screens/free-small.png')});
+    await page.setViewportSize({width:1280,height:720});await click('menu');
     // Storage denied: choices still work for the session, with a clear fallback.
     const blocked=await browser.newContext();await blocked.addInitScript(()=>{Object.defineProperty(window,'localStorage',{get(){throw new Error('blocked');}});});
     const p=await blocked.newPage();await p.goto(url);await p.locator('[data-act=settings]').first().click();await p.selectOption('#hair-skin','intake');await p.selectOption('#outfit-skin','cape');
     assert((await p.locator('#appearance-storage').textContent()).includes('起動中'));
     await p.locator('[data-act=close-settings]').click();assert.equal(await p.locator('svg.mirufi').getAttribute('data-hair-skin'),'intake');assert.equal(await p.locator('svg.mirufi').getAttribute('data-outfit-skin'),'cape');await p.reload();assert.equal(await p.locator('svg.mirufi').getAttribute('data-outfit-skin'),'uniform');assert.equal(await p.locator('svg.mirufi').getAttribute('data-hair-skin'),'center');await blocked.close();
     assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
-    console.log('Appearance browser checks passed: two outfits x three hair skins, every lesson, menu/drill/sprint/result, persistence, import/export, invalid/legacy values, records preserved, keyboard, 800x600, blocked storage, zero errors/network.');
+    console.log('Appearance browser checks passed: two outfits x three hair skins, every lesson, menu/drill/sprint/result, free desktop/800x600 screenshots, persistence, import/export, invalid/legacy values, records preserved, keyboard, blocked storage, zero errors/network.');
   } finally {await browser.close();}
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});
