@@ -109,7 +109,7 @@ async function main() {
       assert.equal(await appearance.locator('#outfit-skin').count(), 1);
       const shared = targetPage.locator('[role=group][aria-labelledby=shared-display-sound]');
       for (const key of ['ghost', 'showKeys', 'sound', 'bubbles', 'volume', 'pieceCueTiming', 'pieceCueVolume']) {
-        assert.equal(await shared.locator(`[data-ui="${key}"]`).count(), 1, `${key} is a series-wide setting`);
+        assert.equal(await shared.locator(`[data-ui="${key}"]`).count(), ['volume', 'pieceCueVolume'].includes(key) ? 2 : 1, `${key} is a series-wide setting`);
       }
       const finesse = targetPage.locator('[role=group][aria-labelledby=finesse-settings]');
       assert.deepEqual(await finesse.locator('[data-ui]').evaluateAll(es => es.map(e => e.dataset.ui)),
@@ -371,7 +371,7 @@ async function main() {
     // Native controls remain keyboard reachable; slider change must not be
     // mistaken for a boolean checkbox by the delegated settings handler.
     await page.locator('[data-ui=pieceCueTiming]').selectOption('current');
-    await page.locator('[data-ui=pieceCueVolume]').focus();
+    await page.locator('[data-ui=pieceCueVolume][type=range]').focus();
     await page.keyboard.press('ArrowRight');
     assert.equal((await state()).ui.pieceCueVolume, 61);
     await tabTo('[data-act=preview-cue][data-piece=I]');
@@ -536,7 +536,7 @@ async function main() {
     assert.equal(await page.evaluate(() => document.activeElement.id), 'board');
     assert.equal((await state()).mode, 'free');
     assert.doesNotMatch(await page.locator('.topbar').innerText(), /フィネス編|フリーモード/);
-    assert.equal(await page.locator('.practice-options,[data-setting],#hint-route').count(), 0);
+    assert.equal(await page.locator('.practice-options,[data-setting]:not([data-live-handling] input),#hint-route').count(), 0);
     await checkHandling('free');
     // Real pointer adjustment must leave native arrows/Space and a rebound
     // rotation usable immediately, without adjusting ARR or pausing the run.
@@ -638,7 +638,7 @@ async function main() {
       assert.equal(await defaultPage.locator('#hair-skin').inputValue(), 'center');
       assert.equal(await defaultPage.locator('#outfit-skin').inputValue(), 'uniform');
       assert.equal(await defaultPage.locator('[data-ui=pieceCueTiming]').inputValue(), 'next');
-      assert.equal(await defaultPage.locator('[data-ui=pieceCueVolume]').inputValue(), '60');
+      assert.equal(await defaultPage.locator('[data-ui=pieceCueVolume][type=range]').inputValue(), '60');
       assert.deepEqual(await defaultPage.locator('[data-act=capture][data-action=cw][data-index]').allTextContents(), ['↑', 'X']);
       assert.deepEqual(await defaultPage.locator('[data-act=capture][data-action=hold][data-index]').allTextContents(), ['Shift(左)', 'C']);
       assert.equal(await defaultPage.locator('#setting-das').inputValue(), '110');

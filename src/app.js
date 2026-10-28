@@ -34,7 +34,18 @@
     { key: 'are', title: 'ARE', note: '次の出現まで ms', unit: 'ms', step: 1 },
     { key: 'gravity', title: '重力 G', note: 'マス/フレーム · 0：フィネス編はなし／フリーは毎秒1マス', unit: 'G', step: .1 }
   ];
+  const numericDrafts = new WeakSet();
   let settings = { ...E.DEFAULT_SETTINGS }, ui = { ...UI_DEFAULTS }, bindings = copy(DEFAULT_KEYS);
+  // 60 Hz reference timings, rounded to the editor's millisecond resolution.
+  // Only researched, supported fields are patched; other preferences survive.
+  const HANDLING_PRESETS = {
+    ppt2: { arr: 33, are: 117, irs: false, ihs: false, allow180: false },
+    tec: { arr: 33, are: 100, irs: true, ihs: true, allow180: false },
+    tgm3: { are: 67, irs: true, ihs: true, allow180: false }
+  };
+  function presetsHTML() {
+    return `<div class="handling-presets" role="group" aria-label="近い設定"><span>近い設定</span>${[['ppt2', 'PPT2'], ['tec', 'TEC'], ['tgm3', 'TGM3']].map(([key, label]) => `<button class="small" data-act="handling-preset" data-preset="${key}">${label}</button>`).join('')}<button class="small" data-act="reset-handling">既定値</button></div><details class="preset-notes"><summary>プリセットについて</summary><p>対応する既知の項目だけを変更します。ほかの値は保持し、適用後も調整できます。完全再現ではありません。1F＝1/60秒としてmsに丸めています。</p><p>PPT2：ARR 2F・ARE 7Fはコミュニティ計測。IRS/IHSなしは過去の検証版に基づきます。<br>TEC：ARR 2Fは公式サイトのコミュニティガイド、ARE 約6FはMaster限定の報告です。<br>TGM3：ARE 4FはMaster最速時の参考定数です。TEC・TGM3はIRS/IHSあり。いずれも1入力180度回転なし。</p></details>`;
+  }
   let practice = copy(PRACTICE_DEFAULTS), progress = { current: 0, completed: [] };
   let totalStats = new E.Stats(), storageOK = true;
 
@@ -276,16 +287,17 @@
     // Imported fractions keep full precision in storage; show a compact value.
     return field.key === 'sdf' && value === 41 ? '∞' : `${Number(value.toFixed(3))} ${field.unit}`;
   }
-  // Shared, pointer-operated controls never take focus or consume play keys.
-  // The full settings screen supplies the keyboard-accessible editor.
+  // Stepper buttons retain board focus; native editors isolate typing from play.
   function handlingPanelHTML() {
-    return `<section class="panel handling-panel" data-live-handling aria-label="プレイ中の操作設定" aria-describedby="handling-access"><button class="handling-toggle" data-act="toggle-handling" tabindex="-1" aria-expanded="${handlingOpen}" aria-controls="live-handling-controls">操作設定<span aria-hidden="true">${handlingOpen ? '−' : '＋'}</span></button><span id="handling-access" class="sr-only">キーボードでの調整は設定画面から。</span><div id="live-handling-controls" ${handlingOpen ? '' : 'hidden'}>${HANDLING.map(field => `<div class="handling-stepper" title="${field.note}"><span>${field.key === 'gravity' ? '重力' : field.title}</span><button data-act="adjust-handling" data-handling-key="${field.key}" data-step="-1" tabindex="-1" aria-label="${field.title}を減らす">−</button><output data-handling-value="${field.key}" aria-live="off">${handlingValue(field)}</output><button data-act="adjust-handling" data-handling-key="${field.key}" data-step="1" tabindex="-1" aria-label="${field.title}を増やす">＋</button></div>`).join('')}</div></section>`;
+    return `<section class="panel handling-panel" data-live-handling aria-label="プレイ中のゲーム設定" aria-describedby="handling-access"><button class="handling-toggle" data-act="toggle-handling" tabindex="-1" aria-expanded="${handlingOpen}" aria-controls="live-handling-controls">ゲーム設定<span aria-hidden="true">${handlingOpen ? '−' : '＋'}</span></button><span id="handling-access" class="sr-only">入力中はゲームキーを停止。Enterで盤面に戻ります。</span><div id="live-handling-controls" ${handlingOpen ? '' : 'hidden'}>${HANDLING.map(field => `<div class="handling-stepper" title="${field.note}"><span>${field.key === 'gravity' ? '重力' : field.title}</span><button data-act="adjust-handling" data-handling-key="${field.key}" data-step="-1" tabindex="-1" aria-label="${field.title}を減らす">−</button><output data-handling-value="${field.key}" aria-live="off">${handlingValue(field)}</output><button data-act="adjust-handling" data-handling-key="${field.key}" data-step="1" tabindex="-1" aria-label="${field.title}を増やす">＋</button><input class="live-number" aria-label="${field.title}" data-setting="${field.key}" type="number" min="${E.SETTING_LIMITS[field.key][0]}" max="${E.SETTING_LIMITS[field.key][1]}" step="${field.step}" value="${settings[field.key]}"><input class="live-range" aria-label="${field.title} スライダー" data-setting="${field.key}" type="range" min="${E.SETTING_LIMITS[field.key][0]}" max="${E.SETTING_LIMITS[field.key][1]}" step="${field.step}" value="${settings[field.key]}"></div>`).join('')}</div></section>`;
   }
   function syncHandlingPanel() {
     for (const field of HANDLING) {
       const output = $(`[data-handling-value="${field.key}"]`);
       if (output) output.textContent = handlingValue(field);
+      for (const input of $$(`[data-setting="${field.key}"]`)) { numericDrafts.delete(input); input.value = settings[field.key]; }
     }
+    for (const input of $$('[data-engine-toggle]')) input.checked = settings[input.dataset.engineToggle];
   }
   function playHTML() {
     const free = isFree(), sprint = session.sprintLength;
@@ -306,7 +318,7 @@
   }
   function handlingRow(key, title, note, step = 1) {
     const [min, max] = E.SETTING_LIMITS[key];
-    return `<div class="setting-row"><label for="setting-${key}">${title}<small>${note} · ${min}–${max}</small></label><input aria-label="${title} スライダー" data-setting="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${settings[key]}"><input id="setting-${key}" aria-label="${title}" data-setting="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${settings[key]}"></div>`;
+    return `<div class="setting-row"><label for="setting-${key}">${title}<small>${note} · ${min}–${max}</small></label><input aria-label="${title} スライダー" data-setting="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${settings[key]}"><button class="setting-step" data-act="adjust-handling" data-handling-key="${key}" data-step="-1" aria-label="${title}を減らす">−</button><input id="setting-${key}" aria-label="${title}" data-setting="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${settings[key]}"><button class="setting-step" data-act="adjust-handling" data-handling-key="${key}" data-step="1" aria-label="${title}を増やす">＋</button></div>`;
   }
   function toggle(key, label, engine = false) { return `<label class="checkline"><input type="checkbox" ${engine ? 'data-engine-toggle' : 'data-ui'}="${key}" ${(engine ? settings : ui)[key] ? 'checked' : ''}>${label}</label>`; }
   function appearancePreview() {
@@ -315,11 +327,29 @@
   function appearanceHTML() {
     return `<section class="panel appearance-panel" role="group" aria-labelledby="shared-appearance"><div><h3 id="shared-appearance">共通の見た目</h3><p class="tiny">ミルフィの前髪と衣装の選択は、すべての画面に反映されます。</p><label for="hair-skin">前髪のスキン</label> <select id="hair-skin" data-hair-skin>${M.HAIR_SKINS.map(skin => `<option value="${skin}" ${skin === ui.hairSkin ? 'selected' : ''}>${M.HAIR_SKIN_LABELS[skin]}</option>`).join('')}</select><label for="outfit-skin" class="outfit-label">衣装のスキン</label> <select id="outfit-skin" data-outfit-skin>${M.OUTFIT_SKINS.map(skin => `<option value="${skin}" ${skin === ui.outfitSkin ? 'selected' : ''}>${M.OUTFIT_SKIN_LABELS[skin]}</option>`).join('')}</select><p id="appearance-storage" class="storage-note" role="status">${storageOK ? '選択は自動保存されます。' : '保存できないため、この起動中だけ選択を保持します。'}</p></div><div id="appearance-preview" aria-label="通常顔とにっこりの見本">${appearancePreview()}</div></section>`;
   }
+  const UI_NUMERIC = { volume: [0, 1, .05], pieceCueVolume: [0, 100, 1] };
+  function uiNumeric(key, title) {
+    const [min, max, step] = UI_NUMERIC[key];
+    return `<div class="setting-row"><label for="ui-${key}">${title}</label><input aria-label="${title} スライダー" data-ui="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${ui[key]}"><button class="setting-step" data-act="adjust-ui" data-ui-key="${key}" data-step="-1" aria-label="${title}を減らす">−</button><input id="ui-${key}" aria-label="${title}" data-ui="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${ui[key]}"><button class="setting-step" data-act="adjust-ui" data-ui-key="${key}" data-step="1" aria-label="${title}を増やす">＋</button></div>`;
+  }
+  // Match native range step rounding (ties toward the higher value). Clamp
+  // before rounding, and remove floating point noise from decimal steps.
+  function snapNumeric(value, min, max, step) {
+    const bounded = Math.max(min, Math.min(max, value));
+    const ticks = Math.round(Number(((bounded - min) / step).toFixed(10)));
+    return Math.max(min, Math.min(max, Number((min + ticks * step).toFixed(10))));
+  }
+  function updateNumericUI(key, value) {
+    ui[key] = snapNumeric(value, ...UI_NUMERIC[key]);
+    for (const input of $$(`[data-ui="${key}"]`)) { numericDrafts.delete(input); input.value = ui[key]; }
+    if (key === 'pieceCueVolume' && $('#cue-volume')) $('#cue-volume').textContent = String(ui[key]);
+    audio.configure(); save();
+  }
   function cueSettingsHTML() {
-    return `<div class="cue-settings"><h3>ミノを音でお知らせ</h3><label class="filter-line">鳴らすタイミング<select data-ui="pieceCueTiming" aria-label="ミノの音のタイミング">${[['next', 'NEXT（次のミノ）'], ['current', '現在のミノ'], ['off', 'オフ']].map(([value, label]) => `<option value="${value}" ${ui.pieceCueTiming === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p class="tiny">出現時に、NEXTの先頭に来たミノをお知らせします♪<br>現在のミノにも切替できます。同じ目標のリトライやホールド交換では鳴りません。</p><label class="filter-line">ミノの音量<input aria-label="ミノの音量" data-ui="pieceCueVolume" type="range" min="0" max="100" step="1" value="${ui.pieceCueVolume}"><output id="cue-volume">${ui.pieceCueVolume}</output></label><div class="cue-preview" role="group" aria-label="ミノの音を試聴">${E.PIECE_TYPES.map(type => `<button class="small" data-act="preview-cue" data-piece="${type}" aria-label="${type}ミノの音を試聴">${type}</button>`).join('')}</div><p class="tiny">ミノを選んで試聴できます。効果音のオン・オフと全体の音量も反映します。</p></div>`;
+    return `<div class="cue-settings"><h3>ミノを音でお知らせ</h3><label class="filter-line">鳴らすタイミング<select data-ui="pieceCueTiming" aria-label="ミノの音のタイミング">${[['next', 'NEXT（次のミノ）'], ['current', '現在のミノ'], ['off', 'オフ']].map(([value, label]) => `<option value="${value}" ${ui.pieceCueTiming === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p class="tiny">出現時に、NEXTの先頭に来たミノをお知らせします♪<br>現在のミノにも切替できます。同じ目標のリトライやホールド交換では鳴りません。</p>${uiNumeric('pieceCueVolume', 'ミノの音量')}<output id="cue-volume" hidden>${ui.pieceCueVolume}</output><div class="cue-preview" role="group" aria-label="ミノの音を試聴">${E.PIECE_TYPES.map(type => `<button class="small" data-act="preview-cue" data-piece="${type}" aria-label="${type}ミノの音を試聴">${type}</button>`).join('')}</div><p class="tiny">ミノを選んで試聴できます。効果音のオン・オフと全体の音量も反映します。</p></div>`;
   }
   function settingsHTML() {
-    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">操作と表示の設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目">${appearanceHTML()}<div class="settings-grid"><section class="panel"><div class="row spread"><h3>共通のハンドリング</h3><button class="quiet small" data-act="reset-handling">初期値に戻す</button></div>${HANDLING.map(field => handlingRow(field.key, field.title, field.note, field.step)).join('')}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}</div><div class="settings-group" role="group" aria-labelledby="shared-display-sound"><h3 id="shared-display-sound">共通の表示・サウンド</h3><div class="toggle-grid">${toggle('ghost','着地の影を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div><label class="filter-line" style="margin-top:17px">音量 <input aria-label="音量" data-ui="volume" type="range" min="0" max="1" step=".05" value="${ui.volume}"></label>${cueSettingsHTML()}</div><div class="settings-group" role="group" aria-labelledby="finesse-settings"><h3 id="finesse-settings">フィネス編の練習</h3><div class="toggle-grid">${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('showOptimal','最短手順を表示')}</div></div></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">移動・回転などは共通です。リトライはフリーモードでは再スタート。<br>次の目標・ヒントはフィネス編の操作です。<br>キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
+    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">ゲーム設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目">${appearanceHTML()}<div class="settings-grid"><section class="panel"><h3>共通のハンドリング</h3>${presetsHTML()}${HANDLING.map(field => handlingRow(field.key, field.title, field.note, field.step)).join('')}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}</div><div class="settings-group" role="group" aria-labelledby="shared-display-sound"><h3 id="shared-display-sound">共通の表示・サウンド</h3><div class="toggle-grid">${toggle('ghost','着地の影を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div>${uiNumeric('volume', '音量')}${cueSettingsHTML()}</div><div class="settings-group" role="group" aria-labelledby="finesse-settings"><h3 id="finesse-settings">フィネス編の練習</h3><div class="toggle-grid">${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('showOptimal','最短手順を表示')}</div></div></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">移動・回転などは共通です。リトライはフリーモードでは再スタート。<br>次の目標・ヒントはフィネス編の操作です。<br>キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
   }
   function statsHTML() {
     const stats = statsScope === 'session' && session ? session.stats.snapshot() : totalStats.snapshot();
@@ -848,11 +878,15 @@
       if ($('#play-stats')) $('#play-stats').hidden = handlingOpen;
       $('#board')?.focus({ preventScroll: true });
     } else if (act === 'adjust-handling') {
+      if (document.activeElement && numericEditor(document.activeElement)) commitNumeric(document.activeElement);
       const field = HANDLING.find(field => field.key === button.dataset.handlingKey);
       const value = Number((settings[field.key] + Number(button.dataset.step) * field.step).toFixed(10));
       updateSettings({ [field.key]: value });
       processEvents();
       $('#board')?.focus({ preventScroll: true });
+    } else if (act === 'adjust-ui') {
+      const key = button.dataset.uiKey;
+      if (UI_NUMERIC[key]) updateNumericUI(key, Number((ui[key] + Number(button.dataset.step) * UI_NUMERIC[key][2]).toFixed(10)));
     } else if (act === 'close-settings') closeSettings();
     else if (act === 'preview-cue') audio.piece(button.dataset.piece);
     else if (act === 'pause') { pauseSession(); showPause(); }
@@ -871,7 +905,9 @@
       const input = $('#custom-length'), length = Number(input.value);
       if (Number.isInteger(length) && length >= 1 && length <= 9999) startPlay(length);
       else { input.reportValidity(); toast('目標数は1〜9999の整数でお願いしますね。'); }
-    } else if (act === 'reset-handling') { updateSettings(E.DEFAULT_SETTINGS); render(false); toast('ハンドリング、初期値に戻せましたっ。'); }
+    } else if (act === 'handling-preset') {
+      if (HANDLING_PRESETS[button.dataset.preset]) updateSettings(HANDLING_PRESETS[button.dataset.preset]);
+    } else if (act === 'reset-handling') { updateSettings(E.DEFAULT_SETTINGS); toast('ハンドリング、初期値に戻せましたっ。'); }
     else if (act === 'reset-keys') { bindings = copy(DEFAULT_KEYS); save(); render(false); }
     else if (act === 'reset-settings') {
       settings = { ...E.DEFAULT_SETTINGS }; ui = { ...UI_DEFAULTS }; bindings = copy(DEFAULT_KEYS);
@@ -898,22 +934,57 @@
     } else if (act === 'remove-key') { bindings[button.dataset.action].splice(Number(button.dataset.index), 1); save(); render(false); }
   }
   document.addEventListener('mousedown', event => {
-    if (event.target.closest?.('[data-live-handling]')) event.preventDefault();
+    if (event.target.closest?.('[data-live-handling]') && !event.target.dataset?.setting) event.preventDefault();
+  });
+  document.addEventListener('focusin', event => {
+    if (event.target.dataset?.setting && event.target.closest?.('[data-live-handling]')) releaseAll();
   });
   document.addEventListener('click', event => { const button = event.target.closest('button[data-act]'); if (button && !button.disabled) clickAction(button); });
+  function numericEditor(input) {
+    return input.type === 'number' && (input.dataset?.setting || UI_NUMERIC[input.dataset?.ui]);
+  }
+  function commitNumeric(input) {
+    if (!numericDrafts.delete(input)) return;
+    const key = input.dataset.setting, uiKey = input.dataset.ui;
+    if (!key && !UI_NUMERIC[uiKey]) return;
+    if (input.value.trim() && Number.isFinite(Number(input.value)) && Number(input.value) !== (key ? settings[key] : ui[uiKey])) {
+      if (key) {
+        const field = HANDLING.find(field => field.key === key);
+        const value = snapNumeric(Number(input.value), ...E.SETTING_LIMITS[key], field.step);
+        if (value !== settings[key]) { updateSettings({ [key]: value }); processEvents(); }
+      } else {
+        const value = snapNumeric(Number(input.value), ...UI_NUMERIC[uiKey]);
+        if (value !== ui[uiKey]) updateNumericUI(uiKey, value);
+      }
+    }
+    input.value = key ? settings[key] : ui[uiKey];
+  }
+  // A number editor owns its raw draft until commit. In particular, assigning
+  // .value during input destroys native intermediate text such as '.' or '0.'.
+  document.addEventListener('focusout', event => {
+    if (numericEditor(event.target)) commitNumeric(event.target);
+  });
   document.addEventListener('input', event => {
     const input = event.target;
+    if (numericEditor(input)) { numericDrafts.add(input); return; }
     if (input.dataset.setting) {
       if (!input.value || !Number.isFinite(Number(input.value))) return;
-      const key = input.dataset.setting, value = Number(input.value); updateSettings({ [key]: value });
+      const key = input.dataset.setting, raw = input.value, value = Number(raw);
+      const field = HANDLING.find(field => field.key === key);
+      updateSettings({ [key]: snapNumeric(value, ...E.SETTING_LIMITS[key], field.step) });
+      if (value === settings[key]) input.value = raw;
+      processEvents();
       for (const other of $$(`[data-setting="${key}"]`)) if (other !== input) other.value = settings[key];
     } else if (['volume', 'pieceCueVolume'].includes(input.dataset.ui)) {
-      ui[input.dataset.ui] = Number(input.value); audio.configure(); save();
-      if (input.dataset.ui === 'pieceCueVolume') $('#cue-volume').textContent = input.value;
+      if (!input.value || !Number.isFinite(Number(input.value))) return;
+      const raw = input.value, key = input.dataset.ui, value = Number(raw);
+      updateNumericUI(key, value);
+      if (ui[key] === value) input.value = raw;
     }
   });
   document.addEventListener('change', event => {
     const input = event.target;
+    if (numericEditor(input)) { commitNumeric(input); return; }
     if (input.hasAttribute('data-hair-skin') || input.hasAttribute('data-outfit-skin')) {
       const isHair = input.hasAttribute('data-hair-skin');
       const key = isHair ? 'hairSkin' : 'outfitSkin';
@@ -922,6 +993,7 @@
       $('#appearance-preview').innerHTML = appearancePreview();
       $('#appearance-storage').textContent = storageOK ? '見た目の選択を保存しました。' : '保存できないため、この起動中だけ選択を保持します。';
     } else if (input.dataset.engineToggle) updateSettings({ [input.dataset.engineToggle]: input.checked });
+    else if (UI_NUMERIC[input.dataset.ui]) input.value = ui[input.dataset.ui];
     else if (input.dataset.ui === 'pieceCueTiming') { ui.pieceCueTiming = input.value; audio.stopCues(); save(); }
     else if (input.dataset.ui && !['volume', 'pieceCueVolume'].includes(input.dataset.ui)) {
       if (input.dataset.ui === 'zeroFault' && ui.zeroFault !== input.checked && screen === 'play') resetCombo();
@@ -962,9 +1034,18 @@
       if (event.target.closest?.('button') && ['Enter', 'Space'].includes(event.code)) return;
       event.preventDefault(); if (!event.repeat) acceptKey(event.code); return;
     }
+    if (numericEditor(event.target) && event.code === 'Enter') {
+      event.preventDefault(); commitNumeric(event.target);
+      if (event.target.closest?.('[data-live-handling]')) { event.target.blur(); $('#board')?.focus({ preventScroll: true }); }
+      return;
+    }
     const action = Object.keys(bindings).find(name => bindings[name].includes(event.code));
     // Also guard programmatic/assistive focus on these pointer-only buttons:
     // bound keys, arrows and Space belong to play, never native activation.
+    if (event.target.dataset?.setting && event.target.closest?.('[data-live-handling]')) {
+      if (['Escape', 'Enter'].includes(event.code)) { event.preventDefault(); event.target.blur(); $('#board')?.focus({ preventScroll: true }); }
+      return;
+    }
     const onHandling = !!event.target.closest?.('[data-live-handling]')?.hasAttribute?.('data-live-handling');
     if (onHandling) {
       $('#board')?.focus({ preventScroll: true });

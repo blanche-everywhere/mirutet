@@ -94,7 +94,7 @@ test('top-level mode selection exposes free play alongside finesse, then renders
   assert.equal(s.round, undefined); assert.equal(s.stats.running, true);
   assert.match(app.app.innerHTML, /<h1 class="play-title">フリーモード<\/h1>/);
   for (const id of ['lines', 'pieces', 'elapsed', 'pps']) assert.match(app.app.innerHTML, new RegExp(`id="${id}"`));
-  assert.doesNotMatch(app.app.innerHTML, /practice-options|SESSION|目標|正確率|連続パーフェクト|フォルト \/ 試行|data-setting|data-ui|data-act="hint"|data-act="skip"/);
+  assert.doesNotMatch(app.app.innerHTML, /practice-options|SESSION|目標|正確率|連続パーフェクト|フォルト \/ 試行|data-ui|data-act="hint"|data-act="skip"/);
   const header = app.app.innerHTML.match(/<header[\s\S]*?<\/header>/)[0];
   assert.match(header, /ミルテト/); assert.doesNotMatch(header, /フィネス編|フリーモード|COMBO/);
   assert.match(app.app.innerHTML, /class="speaker">ミルフィ<\/span>/);

@@ -24,7 +24,7 @@ async function main() {
     assert.equal(await sharedAppearance.locator('#hair-skin,#outfit-skin').count(), 2);
     assert.equal(await page.locator('[aria-labelledby=finesse-settings] #hair-skin,[aria-labelledby=finesse-settings] #outfit-skin').count(), 0);
     await page.selectOption('[data-ui=pieceCueTiming]', 'current');
-    await page.locator('[data-ui=pieceCueVolume]').evaluate(el => {
+    await page.locator('[data-ui=pieceCueVolume][type=range]').evaluate(el => {
       el.value = '37';
       el.dispatchEvent(new Event('input', {bubbles:true}));
       el.dispatchEvent(new Event('change', {bubbles:true}));
