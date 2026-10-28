@@ -9,7 +9,7 @@ const A = require('../src/audio.js');
 
 // Run real app events and judgements with rendering sinks. Browser checks own
 // layout/animation assertions; no helper injects a result or changes a count.
-function loadApp(bubbles = true) {
+function loadApp(bubbles = true, are = 0) {
   let time = 0, overlay = false, frame, comboPlaying = false;
   const listeners = new Map(), played = [], stopped = [];
   const node = () => ({ innerHTML: '', textContent: '', dataset: {}, style: {}, hidden: true,
@@ -66,7 +66,7 @@ function loadApp(bubbles = true) {
       constructor(type, options) { Object.assign(this, { type }, options); }
     },
     performance: { now: () => time }, matchMedia: () => ({ matches: false }),
-    localStorage: { getItem: () => JSON.stringify({ settings: { are: 0 }, ui: { bubbles } }), setItem() {} },
+    localStorage: { getItem: () => JSON.stringify({ settings: { are }, ui: { bubbles } }), setItem() {} },
     requestAnimationFrame: callback => { frame = callback; return 1; }
   });
   const key = (code, down) => { time++; window.__mirutet.dispatch(code, down); };

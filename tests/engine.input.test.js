@@ -268,6 +268,16 @@ test('paused settings and soft-drop releases never move pieces; new fall phase b
   b.resume(1010);assert.equal(E.bounds(b.active).minY,0);assert.equal(b.inputCount,1);
 });
 
+test('atomic release restarts falling only when removing soft drop changes its rate',()=>{
+  const {h}=rig({gravity:1/60,sdf:2});h.spawn('O',0);h.keyDown('softDrop',100);
+  assert.equal(h.fallAt,600);h.pause(400);
+  const before={...h.active};h.releaseAll(1500);
+  assert.equal(h.fallAt,1400);assert.deepEqual(h.active,before);assert.equal(h.held.size,0);
+  h.releaseAll(2000);assert.equal(h.fallAt,1400);
+  h.resume(2400);h.update(3399);assert.deepEqual(h.active,before);
+  h.update(3400);assert.equal(h.active.y,before.y-1);
+});
+
 test('a callback may pause at spawn during a long update without processing later due events',()=>{
   const {h}=rig({gravity:1},{onSpawn:(_state,handler)=>handler.pause(handler.time)});
   h.scheduleSpawn('T',0);h.update(1000);

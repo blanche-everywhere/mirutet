@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f8f4fc">
-  <meta name="description" content="ミルテトは、ミルテト学園のミルフィとテトリミノの操作を学ぶブラウザゲームシリーズです。現在は最短操作を練習する「フィネス編」で遊べます。オフライン対応。">
+  <meta name="description" content="ミルテトは、ミルテト学園のミルフィとテトリミノの操作を学ぶブラウザゲームシリーズです。現在は最短操作を練習する「フィネス編」と、自由に積んで消す「フリーモード」で遊べます。オフライン対応。">
   <meta property="og:title" content="ミルテト">
-  <meta property="og:description" content="ミルテトは、ミルテト学園のミルフィとテトリミノの操作を学ぶブラウザゲームシリーズです。現在は最短操作を練習する「フィネス編」で遊べます。オフライン対応。">
+  <meta property="og:description" content="ミルテトは、ミルテト学園のミルフィとテトリミノの操作を学ぶブラウザゲームシリーズです。現在は最短操作を練習する「フィネス編」と、自由に積んで消す「フリーモード」で遊べます。オフライン対応。">
   <title>ミルテト</title>
   <style>
 .mirufi { display: block; max-width: 100%; height: auto; overflow: hidden;
@@ -391,8 +391,13 @@ kbd.pressed {
 }
 
 .menu-mode {
+  display:flex;
+  gap:8px;
   margin-bottom:12px
 }
+
+.menu-mode button { padding:7px 16px; font-size:14px; }
+.menu-mode button[aria-pressed=true] { background:#eee5f7; border-color:#bda5d1; color:#795b93; }
 
 .menu-buttons button {
   text-align:left;
@@ -774,7 +779,7 @@ canvas.board {
   min-height:22px
 }
 
-/* Finesse play screens reserve this space even below two successes. The pop
+/* Play screens reserve this space even below two successes. The pop
    stays inside the queue/coach column, clear of the board and speech bubble. */
 .finesse-combo {
   position:relative;
@@ -786,7 +791,7 @@ canvas.board {
   pointer-events:none
 }
 
-.combo-announcement {
+.sr-only,.combo-announcement {
   position:absolute;
   width:1px;
   height:1px;
@@ -1592,6 +1597,11 @@ canvas.board {
   font-size:24px
 }
 
+.gameover .result-summary {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  font-variant-numeric:tabular-nums
+}
+
 .result-best {
   color:#76b098;
   font-size:13px
@@ -1758,12 +1768,12 @@ body[data-screen=play] {
 }
 
 .right-stack .play-buttons button {
-  padding:8px 5px
+  padding:6px 5px
 }
 
 .right-stack {
   height:100%;
-  grid-template-rows:auto auto minmax(0,1fr) auto;
+  grid-template-rows:auto minmax(0,1fr) auto;
 }
 
 .right-stack .piece-bars {
@@ -1896,7 +1906,7 @@ body:is([data-screen=menu],[data-screen=tutorial],[data-screen=settings],[data-s
 .binding-key { font-size:13px; }
 .toggle-grid .checkline,.handling-note,.storage-note { font-size:13px; }
 .play-page { flex:1; min-height:0; width:100%; max-width:1600px; display:flex; flex-direction:column; padding:14px 28px 0; }
-.play-grid { flex:1; min-height:0; height:auto; grid-template-columns:minmax(0,1fr) calc(var(--cell)*10 + var(--queue)*2 + 26px) minmax(0,1fr); gap:20px; }
+.play-grid { flex:1; min-height:0; height:auto; grid-template-columns:minmax(0,1fr) calc(var(--cell)*10 + var(--queue)*2 + 26px) minmax(0,1fr); grid-template-rows:minmax(0,1fr); gap:20px; }
 .board-stage { grid-template-columns:var(--queue) calc(var(--cell)*10 + 2px) var(--queue); gap:12px; }
 .board-heading { font-size:13px; letter-spacing:0; white-space:nowrap; }
 .column-labels { font-size:13px; padding-top:4px; }
@@ -1914,8 +1924,8 @@ body:is([data-screen=menu],[data-screen=tutorial],[data-screen=settings],[data-s
 .piece-check span { font-size:13px; width:28px; height:28px; }
 .checkline,.filter-line { font-size:13px; }
 .filter-line select { width:140px; }
-.right-stack { min-height:0; gap:8px; }
-.right-stack .stats-panel { padding:8px 10px; line-height:1.3; }
+.right-stack { min-height:0; gap:6px; }
+.right-stack .stats-panel { padding:6px 10px; line-height:1.3; }
 .right-stack .panel-label { font-size:13px; letter-spacing:0; margin-bottom:5px; }
 .right-stack .stats-main label { margin-bottom:2px; }
 .right-stack .stats-strip { font-size:13px; margin-top:4px; padding-top:4px; }
@@ -1942,6 +1952,69 @@ kbd,.key-help kbd { font-size:13px; }
   .mini-piece { width:82px; height:64px; }
 }
 .board-shell:focus-within { outline:3px solid #b6a0da; outline-offset:3px; }
+
+/* Endless play shares the board/queues and leaves its side panels quiet. */
+body[data-screen=play],body[data-screen=tutorial] { min-width:800px; }
+.play-page {
+  --cell:max(16px,min(36px,calc((100vh - 252px)/22),calc((max(800px,100vw) - 620px)/10)));
+}
+.free-play {
+  --queue:76px;
+  /* Keep the 800px play layout scrollable in smaller windows. */
+  --cell:max(16px,min(36px,calc((100vh - 240px)/22),calc((max(800px,100vw) - 550px)/10)));
+}
+.free-play .right-stack { grid-template-rows:auto auto 1fr; }
+.free-play .free-stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px 10px; padding:20px; }
+.free-stats strong { display:block; font-size:30px; font-variant-numeric:tabular-nums; }
+.free-stats #elapsed { font-size:24px; }
+.free-play .mini-piece { width:100%; }
+.free-play .result-panel { min-height:55px; overflow:visible; }
+.free-play .result-panel:empty { visibility:hidden; }
+.free-play .result-head { margin:0; flex-wrap:wrap; gap:8px; }
+.free-play .play-buttons { align-self:end; }
+.play-tools,.play-stats { display:grid; gap:6px; min-width:0; }
+.handling-panel { padding:0 10px; min-width:0; }
+.handling-toggle { display:flex; align-items:center; justify-content:space-between; width:100%; padding:6px 0; border:0; background:transparent; border-radius:8px; font-size:13px; line-height:18px; font-weight:700; }
+.handling-toggle:hover,.handling-stepper button:hover { transform:none; }
+.handling-toggle span { color:var(--purple); }
+#live-handling-controls { padding:0 0 8px; }
+.handling-stepper { display:grid; grid-template-columns:minmax(33px,1fr) 26px minmax(54px,70px) 26px; gap:3px; align-items:center; min-height:34px; border-top:1px solid #f0eaf5; font-size:13px; }
+.handling-stepper>span { color:#887794; font-weight:600; }
+.handling-stepper output { text-align:center; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.handling-stepper button { padding:0; width:26px; height:26px; border-radius:7px; color:#9278b3; }
+.lesson-details>.handling-panel { flex-shrink:0; margin-bottom:10px; }
+@media(max-height:680px) {
+  .play-page #next-preview .mini-piece { height:44px; }
+}
+@media(max-width:1050px) {
+  .play-page { --queue:60px; padding-right:16px; padding-left:16px; }
+  .play-grid { gap:12px; }
+  .play-title { font-size:15px; }
+  .play-footer { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .mini-piece { width:100%; }
+  .play-page .key-help { gap:3px; }
+  .play-page .key-help kbd { min-width:22px; padding:3px; }
+  .practice-options .piece-filters { gap:3px; }
+  .practice-options .piece-check span { width:23px; height:26px; }
+  .practice-options .filter-line select { width:120px; }
+  .lesson-page { padding:12px 16px; }
+  .lesson-heading { flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+  .lesson-heading h2 { font-size:20px; }
+  .lesson-steps { gap:3px; }
+  .lesson-steps button { width:24px; height:24px; }
+  .lesson-grid { grid-template-columns:minmax(160px,1fr) minmax(160px,1fr) minmax(300px,1.7fr); gap:14px; }
+  .lesson-coach .mascot-wrap { width:100%; }
+  .lesson-board .board-heading span:last-child { display:none; }
+  .free-play { padding-right:16px; padding-left:16px; }
+  .free-play .play-grid { gap:12px; }
+  .free-play .free-stats { grid-template-columns:1fr; gap:12px; padding:14px; }
+  .free-play .free-stats .stat { display:flex; align-items:baseline; justify-content:space-between; gap:6px; }
+  .free-stats strong,.free-stats #elapsed { font-size:20px; }
+  .free-play .key-help { gap:3px; }
+  .free-play .key-help kbd { min-width:22px; padding:3px; }
+  .free-play .play-buttons { grid-template-columns:1fr; }
+  .free-play .coach .speech { padding:10px; }
+}
 
 .dressup-page{font-family:"Yu Gothic UI",Meiryo,sans-serif;color:#51465d;background:#f8f5fa;font-synthesis:none;--ink:#51465d;--purple:#9275ab;--line:#e6deed}
 .dressup-page *{box-sizing:border-box}
@@ -2483,6 +2556,9 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       this.pieceProvider = options.pieceProvider || (() => this.bag.next());
       this.autoNext = options.autoNext !== false;
       this.lockToBoard = !!options.lockToBoard;
+      // Endless play opts into timed locking; practice keeps manual locking.
+      this.lockDelay = options.lockDelay ?? Infinity;
+      this.lockAt = this.lockDeadline = Infinity; this.lockResets = 0;
       this.holdEnabled = options.holdEnabled !== false;
       this.callbacks = options;
       this.active = null; this.pending = null; this.heldPiece = null; this.holdUsed = false;
@@ -2548,6 +2624,19 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       this.cutUntil = this.cutAt + this.settings.dcd;
       this._wakeHorizontal();
     }
+    _grounded(reset = false) {
+      if (!this.active || movePiece(this.board, this.active, 0, -1)) this.lockAt = Infinity;
+      else {
+        // Airborne time disables locking, but never erases the contact deadline
+        // or replenishes the reset budget. An expired piece locks on recontact.
+        if (this.lockDeadline === Infinity) this.lockDeadline = this.time + this.lockDelay;
+        else if (reset && this.lockResets < 15) {
+          this.lockResets++;
+          this.lockDeadline = this.time + this.lockDelay;
+        }
+        this.lockAt = Math.max(this.time, this.lockDeadline);
+      }
+    }
     _horizontal(key, automatic, initial = false) {
       const delta = key.action === 'left' ? -1 : 1;
       const next = automatic && this.settings.arr === 0 ? slidePiece(this.board, this.active, delta) :
@@ -2557,7 +2646,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
         const entry = this._record(key.action, key, { initial });
         if (automatic) { entry.slide = true; entry.label = delta < 0 ? 'DAS←' : 'DAS→'; }
       }
-      if (moved) { this.active = next; this._emit('move', { action: key.action, automatic, state: { ...next } }); this._wakeFall(); }
+      if (moved) { this.active = next; this._grounded(true); this._emit('move', { action: key.action, automatic, state: { ...next } }); this._wakeFall(); }
       if (automatic) key.nextAt = this.settings.arr === 0 ? Infinity : this.time + this.settings.arr;
     }
     _fall(instant = false) {
@@ -2572,11 +2661,13 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
         this._wakeHorizontal();
       }
       this.fallAt = !instant && moved ? this.time + this._interval() : Infinity;
+      this._grounded();
     }
     _spawn(type, { initialHold = true, holdUsed = false, ihs = false, queueDrawn = false } = {}) {
       const bufferedHold = this.initialHoldBuffered;
       this.initialHoldBuffered = false;
       this.pending = null; this.pieceId++;
+      this.lockAt = this.lockDeadline = Infinity; this.lockResets = 0;
       this.active = spawnPiece(type, { board: this.board });
       this.holdUsed = holdUsed; this.inputs = []; this.inputCount = 0;
       this.flags = { ihs, softDrop: false }; this.blocked = false;
@@ -2602,6 +2693,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
         if (direction.since + this.settings.das > this.time) this._horizontal(direction, false, true);
       }
       this._resetFall();
+      this._grounded();
     }
     _hold(initial) {
       if (!this.active || this.holdUsed || !this.holdEnabled) return false;
@@ -2619,14 +2711,14 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       const result = { t: this.time, type: state.type, state, cells: cells(state),
         used: this.inputCount, inputs: this.inputs.map(e => ({ ...e })), flags: { ...this.flags } };
       if (this.lockToBoard) this.board.lock(state);
-      this.active = null; this.fallAt = Infinity; this._cut();
+      this.active = null; this.fallAt = this.lockAt = this.lockDeadline = Infinity; this._cut();
       this._emit('lock', result);
       if (this.callbacks.onLock) this.callbacks.onLock(result, this);
       if (this.autoNext && !this.pending && !this.active) this._schedule(pieceType(this.pieceProvider()), this.settings.are);
     }
     _schedule(type, delay) {
       if (!Number.isFinite(delay) || delay < 0) throw new RangeError('Invalid spawn delay');
-      this.active = null; this.fallAt = Infinity;
+      this.active = null; this.fallAt = this.lockAt = this.lockDeadline = Infinity;
       const since = this.paused ? this.pauseStarted : this.time;
       this.initialHoldBuffered = false;
       this.pending = { type: pieceType(type), since, at: since + delay };
@@ -2648,12 +2740,14 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
           const spawnAt = this.pending ? this.pending.at : Infinity;
           const horizontalAt = this.active && direction ? Math.max(direction.nextAt, this.cutUntil) : Infinity;
           const fallAt = this.active ? this.fallAt : Infinity;
-          const at = Math.min(spawnAt, horizontalAt, fallAt);
+          const lockAt = this.active ? this.lockAt : Infinity;
+          const at = Math.min(spawnAt, horizontalAt, fallAt, lockAt);
           if (at > t || at === Infinity) break;
           this.time = at;
           if (spawnAt === at) this._spawn(this.pending.type);
           else if (horizontalAt === at) this._horizontal(direction, true, true);
-          else this._fall(this._interval() === 0);
+          else if (fallAt === at) this._fall(this._interval() === 0);
+          else this._lock();
           if (this.paused) break; // A spawn/input callback may pause mid-update.
         }
         this.time = t;
@@ -2684,7 +2778,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
         else if (action in ROTATE_ACTIONS) {
           this._record(action, key);
           const next = rotatePiece(this.board, this.active, ROTATE_ACTIONS[action], this.settings);
-          if (next) { this.active = next; this._cut(); this._wakeFall(); this._emit('rotate', { action, state: { ...next } }); }
+          if (next) { this.active = next; this._grounded(true); this._cut(); this._wakeFall(); this._emit('rotate', { action, state: { ...next } }); }
         } else if (action === 'softDrop') {
           this._record(action, key);
           if (this.settings.sdf === 41) this._fall(true); else { this._fall(); this._resetFall(); }
@@ -2695,33 +2789,41 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     }
     keyUp(action, t = this.clock(), options = {}) {
       this.update(t);
-      const before = this._direction(), code = options.code || action;
+      const before = this._direction(), interval = this._interval(), code = options.code || action;
       const key = this.held.get(code);
       if (!key || key.action !== action) return false;
       this.held.delete(code);
       const after = this._direction();
       const effectiveTime = this.paused ? this.pauseStarted : t;
       if (after && before !== after) after.nextAt = Math.max(effectiveTime, after.since + this.settings.das);
-      if (action === 'softDrop') this._resetFall();
+      if (this._interval() !== interval) this._resetFall();
       this.update(t); return true;
     }
     // Atomic focus/pause cleanup: sequential keyUp calls could wake an older
     // charged direction between releases. Also discard a released IHS ARE tap.
     releaseAll(t = this.clock()) {
       this.update(t);
+      const interval = this._interval();
       this.held.clear(); this.initialHoldBuffered = false;
-      this._resetFall();
+      if (this._interval() !== interval) this._resetFall();
       return this;
     }
     setSettings(patch, t = this.clock()) {
-      this.update(t); this.settings = normalizeSettings(patch, this.settings);
-      // Live edits preserve DAS age, restart ARR/fall phases at edit time,
-      // and recalculate an in-flight ARE deadline from its original start.
+      this.update(t);
+      const previous = this.settings, interval = this._interval();
+      this.settings = normalizeSettings(patch, previous);
+      // Only affected timers change. DAS/ARR edits preserve held-key age and
+      // allow one charged repeat now, then use the new ARR (no backlog burst).
+      // DCD/ARE keep their original trigger/start; elapsed deadlines fire now.
+      // A changed fall rate starts a full interval now, or drops immediately.
       const effectiveTime = this.paused ? this.pauseStarted : t;
-      for (const key of this.held.values()) key.nextAt = Math.max(effectiveTime, key.since + this.settings.das);
-      this.cutUntil = Math.max(effectiveTime, this.cutAt + this.settings.dcd);
-      if (this.pending) this.pending.at = Math.max(effectiveTime, this.pending.since + this.settings.are);
-      this._resetFall(); this.update(t); return this;
+      if (this.settings.das !== previous.das || this.settings.arr !== previous.arr) {
+        for (const key of this.held.values()) key.nextAt = Math.max(effectiveTime, key.since + this.settings.das);
+      }
+      if (this.settings.dcd !== previous.dcd) this.cutUntil = Math.max(effectiveTime, this.cutAt + this.settings.dcd);
+      if (this.pending && this.settings.are !== previous.are) this.pending.at = Math.max(effectiveTime, this.pending.since + this.settings.are);
+      if (this._interval() !== interval) this._resetFall();
+      this.update(t); return this;
     }
     pause(t = this.clock()) {
       this.update(t);
@@ -2735,12 +2837,13 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       for (const key of this.held.values()) { key.since += delta; key.nextAt += delta; }
       if (this.pending) { this.pending.since += delta; this.pending.at += delta; }
       this.cutAt += delta; this.cutUntil += delta; this.fallAt += delta;
+      this.lockAt += delta; this.lockDeadline += delta;
       this.paused = false; this.pauseStarted = null;
       this._emit('resume'); this.update(t); return this;
     }
   }
 
-  // Finesse-mode feedback only; independent of persisted lifetime statistics.
+  // Placement feedback, shared by practice and endless play; never persisted.
   const COMBO_MILESTONES = Object.freeze([5, 10, 20, 50]);
   class ComboTracker {
     constructor() { this.reset(); }
@@ -2813,6 +2916,133 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     reset() { Object.assign(this, new Stats()); return this; }
   }
 
+  // Shared session clock and input boundary. Pauses freeze every engine timer.
+  class PlaySession {
+    constructor(options) {
+      this.clock = options.clock || defaultClock;
+      this.onEvent = options.onEvent;
+      this.startedAt = null; this.endedAt = null;
+      this.pausedAt = null; this.pausedDuration = 0;
+      this.running = false; this.lastResult = null;
+      this.combo = new ComboTracker();
+    }
+    _emit(kind, data = {}) { if (this.onEvent) this.onEvent({ kind, ...data }, this); }
+    _touch(t) { if (this.running && this.startedAt === null) this.startedAt = t; }
+    pause(t = this.clock()) {
+      this.update(t);
+      if (this.running && this.pausedAt === null) { this.pausedAt = t; this.handler.pause(t); }
+      return this;
+    }
+    resume(t = this.clock()) {
+      this.update(t);
+      if (this.pausedAt !== null) {
+        if (this.startedAt !== null) this.pausedDuration += t - this.pausedAt;
+        this.pausedAt = null; this.handler.resume(t);
+      }
+      return this;
+    }
+    update(t = this.clock()) { this.handler.update(t); return this; }
+    keyDown(action, t = this.clock(), options) {
+      if (!this.running) return false;
+      return this.handler.keyDown(action, t, options);
+    }
+    keyUp(action, t = this.clock(), options) { return this.handler.keyUp(action, t, options); }
+    elapsed(t = this.clock()) {
+      return this.startedAt === null ? 0 : Math.max(0, (this.endedAt ?? this.pausedAt ?? t) - this.startedAt - this.pausedDuration);
+    }
+  }
+
+  function judgePlacement(lock, optimal, correct = true) {
+    const status = !correct ? 'miss' : !optimal ? 'unjudged' :
+      lock.used === optimal.count ? 'perfect' : 'fault';
+    return { ...lock, status, optimal: optimal?.count ?? null, targetKey: optimal?.key ?? null,
+      targetCells: optimal?.cells.map(c => c.slice()) || [], optimalSequence: optimal?.sequence.slice() || [],
+      extra: optimal ? Math.max(0, lock.used - optimal.count) : 0 };
+  }
+
+  // Endless, unfiltered seven-bag play. The solver judges against the board
+  // BEFORE lock/clear. Deliberate descent/tucks outside its graph are unjudged.
+  class FreeSession extends PlaySession {
+    constructor(options = {}) {
+      super(options);
+      this.settings = this._settings(options.settings);
+      this.rng = options.rng || (options.seed === undefined ? Math.random : createRNG(options.seed));
+      this._reset(options.time ?? this.clock());
+    }
+    _settings(patch) {
+      const settings = normalizeSettings(patch);
+      // A zero-gravity training profile still gives normal falling play.
+      if (!settings.gravity) settings.gravity = 1 / 60;
+      return settings;
+    }
+    _reset(t) {
+      this.bag = new Bag({ rng: this.rng });
+      this.lines = 0; this.pieces = 0; this.gameOver = false; this.reason = null;
+      this.startedAt = this.endedAt = this.pausedAt = null; this.pausedDuration = 0;
+      this.running = false; this.lastResult = null; this.cueDrawPending = false; this.combo.reset();
+      this.handler = new InputHandler({ clock: this.clock, time: t, settings: this.settings,
+        bag: this.bag, autoNext: false, lockDelay: 500,
+        onLock: lock => this._onLock(lock),
+        onCommand: (action, time) => {
+          if (action === 'retry') this.restart(time);
+          else if (action === 'pause') this.pausedAt === null ? this.pause(time) : this.resume(time);
+          else if (action === 'settings') this._emit(action, { t: time });
+        },
+        onEvent: event => {
+          if (event.kind === 'spawn') {
+            this._touch(event.t);
+            const queueDrawn = this.cueDrawPending || event.queueDrawn;
+            this.cueDrawPending = false;
+            this._emit('spawn', { ...event, queueDrawn, nextType: this.bag.peek(1)[0] });
+          } else if (event.kind === 'blockout') this._gameOver('blockout', event.t);
+          else this._emit(event.kind, event);
+        }
+      });
+    }
+    _schedule(t) {
+      this.cueDrawPending = true;
+      this.handler.scheduleSpawn(this.bag.next(), t, this.settings.are);
+    }
+    start(t = this.clock()) {
+      if (this.running || this.endedAt !== null) throw new Error('Session already started');
+      this.running = true; this._schedule(t); return this;
+    }
+    restart(t = this.clock()) {
+      this.update(t); this._reset(t); this._emit('restart', { t }); return this.start(t);
+    }
+    _onLock(lock) {
+      const board = this.handler.board;
+      const optimal = finesseFor(lock.type, lock.cells, { board, ...this.settings });
+      const result = judgePlacement(lock, optimal && lock.used >= optimal.count ? optimal : null);
+      result.combo = result.status === 'unjudged' ? this.combo.reset() : this.combo.next(result);
+      board.lock(lock.state);
+      result.lines = board.clearLines(); this.lines += result.lines; this.pieces++;
+      this.lastResult = result; this._emit('result', { result });
+      if (lock.cells.every(([, y]) => y >= VISIBLE_HEIGHT)) this._gameOver('lockout', lock.t);
+      else this._schedule(lock.t);
+    }
+    _gameOver(reason, t) {
+      this.running = false; this.gameOver = true; this.reason = reason; this.endedAt = t;
+      this.cueDrawPending = false;
+      this.handler.active = this.handler.pending = null;
+      this.handler.fallAt = this.handler.lockAt = Infinity;
+      this.handler.held.clear(); this.handler.initialHoldBuffered = false;
+      this._emit('gameover', { t, reason });
+    }
+    setSettings(patch, t = this.clock()) {
+      this.update(t); this.settings = this._settings({ ...this.settings, ...patch });
+      this.handler.setSettings(this.settings, t); return this;
+    }
+    nextQueue(count = 5) {
+      return this.handler.pending ? [this.handler.pending.type].concat(this.bag.peek(Math.max(0, count - 1))).slice(0, count) : this.bag.peek(count);
+    }
+    snapshot(t = this.clock()) {
+      const elapsed = this.elapsed(t);
+      return { lines: this.lines, pieces: this.pieces, elapsed, pps: elapsed ? this.pieces * 1000 / elapsed : 0,
+        running: this.running, gameOver: this.gameOver, reason: this.reason };
+    }
+  }
+
   /* DrillSession keeps an empty practice board for every attempt. No lines
    * accumulate. It exposes round/target during ARE and nextQueue(5) for UI.
    * Column filters constrain the occupied LEFT column (inclusive); area aliases
@@ -2825,9 +3055,9 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
    * Timer starts on first gameplay input, including IRS/HD/IHS; pauses excluded.
    * Persistence is data-only via Stats.toJSON(); storage belongs to the UI.
    */
-  class DrillSession {
+  class DrillSession extends PlaySession {
     constructor(options = {}) {
-      this.clock = options.clock || defaultClock;
+      super(options);
       this.pieces = normalizePieces(options.pieces);
       this.settings = normalizeSettings(options.settings);
       this.rng = options.rng || (options.seed === undefined ? Math.random : createRNG(options.seed));
@@ -2844,13 +3074,9 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       this.sprintLength = options.sprintLength || 0;
       if (!Number.isInteger(this.sprintLength) || this.sprintLength < 0) throw new RangeError('Invalid sprint length');
       this.stats = new Stats();
-      this.combo = new ComboTracker();
       this.totalStats = options.totalStats instanceof Stats ? options.totalStats : new Stats(options.totalStats);
-      this.completed = 0; this.startedAt = null; this.endedAt = null;
-      this.pausedAt = null; this.pausedDuration = 0;
-      this.round = null; this.lastResult = null; this.running = false; this.serial = 0;
+      this.completed = 0; this.round = null; this.serial = 0;
       this.cueDrawPending = false;
-      this.onEvent = options.onEvent;
       this.handler = new InputHandler({ clock: this.clock, time: options.time, settings: this.settings,
         board: this.boardTemplate.clone(), bag: this.bag, autoNext: false,
         holdEnabled: this.pieces.length > 1,
@@ -2883,8 +3109,6 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       // Fail before play if ANY selected piece has no target under the filter.
       for (const type of this.pieces) if (!this._candidates(type).length) throw new RangeError('No targets for ' + type);
     }
-    _emit(kind, data = {}) { if (this.onEvent) this.onEvent({ kind, ...data }, this); }
-    _touch(t) { if (this.running && this.startedAt === null) this.startedAt = t; }
     _candidates(type) {
       const ranges = { all: [0, 9], left: [0, 2], center: [3, 5], right: [6, 9] };
       const [min, max] = this.columnRange || ranges[this.area];
@@ -2921,11 +3145,10 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     }
     _onLock(lock) {
       const correct = sameCells(lock.cells, this.round.target.cells);
-      const status = !correct ? 'miss' : lock.used === this.round.optimal ? 'perfect' : 'fault';
+      const result = judgePlacement(lock, this.round.target, correct);
+      const status = result.status;
       const advanced = correct && !(status === 'fault' && this.zeroFault);
-      const result = { ...lock, status, optimal: this.round.optimal, targetKey: this.round.target.key,
-        targetCells: this.round.target.cells.map(c => c.slice()),
-        optimalSequence: this.round.target.sequence.slice(), extra: Math.max(0, lock.used - this.round.optimal), advanced };
+      result.advanced = advanced;
       result.combo = this.combo.next(result);
       this.stats.record(result); this.totalStats.record(result); this.lastResult = result;
       if (advanced) this.completed++;
@@ -2955,35 +3178,17 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       this._drawRound(); this._schedule(t); return true;
     }
     setSettings(patch, t = this.clock()) {
-      this.update(t); this.settings = normalizeSettings(patch, this.settings);
+      this.update(t);
+      const previous = this.settings;
+      this.settings = normalizeSettings(patch, previous);
       // Refresh optimal count when 180/spawnDrop changes, retaining cell target.
-      if (this.round) this._newRound(this.round.type, this.round.target);
+      if (this.round && (this.settings.allow180 !== previous.allow180 || this.settings.spawnDrop !== previous.spawnDrop)) {
+        this._newRound(this.round.type, this.round.target);
+      }
       this.handler.setSettings(patch, t); return this;
     }
-    pause(t = this.clock()) {
-      this.update(t);
-      if (this.running && this.pausedAt === null) { this.pausedAt = t; this.handler.pause(t); }
-      return this;
-    }
-    resume(t = this.clock()) {
-      this.update(t);
-      if (this.pausedAt !== null) {
-        if (this.startedAt !== null) this.pausedDuration += t - this.pausedAt;
-        this.pausedAt = null; this.handler.resume(t);
-      }
-      return this;
-    }
-    update(t = this.clock()) { this.handler.update(t); return this; }
-    keyDown(action, t = this.clock(), options) {
-      if (!this.running) return false;
-      return this.handler.keyDown(action, t, options);
-    }
-    keyUp(action, t = this.clock(), options) { return this.handler.keyUp(action, t, options); }
     nextQueue(count = 5) {
       return this.handler.pending ? [this.round.type].concat(this.bag.peek(Math.max(0, count - 1))).slice(0, count) : this.bag.peek(count);
-    }
-    elapsed(t = this.clock()) {
-      return this.startedAt === null ? 0 : Math.max(0, (this.endedAt ?? this.pausedAt ?? t) - this.startedAt - this.pausedDuration);
     }
     snapshot(t = this.clock()) {
       const elapsed = this.elapsed(t);
@@ -2998,7 +3203,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     cells, cellsKey, sameCells, bounds, Board, spawnPiece, movePiece, rotatePiece,
     slidePiece, hardDrop, createRNG, Bag, ACTION_LABELS, applyAction, placementFor,
     finesseFor, allPlacements, DEFAULT_SETTINGS, SETTING_LIMITS, normalizeSettings,
-    INPUT_ACTIONS, validateBindings, rebindKeys, InputHandler, COMBO_MILESTONES, ComboTracker, Stats, DrillSession });
+    INPUT_ACTIONS, validateBindings, rebindKeys, InputHandler, COMBO_MILESTONES, ComboTracker, Stats, DrillSession, FreeSession });
 });
 </script>
   <script>/* Original, sample-free Web Audio cues. No context or nodes until unlock(). */
@@ -3865,13 +4070,21 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     retry: ['KeyR'], pause: ['Escape'], skip: ['KeyN'], settings: ['Comma'], hint: ['KeyH']
   };
   const ACTION_NAMES = { left: '左へ', right: '右へ', softDrop: 'ソフトドロップ', hardDrop: 'ハードドロップ',
-    cw: '右回転 CW', ccw: '左回転 CCW', rotate180: '180°回転', hold: 'ホールド', retry: '同じ目標をリトライ',
+    cw: '右回転 CW', ccw: '左回転 CCW', rotate180: '180°回転', hold: 'ホールド', retry: 'リトライ / 再スタート',
     pause: '一時停止', skip: '次の目標', settings: '設定を開く', hint: 'ヒント切替' };
   const UI_DEFAULTS = { zeroFault: false, repeatOnFault: false, repeatOnMiss: true, showTarget: true,
     showOptimal: true, showKeys: true, ghost: true, sound: true, volume: .3, bubbles: true,
     pieceCueTiming: 'next', pieceCueVolume: 60,
     hairSkin: M.DEFAULT_HAIR_SKIN, outfitSkin: M.DEFAULT_OUTFIT_SKIN };
   const PRACTICE_DEFAULTS = { pieces: [...E.PIECE_TYPES], area: 'all', minColumn: 1, maxColumn: 10, weakSpot: false };
+  const HANDLING = [
+    { key: 'das', title: 'DAS', note: '長押しの待ち時間 ms', unit: 'ms', step: 1 },
+    { key: 'arr', title: 'ARR', note: '連続移動の間隔 ms', unit: 'ms', step: 1 },
+    { key: 'sdf', title: 'SDF', note: 'ソフト落下倍率 / 41 = ∞', unit: '×', step: 1 },
+    { key: 'dcd', title: 'DCD', note: '自動移動の待機 ms', unit: 'ms', step: 1 },
+    { key: 'are', title: 'ARE', note: '次の出現まで ms', unit: 'ms', step: 1 },
+    { key: 'gravity', title: '重力 G', note: 'マス/フレーム · 0：フィネス編はなし／フリーは毎秒1マス', unit: 'G', step: .1 }
+  ];
   let settings = { ...E.DEFAULT_SETTINGS }, ui = { ...UI_DEFAULTS }, bindings = copy(DEFAULT_KEYS);
   let practice = copy(PRACTICE_DEFAULTS), progress = { current: 0, completed: [] };
   let totalStats = new E.Stats(), storageOK = true;
@@ -3941,11 +4154,15 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     } catch (_) { storageOK = false; }
   }
   let screen = 'menu', session = null, demo = null, lessonIndex = progress.current;
+  let menuMode = 'finesse';
+  const isFree = () => session instanceof E.FreeSession;
   let lessons = M.createLessons(settings), tryMode = false, tryIndex = 0, tryDone = false;
   let lessonMessage = '', sessionEventQueue = [], trace = [], irsUntil = 0, irsCount = 0;
   let hint = false, lastResult = null, resultActions = [];
   let expression = 'normal', bubble = '', tipIndex = 0, particles = [];
   let feedbackAt = 0, lastTipAttempt = 0;
+  let gameOverInputUntil = 0;
+  let handlingOpen = false;
   let settingsReturn = 'menu', capture = null, toastUntil = 0, lastHUD = 0, sprintResult = null;
   let demoVariant = 0, selectedDemo = null, lastQueue = '', statsScope = 'total';
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -4000,7 +4217,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     if (hidden) {
       audio.stopCombo();
       if (announcement?.textContent) announcement.textContent = '';
-      if (Object.values(M.COMBO_LINES).some(lines => lines.includes(bubble))) setCoach(pick(M.ENCOURAGEMENT_LINES));
+      if (Object.values(M.COMBO_LINES).some(lines => lines.includes(bubble))) setCoach(isFree() ? 'あなたのペースで大丈夫ですっ♪' : pick(M.ENCOURAGEMENT_LINES));
     }
     // A judged lock also queues a target event. Reuse this view on that event,
     // skips and other target changes rather than rewriting an unchanged count.
@@ -4076,11 +4293,11 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   }
 
   function menuHTML() {
-    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><p class="menu-mode"><span class="tag">フィネス編</span></p><nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>FREE PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="dressup"><span><b>ミルフィのきせかえ</b><small>DRESS-UP ROOM</small></span><span>✧</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p><p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
+    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="menu-mode" aria-label="モード"><button data-act="mode-finesse" aria-pressed="${menuMode === 'finesse'}">フィネス編</button><button data-act="mode-free" aria-pressed="${menuMode === 'free'}">フリーモード</button></nav>${menuMode === 'free' ? '<nav class="menu-buttons" aria-label="フリーモード"><button class="primary" data-act="free"><b>はじめる</b><span>→</span></button><button data-act="settings"><b>設定</b><span>⚙</span></button></nav>' : `<nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>TARGET PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="dressup"><span><b>ミルフィのきせかえ</b><small>DRESS-UP ROOM</small></span><span>✧</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p>`}<p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
   }
   function mini(type, extra = '') { return `<canvas class="mini-piece" data-piece="${type || ''}" width="144" height="108" aria-label="${type || '空'}ミノ" ${extra}></canvas>`; }
   function boardHTML() {
-    return `<div class="board-heading"><span>出現 / 21–22行</span><span>10 × 20</span></div><div class="board-shell"><canvas id="board" class="board" tabindex="0" role="img" aria-label="練習フィールド、10列20行と出現2行"></canvas><div id="irs-indicator" class="irs-flash" aria-live="polite">IRS ✧</div><div id="are-bar" class="are-track" role="progressbar" aria-label="出現までの待ち時間" aria-valuemin="0" aria-valuemax="100"><div class="are-fill"></div></div></div><div class="column-labels">${Array.from({ length: 10 }, (_, i) => `<span>${i + 1}</span>`).join('')}</div>`;
+    return `<div class="board-heading"><span>出現 / 21–22行</span><span>10 × 20</span></div><div class="board-shell"><canvas id="board" class="board" tabindex="0" role="img" aria-label="フィールド、10列20行と出現2行"></canvas><div id="irs-indicator" class="irs-flash" aria-live="polite">IRS ✧</div><div id="are-bar" class="are-track" role="progressbar" aria-label="出現までの待ち時間" aria-valuemin="0" aria-valuemax="100"><div class="are-fill"></div></div></div><div class="column-labels">${Array.from({ length: 10 }, (_, i) => `<span>${i + 1}</span>`).join('')}</div>`;
   }
   function pieceBars(stats) {
     return E.PIECE_TYPES.map(type => {
@@ -4089,11 +4306,46 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     }).join('');
   }
   function practiceHTML() {
-    return `<section class="panel practice-options"><h3>練習するミノ / 目標のエリア</h3><div class="piece-filters">${E.PIECE_TYPES.map(type => `<label class="piece-check"><input type="checkbox" data-piece-filter="${type}" ${practice.pieces.includes(type) ? 'checked' : ''}><span>${type}</span></label>`).join('')}</div><label class="filter-line">列のエリア<select id="area" aria-label="列のエリア">${[['all','すべて'],['left','左 / 1–3列'],['center','中央 / 4–6列'],['right','右 / 7–10列'],['custom','列を指定']].map(([value, label]) => `<option value="${value}" ${practice.area === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>${practice.area === 'custom' ? `<div class="filter-line">左端の列 <input id="min-column" aria-label="開始列" type="number" min="1" max="10" value="${practice.minColumn}"> 〜 <input id="max-column" aria-label="終了列" type="number" min="1" max="10" value="${practice.maxColumn}"></div>` : ''}<label class="checkline" style="margin-top:8px"><input data-practice="weakSpot" type="checkbox" ${practice.weakSpot ? 'checked' : ''}>苦手な目標を多めに</label><label class="checkline"><input data-ui="zeroFault" type="checkbox" ${ui.zeroFault ? 'checked' : ''}>ゼロフォルト（成功まで再挑戦）</label><p class="tiny" style="margin-top:5px">変更は次の目標から反映・成績は引き継ぎます</p></section>`;
+    return `<section class="panel practice-options"><h3>練習するミノ / エリア</h3><div class="piece-filters">${E.PIECE_TYPES.map(type => `<label class="piece-check"><input type="checkbox" data-piece-filter="${type}" ${practice.pieces.includes(type) ? 'checked' : ''}><span>${type}</span></label>`).join('')}</div><label class="filter-line">列のエリア<select id="area" aria-label="列のエリア">${[['all','すべて'],['left','左 / 1–3列'],['center','中央 / 4–6列'],['right','右 / 7–10列'],['custom','列を指定']].map(([value, label]) => `<option value="${value}" ${practice.area === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>${practice.area === 'custom' ? `<div class="filter-line">左端の列 <input id="min-column" aria-label="開始列" type="number" min="1" max="10" value="${practice.minColumn}"> 〜 <input id="max-column" aria-label="終了列" type="number" min="1" max="10" value="${practice.maxColumn}"></div>` : ''}<label class="checkline" style="margin-top:8px"><input data-practice="weakSpot" type="checkbox" ${practice.weakSpot ? 'checked' : ''}>苦手な目標を多めに</label><label class="checkline"><input data-ui="zeroFault" type="checkbox" ${ui.zeroFault ? 'checked' : ''}>ゼロフォルト</label><p class="tiny" style="margin-top:5px">変更後も成績は引き継ぎます</p></section>`;
+  }
+  function practiceStatsHTML(sprint) {
+    return `<section class="panel stats-panel"><div class="row spread panel-label"><span>SESSION / この練習</span><button class="quiet small" style="padding:0" data-act="records-session">全記録 ↗</button></div><div class="stats-main"><div class="stat"><label>連続Perfect</label><strong class="accent" id="streak">0</strong><small> 連続</small></div><div class="stat"><label>フィネス正確率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>最高 <b id="best-streak">0</b></span><span>PPS <b id="pps">0.00</b></span><span>成功 <b id="completed">0${sprint ? '/' + sprint : ''}</b></span></div>${sprint ? '<div class="sprint-progress"><div id="sprint-progress"></div></div>' : ''}<div class="stats-strip"><span>平均入力 <b id="average">0 / 0</b></span><span>ミス <b id="misses">0</b></span></div></section><section class="panel stats-panel"><div class="panel-label">フォルト / 試行 · ミノ別</div><div id="piece-bars" class="piece-bars">${pieceBars(session.stats)}</div></section>`;
+  }
+  function freeStatsHTML() {
+    return `<section class="panel stats-panel free-stats" aria-label="プレイ記録">${[['lines', 'ライン'], ['pieces', 'ミノ'], ['elapsed', '時間'], ['pps', 'PPS']].map(([id, label]) => `<div class="stat"><label>${label}</label><strong id="${id}">${id === 'elapsed' ? '00:00.00' : id === 'pps' ? '0.00' : '0'}</strong></div>`).join('')}</section>`;
+  }
+  function freeStatsValues(stats) {
+    return { lines: stats.lines, pieces: stats.pieces, elapsed: timeText(stats.elapsed), pps: stats.pps.toFixed(2) };
+  }
+  // The IRS challenge keeps its ARE window (and IRS) so a rotation can be
+  // buffered at all; every other timing is the player's saved handling.
+  function challengeOverrides(values) {
+    return session?.irsChallengeARE ? { irs: true, are: Math.max(values.are, session.irsChallengeARE) } : {};
+  }
+  function handlingValue(field) {
+    const value = { ...settings, ...challengeOverrides(settings) }[field.key];
+    // Imported fractions keep full precision in storage; show a compact value.
+    return field.key === 'sdf' && value === 41 ? '∞' : `${Number(value.toFixed(3))} ${field.unit}`;
+  }
+  // Shared, pointer-operated controls never take focus or consume play keys.
+  // The full settings screen supplies the keyboard-accessible editor.
+  function handlingPanelHTML() {
+    return `<section class="panel handling-panel" data-live-handling aria-label="プレイ中の操作設定" aria-describedby="handling-access"><button class="handling-toggle" data-act="toggle-handling" tabindex="-1" aria-expanded="${handlingOpen}" aria-controls="live-handling-controls">操作設定<span aria-hidden="true">${handlingOpen ? '−' : '＋'}</span></button><span id="handling-access" class="sr-only">キーボードでの調整は設定画面から。</span><div id="live-handling-controls" ${handlingOpen ? '' : 'hidden'}>${HANDLING.map(field => `<div class="handling-stepper" title="${field.note}"><span>${field.key === 'gravity' ? '重力' : field.title}</span><button data-act="adjust-handling" data-handling-key="${field.key}" data-step="-1" tabindex="-1" aria-label="${field.title}を減らす">−</button><output data-handling-value="${field.key}" aria-live="off">${handlingValue(field)}</output><button data-act="adjust-handling" data-handling-key="${field.key}" data-step="1" tabindex="-1" aria-label="${field.title}を増やす">＋</button></div>`).join('')}</div></section>`;
+  }
+  function syncHandlingPanel() {
+    for (const field of HANDLING) {
+      const output = $(`[data-handling-value="${field.key}"]`);
+      if (output) output.textContent = handlingValue(field);
+    }
   }
   function playHTML() {
-    const sprint = session.sprintLength;
-    return `<main class="play-page"><div class="row spread play-topline"><h1 class="play-title">${sprint ? 'スプリント' : 'フィネス・ドリル'}<span class="tag">${sprint ? sprint + ' PLACEMENTS' : 'FREE PRACTICE'}</span></h1><div class="row"><span id="sprint-time" class="sprint-time">00:00.00</span><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div></div><div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div id="practice-wrap">${practiceHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">ホールド</div><div id="hold-preview">${mini(null)}</div></div><p id="hold-note" class="hold-note">${session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効'}</p><div class="key-help">${['left', 'right', 'cw', 'ccw', 'rotate180'].map(a => `<kbd data-live-key="${a}" title="${ACTION_NAMES[a]}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><div class="queue-box"><div class="queue-title">次の5個</div><div id="next-preview"></div></div><p class="hold-note">${escape(friendly(bindings.hardDrop[0]))}<br>ハードドロップ</p>${comboHTML()}</aside></section><aside class="right-stack"><section class="panel stats-panel"><div class="row spread panel-label"><span>SESSION / この練習</span><button class="quiet small" style="padding:0" data-act="records-session">全記録 ↗</button></div><div class="stats-main"><div class="stat"><label>連続パーフェクト</label><strong class="accent" id="streak">0</strong><small> 連続</small></div><div class="stat"><label>フィネス正確率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>最高 <b id="best-streak">0</b></span><span>PPS <b id="pps">0.00</b></span><span>成功 <b id="completed">0${sprint ? '/' + sprint : ''}</b></span></div>${sprint ? '<div class="sprint-progress"><div id="sprint-progress"></div></div>' : ''}<div class="stats-strip"><span>平均入力 <b id="average">0 / 0</b></span><span>ミス <b id="misses">0</b></span></div></section><section class="panel stats-panel"><div class="panel-label">フォルト / 試行 · ミノ別</div><div id="piece-bars" class="piece-bars">${pieceBars(session.stats)}</div></section><section id="result-panel" class="panel result-panel"></section><div class="play-buttons"><button data-act="retry">↻ 同じ目標</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の目標 →</button><button data-act="settings">操作の設定</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
+    const free = isFree(), sprint = session.sprintLength;
+    return `<main class="play-page${free ? ' free-play' : ''}">
+      <div class="row spread play-topline"><h1 class="play-title">${free ? 'フリーモード' : sprint ? 'スプリント' : 'フィネス・ドリル'}${free ? '' : `<span class="tag">${sprint ? sprint + ' PLACEMENTS' : 'TARGET PRACTICE'}</span>`}</h1><div class="row">${free ? '' : '<span id="sprint-time" class="sprint-time">00:00.00</span>'}<button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div></div>
+      <div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div>${free ? '' : `<div id="practice-wrap">${practiceHTML()}</div>`}</aside>
+      <section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">ホールド</div><div id="hold-preview">${mini(null)}</div></div><p id="hold-note" class="hold-note">${session.handler.holdEnabled ? escape(friendly(bindings.hold[0])) + ' で交換<br>固定まで1回' : '1種類の練習では<br>ホールド無効'}</p><div class="key-help">${['left', 'right', 'cw', 'ccw', 'rotate180'].map(a => `<kbd data-live-key="${a}" title="${ACTION_NAMES[a]}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">${free ? '半透明：着地の影' : '破線：目標 · 半透明：着地の影'}</p></div><aside class="side-queue"><div class="queue-box"><div class="queue-title">次の5個</div><div id="next-preview"></div></div><p class="hold-note">${escape(friendly(bindings.hardDrop[0]))}<br>${free ? '固定' : 'ハードドロップ'}</p>${comboHTML()}</aside></section>
+      <aside class="right-stack"><div class="play-tools">${handlingPanelHTML()}<div id="play-stats" class="play-stats" ${handlingOpen ? 'hidden' : ''}>${free ? freeStatsHTML() : practiceStatsHTML(sprint)}</div></div><section id="result-panel" class="panel result-panel" aria-live="polite"></section><div class="play-buttons">${free ? `<button data-act="restart">↻ もう一度 ${escape(friendly(bindings.retry[0]))}</button><button data-act="menu">タイトルへ</button>` : `<button data-act="retry">↻ 同じ目標</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の目標 →</button><button data-act="settings">操作の設定</button>`}</div></aside></div>
+      <div class="play-footer" id="play-footer"></div></main>`;
   }
   function lessonsHTML() {
     return `<main class="page"><div class="page-heading"><div><div class="eyebrow">FINESSE CLASSROOM</div><h2 style="margin-top:6px">レッスン一覧</h2><p>実演を見て、3つの目標で練習。好きなところから復習できます。</p></div><span class="tag mint-tag">${progress.completed.length} / 12 チャレンジ達成</span></div><div class="lesson-list">${lessons.map((lesson, i) => `<button class="lesson-card" data-act="lesson" data-index="${i}"><span class="eyebrow">LESSON ${String(i + 1).padStart(2, '0')} ${progress.completed.includes(i) ? ' · ✔' : ''}</span><b>${escape(lesson.title)}</b><span>${i >= 4 && i <= 10 ? 'ミノ別の最短表・実演・3つの目標' : '実演とミニチャレンジ'}</span></button>`).join('')}</div></main>${footer()}`;
@@ -4101,7 +4353,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   function demoVariants(lesson) { return lesson.demo.examples || lesson.demo.variants || [lesson.demo]; }
   function tutorialHTML() {
     const lesson = lessons[lessonIndex], variants = demoVariants(lesson);
-    return `<main class="page lesson-page"><div class="page-heading lesson-heading"><div><div class="eyebrow">LESSON ${String(lessonIndex + 1).padStart(2, '0')} / 12</div><h2 style="margin-top:5px">${escape(lesson.title)}</h2></div><div class="row"><nav class="lesson-steps" aria-label="レッスン選択">${lessons.map((l, i) => `<button data-act="lesson" data-index="${i}" title="${escape(l.title)}" class="${i === lessonIndex ? 'active' : progress.completed.includes(i) ? 'done' : ''}">${i + 1}</button>`).join('')}</nav><button class="small" data-act="lessons">一覧</button></div></div><div class="lesson-grid"><aside class="lesson-coach">${speech(lesson.lines[0], 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${lesson.expression}">${mascot(lesson.expression, 'lesson')}</div><p class="tiny" style="text-align:center">ミルフィのフィネス教室</p>${tryMode ? comboHTML() : ''}</aside><section class="lesson-board">${boardHTML()}<div id="demo-keys" class="sequence"></div><p id="demo-caption" class="tiny" style="text-align:center;margin:8px 0">実演を準備しています…</p><div id="tutorial-result" class="lesson-status" aria-live="polite">${escape(lessonMessage)}</div></section><section class="lesson-details" aria-label="レッスンの説明と操作"><div class="lesson-content" tabindex="0" aria-label="レッスンの説明と最短表"><span class="tag ${tryMode ? 'mint-tag' : ''}">${tryMode ? 'YOUR TURN / 自分でチャレンジ' : 'WATCH / キーの光り方を見てみよう'}</span><div class="lesson-text">${lesson.lines.slice(1).map(line => `<p>${escape(line)}</p>`).join('')}</div><div class="demo-tabs">${variants.map((v, i) => `<button class="${demoVariant === i && !tryMode ? 'active' : ''}" data-act="demo" data-index="${i}">${lesson.demo.type === 'compare-sequences' ? i === 0 ? 'タップ × 4' : 'DAS × 1' : v.type === 'irs' ? 'IRSの実演' : v.type === 'ihs' ? 'IHSの実演' : '実演 ' + (i + 1)}</button>`).join('')}<button data-act="settings">操作の設定 ↗</button></div><div class="try-box"><h3>✧ やってみましょう</h3><p>${lesson.tryIt.requireIRS ? 'ARE中に回転キーを長押しして、IRSで置いてみましょうね。' : '目標の輪郭に、最少の回数で置いてみましょうね。別の最短手順でもOKですっ。'}<br>移動・回転で合わせ、${escape(friendly(bindings.hardDrop[0]))} で落下 / ${escape(friendly(bindings.retry[0]))} でもう一度</p><button class="small ${tryMode ? '' : 'primary'}" data-act="try-it">${tryDone ? 'もう一度チャレンジ' : tryMode ? `目標 ${Math.min(tryIndex + 1, lesson.tryIt.targets.length)} / ${lesson.tryIt.targets.length} · 最初から` : `${lesson.tryIt.targets.length}つの目標にチャレンジ`}</button></div>${lesson.demo.placementGroups ? `<h3 style="margin-bottom:7px">${lesson.demo.piece}ミノの最短ルート表</h3><p class="tiny">列を選ぶと実演します。0 / R / 2 / L は回転の向きです。</p><table class="lesson-table"><thead><tr><th>向き・左端の列</th><th>最短入力</th></tr></thead><tbody>${lesson.demo.placementGroups.map((group, i) => `<tr><td><button data-act="table-demo" data-index="${i}">${group.placements.map(p => `${p.rotationLabel}・${p.column}`).join(' / ')}</button></td><td><div class="sequence">${route(group.actions)}</div></td></tr>`).join('')}</tbody></table>` : ''}</div><nav class="lesson-nav" aria-label="前後のレッスン"><button class="small" data-act="previous-lesson" ${lessonIndex === 0 ? 'disabled' : ''}>← 前へ</button><button class="primary small" data-act="next-lesson">${lessonIndex === 11 ? 'ドリルへ →' : '次のレッスン →'}</button></nav><p class="tiny lesson-shortcuts">実演中: Enter / Space / → で次へ · ← で前へ · Esc でタイトル</p></section></div></main>`;
+    return `<main class="page lesson-page"><div class="page-heading lesson-heading"><div><div class="eyebrow">LESSON ${String(lessonIndex + 1).padStart(2, '0')} / 12</div><h2 style="margin-top:5px">${escape(lesson.title)}</h2></div><div class="row"><nav class="lesson-steps" aria-label="レッスン選択">${lessons.map((l, i) => `<button data-act="lesson" data-index="${i}" title="${escape(l.title)}" class="${i === lessonIndex ? 'active' : progress.completed.includes(i) ? 'done' : ''}">${i + 1}</button>`).join('')}</nav><button class="small" data-act="lessons">一覧</button></div></div><div class="lesson-grid"><aside class="lesson-coach">${speech(lesson.lines[0], 'coach-speech')}<div id="coach-mascot" class="mascot-wrap" data-expression="${lesson.expression}">${mascot(lesson.expression, 'lesson')}</div><p class="tiny" style="text-align:center">ミルフィのフィネス教室</p>${tryMode ? comboHTML() : ''}</aside><section class="lesson-board">${boardHTML()}<div id="demo-keys" class="sequence"></div><p id="demo-caption" class="tiny" style="text-align:center;margin:8px 0">実演を準備しています…</p><div id="tutorial-result" class="lesson-status" aria-live="polite">${escape(lessonMessage)}</div></section><section class="lesson-details" aria-label="レッスンの説明と操作">${tryMode ? handlingPanelHTML() : ''}<div class="lesson-content" tabindex="0" aria-label="レッスンの説明と最短表"><span class="tag ${tryMode ? 'mint-tag' : ''}">${tryMode ? 'YOUR TURN / 自分でチャレンジ' : 'WATCH / キーの光り方を見てみよう'}</span><div class="lesson-text">${lesson.lines.slice(1).map(line => `<p>${escape(line)}</p>`).join('')}</div><div class="demo-tabs">${variants.map((v, i) => `<button class="${demoVariant === i && !tryMode ? 'active' : ''}" data-act="demo" data-index="${i}">${lesson.demo.type === 'compare-sequences' ? i === 0 ? 'タップ × 4' : 'DAS × 1' : v.type === 'irs' ? 'IRSの実演' : v.type === 'ihs' ? 'IHSの実演' : '実演 ' + (i + 1)}</button>`).join('')}<button data-act="settings">操作の設定 ↗</button></div><div class="try-box"><h3>✧ やってみましょう</h3><p>${lesson.tryIt.requireIRS ? 'ARE中に回転キーを長押しして、IRSで置いてみましょうね。' : '目標の輪郭に、最少の回数で置いてみましょうね。別の最短手順でもOKですっ。'}<br>移動・回転で合わせ、${escape(friendly(bindings.hardDrop[0]))} で落下 / ${escape(friendly(bindings.retry[0]))} でもう一度</p><button class="small ${tryMode ? '' : 'primary'}" data-act="try-it">${tryDone ? 'もう一度チャレンジ' : tryMode ? `目標 ${Math.min(tryIndex + 1, lesson.tryIt.targets.length)} / ${lesson.tryIt.targets.length} · 最初から` : `${lesson.tryIt.targets.length}つの目標にチャレンジ`}</button></div>${lesson.demo.placementGroups ? `<h3 style="margin-bottom:7px">${lesson.demo.piece}ミノの最短ルート表</h3><p class="tiny">列を選ぶと実演します。0 / R / 2 / L は回転の向きです。</p><table class="lesson-table"><thead><tr><th>向き・左端の列</th><th>最短入力</th></tr></thead><tbody>${lesson.demo.placementGroups.map((group, i) => `<tr><td><button data-act="table-demo" data-index="${i}">${group.placements.map(p => `${p.rotationLabel}・${p.column}`).join(' / ')}</button></td><td><div class="sequence">${route(group.actions)}</div></td></tr>`).join('')}</tbody></table>` : ''}</div><nav class="lesson-nav" aria-label="前後のレッスン"><button class="small" data-act="previous-lesson" ${lessonIndex === 0 ? 'disabled' : ''}>← 前へ</button><button class="primary small" data-act="next-lesson">${lessonIndex === 11 ? 'ドリルへ →' : '次のレッスン →'}</button></nav><p class="tiny lesson-shortcuts">実演中: Enter / Space / → で次へ · ← で前へ · Esc でタイトル</p></section></div></main>`;
   }
   function handlingRow(key, title, note, step = 1) {
     const [min, max] = E.SETTING_LIMITS[key];
@@ -4118,7 +4370,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     return `<div class="cue-settings"><h3>ミノを音でお知らせ</h3><label class="filter-line">鳴らすタイミング<select data-ui="pieceCueTiming" aria-label="ミノの音のタイミング">${[['next', 'NEXT（次のミノ）'], ['current', '現在のミノ'], ['off', 'オフ']].map(([value, label]) => `<option value="${value}" ${ui.pieceCueTiming === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p class="tiny">出現時に、NEXTの先頭に来たミノをお知らせします♪<br>現在のミノにも切替できます。同じ目標のリトライやホールド交換では鳴りません。</p><label class="filter-line">ミノの音量<input aria-label="ミノの音量" data-ui="pieceCueVolume" type="range" min="0" max="100" step="1" value="${ui.pieceCueVolume}"><output id="cue-volume">${ui.pieceCueVolume}</output></label><div class="cue-preview" role="group" aria-label="ミノの音を試聴">${E.PIECE_TYPES.map(type => `<button class="small" data-act="preview-cue" data-piece="${type}" aria-label="${type}ミノの音を試聴">${type}</button>`).join('')}</div><p class="tiny">ミノを選んで試聴できます。効果音のオン・オフと全体の音量も反映します。</p></div>`;
   }
   function settingsHTML() {
-    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">操作と表示の設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目">${appearanceHTML()}<div class="settings-grid"><section class="panel"><div class="row spread"><h3>共通のハンドリング</h3><button class="quiet small" data-act="reset-handling">初期値に戻す</button></div>${handlingRow('das','DAS','長押しの待ち時間 ms')}${handlingRow('arr','ARR','連続移動の間隔 ms')}${handlingRow('sdf','SDF','ソフト落下倍率 / 41 = ∞')}${handlingRow('dcd','DCD','自動移動の待機 ms')}${handlingRow('are','ARE','次の出現まで ms')}${handlingRow('gravity','重力 G','0 = なし / マス数（60分の1秒）',.1)}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}</div><div class="settings-group" role="group" aria-labelledby="shared-display-sound"><h3 id="shared-display-sound">共通の表示・サウンド</h3><div class="toggle-grid">${toggle('ghost','着地の影を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div><label class="filter-line" style="margin-top:17px">音量 <input aria-label="音量" data-ui="volume" type="range" min="0" max="1" step=".05" value="${ui.volume}"></label>${cueSettingsHTML()}</div><div class="settings-group" role="group" aria-labelledby="finesse-settings"><h3 id="finesse-settings">フィネス編の練習</h3><div class="toggle-grid">${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('showOptimal','最短手順を表示')}</div></div></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">移動・回転などは共通、リトライ・次の目標・ヒントはフィネス編の操作です。<br>キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
+    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">操作と表示の設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目">${appearanceHTML()}<div class="settings-grid"><section class="panel"><div class="row spread"><h3>共通のハンドリング</h3><button class="quiet small" data-act="reset-handling">初期値に戻す</button></div>${HANDLING.map(field => handlingRow(field.key, field.title, field.note, field.step)).join('')}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}</div><div class="settings-group" role="group" aria-labelledby="shared-display-sound"><h3 id="shared-display-sound">共通の表示・サウンド</h3><div class="toggle-grid">${toggle('ghost','着地の影を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div><label class="filter-line" style="margin-top:17px">音量 <input aria-label="音量" data-ui="volume" type="range" min="0" max="1" step=".05" value="${ui.volume}"></label>${cueSettingsHTML()}</div><div class="settings-group" role="group" aria-labelledby="finesse-settings"><h3 id="finesse-settings">フィネス編の練習</h3><div class="toggle-grid">${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('showOptimal','最短手順を表示')}</div></div></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">移動・回転などは共通です。リトライはフリーモードでは再スタート。<br>次の目標・ヒントはフィネス編の操作です。<br>キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
   }
   function statsHTML() {
     const stats = statsScope === 'session' && session ? session.stats.snapshot() : totalStats.snapshot();
@@ -4140,6 +4392,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     app.innerHTML = header() + ({ menu: menuHTML, play: playHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
       dressup: dressupHTML, settings: settingsHTML, records: statsHTML, sprint: sprintHTML, result: resultHTML }[screen])();
     document.body.dataset.screen = screen;
+    document.body.dataset.mode = isFree() ? 'free' : 'finesse';
     document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
     lastQueue = ''; lastHUD = 0;
     updateCombo();
@@ -4163,7 +4416,10 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
         Object.keys(focusKey).length && Object.entries(focusKey).every(([key, value]) => el.dataset[key] === value));
       (target || $('main button:not(:disabled)'))?.focus({ preventScroll: true });
     }
-    if (['play','tutorial'].includes(screen) && session && session.pausedAt !== null && !tryDone) showPause();
+    if (['play','tutorial'].includes(screen)) {
+      if (isFree() && session.gameOver) showGameOver();
+      else if (session && session.pausedAt !== null && !tryDone) showPause();
+    }
   }
   function releaseAll() {
     if (!session) return;
@@ -4196,20 +4452,21 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   }
   function updateSettings(patch) {
     settings = E.normalizeSettings(patch, settings);
-    if (session) session.setSettings(settings, now());
+    if (session) session.setSettings({ ...patch, ...challengeOverrides(settings) }, now());
+    syncHandlingPanel();
     save();
   }
   function updateOptions() {
     audio.configure();
     document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
-    if (session) {
+    if (session && !isFree()) {
       session.zeroFault = ui.zeroFault; session.repeatOnFault = ui.repeatOnFault;
       session.repeatOnMiss = ui.repeatOnMiss;
     }
     save();
   }
-  function newSession(options) {
-    const s = new E.DrillSession({ clock: now, time: now(), settings, totalStats, ...options,
+  function newSession(options, Session = E.DrillSession) {
+    const s = new Session({ clock: now, time: now(), settings, totalStats, ...options,
       onEvent: (event, source) => sessionEventQueue.push({ event, source }) });
     return s;
   }
@@ -4218,13 +4475,14 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       columnRange: practice.area === 'custom' ? [practice.minColumn - 1, practice.maxColumn - 1] : null,
       weakSpot: practice.weakSpot, zeroFault: ui.zeroFault, repeatOnFault: ui.repeatOnFault, repeatOnMiss: ui.repeatOnMiss };
   }
-  function startPlay(length = 0) {
+  function startPlay(length = 0, free = false) {
     resetCombo();
     audio.stopCues();
     releaseAll(); sessionEventQueue = []; demo = null; tryMode = false; tryDone = false;
-    session = newSession({ ...sessionOptions(), sprintLength: length });
+    menuMode = free ? 'free' : 'finesse';
+    session = free ? newSession({}, E.FreeSession) : newSession({ ...sessionOptions(), sprintLength: length });
     lastResult = null; particles = []; hint = false; irsUntil = 0; irsCount = 0; lastTipAttempt = 0;
-    setCoach('目標の輪郭へ、最短ルートですっ♪ 迷ったらヒントをどうぞ。わたしもついていますよ。');
+    setCoach(free ? 'あなたのペースで、わたしも応援ですっ♪' : '輪郭に重ねて、最短の操作ですっ♪');
     screen = 'play'; session.start(now()); window.scrollTo(0, 0); render(); processEvents();
   }
   function updatePractice(next) {
@@ -4253,16 +4511,32 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     }
   }
   function showPause() {
-    if ($('.overlay') || !['play', 'tutorial'].includes(screen) || screen === 'tutorial' && tryDone) return;
+    if ($('.overlay') || !session?.running || !['play', 'tutorial'].includes(screen) || screen === 'tutorial' && tryDone) return;
     releaseAll();
-    app.insertAdjacentHTML('beforeend', `<div class="overlay" role="dialog" aria-modal="true" aria-label="一時停止"><div class="modal"><div class="eyebrow">TAKE A LITTLE BREAK</div><h2>ひとやすみしましょう♪</h2><p>タイマーもミノも止まっています。<br>準備ができたら、また一緒に。</p><div class="stack"><button class="primary" data-act="resume">練習を再開 ${escape(friendly(bindings.pause[0]))}</button><button data-act="settings">操作の設定</button><button class="quiet" data-act="menu">タイトルへ戻る</button></div></div></div>`);
+    app.insertAdjacentHTML('beforeend', `<div class="overlay" role="dialog" aria-modal="true" aria-label="一時停止"><div class="modal"><div class="eyebrow">TAKE A LITTLE BREAK</div><h2>ひとやすみしましょう♪</h2><p>タイマーもミノも止まっています。<br>準備ができたら、また一緒に。</p><div class="stack"><button class="primary" data-act="resume">再開 ${escape(friendly(bindings.pause[0]))}</button><button data-act="settings">操作の設定</button><button class="quiet" data-act="menu">タイトルへ戻る</button></div></div></div>`);
     $('.overlay .primary').focus({ preventScroll: true });
   }
   function resumePlay() {
     $('.overlay')?.remove(); releaseAll(); session?.resume(now()); $('#board')?.focus({ preventScroll: true });
   }
+  function showGameOver() {
+    if ($('.overlay') || screen !== 'play') return;
+    const stats = freeStatsValues(session.snapshot(now()));
+    app.insertAdjacentHTML('beforeend', `<div class="overlay gameover" role="dialog" aria-modal="true" aria-label="ゲームオーバー"><div class="modal"><h2>ゲームオーバー</h2><div class="result-summary">${[['lines', 'ライン'], ['pieces', 'ミノ'], ['elapsed', '時間'], ['pps', 'PPS']].map(([id, label]) => `<div class="stat"><label>${label}</label><strong>${stats[id]}</strong></div>`).join('')}</div><div class="stack"><button class="primary" data-act="restart">もう一度 ${escape(friendly(bindings.retry[0]))}</button><button data-act="menu">タイトルへ</button></div></div></div>`);
+    $('.overlay .primary').focus({ preventScroll: true });
+  }
+  function restartFree() {
+    if (!isFree()) return;
+    audio.stopCues(); sessionEventQueue = []; session.restart(now()); processEvents();
+  }
   function updateResult() {
     const panel = $('#result-panel'); if (!panel) return;
+    if (isFree()) {
+      const r = lastResult;
+      panel.className = 'panel result-panel' + (r ? ' ' + r.status : '');
+      panel.innerHTML = r ? `<div class="result-head"><strong>${r.status === 'perfect' ? '✔ Perfect' : r.status === 'fault' ? 'フォルト +' + r.extra : '固定'}</strong></div>` : '';
+      return;
+    }
     if (!lastResult) {
       panel.className = 'panel result-panel';
       panel.innerHTML = `<div class="result-head"><strong>目標を見てみよう</strong><small id="target-optimal"></small></div><p class="tiny" style="line-height:1.9">破線の目標と着地の影を重ねて、<br>${escape(friendly(bindings.hardDrop[0]))} で固定します。</p><div id="hint-route" class="hint-route" ${hint && ui.showOptimal ? '' : 'hidden'}></div>`;
@@ -4298,6 +4572,16 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       if (event.kind === 'pause') { audio.stopCues(); showPause(); }
       if (event.kind === 'blockout') audio.stopCues();
       if (event.kind === 'resume') $('.overlay')?.remove();
+      if (event.kind === 'restart') {
+        lastResult = null; particles = []; irsUntil = 0; irsCount = 0;
+        setCoach('あなたのペースで、わたしも応援ですっ♪'); render();
+      }
+      if (event.kind === 'gameover') {
+        audio.stopCues(); audio.stopCombo();
+        gameOverInputUntil = now() + 500;
+        setCoach('おつかれさまですっ。わたしと、もう一度どうぞ♪', 'sorry');
+        updateHUD(event.t); showGameOver();
+      }
       if (event.kind === 'hint') { hint = !hint; updateHint(); }
       if (event.kind === 'settings') openSettings();
       if (event.kind === 'result') {
@@ -4335,16 +4619,16 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
           save();
         } else {
           if (r.status === 'perfect') {
-            setCoach(source.stats.streak % 3 === 0 ? pick(M.PIECE_PRAISE[r.type]) : pick(M.PRAISE_LINES), 'happy');
+            setCoach(isFree() ? 'きれいな操作ですっ♪' : source.stats.streak % 3 === 0 ? pick(M.PIECE_PRAISE[r.type]) : pick(M.PRAISE_LINES), 'happy');
             if (!reducedMotion) for (let i = 0; i < 28; i++) particles.push({ x: 5, y: 2, vx: (Math.random() - .5) * 10, vy: 2 + Math.random() * 9, start: now(), color: ['#d9a6ce','#b5ddc8','#c5ade1','#efcf95'][i % 4] });
           } else if (r.status === 'fault') {
-            setCoach(M.hintText(r.type, r.used, r.optimal, resultActions.map(actionLabel)), 'thinking');
-          } else setCoach(pick(M.MISS_LINES), 'sorry');
-          updateResult(); save();
+            setCoach(isFree() ? `…${r.extra}入力多い。` : M.hintText(r.type, r.used, r.optimal, resultActions.map(actionLabel)), 'thinking');
+          } else if (r.status === 'miss') setCoach(pick(M.MISS_LINES), 'sorry');
+          updateResult(); if (!isFree()) save();
           // Lesson corrections, progress and completion keep their own feedback.
           if (r.combo.milestone && ui.bubbles) setCoach(pick(M.COMBO_LINES[r.combo.milestone]), 'happy');
         }
-        sound(r.status === 'perfect' ? 'perfect' : 'fault');
+        if (r.status !== 'unjudged') sound(r.status === 'perfect' ? 'perfect' : 'fault');
         if (r.combo.count >= 2) audio.combo(r.combo.count); else audio.stopCombo();
         updateCombo(r.combo, true);
       }
@@ -4358,12 +4642,13 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   function updateHUD(t) {
     if (screen !== 'play' || !session) return;
     const stats = session.snapshot(t), handler = session.handler;
-    const values = { streak: stats.streak, accuracy: stats.accuracy.toFixed(0), 'best-streak': stats.bestStreak,
+    const values = isFree() ? freeStatsValues(stats) :
+      { streak: stats.streak, accuracy: stats.accuracy.toFixed(0), 'best-streak': stats.bestStreak,
       pps: stats.pps.toFixed(2), completed: stats.completed + (session.sprintLength ? '/' + session.sprintLength : ''),
       average: stats.averageInputs.toFixed(1) + ' / ' + stats.averageOptimal.toFixed(1), misses: stats.misses,
       'sprint-time': timeText(stats.elapsed) };
     for (const [id, value] of Object.entries(values)) { const el = $('#' + id); if (el) el.textContent = value; }
-    $('#piece-bars').innerHTML = pieceBars(session.stats);
+    if ($('#piece-bars')) $('#piece-bars').innerHTML = pieceBars(session.stats);
     if ($('#target-optimal')) $('#target-optimal').textContent = '最短 ' + session.round.optimal + ' 入力';
     if ($('#sprint-progress')) $('#sprint-progress').style.width = 100 * session.completed / session.sprintLength + '%';
     const queue = session.nextQueue(), key = queue.join('') + ':' + handler.heldPiece;
@@ -4373,6 +4658,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     }
     $('#hold-preview').style.opacity = !handler.holdEnabled || handler.holdUsed ? '.4' : '1';
     $('.key-help').hidden = !ui.showKeys;
+    if (isFree()) return;
     const tip = M.TIPS[tipIndex % M.TIPS.length];
     $('#play-footer').textContent = '✧ ' + tip;
     if (session.stats.attempts && session.stats.attempts % 7 === 0) tipIndex = Math.floor(session.stats.attempts / 7);
@@ -4395,8 +4681,12 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     audio.stopCues();
     demo = null; releaseAll(); sessionEventQueue = []; tryMode = true; tryIndex = 0; tryDone = false; lastResult = null;
     const exercise = lessons[lessonIndex].tryIt;
-    session = newSession({ pieces: [exercise.piece], settings: { ...settings, ...exercise.settings },
+    // Demonstrations keep their slow teaching timings. Player challenges use
+    // the same saved handling as other play, except the IRS challenge's window.
+    session = newSession({ pieces: [exercise.piece], settings: { ...exercise.settings, ...settings,
+      ...(exercise.requireIRS ? { irs: true, are: Math.max(settings.are, exercise.settings.are) } : {}) },
       totalStats: new E.Stats(), zeroFault: true, repeatOnFault: true, repeatOnMiss: true });
+    if (exercise.requireIRS) session.irsChallengeARE = exercise.settings.are;
     session.start(now(), exercise.targets[0]); lessonMessage = '輪郭に重ねて、ハードドロップですっ♪'; render();
     $('#demo-keys').innerHTML = route(exercise.targets[0].actions);
     $('#demo-caption').textContent = `チャレンジ 1 / ${exercise.targets.length} · 最短 ${exercise.targets[0].count} 入力`;
@@ -4568,6 +4858,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     save(); endCapture(true); toast('キー設定の保存、完了ですっ。');
   }
   function clickAction(button) {
+    if (button.closest?.('.gameover') && now() < gameOverInputUntil) return;
     const act = button.dataset.act;
     if (act === 'menu') { save(); go('menu'); }
     else if (act === 'dressup') openDressup();
@@ -4578,6 +4869,9 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       save(); updateDressup();
     } else if (act === 'dressup-face') { dressupFace = M.EXPRESSIONS.includes(button.dataset.value) ? button.dataset.value : 'normal'; updateDressup(); }
     else if (act === 'dressup-motion') { dressupPaused = !dressupPaused; dressupMotion(); }
+    else if (act === 'mode-finesse' || act === 'mode-free') { menuMode = act === 'mode-free' ? 'free' : 'finesse'; render(); }
+    else if (act === 'free') startPlay(0, true);
+    else if (act === 'restart') restartFree();
     else if (act === 'drill') startPlay();
     else if (act === 'tutorial') startLesson(progress.current);
     else if (act === 'lessons') go('lessons');
@@ -4595,7 +4889,20 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       render(false);
     } else if (act === 'try-it') startTryIt();
     else if (act === 'settings') openSettings();
-    else if (act === 'close-settings') closeSettings();
+    else if (act === 'toggle-handling') {
+      handlingOpen = !handlingOpen;
+      button.setAttribute('aria-expanded', handlingOpen);
+      $('span[aria-hidden]', button).textContent = handlingOpen ? '−' : '＋';
+      $('#live-handling-controls').hidden = !handlingOpen;
+      if ($('#play-stats')) $('#play-stats').hidden = handlingOpen;
+      $('#board')?.focus({ preventScroll: true });
+    } else if (act === 'adjust-handling') {
+      const field = HANDLING.find(field => field.key === button.dataset.handlingKey);
+      const value = Number((settings[field.key] + Number(button.dataset.step) * field.step).toFixed(10));
+      updateSettings({ [field.key]: value });
+      processEvents();
+      $('#board')?.focus({ preventScroll: true });
+    } else if (act === 'close-settings') closeSettings();
     else if (act === 'preview-cue') audio.piece(button.dataset.piece);
     else if (act === 'pause') { pauseSession(); showPause(); }
     else if (act === 'resume') resumePlay();
@@ -4639,6 +4946,9 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       save(); endCapture(true); toast('キーの入れ替え、完了ですっ。');
     } else if (act === 'remove-key') { bindings[button.dataset.action].splice(Number(button.dataset.index), 1); save(); render(false); }
   }
+  document.addEventListener('mousedown', event => {
+    if (event.target.closest?.('[data-live-handling]')) event.preventDefault();
+  });
   document.addEventListener('click', event => { const button = event.target.closest('button[data-act]'); if (button && !button.disabled) clickAction(button); });
   document.addEventListener('input', event => {
     const input = event.target;
@@ -4702,7 +5012,14 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       event.preventDefault(); if (!event.repeat) acceptKey(event.code); return;
     }
     const action = Object.keys(bindings).find(name => bindings[name].includes(event.code));
-    const onBoard = event.target === $('#board') || event.target === document.body || event.target === document;
+    // Also guard programmatic/assistive focus on these pointer-only buttons:
+    // bound keys, arrows and Space belong to play, never native activation.
+    const onHandling = !!event.target.closest?.('[data-live-handling]')?.hasAttribute?.('data-live-handling');
+    if (onHandling) {
+      $('#board')?.focus({ preventScroll: true });
+      if (action || event.code.startsWith('Arrow') || ['Space', 'Enter'].includes(event.code)) event.preventDefault();
+    }
+    const onBoard = onHandling || event.target === $('#board') || event.target === document.body || event.target === document;
     if (screen === 'dressup') {
       if(event.code === 'Escape') { event.preventDefault(); if(!event.repeat) closeDressup(); }
       return;
@@ -4714,6 +5031,17 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     if (screen === 'tutorial' && event.code === 'Escape') { event.preventDefault(); if (!event.repeat) go('menu'); return; }
     const overlay = $('.overlay');
     if (overlay) {
+      if (isFree() && session.gameOver) {
+        // Cancel native button activation too, including Space held at top-out.
+        if (event.repeat || now() < gameOverInputUntil && (['Enter', 'Space'].includes(event.code) || action === 'retry')) {
+          event.preventDefault(); return;
+        }
+        if (event.target.closest?.('button') && ['Enter', 'Space'].includes(event.code)) return;
+        if (action === 'retry') { event.preventDefault(); if (!event.repeat) restartFree(); }
+        else if (event.code === 'Escape') { event.preventDefault(); if (!event.repeat) go('menu'); }
+        else navigateDialog(event, overlay);
+        return;
+      }
       if (event.code === 'Escape') { event.preventDefault(); if (!event.repeat) resumePlay(); }
       else if (event.target.closest?.('button') && ['Enter', 'Space'].includes(event.code)) return;
       else if (action === 'pause') { event.preventDefault(); if (!event.repeat) resumePlay(); }
@@ -4730,7 +5058,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       event.preventDefault(); if (!event.repeat) go('menu'); return;
     }
     if (editable(event.target)) return;
-    const buttonActivation = event.target.closest?.('button') && ['Enter', 'Space'].includes(event.code);
+    const buttonActivation = !onHandling && event.target.closest?.('button') && ['Enter', 'Space'].includes(event.code);
     if ((screen === 'play' || screen === 'tutorial' && tryMode) && session && !buttonActivation) {
       // Shift+Tab always reaches native controls. Arrow keys navigate controls while
       // the board is unfocused; gameplay shortcuts use their bindings on board.
@@ -4747,6 +5075,10 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       if (event.code === 'ArrowLeft') { event.preventDefault(); if (!event.repeat) startLesson(lessonIndex - 1); return; }
     }
     if (action === 'settings') { event.preventDefault(); if (!event.repeat) openSettings(); return; }
+    // During play, unbound arrows/Space/Enter on the board do nothing: they
+    // must not walk focus onto a button that the next Space would press.
+    if ((screen === 'play' || screen === 'tutorial' && tryMode) && session && onBoard &&
+      (event.code.startsWith('Arrow') || ['Space', 'Enter'].includes(event.code))) { event.preventDefault(); return; }
     if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
       const buttons = $$('button:not(:disabled)', $('main')).filter(el => el.offsetParent !== null);
       if (!buttons.length) return;
@@ -4784,7 +5116,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     if (screen === 'play' || screen === 'tutorial') renderBoard(t);
     if (screen === 'play' && t - lastHUD > 90) {
       lastHUD = t; updateHUD(t);
-      const attempts = session.stats.attempts;
+      const attempts = session.stats?.attempts;
       if (attempts && attempts % 7 === 0 && attempts !== lastTipAttempt && t - feedbackAt > 3200) {
         lastTipAttempt = attempts; setCoach(M.TIPS[tipIndex++ % M.TIPS.length], 'normal');
       }
@@ -4798,7 +5130,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   window.__mirutet = Object.freeze({
     getState() {
       const handler = screen === 'tutorial' && !tryMode ? demo?.handler : session?.handler;
-      return copy({ screen, settings, ui, bindings, practice, progress, lessonIndex, tryMode, tryIndex, tryDone,
+      return copy({ screen, menuMode, mode: session ? isFree() ? 'free' : 'finesse' : null, settings, ui, bindings, practice, progress, lessonIndex, tryMode, tryIndex, tryDone,
         expression, bubble, irsCount, storageOK, hint, lastResult, trace, combo: session?.combo.snapshot(),
         round: session?.round, stats: session?.snapshot(), totalStats: totalStats.snapshot(),
         active: handler?.active, pending: handler?.pending, inputs: handler?.inputs, inputCount: handler?.inputCount,
@@ -4807,7 +5139,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
         demo: demo ? { type: demo.variant.type, actions: demo.actions, target: demo.target } : null, sprintResult });
     },
     chooseTarget(type, target, { delay } = {}) {
-      if (!session?.running || session.pausedAt !== null) throw new Error('Open a running drill first');
+      if (!session?.running || isFree() || session.pausedAt !== null) throw new Error('Open a running drill first');
       const optimal = E.finesseFor(type, target, session.settings);
       if (!optimal) throw new Error('Unreachable debug target');
       releaseAll(); session._newRound(type, optimal); session.handler.board = session.boardTemplate.clone();
