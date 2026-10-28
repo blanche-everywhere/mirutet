@@ -391,6 +391,8 @@
   }
   function openSettings() {
     if (screen === 'settings') return;
+    // Settings → dress-up → settings goes back instead of nesting, so Back/Esc cannot loop.
+    if (screen === 'dressup' && dressupReturn === 'settings') { closeDressup(); return; }
     resetCombo();
     settingsReturn = screen; pauseSession(); demo = null; screen = 'settings'; window.scrollTo(0, 0); render();
   }
