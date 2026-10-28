@@ -161,3 +161,26 @@ test('numeric settings clamp invalid commits and preserve repeated edits across 
   app.click('reset-handling');assert.deepEqual(app.state().settings,E.DEFAULT_SETTINGS);
   app.click('close-settings');assert.equal(app.state().screen,'menu');
 });
+
+
+test('direct numeric edits snap to slider steps before saving, including decimal ties', () => {
+  const app = loadApp(); app.click('settings');
+  assert.match(app.nodes['#app'].innerHTML, /<span>近い設定<\/span>/);
+  for (const [key, raw, expected] of [
+    ['volume', '.33', .35], ['volume', '.325', .35], ['volume', '.324', .3],
+    ['volume', '1.01', 1], ['volume', '-.1', 0], ['pieceCueVolume', '37.6', 38]
+  ]) {
+    app.change({ui:key},raw,'input'); app.change({ui:key},raw);
+    assert.equal(app.state().ui[key],expected); assert.equal(app.persisted().ui[key],expected);
+  }
+  for (const [key, raw, expected] of [
+    ['das','12.6',13], ['arr','12.5',13], ['sdf','12.4',12], ['dcd','12.6',13],
+    ['are','12.6',13], ['gravity','.33',.3], ['gravity','.35',.4]
+  ]) {
+    app.change({setting:key},raw,'input');app.change({setting:key},raw);
+    assert.equal(app.state().settings[key],expected);assert.equal(app.persisted().settings[key],expected);
+  }
+  const restored=loadApp(app.persisted());
+  assert.deepEqual(restored.state().settings,app.state().settings);
+  assert.deepEqual(restored.state().ui,app.state().ui);
+});

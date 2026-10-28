@@ -4113,7 +4113,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     tgm3: { are: 67, irs: true, ihs: true, allow180: false }
   };
   function presetsHTML() {
-    return `<div class="handling-presets" role="group" aria-label="近い設定"><span>プリセット</span>${[['ppt2', 'PPT2'], ['tec', 'TEC'], ['tgm3', 'TGM3']].map(([key, label]) => `<button class="small" data-act="handling-preset" data-preset="${key}">${label}</button>`).join('')}<button class="small" data-act="reset-handling">既定値</button></div><details class="preset-notes"><summary>プリセットについて</summary><p>対応する既知の項目だけを変更します。ほかの値は保持し、適用後も調整できます。完全再現ではありません。1F＝1/60秒としてmsに丸めています。</p><p>PPT2：ARR 2F・ARE 7Fはコミュニティ計測。IRS/IHSなしは過去の検証版に基づきます。<br>TEC：ARR 2Fは公式サイトのコミュニティガイド、ARE 約6FはMaster限定の報告です。<br>TGM3：ARE 4FはMaster最速時の参考定数です。TEC・TGM3はIRS/IHSあり。いずれも1入力180度回転なし。</p></details>`;
+    return `<div class="handling-presets" role="group" aria-label="近い設定"><span>近い設定</span>${[['ppt2', 'PPT2'], ['tec', 'TEC'], ['tgm3', 'TGM3']].map(([key, label]) => `<button class="small" data-act="handling-preset" data-preset="${key}">${label}</button>`).join('')}<button class="small" data-act="reset-handling">既定値</button></div><details class="preset-notes"><summary>プリセットについて</summary><p>対応する既知の項目だけを変更します。ほかの値は保持し、適用後も調整できます。完全再現ではありません。1F＝1/60秒としてmsに丸めています。</p><p>PPT2：ARR 2F・ARE 7Fはコミュニティ計測。IRS/IHSなしは過去の検証版に基づきます。<br>TEC：ARR 2Fは公式サイトのコミュニティガイド、ARE 約6FはMaster限定の報告です。<br>TGM3：ARE 4FはMaster最速時の参考定数です。TEC・TGM3はIRS/IHSあり。いずれも1入力180度回転なし。</p></details>`;
   }
   let practice = copy(PRACTICE_DEFAULTS), progress = { current: 0, completed: [] };
   let totalStats = new E.Stats(), storageOK = true;
@@ -4401,9 +4401,15 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     const [min, max, step] = UI_NUMERIC[key];
     return `<div class="setting-row"><label for="ui-${key}">${title}</label><input aria-label="${title} スライダー" data-ui="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${ui[key]}"><button class="setting-step" data-act="adjust-ui" data-ui-key="${key}" data-step="-1" aria-label="${title}を減らす">−</button><input id="ui-${key}" aria-label="${title}" data-ui="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${ui[key]}"><button class="setting-step" data-act="adjust-ui" data-ui-key="${key}" data-step="1" aria-label="${title}を増やす">＋</button></div>`;
   }
+  // Match native range step rounding (ties toward the higher value). Clamp
+  // before rounding, and remove floating point noise from decimal steps.
+  function snapNumeric(value, min, max, step) {
+    const bounded = Math.max(min, Math.min(max, value));
+    const ticks = Math.round(Number(((bounded - min) / step).toFixed(10)));
+    return Math.max(min, Math.min(max, Number((min + ticks * step).toFixed(10))));
+  }
   function updateNumericUI(key, value) {
-    const [min, max] = UI_NUMERIC[key];
-    ui[key] = Math.max(min, Math.min(max, value));
+    ui[key] = snapNumeric(value, ...UI_NUMERIC[key]);
     for (const input of $$(`[data-ui="${key}"]`)) input.value = ui[key];
     if (key === 'pieceCueVolume' && $('#cue-volume')) $('#cue-volume').textContent = String(ui[key]);
     audio.configure(); save();
@@ -5006,7 +5012,9 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     const input = event.target;
     if (input.dataset.setting) {
       if (!input.value || !Number.isFinite(Number(input.value))) return;
-      const key = input.dataset.setting, raw = input.value, value = Number(raw); updateSettings({ [key]: value });
+      const key = input.dataset.setting, raw = input.value, value = Number(raw);
+      const field = HANDLING.find(field => field.key === key);
+      updateSettings({ [key]: snapNumeric(value, ...E.SETTING_LIMITS[key], field.step) });
       if (value === settings[key]) input.value = raw;
       processEvents();
       for (const other of $$(`[data-setting="${key}"]`)) if (other !== input) other.value = settings[key];

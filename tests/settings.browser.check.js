@@ -9,7 +9,7 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
   const state=()=>page.evaluate(()=>window.__mirutet.getState());
   const click=act=>page.locator(`[data-act="${act}"]`).first().click();
   await page.goto(pathToFileURL(path.resolve(__dirname,'../dist/mirutet.html')).href);
-  await click('settings'); assert.equal(await page.locator('h2').textContent(),'ゲーム設定');
+  await click('settings'); assert.equal(await page.locator('.handling-presets>span').textContent(),'近い設定'); assert.equal(await page.locator('h2').textContent(),'ゲーム設定');
   for(const key of ['das','arr','sdf','dcd','are','gravity']) {
     const input=page.locator(`#setting-${key}`),range=page.locator(`[data-setting=${key}][type=range]`);
     await input.fill('');await input.blur();assert.notEqual(await input.inputValue(),'');
@@ -21,6 +21,20 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
     await page.locator(`[data-act=adjust-handling][data-handling-key=${key}][data-step="1"]`).click();
     assert(Math.abs((await state()).settings[key]-before-(key==='gravity'?.1:1))<1e-8);
     assert.equal(await input.inputValue(),await range.inputValue());
+  }
+  // Regression: browser range values must equal number fields and stored state.
+  for (const [attribute,key,raw,expected] of [
+    ['ui','volume','.33',.35], ['ui','volume','.325',.35], ['ui','pieceCueVolume','37.6',38],
+    ['setting','das','12.6',13], ['setting','arr','12.5',13], ['setting','sdf','12.4',12],
+    ['setting','dcd','12.6',13], ['setting','are','12.6',13], ['setting','gravity','.35',.4]
+  ]) {
+    const number=page.locator(`[data-${attribute}=${key}][type=number]`);
+    const range=page.locator(`[data-${attribute}=${key}][type=range]`);
+    await number.fill(raw); await number.blur();
+    assert.equal(await number.inputValue(),String(expected));assert.equal(await range.inputValue(),String(expected));
+    assert.equal((await state())[attribute==='ui'?'ui':'settings'][key],expected);
+    const stored=await page.evaluate(()=>JSON.parse(localStorage.getItem(window.__mirutet.storageKey)));
+    assert.equal(stored[attribute==='ui'?'ui':'settings'][key],expected);
   }
   await page.locator('#setting-das').fill('173');
   for(let i=0;i<24;i++) await page.locator('[data-act=handling-preset]').nth(i%3).click();
@@ -47,7 +61,7 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
   await click('mode-free');await click('free');await page.waitForFunction(()=>!!window.__mirutet.getState().active);
   await click('toggle-handling');
   const live=page.locator('[data-live-handling] input[type=number][data-setting=das]');
-  await live.fill('182');assert.equal((await state()).settings.das,182);
+  await live.fill('181.6');assert.equal((await state()).settings.das,182);
   const active=(await state()).active;
   await page.keyboard.press('ArrowRight');await page.keyboard.press('Space');
   assert.equal((await state()).active.x,active.x);assert.equal((await state()).active.rot,active.rot);
