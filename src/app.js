@@ -191,11 +191,58 @@
   // Unlock on the gesture itself, before an ARE timer or a preview's click.
   document.addEventListener('pointerdown', () => audio.unlock(), { passive: true });
   function header() {
-    return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ミルテト</span></button><div class="top-actions">${screen !== 'menu' ? '<button class="quiet small" data-act="menu">タイトル</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
+    return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ミルテト</span></button><div class="top-actions">${screen !== 'menu' ? '<button class="quiet small" data-act="menu">タイトル</button>' : ''}${screen !== 'dressup' ? '<button class="quiet small" data-act="dressup">きせかえ</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
   }
   function footer() { return '<footer class="footer"><span>ミルテト学園 · 小さな一手で、もっと楽しく。</span><span>ORIGINAL ART & SYNTHESIZED SOUND · NO NETWORK</span></footer>'; }
+
+  // Dress-up choices use existing saved cosmetic IDs; expressions stay local.
+  let dressupReturn = 'menu', dressupFace = 'normal', dressupPaused = reducedMotion;
+  const dressupHairNames = {side:'そよ風サイド',center:'おすましセンター',intake:'ふんわりフェザー'},dressupHairHints={side:'7:3でふんわり横流し',center:'真ん中分けのやさしいカーブ',intake:'控えめインテークの立体感'},dressupOutfitNames={uniform:'放課後フィネス',cape:'月夜のワルツ'},dressupFaceNames={normal:'いつもの',happy:'にっこり',surprised:'びっくり',thinking:'考え中',sorry:'しょんぼり'};
+  function dressupStorageText() { return storageOK ? '髪型と衣装は自動保存されます。' : '保存できないため、この起動中だけ選択を保持します。'; }
+  function dressupCombination() { return dressupHairNames[ui.hairSkin] + ' × ' + dressupOutfitNames[ui.outfitSkin]; }
+  function dressupAvatar() { return M.mascotSVG(dressupFace, {idPrefix:'dressup', hairSkin:ui.hairSkin, outfitSkin:ui.outfitSkin, halo:false}); }
+  function dressupChoices(kind) {
+    const names = kind === 'hair' ? dressupHairNames : dressupOutfitNames;
+    return Object.entries(names).map(([value, label]) => {
+      const opts = { hairSkin: kind === 'hair' ? value : 'center', outfitSkin: kind === 'outfit' ? value : 'uniform', animated:false, halo:false, idPrefix:'dressup-thumb' };
+      const crop = kind === 'hair' ? '58 13 184 151' : '65 225 170 103';
+      const thumb = M.mascotSVG('normal',opts).replace('viewBox="0 0 300 328"',`viewBox="${crop}"`).replace('role="img"','role="img" aria-hidden="true"');
+      const selected = value === ui[kind === 'hair' ? 'hairSkin' : 'outfitSkin'];
+      const hint = kind === 'hair' ? dressupHairHints[value] : value === 'uniform' ? 'やさしい桃色の制服' : '黒いケープと細いレース';
+      return `<button class="choice ${kind === 'outfit' ? 'outfit-choice' : ''}" data-act="dressup-select" data-kind="${kind}" data-value="${value}" aria-pressed="${selected}"><span class="tick" aria-hidden="true">✓</span><span class="thumb">${thumb}</span><span><strong>${label}</strong><small>${hint}</small></span></button>`;
+    }).join('');
+  }
+  function dressupFaces() { return Object.entries(dressupFaceNames).map(([value,label]) => `<button class="expression" data-act="dressup-face" data-value="${value}" aria-pressed="${value === dressupFace}">${label}</button>`).join(''); }
+  function dressupMotion() {
+    $('#avatar')?.getAnimations({subtree:true}).forEach(a => dressupPaused ? a.pause() : a.play());
+    const button = $('#motion'); if(button) { button.textContent = dressupPaused ? '▷ 動きを再開' : 'Ⅱ 動きを止める'; button.setAttribute('aria-pressed',String(dressupPaused)); }
+  }
+  function updateDressup() {
+    $('#avatar').innerHTML = dressupAvatar(); $('#combination').textContent = dressupCombination();
+    $$('.dressup-page [data-act="dressup-select"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.value === ui[b.dataset.kind === 'hair' ? 'hairSkin' : 'outfitSkin'])));
+    $$('.dressup-page [data-act="dressup-face"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.value === dressupFace)));
+    $('#dressup-storage').textContent = dressupStorageText();
+    $('#dressup-status').textContent = dressupCombination() + '、' + dressupFaceNames[dressupFace];
+    dressupMotion();
+  }
+  function dressupHTML() { return `<main class="dressup-page"><div class="heading"><button class="quiet" data-act="close-dressup">← 戻る</button><div><p class="eyebrow">A LITTLE MOMENT WITH MIRUFI</p><h1 tabindex="-1" id="room-title">ミルフィのきせかえルーム</h1><p class="subtitle">今日は、どんなミルフィに会いたい？</p></div><div class="session" id="dressup-storage" role="status">${dressupStorageText()}</div></div><div class="room">
+<section class="panel" aria-labelledby="hair-title"><div class="panel-head"><span class="number">01</span><h2 id="hair-title">ヘアスタイル</h2><small>HAIR</small></div><div class="choices" id="hair-choices">${dressupChoices("hair")}</div><p class="hint">ふんわり流しても、すっきり分けても。好きな雰囲気を選んでね。</p></section>
+<section class="center" aria-label="ミルフィの試着"><div class="portrait"><span class="room-label">MIRUFI'S LITTLE WARDROBE</span><span class="spark" aria-hidden="true">✧</span><span class="spark second" aria-hidden="true">✧</span><div id="avatar" class="avatar">${dressupAvatar()}</div><div class="floor"></div><div class="outfit-name" id="combination">${dressupCombination()}</div></div><p class="speech" id="speech">「いっしょに、お気に入りを見つけよう？」</p><div class="expressions" id="expressions" aria-label="表情を試す">${dressupFaces()}</div><button id="motion" data-act="dressup-motion" class="motion" aria-pressed="false">Ⅱ 動きを止める</button></section>
+<section class="panel" aria-labelledby="outfit-title"><div class="panel-head"><span class="number">02</span><h2 id="outfit-title">お洋服</h2><small>OUTFIT</small></div><div class="choices" id="outfit-choices">${dressupChoices("outfit")}</div><p class="hint">いつもの制服と、ちょっと特別な黒ケープ。髪型との組み合わせも自由に。</p></section>
+</div><footer class="footer"><span>選ぶたびにその場でお着替え。表情も自由に試せます。</span><span>髪型と衣装はゲームにも反映されます。試し表情はこの部屋だけ。</span></footer><div id="dressup-status" class="status" role="status" aria-live="polite"></div></main>`; }
+  function openDressup() {
+    if(screen === 'dressup') return;
+    if(screen === 'settings' && settingsReturn === 'dressup') { closeSettings(); return; }
+    dressupReturn = screen; dressupFace = 'normal'; resetCombo(); pauseSession(); demo = null;
+    screen = 'dressup'; window.scrollTo(0,0); render();
+  }
+  function closeDressup() {
+    screen = dressupReturn; window.scrollTo(0,0); render();
+    // Returning to an active lesson/drill keeps the existing pause overlay.
+  }
+
   function menuHTML() {
-    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="menu-mode" aria-label="モード"><button data-act="mode-finesse" aria-pressed="${menuMode === 'finesse'}">フィネス編</button><button data-act="mode-free" aria-pressed="${menuMode === 'free'}">フリーモード</button></nav>${menuMode === 'free' ? '<nav class="menu-buttons" aria-label="フリーモード"><button class="primary" data-act="free"><b>はじめる</b><span>→</span></button><button data-act="settings"><b>設定</b><span>⚙</span></button></nav>' : `<nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>TARGET PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p>`}<p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
+    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="menu-mode" aria-label="モード"><button data-act="mode-finesse" aria-pressed="${menuMode === 'finesse'}">フィネス編</button><button data-act="mode-free" aria-pressed="${menuMode === 'free'}">フリーモード</button></nav>${menuMode === 'free' ? '<nav class="menu-buttons" aria-label="フリーモード"><button class="primary" data-act="free"><b>はじめる</b><span>→</span></button><button data-act="settings"><b>設定</b><span>⚙</span></button></nav>' : `<nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>TARGET PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="dressup"><span><b>ミルフィのきせかえ</b><small>DRESS-UP ROOM</small></span><span>✧</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p>`}<p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
   }
   function mini(type, extra = '') { return `<canvas class="mini-piece" data-piece="${type || ''}" width="144" height="108" aria-label="${type || '空'}ミノ" ${extra}></canvas>`; }
   function boardHTML() {
@@ -292,7 +339,7 @@
     const focusKey = previous?.dataset ? { ...previous.dataset } : {};
     const previousId = previous?.id;
     app.innerHTML = header() + ({ menu: menuHTML, play: playHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
-      settings: settingsHTML, records: statsHTML, sprint: sprintHTML, result: resultHTML }[screen])();
+      dressup: dressupHTML, settings: settingsHTML, records: statsHTML, sprint: sprintHTML, result: resultHTML }[screen])();
     document.body.dataset.screen = screen;
     document.body.dataset.mode = isFree() ? 'free' : 'finesse';
     document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
@@ -307,6 +354,7 @@
     }
     drawMinis();
     fitLessonBoard();
+    if (screen === 'dressup') dressupMotion();
     if (focus) {
       const target = screen === 'play' || screen === 'tutorial' ? $('#board') : $('main .primary:not(:disabled)') || $('main button:not(:disabled)');
       target?.focus({ preventScroll: true });
@@ -317,8 +365,10 @@
         Object.keys(focusKey).length && Object.entries(focusKey).every(([key, value]) => el.dataset[key] === value));
       (target || $('main button:not(:disabled)'))?.focus({ preventScroll: true });
     }
-    if (isFree() && session.gameOver) showGameOver();
-    else if (session && session.pausedAt !== null && !tryDone) showPause();
+    if (['play','tutorial'].includes(screen)) {
+      if (isFree() && session.gameOver) showGameOver();
+      else if (session && session.pausedAt !== null && !tryDone) showPause();
+    }
   }
   function releaseAll() {
     if (!session) return;
@@ -341,6 +391,8 @@
   }
   function openSettings() {
     if (screen === 'settings') return;
+    // Settings → dress-up → settings goes back instead of nesting, so Back/Esc cannot loop.
+    if (screen === 'dressup' && dressupReturn === 'settings') { closeDressup(); return; }
     resetCombo();
     settingsReturn = screen; pauseSession(); demo = null; screen = 'settings'; window.scrollTo(0, 0); render();
   }
@@ -760,6 +812,14 @@
     if (button.closest?.('.gameover') && now() < gameOverInputUntil) return;
     const act = button.dataset.act;
     if (act === 'menu') { save(); go('menu'); }
+    else if (act === 'dressup') openDressup();
+    else if (act === 'close-dressup') closeDressup();
+    else if (act === 'dressup-select') {
+      const key = button.dataset.kind === 'hair' ? 'hairSkin' : 'outfitSkin';
+      ui[key] = key === 'hairSkin' ? M.normalizeHairSkin(button.dataset.value) : M.normalizeOutfitSkin(button.dataset.value);
+      save(); updateDressup();
+    } else if (act === 'dressup-face') { dressupFace = M.EXPRESSIONS.includes(button.dataset.value) ? button.dataset.value : 'normal'; updateDressup(); }
+    else if (act === 'dressup-motion') { dressupPaused = !dressupPaused; dressupMotion(); }
     else if (act === 'mode-finesse' || act === 'mode-free') { menuMode = act === 'mode-free' ? 'free' : 'finesse'; render(); }
     else if (act === 'free') startPlay(0, true);
     else if (act === 'restart') restartFree();
@@ -911,6 +971,10 @@
       if (action || event.code.startsWith('Arrow') || ['Space', 'Enter'].includes(event.code)) event.preventDefault();
     }
     const onBoard = onHandling || event.target === $('#board') || event.target === document.body || event.target === document;
+    if (screen === 'dressup') {
+      if(event.code === 'Escape') { event.preventDefault(); if(!event.repeat) closeDressup(); }
+      return;
+    }
     if (screen === 'settings') {
       if (event.code === 'Escape') { event.preventDefault(); if (!event.repeat) closeSettings(); }
       return;
