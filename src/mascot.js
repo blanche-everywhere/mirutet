@@ -70,7 +70,7 @@
 
   const HAIR_SKINS = Object.freeze(['side', 'center', 'intake']);
   const DEFAULT_HAIR_SKIN = 'center';
-  const HAIR_SKIN_LABELS = Object.freeze({ side: '7:3', center: '真ん中分け', intake: '控えめインテーク' });
+  const HAIR_SKIN_LABELS = Object.freeze({ side: 'そよ風サイド', center: 'おすましセンター', intake: 'ふんわりフェザー' });
   const HAIR_DESIGNS = deepFreeze({
   "side": {
     "outline": "M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 214 125 C199 122 190 108 182 92 C173 104 150 116 126 118 Q105 121 86 123 Q88 153 77 179 Q66 165 70 138Z",
@@ -115,7 +115,7 @@
 
   const OUTFIT_SKINS = Object.freeze(['uniform', 'cape']);
   const DEFAULT_OUTFIT_SKIN = 'uniform';
-  const OUTFIT_SKIN_LABELS = Object.freeze({ uniform: '制服', cape: '黒ケープ' });
+  const OUTFIT_SKIN_LABELS = Object.freeze({ uniform: '放課後フィネス', cape: '月夜のワルツ' });
   function normalizeOutfitSkin(value) {
     return OUTFIT_SKINS.includes(value) ? value : DEFAULT_OUTFIT_SKIN;
   }

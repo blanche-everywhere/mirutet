@@ -1942,6 +1942,116 @@ kbd,.key-help kbd { font-size:13px; }
   .mini-piece { width:82px; height:64px; }
 }
 .board-shell:focus-within { outline:3px solid #b6a0da; outline-offset:3px; }
+
+.dressup-page{font-family:"Yu Gothic UI",Meiryo,sans-serif;color:#51465d;background:#f8f5fa;font-synthesis:none;--ink:#51465d;--purple:#9275ab;--line:#e6deed}
+.dressup-page *{box-sizing:border-box}
+.dressup-page{margin:0}
+.dressup-page button{font:inherit;color:inherit;cursor:pointer}
+.dressup-page button:focus-visible{outline:3px solid #8e6ea8;outline-offset:4px}
+.dressup-page button{touch-action:manipulation}
+.dressup-page button:hover{filter:brightness(.98)}
+.dressup-page [hidden]{display:none!important}
+.dressup-page .top{height:76px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 4vw;border-bottom:1px solid var(--line);background:#ffffffc9}
+.dressup-page .brand{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.06em}
+.dressup-page .blocks{display:grid;grid-template-columns:repeat(3,9px);gap:3px;transform:rotate(-12deg)}
+.dressup-page .blocks i{width:9px;height:9px;background:#c4addc;border-radius:2px}
+.dressup-page .blocks i:nth-child(2){background:#eabed3;transform:translateY(-5px)}
+.dressup-page .quiet{border:1px solid var(--line);border-radius:30px;background:white;padding:10px 18px;font-size:13px}
+.dressup-page .badge{font-size:10px;letter-spacing:.12em;border:1px solid var(--line);padding:7px 10px;border-radius:20px;color:#95809e}
+.dressup-page .heading{max-width:1320px;margin:30px auto 23px;padding:0 32px;display:flex;justify-content:space-between;align-items:end;gap:20px}
+.dressup-page .eyebrow{font-size:10px;letter-spacing:.22em;color:#a18eaf;margin:0 0 8px}
+.dressup-page h1{font-size:30px;font-weight:650;letter-spacing:.03em;margin:0}
+.dressup-page p{line-height:1.8}
+.dressup-page .subtitle{font-size:13px;color:#95869d;margin:10px 0 0}
+.dressup-page .session{font-size:11px;color:#9b8ca2;max-width:230px;line-height:1.8}
+.dressup-page .room{max-width:1320px;padding:0 32px 30px;margin:auto;display:grid;grid-template-columns:246px minmax(300px,1fr) 246px;gap:24px;align-items:start}
+.dressup-page .panel{background:#ffffffb5;border:1px solid var(--line);border-radius:24px;padding:22px 18px}
+.dressup-page .panel-head{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.dressup-page .number{color:#b09ac0;font-size:11px;letter-spacing:.08em}
+.dressup-page h2{font-size:16px;font-weight:650;margin:0}
+.dressup-page .panel-head small{margin-left:auto;color:#a18eaf;font-size:10px}
+.dressup-page .choices{display:grid;gap:10px}
+.dressup-page .choice{position:relative;width:100%;display:flex;align-items:center;gap:13px;padding:9px;border:1px solid #e9e1ef;border-radius:17px;background:white;text-align:left;transition:border-color .15s,box-shadow .15s}
+.dressup-page .choice[aria-pressed=true]{border:2px solid #b49ac8;padding:8px;background:#faf6fd;box-shadow:0 3px 10px #a68bbb16}
+.dressup-page .thumb{display:block;width:78px;height:83px;flex-shrink:0;border-radius:12px;background:linear-gradient(145deg,#f8eef6,#edf8f3);overflow:hidden;pointer-events:none}
+.dressup-page .thumb svg{width:100%;height:100%;max-width:none}
+.dressup-page .choice strong{display:block;font-size:12px;font-weight:600;margin-bottom:5px}
+.dressup-page .choice small{font-size:10px;color:#a18eaf}
+.dressup-page .tick{position:absolute;right:8px;top:7px;width:17px;height:17px;background:#b69bca;color:#fff;border-radius:50%;font-size:10px;display:none;align-items:center;justify-content:center}
+.dressup-page .choice[aria-pressed=true] .tick{display:flex}
+.dressup-page .hint{font-size:11px;color:#a08fa8;line-height:1.9;margin:18px 2px 0}
+.dressup-page .portrait{position:relative;border:1px solid #e4d9eb;border-radius:150px 150px 28px 28px;background:radial-gradient(ellipse at 20% 20%,#fff6fa 0,transparent 60%),radial-gradient(ellipse at 80% 80%,#e4f3ef 0,transparent 60%),#f3eff9;overflow:hidden;min-height:562px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:48px 16px 20px}
+.dressup-page .portrait:before{content:'';position:absolute;inset:14px;border:1px solid #fff;border-radius:140px 140px 20px 20px;pointer-events:none}
+.dressup-page .spark{position:absolute;color:#c5add8;font-size:22px;top:105px;left:30px}
+.dressup-page .spark.second{top:240px;left:auto;right:25px;font-size:14px;color:#d6b6c6}
+.dressup-page .room-label{position:absolute;top:28px;left:0;right:0;text-align:center;font-size:10px;letter-spacing:.2em;color:#aa95b7}
+.dressup-page .avatar{position:relative;width:min(100%,430px);z-index:1}
+.dressup-page .avatar svg{width:100%;height:auto}
+.dressup-page .floor{width:80%;height:20px;background:#b8a2ca22;filter:blur(7px);border-radius:50%;margin-top:-7px}
+.dressup-page .outfit-name{font-size:12px;color:#897295;background:#ffffffb3;padding:7px 14px;border-radius:20px;margin-top:10px}
+.dressup-page .center{text-align:center}
+.dressup-page .speech{font-size:13px;color:#897195;margin:18px 0 14px;min-height:23px}
+.dressup-page .expressions{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.dressup-page .expression{border:1px solid var(--line);background:white;border-radius:20px;padding:8px 12px;font-size:11px}
+.dressup-page .expression[aria-pressed=true]{background:#9a7db1;color:white;border-color:#9a7db1}
+.dressup-page .motion{border:0;background:none;font-size:11px;color:#a491b0;margin-top:15px;padding:8px 12px}
+.dressup-page .outfit-choice{flex-direction:column;gap:7px;text-align:center;padding:12px}
+.dressup-page .outfit-choice[aria-pressed=true]{padding:11px}
+.dressup-page .outfit-choice .thumb{width:100%;height:112px}
+.dressup-page .outfit-choice strong{margin:2px 0 3px}
+.dressup-page .footer{max-width:1256px;margin:0 auto 24px;padding:17px 4px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:15px;font-size:10px;color:#aa99b2}
+.dressup-page .footer span:last-child{text-align:right}
+.dressup-page .home{max-width:880px;margin:50px auto;padding:38px;text-align:center}
+.dressup-page .home h1{font-size:32px}
+.dressup-page .home-card{display:flex;align-items:center;justify-content:center;gap:36px;background:white;border:1px solid var(--line);border-radius:32px;padding:24px;margin:28px 0}
+.dressup-page .home-avatar{width:210px;flex-shrink:0}
+.dressup-page .home-avatar svg{width:100%}
+.dressup-page .home-copy{text-align:left;max-width:290px}
+.dressup-page .home-copy p{font-size:13px;color:#92809e}
+.dressup-page .primary{background:#9476aa;color:white;border:0;border-radius:24px;padding:13px 24px;font-size:13px}
+.dressup-page .home-note{font-size:11px;color:#a18daa}
+.dressup-page .status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+@media(max-width:1050px){.dressup-page .room{grid-template-columns:200px minmax(260px,1fr) 200px;gap:16px;padding:0 20px 25px}
+.dressup-page .panel{padding:18px 12px}
+.dressup-page .thumb{width:58px;height:66px}
+.dressup-page .choice{gap:9px}
+.dressup-page .portrait{min-height:490px}
+.dressup-page .heading{padding:0 24px}
+.dressup-page .footer{margin:0 24px 20px}
+}
+@media(max-width:760px){.dressup-page .top{height:62px;padding:0 18px}
+.dressup-page .badge{display:none}
+.dressup-page .heading{margin:22px 0 18px;padding:0 20px}
+.dressup-page .heading h1{font-size:24px}
+.dressup-page .subtitle{font-size:12px}
+.dressup-page .session{display:none}
+.dressup-page .room{grid-template-columns:1fr 1fr;gap:16px;padding:0 16px 22px}
+.dressup-page .center{grid-column:1/-1;grid-row:1}
+.dressup-page .portrait{max-width:460px;min-height:0;margin:auto;padding:40px 16px 18px;border-radius:110px 110px 24px 24px}
+.dressup-page .portrait:before{border-radius:100px 100px 16px 16px}
+.dressup-page .avatar{width:290px;max-width:100%}
+.dressup-page .room-label{top:20px}
+.dressup-page .panel{padding:16px 10px;border-radius:20px}
+.dressup-page .panel-head{gap:6px;margin-bottom:12px}
+.dressup-page .panel-head small{display:none}
+.dressup-page .panel h2{font-size:14px}
+.dressup-page .choice{flex-direction:column;gap:5px;text-align:center;padding:8px}
+.dressup-page .choice[aria-pressed=true]{padding:7px}
+.dressup-page .thumb{width:100%;height:75px}
+.dressup-page .outfit-choice .thumb{height:106px}
+.dressup-page .choice strong{font-size:11px}
+.dressup-page .hint{font-size:10px}
+.dressup-page .speech{margin:14px 0 10px}
+.dressup-page .footer{margin:0 16px 20px;display:block;line-height:1.8}
+.dressup-page .footer span{display:block}
+.dressup-page .footer span:last-child{text-align:left}
+.dressup-page .home{margin:20px auto;padding:24px 18px}
+.dressup-page .home-card{flex-direction:column;gap:8px;padding:20px}
+.dressup-page .home-copy{text-align:center}
+.dressup-page .home-avatar{width:180px}
+}
+
+body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen=dressup] #app{height:auto;min-height:100vh;overflow:visible}.dressup-page{padding-top:1px}.dressup-page .heading{align-items:center}.dressup-page .quiet{flex-shrink:0}.dressup-page .choice{min-width:0}.dressup-page .choice strong{overflow-wrap:anywhere}.dressup-page .thumb svg{max-height:none}.dressup-page .session{margin:4px 0}.dressup-page button{letter-spacing:normal}.dressup-page .expressions{line-height:normal}@media(max-width:760px){body[data-screen=dressup] .topbar{padding:0 16px}.dressup-page .heading{flex-wrap:wrap}.dressup-page .heading .session{display:block;font-size:10px}}
 </style>
 </head>
 <body>
@@ -3167,7 +3277,7 @@ kbd,.key-help kbd { font-size:13px; }
 
   const HAIR_SKINS = Object.freeze(['side', 'center', 'intake']);
   const DEFAULT_HAIR_SKIN = 'center';
-  const HAIR_SKIN_LABELS = Object.freeze({ side: '7:3', center: '真ん中分け', intake: '控えめインテーク' });
+  const HAIR_SKIN_LABELS = Object.freeze({ side: 'そよ風サイド', center: 'おすましセンター', intake: 'ふんわりフェザー' });
   const HAIR_DESIGNS = deepFreeze({
   "side": {
     "outline": "M70 138 C59 91 77 36 135 29 C179 14 228 43 232 89 Q242 116 226 151 L218 174 Q210 151 214 125 C199 122 190 108 182 92 C173 104 150 116 126 118 Q105 121 86 123 Q88 153 77 179 Q66 165 70 138Z",
@@ -3212,7 +3322,7 @@ kbd,.key-help kbd { font-size:13px; }
 
   const OUTFIT_SKINS = Object.freeze(['uniform', 'cape']);
   const DEFAULT_OUTFIT_SKIN = 'uniform';
-  const OUTFIT_SKIN_LABELS = Object.freeze({ uniform: '制服', cape: '黒ケープ' });
+  const OUTFIT_SKIN_LABELS = Object.freeze({ uniform: '放課後フィネス', cape: '月夜のワルツ' });
   function normalizeOutfitSkin(value) {
     return OUTFIT_SKINS.includes(value) ? value : DEFAULT_OUTFIT_SKIN;
   }
@@ -3915,11 +4025,58 @@ kbd,.key-help kbd { font-size:13px; }
   // Unlock on the gesture itself, before an ARE timer or a preview's click.
   document.addEventListener('pointerdown', () => audio.unlock(), { passive: true });
   function header() {
-    return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ミルテト</span></button><div class="top-actions">${screen !== 'menu' ? '<button class="quiet small" data-act="menu">タイトル</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
+    return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ミルテト</span></button><div class="top-actions">${screen !== 'menu' ? '<button class="quiet small" data-act="menu">タイトル</button>' : ''}${screen !== 'dressup' ? '<button class="quiet small" data-act="dressup">きせかえ</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
   }
   function footer() { return '<footer class="footer"><span>ミルテト学園 · 小さな一手で、もっと楽しく。</span><span>ORIGINAL ART & SYNTHESIZED SOUND · NO NETWORK</span></footer>'; }
+
+  // Dress-up choices use existing saved cosmetic IDs; expressions stay local.
+  let dressupReturn = 'menu', dressupFace = 'normal', dressupPaused = reducedMotion;
+  const dressupHairNames = {side:'そよ風サイド',center:'おすましセンター',intake:'ふんわりフェザー'},dressupHairHints={side:'7:3でふんわり横流し',center:'真ん中分けのやさしいカーブ',intake:'控えめインテークの立体感'},dressupOutfitNames={uniform:'放課後フィネス',cape:'月夜のワルツ'},dressupFaceNames={normal:'いつもの',happy:'にっこり',surprised:'びっくり',thinking:'考え中',sorry:'しょんぼり'};
+  function dressupStorageText() { return storageOK ? '髪型と衣装は自動保存されます。' : '保存できないため、この起動中だけ選択を保持します。'; }
+  function dressupCombination() { return dressupHairNames[ui.hairSkin] + ' × ' + dressupOutfitNames[ui.outfitSkin]; }
+  function dressupAvatar() { return M.mascotSVG(dressupFace, {idPrefix:'dressup', hairSkin:ui.hairSkin, outfitSkin:ui.outfitSkin, halo:false}); }
+  function dressupChoices(kind) {
+    const names = kind === 'hair' ? dressupHairNames : dressupOutfitNames;
+    return Object.entries(names).map(([value, label]) => {
+      const opts = { hairSkin: kind === 'hair' ? value : 'center', outfitSkin: kind === 'outfit' ? value : 'uniform', animated:false, halo:false, idPrefix:'dressup-thumb' };
+      const crop = kind === 'hair' ? '58 13 184 151' : '65 225 170 103';
+      const thumb = M.mascotSVG('normal',opts).replace('viewBox="0 0 300 328"',`viewBox="${crop}"`).replace('role="img"','role="img" aria-hidden="true"');
+      const selected = value === ui[kind === 'hair' ? 'hairSkin' : 'outfitSkin'];
+      const hint = kind === 'hair' ? dressupHairHints[value] : value === 'uniform' ? 'やさしい桃色の制服' : '黒いケープと細いレース';
+      return `<button class="choice ${kind === 'outfit' ? 'outfit-choice' : ''}" data-act="dressup-select" data-kind="${kind}" data-value="${value}" aria-pressed="${selected}"><span class="tick" aria-hidden="true">✓</span><span class="thumb">${thumb}</span><span><strong>${label}</strong><small>${hint}</small></span></button>`;
+    }).join('');
+  }
+  function dressupFaces() { return Object.entries(dressupFaceNames).map(([value,label]) => `<button class="expression" data-act="dressup-face" data-value="${value}" aria-pressed="${value === dressupFace}">${label}</button>`).join(''); }
+  function dressupMotion() {
+    $('#avatar')?.getAnimations({subtree:true}).forEach(a => dressupPaused ? a.pause() : a.play());
+    const button = $('#motion'); if(button) { button.textContent = dressupPaused ? '▷ 動きを再開' : 'Ⅱ 動きを止める'; button.setAttribute('aria-pressed',String(dressupPaused)); }
+  }
+  function updateDressup() {
+    $('#avatar').innerHTML = dressupAvatar(); $('#combination').textContent = dressupCombination();
+    $$('.dressup-page [data-act="dressup-select"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.value === ui[b.dataset.kind === 'hair' ? 'hairSkin' : 'outfitSkin'])));
+    $$('.dressup-page [data-act="dressup-face"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.value === dressupFace)));
+    $('#dressup-storage').textContent = dressupStorageText();
+    $('#dressup-status').textContent = dressupCombination() + '、' + dressupFaceNames[dressupFace];
+    dressupMotion();
+  }
+  function dressupHTML() { return `<main class="dressup-page"><div class="heading"><button class="quiet" data-act="close-dressup">← 戻る</button><div><p class="eyebrow">A LITTLE MOMENT WITH MIRUFI</p><h1 tabindex="-1" id="room-title">ミルフィのきせかえルーム</h1><p class="subtitle">今日は、どんなミルフィに会いたい？</p></div><div class="session" id="dressup-storage" role="status">${dressupStorageText()}</div></div><div class="room">
+<section class="panel" aria-labelledby="hair-title"><div class="panel-head"><span class="number">01</span><h2 id="hair-title">ヘアスタイル</h2><small>HAIR</small></div><div class="choices" id="hair-choices">${dressupChoices("hair")}</div><p class="hint">ふんわり流しても、すっきり分けても。好きな雰囲気を選んでね。</p></section>
+<section class="center" aria-label="ミルフィの試着"><div class="portrait"><span class="room-label">MIRUFI'S LITTLE WARDROBE</span><span class="spark" aria-hidden="true">✧</span><span class="spark second" aria-hidden="true">✧</span><div id="avatar" class="avatar">${dressupAvatar()}</div><div class="floor"></div><div class="outfit-name" id="combination">${dressupCombination()}</div></div><p class="speech" id="speech">「いっしょに、お気に入りを見つけよう？」</p><div class="expressions" id="expressions" aria-label="表情を試す">${dressupFaces()}</div><button id="motion" data-act="dressup-motion" class="motion" aria-pressed="false">Ⅱ 動きを止める</button></section>
+<section class="panel" aria-labelledby="outfit-title"><div class="panel-head"><span class="number">02</span><h2 id="outfit-title">お洋服</h2><small>OUTFIT</small></div><div class="choices" id="outfit-choices">${dressupChoices("outfit")}</div><p class="hint">いつもの制服と、ちょっと特別な黒ケープ。髪型との組み合わせも自由に。</p></section>
+</div><footer class="footer"><span>選ぶたびにその場でお着替え。表情も自由に試せます。</span><span>髪型と衣装はゲームにも反映されます。試し表情はこの部屋だけ。</span></footer><div id="dressup-status" class="status" role="status" aria-live="polite"></div></main>`; }
+  function openDressup() {
+    if(screen === 'dressup') return;
+    if(screen === 'settings' && settingsReturn === 'dressup') { closeSettings(); return; }
+    dressupReturn = screen; dressupFace = 'normal'; resetCombo(); pauseSession(); demo = null;
+    screen = 'dressup'; window.scrollTo(0,0); render();
+  }
+  function closeDressup() {
+    screen = dressupReturn; window.scrollTo(0,0); render();
+    // Returning to an active lesson/drill keeps the existing pause overlay.
+  }
+
   function menuHTML() {
-    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><p class="menu-mode"><span class="tag">フィネス編</span></p><nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>FREE PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p><p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
+    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><p class="menu-mode"><span class="tag">フィネス編</span></p><nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>FREE PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="dressup"><span><b>ミルフィのきせかえ</b><small>DRESS-UP ROOM</small></span><span>✧</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p><p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
   }
   function mini(type, extra = '') { return `<canvas class="mini-piece" data-piece="${type || ''}" width="144" height="108" aria-label="${type || '空'}ミノ" ${extra}></canvas>`; }
   function boardHTML() {
@@ -3981,7 +4138,7 @@ kbd,.key-help kbd { font-size:13px; }
     const focusKey = previous?.dataset ? { ...previous.dataset } : {};
     const previousId = previous?.id;
     app.innerHTML = header() + ({ menu: menuHTML, play: playHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
-      settings: settingsHTML, records: statsHTML, sprint: sprintHTML, result: resultHTML }[screen])();
+      dressup: dressupHTML, settings: settingsHTML, records: statsHTML, sprint: sprintHTML, result: resultHTML }[screen])();
     document.body.dataset.screen = screen;
     document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
     lastQueue = ''; lastHUD = 0;
@@ -3995,6 +4152,7 @@ kbd,.key-help kbd { font-size:13px; }
     }
     drawMinis();
     fitLessonBoard();
+    if (screen === 'dressup') dressupMotion();
     if (focus) {
       const target = screen === 'play' || screen === 'tutorial' ? $('#board') : $('main .primary:not(:disabled)') || $('main button:not(:disabled)');
       target?.focus({ preventScroll: true });
@@ -4005,7 +4163,7 @@ kbd,.key-help kbd { font-size:13px; }
         Object.keys(focusKey).length && Object.entries(focusKey).every(([key, value]) => el.dataset[key] === value));
       (target || $('main button:not(:disabled)'))?.focus({ preventScroll: true });
     }
-    if (session && session.pausedAt !== null && !tryDone) showPause();
+    if (['play','tutorial'].includes(screen) && session && session.pausedAt !== null && !tryDone) showPause();
   }
   function releaseAll() {
     if (!session) return;
@@ -4412,6 +4570,14 @@ kbd,.key-help kbd { font-size:13px; }
   function clickAction(button) {
     const act = button.dataset.act;
     if (act === 'menu') { save(); go('menu'); }
+    else if (act === 'dressup') openDressup();
+    else if (act === 'close-dressup') closeDressup();
+    else if (act === 'dressup-select') {
+      const key = button.dataset.kind === 'hair' ? 'hairSkin' : 'outfitSkin';
+      ui[key] = key === 'hairSkin' ? M.normalizeHairSkin(button.dataset.value) : M.normalizeOutfitSkin(button.dataset.value);
+      save(); updateDressup();
+    } else if (act === 'dressup-face') { dressupFace = M.EXPRESSIONS.includes(button.dataset.value) ? button.dataset.value : 'normal'; updateDressup(); }
+    else if (act === 'dressup-motion') { dressupPaused = !dressupPaused; dressupMotion(); }
     else if (act === 'drill') startPlay();
     else if (act === 'tutorial') startLesson(progress.current);
     else if (act === 'lessons') go('lessons');
@@ -4537,6 +4703,10 @@ kbd,.key-help kbd { font-size:13px; }
     }
     const action = Object.keys(bindings).find(name => bindings[name].includes(event.code));
     const onBoard = event.target === $('#board') || event.target === document.body || event.target === document;
+    if (screen === 'dressup') {
+      if(event.code === 'Escape') { event.preventDefault(); if(!event.repeat) closeDressup(); }
+      return;
+    }
     if (screen === 'settings') {
       if (event.code === 'Escape') { event.preventDefault(); if (!event.repeat) closeSettings(); }
       return;
