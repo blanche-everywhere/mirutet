@@ -676,14 +676,21 @@
       return this;
     }
     setSettings(patch, t = this.clock()) {
-      this.update(t); this.settings = normalizeSettings(patch, this.settings);
-      // Live edits preserve DAS age, restart ARR/fall phases at edit time,
-      // and recalculate an in-flight ARE deadline from its original start.
+      this.update(t);
+      const previous = this.settings, interval = this._interval();
+      this.settings = normalizeSettings(patch, previous);
+      // Only affected timers change. DAS/ARR edits preserve held-key age and
+      // allow one charged repeat now, then use the new ARR (no backlog burst).
+      // DCD/ARE keep their original trigger/start; elapsed deadlines fire now.
+      // A changed fall rate starts a full interval now, or drops immediately.
       const effectiveTime = this.paused ? this.pauseStarted : t;
-      for (const key of this.held.values()) key.nextAt = Math.max(effectiveTime, key.since + this.settings.das);
-      this.cutUntil = Math.max(effectiveTime, this.cutAt + this.settings.dcd);
-      if (this.pending) this.pending.at = Math.max(effectiveTime, this.pending.since + this.settings.are);
-      this._resetFall(); this.update(t); return this;
+      if (this.settings.das !== previous.das || this.settings.arr !== previous.arr) {
+        for (const key of this.held.values()) key.nextAt = Math.max(effectiveTime, key.since + this.settings.das);
+      }
+      if (this.settings.dcd !== previous.dcd) this.cutUntil = Math.max(effectiveTime, this.cutAt + this.settings.dcd);
+      if (this.pending && this.settings.are !== previous.are) this.pending.at = Math.max(effectiveTime, this.pending.since + this.settings.are);
+      if (this._interval() !== interval) this._resetFall();
+      this.update(t); return this;
     }
     pause(t = this.clock()) {
       this.update(t);
@@ -1038,9 +1045,13 @@
       this._drawRound(); this._schedule(t); return true;
     }
     setSettings(patch, t = this.clock()) {
-      this.update(t); this.settings = normalizeSettings(patch, this.settings);
+      this.update(t);
+      const previous = this.settings;
+      this.settings = normalizeSettings(patch, previous);
       // Refresh optimal count when 180/spawnDrop changes, retaining cell target.
-      if (this.round) this._newRound(this.round.type, this.round.target);
+      if (this.round && (this.settings.allow180 !== previous.allow180 || this.settings.spawnDrop !== previous.spawnDrop)) {
+        this._newRound(this.round.type, this.round.target);
+      }
       this.handler.setSettings(patch, t); return this;
     }
     nextQueue(count = 5) {

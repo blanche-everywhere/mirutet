@@ -748,7 +748,7 @@ canvas.board {
   pointer-events:none
 }
 
-.combo-announcement {
+.sr-only,.combo-announcement {
   position:absolute;
   width:1px;
   height:1px;
@@ -1725,12 +1725,12 @@ body[data-screen=play] {
 }
 
 .right-stack .play-buttons button {
-  padding:8px 5px
+  padding:6px 5px
 }
 
 .right-stack {
   height:100%;
-  grid-template-rows:auto auto minmax(0,1fr) auto;
+  grid-template-rows:auto minmax(0,1fr) auto;
 }
 
 .right-stack .piece-bars {
@@ -1863,7 +1863,7 @@ body:is([data-screen=menu],[data-screen=tutorial],[data-screen=settings],[data-s
 .binding-key { font-size:13px; }
 .toggle-grid .checkline,.handling-note,.storage-note { font-size:13px; }
 .play-page { flex:1; min-height:0; width:100%; max-width:1600px; display:flex; flex-direction:column; padding:14px 28px 0; }
-.play-grid { flex:1; min-height:0; height:auto; grid-template-columns:minmax(0,1fr) calc(var(--cell)*10 + var(--queue)*2 + 26px) minmax(0,1fr); gap:20px; }
+.play-grid { flex:1; min-height:0; height:auto; grid-template-columns:minmax(0,1fr) calc(var(--cell)*10 + var(--queue)*2 + 26px) minmax(0,1fr); grid-template-rows:minmax(0,1fr); gap:20px; }
 .board-stage { grid-template-columns:var(--queue) calc(var(--cell)*10 + 2px) var(--queue); gap:12px; }
 .board-heading { font-size:13px; letter-spacing:0; white-space:nowrap; }
 .column-labels { font-size:13px; padding-top:4px; }
@@ -1881,8 +1881,8 @@ body:is([data-screen=menu],[data-screen=tutorial],[data-screen=settings],[data-s
 .piece-check span { font-size:13px; width:28px; height:28px; }
 .checkline,.filter-line { font-size:13px; }
 .filter-line select { width:140px; }
-.right-stack { min-height:0; gap:8px; }
-.right-stack .stats-panel { padding:8px 10px; line-height:1.3; }
+.right-stack { min-height:0; gap:6px; }
+.right-stack .stats-panel { padding:6px 10px; line-height:1.3; }
 .right-stack .panel-label { font-size:13px; letter-spacing:0; margin-bottom:5px; }
 .right-stack .stats-main label { margin-bottom:2px; }
 .right-stack .stats-strip { font-size:13px; margin-top:4px; padding-top:4px; }
@@ -1911,7 +1911,10 @@ kbd,.key-help kbd { font-size:13px; }
 .board-shell:focus-within { outline:3px solid #b6a0da; outline-offset:3px; }
 
 /* Endless play shares the board/queues and leaves its side panels quiet. */
-body[data-screen=play][data-mode=free] { min-width:800px; }
+body[data-screen=play],body[data-screen=tutorial] { min-width:800px; }
+.play-page {
+  --cell:max(16px,min(36px,calc((100vh - 252px)/22),calc((max(800px,100vw) - 620px)/10)));
+}
 .free-play {
   --queue:76px;
   /* Keep the 800px play layout scrollable in smaller windows. */
@@ -1926,10 +1929,39 @@ body[data-screen=play][data-mode=free] { min-width:800px; }
 .free-play .result-panel:empty { visibility:hidden; }
 .free-play .result-head { margin:0; flex-wrap:wrap; gap:8px; }
 .free-play .play-buttons { align-self:end; }
+.play-tools,.play-stats { display:grid; gap:6px; min-width:0; }
+.handling-panel { padding:0 10px; min-width:0; }
+.handling-toggle { display:flex; align-items:center; justify-content:space-between; width:100%; padding:6px 0; border:0; background:transparent; border-radius:8px; font-size:13px; line-height:18px; font-weight:700; }
+.handling-toggle:hover,.handling-stepper button:hover { transform:none; }
+.handling-toggle span { color:var(--purple); }
+#live-handling-controls { padding:0 0 8px; }
+.handling-stepper { display:grid; grid-template-columns:minmax(33px,1fr) 26px minmax(54px,70px) 26px; gap:3px; align-items:center; min-height:34px; border-top:1px solid #f0eaf5; font-size:13px; }
+.handling-stepper>span { color:#887794; font-weight:600; }
+.handling-stepper output { text-align:center; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.handling-stepper button { padding:0; width:26px; height:26px; border-radius:7px; color:#9278b3; }
+.lesson-details>.handling-panel { flex-shrink:0; margin-bottom:10px; }
 @media(max-height:680px) {
-  .free-play #next-preview .mini-piece { height:44px; }
+  .play-page #next-preview .mini-piece { height:44px; }
 }
 @media(max-width:1050px) {
+  .play-page { --queue:60px; padding-right:16px; padding-left:16px; }
+  .play-grid { gap:12px; }
+  .play-title { font-size:15px; }
+  .play-footer { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .mini-piece { width:100%; }
+  .play-page .key-help { gap:3px; }
+  .play-page .key-help kbd { min-width:22px; padding:3px; }
+  .practice-options .piece-filters { gap:3px; }
+  .practice-options .piece-check span { width:23px; height:26px; }
+  .practice-options .filter-line select { width:120px; }
+  .lesson-page { padding:12px 16px; }
+  .lesson-heading { flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+  .lesson-heading h2 { font-size:20px; }
+  .lesson-steps { gap:3px; }
+  .lesson-steps button { width:24px; height:24px; }
+  .lesson-grid { grid-template-columns:minmax(160px,1fr) minmax(160px,1fr) minmax(300px,1.7fr); gap:14px; }
+  .lesson-coach .mascot-wrap { width:100%; }
+  .lesson-board .board-heading span:last-child { display:none; }
   .free-play { padding-right:16px; padding-left:16px; }
   .free-play .play-grid { gap:12px; }
   .free-play .free-stats { grid-template-columns:1fr; gap:12px; padding:14px; }

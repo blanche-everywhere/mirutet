@@ -90,6 +90,7 @@ test('top-level mode selection exposes free play alongside finesse, then renders
   assert.match(app.app.innerHTML, /data-act="mode-free"[^>]*>フリーモード/);
   app.enter();
   const s = app.state(); assert.equal(s.screen, 'play'); assert.equal(s.mode, 'free');
+  assert.match(app.app.innerHTML, /data-live-handling/);
   assert.equal(s.round, undefined); assert.equal(s.stats.running, true);
   assert.match(app.app.innerHTML, /<h1 class="play-title">フリーモード<\/h1>/);
   for (const id of ['lines', 'pieces', 'elapsed', 'pps']) assert.match(app.app.innerHTML, new RegExp(`id="${id}"`));
@@ -199,7 +200,7 @@ test('game-over dialog shows only the four final stats in HUD format and keeps t
   assert.deepEqual(app.state().stats, final); assert.equal(app.overlay, dialog);
 });
 
-test('free mode shares pause, sound/cue preferences and rebinding without an in-play settings panel', () => {
+test('free mode shares pause, sound/cue preferences and rebinding with a shared live handling panel', () => {
   const defaults = loadApp().state().bindings;
   const app = loadApp({ ui: { bubbles: false, sound: false, pieceCueTiming: 'off' },
     bindings: { ...defaults, retry: ['KeyQ'], pause: ['KeyP'] } });

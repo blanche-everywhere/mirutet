@@ -122,6 +122,22 @@ async function main() {
         '.play-buttons', '.play-buttons button', '[data-act=pause]', '.play-footer']);
       await checkText();
     };
+    const checkHandling = async label => {
+      assert.equal(await page.locator('[data-live-handling]').count(), 1, label);
+      await click('toggle-handling');
+      assert.equal(await page.locator('[data-act=toggle-handling]').getAttribute('aria-expanded'), 'true');
+      await checkViewport(label + ' handling', ['.handling-panel', '.handling-stepper', '.handling-stepper button']);
+      const before = await state();
+      await page.locator('[data-handling-key=arr][data-step="1"]').click();
+      assert.equal((await state()).settings.arr, before.settings.arr + 1);
+      assert.equal((await state()).paused, false);
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'board');
+      assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem(window.__mirutet.storageKey)).settings.arr), before.settings.arr + 1);
+      await page.locator('[data-handling-key=arr][data-step="-1"]').click();
+      assert.equal((await state()).settings.arr, before.settings.arr);
+      await click('toggle-handling');
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'board');
+    };
     const checkCombo = async count => {
       assert.equal((await state()).combo.count, count);
       assert.equal(await page.locator('#combo-display').isVisible(), count >= 2);
@@ -185,6 +201,7 @@ async function main() {
     // Native keyboard activation must reach lesson controls, including after
     // blur pauses an interactive lesson (there used to be no resume path).
     await page.locator('[data-act=try-it]').focus(); await page.keyboard.press('Enter'); await ready();
+    await checkHandling('lesson challenge');
     await page.keyboard.down('ArrowLeft'); await page.evaluate(() => window.dispatchEvent(new Event('blur')));
     assert.equal((await state()).paused, true); assert.deepEqual((await state()).held, []);
     await page.keyboard.up('ArrowLeft'); await page.keyboard.press('Enter'); await ready();
@@ -261,6 +278,7 @@ async function main() {
 
     await page.keyboard.press('Escape'); await waitScreen('menu');
     await click('drill'); await waitScreen('play'); await ready();
+    await checkHandling('drill');
     await checkDrill();
     assert.equal(await page.locator('#next-preview canvas').count(), 5);
     await target('T', 0, 0, 0); await ready();
@@ -476,6 +494,7 @@ async function main() {
     assert.equal(await page.locator('[data-act=start-sprint][data-length="40"]').count(), 1);
     assert.equal(await page.locator('[data-act=start-sprint][data-length="100"]').count(), 1);
     await page.locator('#custom-length').fill('3'); await click('custom-sprint');
+    await ready(); await checkHandling('sprint');
     for (let i = 0; i < 3; i++) await placeOptimal();
     await waitScreen('result'); s = await state();
     assert.equal(s.sprintResult.completed, 3); assert.equal(s.sprintResult.perfect, 3);
@@ -518,6 +537,31 @@ async function main() {
     assert.equal((await state()).mode, 'free');
     assert.doesNotMatch(await page.locator('.topbar').innerText(), /フィネス編|フリーモード/);
     assert.equal(await page.locator('.practice-options,[data-setting],#hint-route').count(), 0);
+    await checkHandling('free');
+    // Real pointer adjustment must leave native arrows/Space and a rebound
+    // rotation usable immediately, without adjusting ARR or pausing the run.
+    await click('toggle-handling');
+    const originalARR = (await state()).settings.arr;
+    await page.locator('[data-handling-key=arr][data-step="1"]').click();
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'board');
+    const liveBefore = await state();
+    await page.keyboard.press('ArrowLeft');
+    assert.equal((await state()).active.x, liveBefore.active.x - 1);
+    assert.equal((await state()).settings.arr, originalARR + 1);
+    await page.locator('[data-handling-key=arr][data-step="1"]').focus();
+    await pressAction('cw');
+    assert.equal((await state()).active.rot, (liveBefore.active.rot + 1) % 4);
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'board');
+    await page.keyboard.press('Space');
+    assert.equal((await state()).stats.pieces, 1);
+    assert.equal((await state()).settings.arr, originalARR + 1);
+    await settingsOpen();
+    assert.equal(await page.locator('#setting-arr').inputValue(), String(originalARR + 1));
+    await setNumber('arr', originalARR + 2); await closeSettings();
+    assert.equal(await page.locator('[data-handling-value=arr]').innerText(), `${originalARR + 2} ms`);
+    await page.locator('[data-handling-key=arr][data-step="-1"]').click();
+    await page.locator('[data-handling-key=arr][data-step="-1"]').click();
+    await click('toggle-handling'); await click('restart'); await ready();
     const freeTotal = (await state()).totalStats;
     await page.waitForTimeout(150);
     for (let i = 1; i <= 4; i++) {

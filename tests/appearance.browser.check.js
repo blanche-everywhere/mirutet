@@ -11,6 +11,7 @@ async function main() {
     const context=await browser.newContext({viewport:{width:1280,height:720}});
     const page=await context.newPage(), errors=[],requests=[];
     page.on('pageerror',e=>errors.push(e.message));
+    page.on('console',e=>{if(e.type()==='error')errors.push(e.text());});
     page.on('request',r=>{if(/^https?:/.test(r.url()))requests.push(r.url());});
     const url=pathToFileURL(path.resolve(__dirname,'../dist/mirutet.html')).href;
     const click=act=>page.locator(`[data-act="${act}"]`).first().click();
@@ -120,6 +121,51 @@ async function main() {
     await checkFree();await page.screenshot({path:path.resolve(__dirname,'../screens/free.png')});
     await page.setViewportSize({width:800,height:600});await checkFree();
     await page.screenshot({path:path.resolve(__dirname,'../screens/free-small.png')});
+    // Keep the controls open in each actual player mode. Check rectangles as
+    // well as document overflow: clipped children can otherwise go unnoticed.
+    const captureHandling=async (name,open=true)=>{
+      await page.waitForFunction(()=>!!window.__mirutet.getState().active);
+      // Lesson boards are fitted by the window resize handler. Headless
+      // viewport emulation can fire it before the new size is laid out, so
+      // wait for the final size and deliver the event again.
+      const size=page.viewportSize();
+      await page.waitForFunction(([w,h])=>innerWidth===w&&innerHeight===h&&document.documentElement.clientWidth===w,[size.width,size.height]);
+      await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>{window.dispatchEvent(new Event('resize'));requestAnimationFrame(r);})));
+      if((await page.locator('[data-act=toggle-handling]').getAttribute('aria-expanded')==='true')!==open)await click('toggle-handling');
+      const layout=await page.evaluate(()=>{
+        const panel=document.querySelector('.handling-panel').getBoundingClientRect();
+        const selectors='.handling-panel,.handling-stepper,.handling-stepper button,.play-stats,.play-stats .stat,.board-shell,.column-labels,.board-note,#hold-preview,#next-preview,.play-buttons button,.practice-options,.coach .speech,.coach .mirufi,.lesson-coach .speech,.lesson-coach .mirufi,.lesson-nav,.lesson-heading,#demo-keys,#demo-caption,#tutorial-result';
+        const rects=[...document.querySelectorAll(selectors)].filter(el=>el.getClientRects().length).map(el=>{
+          const r=el.getBoundingClientRect();return {name:el.className||el.id,top:r.top,bottom:r.bottom,left:r.left,right:r.right,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth};
+        });
+        const overlaps=[...document.querySelectorAll('.board-shell,#hold-preview,#next-preview,.play-buttons,.lesson-nav')].some(el=>{
+          const r=el.getBoundingClientRect();return panel.left<r.right&&panel.right>r.left&&panel.top<r.bottom&&panel.bottom>r.top;
+        });
+        return {width:innerWidth,height:innerHeight,scrollWidth:document.scrollingElement.scrollWidth,scrollHeight:document.scrollingElement.scrollHeight,rects,overlaps};
+      });
+      assert(layout.scrollWidth<=layout.width&&layout.scrollHeight<=layout.height,`${name}: ${JSON.stringify(layout)}`);
+      for(const r of layout.rects)assert(r.top>=0&&r.bottom<=layout.height&&r.left>=0&&r.right<=layout.width&&r.scrollWidth<=r.clientWidth,`${name}: ${JSON.stringify(r)}`);
+      assert.equal(layout.overlaps,false,`${name}: handling overlaps play`);
+      assert.equal((await state()).paused,false);
+      if(name)await page.screenshot({path:path.resolve(__dirname,`../screens/${name}.png`)});
+    };
+    await page.setViewportSize({width:1280,height:720});await captureHandling('handling-live');
+    await page.setViewportSize({width:800,height:600});await captureHandling('handling-live-small');
+    await page.setViewportSize({width:1280,height:720});await click('menu');await click('mode-finesse');await click('drill');
+    await captureHandling('handling-drill');
+    await page.setViewportSize({width:800,height:600});await captureHandling('handling-drill-small');
+    await captureHandling('drill-small',false);
+    assert.equal(await page.locator('#play-stats').isVisible(),true);
+    await page.setViewportSize({width:1280,height:720});await click('menu');await click('sprint');await page.locator('[data-act=start-sprint][data-length="40"]').click();
+    await captureHandling('handling-sprint');
+    await page.setViewportSize({width:800,height:600});await captureHandling('handling-sprint-small');
+    await captureHandling('sprint-small',false);
+    await page.setViewportSize({width:1280,height:720});await click('menu');await click('tutorial');await page.locator('[data-act=lesson][data-index="1"]').click();await click('try-it');
+    await captureHandling('handling-lesson');
+    await page.setViewportSize({width:800,height:600});await captureHandling('handling-lesson-small');
+    for(let i=0;i<12;i++){
+      await page.locator(`.lesson-steps [data-index="${i}"]`).click();await click('try-it');await captureHandling(null);
+    }
     await page.setViewportSize({width:1280,height:720});await click('menu');
     // Storage denied: choices still work for the session, with a clear fallback.
     const blocked=await browser.newContext();await blocked.addInitScript(()=>{Object.defineProperty(window,'localStorage',{get(){throw new Error('blocked');}});});
@@ -127,7 +173,7 @@ async function main() {
     assert((await p.locator('#appearance-storage').textContent()).includes('起動中'));
     await p.locator('[data-act=close-settings]').click();assert.equal(await p.locator('svg.mirufi').getAttribute('data-hair-skin'),'intake');assert.equal(await p.locator('svg.mirufi').getAttribute('data-outfit-skin'),'cape');await p.reload();assert.equal(await p.locator('svg.mirufi').getAttribute('data-outfit-skin'),'uniform');assert.equal(await p.locator('svg.mirufi').getAttribute('data-hair-skin'),'center');await blocked.close();
     assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
-    console.log('Appearance browser checks passed: two outfits x three hair skins, every lesson, menu/drill/sprint/result, free desktop/800x600 screenshots, persistence, import/export, invalid/legacy values, records preserved, keyboard, blocked storage, zero errors/network.');
+    console.log('Appearance browser checks passed: two outfits x three hair skins, every lesson, menu/drill/sprint/result, live handling in all play modes at desktop/800x600 (all 12 challenges), persistence, import/export, invalid/legacy values, records preserved, keyboard, blocked storage, zero errors/network.');
   } finally {await browser.close();}
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});
