@@ -103,6 +103,42 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
   assert.equal(await page.locator('[data-live-handling] input[type=number][data-setting=are]').inputValue(),'117');
   await click('resume');
   await page.screenshot({path:path.resolve(__dirname,'../screens/bl122-live.png'),fullPage:false});
+  const precision=await browser.newPage();precision.on('pageerror',e=>errors.push(e.message));
+  await precision.goto(pathToFileURL(path.resolve(__dirname,'../dist/mirutet.html')).href);
+  const pclick=act=>precision.locator(`[data-act="${act}"]`).first().click();
+  const pstate=()=>precision.evaluate(()=>window.__mirutet.getState());
+  await pclick('settings');
+  await precision.locator('#settings-json').fill(JSON.stringify({settings:{gravity:1/60,das:177.6},ui:{volume:.333,pieceCueVolume:37.6}}));
+  await pclick('import');
+  const original=await precision.evaluate(()=>localStorage.getItem(window.__mirutet.storageKey));
+  for(let repeat=0;repeat<3;repeat++) {
+    for(const selector of ['#setting-gravity','#setting-das','#ui-volume','#ui-pieceCueVolume']) {
+      const number=precision.locator(selector),before=await number.inputValue();
+      await number.focus();await number.blur();assert.equal(await number.inputValue(),before);
+      await number.focus();await number.press('Enter');await number.blur();assert.equal(await number.inputValue(),before);
+    }
+    await pclick('close-settings');await pclick('settings');
+    assert.equal((await pstate()).settings.gravity,1/60);assert.equal((await pstate()).settings.das,177.6);
+    assert.equal((await pstate()).ui.volume,.333);assert.equal((await pstate()).ui.pieceCueVolume,37.6);
+    assert.equal(await precision.evaluate(()=>localStorage.getItem(window.__mirutet.storageKey)),original);
+  }
+  await precision.locator('#setting-das').focus();
+  await precision.locator('[data-handling-key=das][data-step="1"]').click();assert.equal((await pstate()).settings.das,178.6);
+  const gravity=precision.locator('#setting-gravity');
+  await gravity.focus();await gravity.press('ControlOrMeta+A');await gravity.pressSequentially(String(1/60));await gravity.press('Enter');
+  assert.equal((await pstate()).settings.gravity,1/60,'restoring original draft preserves precision');
+  await gravity.focus();await gravity.press('ControlOrMeta+A');await gravity.pressSequentially('.349');await gravity.press('Enter');await gravity.blur();
+  assert.equal((await pstate()).settings.gravity,.3);
+  await precision.locator('[data-setting=gravity][type=range]').focus();await precision.keyboard.press('ArrowRight');
+  assert.equal((await pstate()).settings.gravity,.4);assert.equal(await gravity.inputValue(),'0.4');
+  await pclick('close-settings');await pclick('mode-free');await pclick('free');await pclick('toggle-handling');
+  const liveDas=precision.locator('[data-setting=das][type=number]');
+  await liveDas.focus();await liveDas.blur();await liveDas.focus();await liveDas.press('Enter');assert.equal((await pstate()).settings.das,178.6);
+  await liveDas.focus();await precision.locator('[data-handling-key=das][data-step="1"]').click();assert.equal((await pstate()).settings.das,179.6);
+  await liveDas.focus();await liveDas.press('ControlOrMeta+A');await liveDas.pressSequentially('181.6');
+  await precision.locator('[data-handling-key=das][data-step="1"]').click();assert.equal((await pstate()).settings.das,183);
+  await liveDas.focus();await liveDas.blur();assert.equal((await pstate()).settings.das,183);
+  await precision.close();
   assert.deepEqual(errors,[]);console.log('BL-122 browser checks passed: bounds, empty input, synchronization, repeated presets, manual edits, audio, persistence, defaults, keyboard, mobile, dressup/free transitions, live editing.');
  } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

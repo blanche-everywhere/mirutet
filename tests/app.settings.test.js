@@ -12,7 +12,7 @@ const A = require('../src/audio.js');
 // supply form values and rendering sinks; actual DOM/focus/layout checks remain
 // in browser.check.js and appearance.browser.check.js.
 function loadApp(saved, storageBlocked = false) {
-  const listeners = new Map(), values = new Map();
+  const listeners = new Map(), values = new Map(), editors = new Map();
   if (saved) values.set('mirutet-finesse.v1', JSON.stringify(saved));
   const classes = new Set(), nodes = {
     '#app': { innerHTML: '' },
@@ -48,8 +48,11 @@ function loadApp(saved, storageBlocked = false) {
       listeners.get('click')({ target: { closest: () => button } });
     },
     change(dataset, value, event = 'change', type) {
-      const input = { dataset, value, type, hasAttribute: attr =>
+      const editorKey = JSON.stringify(dataset);
+      const input = type === 'number' && editors.get(editorKey) || { dataset, value, type, hasAttribute: attr =>
         attr === 'data-hair-skin' && 'hairSkin' in dataset || attr === 'data-outfit-skin' && 'outfitSkin' in dataset };
+      input.value = value;
+      if (type === 'number') editors.set(editorKey, input);
       listeners.get(event)({ target: input }); return input;
     }
   };
@@ -207,4 +210,19 @@ test('number drafts preserve incomplete text and only commit on change or focuso
     const input=app.change({ui:'volume'},raw,'focusout','number');
     assert.equal(Number(input.value),before);assert.equal(app.state().ui.volume,before);
   }
+});
+
+
+test('untouched imported precision survives focusout, change, and duplicate commits', () => {
+  const app=loadApp({settings:{gravity:1/60,das:177.6},ui:{volume:.333}});app.click('settings');
+  for(let i=0;i<3;i++) for(const [dataset,raw] of [[{setting:'gravity'},String(1/60)],[{setting:'das'},'177.6'],[{ui:'volume'},'.333']]) {
+    app.change(dataset,raw,'focusin','number');app.change(dataset,raw,'focusout','number');app.change(dataset,raw,'change','number');
+  }
+  assert.equal(app.state().settings.gravity,1/60);assert.equal(app.state().settings.das,177.6);assert.equal(app.state().ui.volume,.333);
+  app.change({setting:'gravity'},String(1/60),'input','number');app.change({setting:'gravity'},String(1/60),'focusout','number');
+  assert.equal(app.state().settings.gravity,1/60,'editing back to the original value keeps imported precision');
+  app.click('adjust-handling',{handlingKey:'das',step:'1'});assert.equal(app.state().settings.das,178.6);
+  app.change({setting:'gravity'},'.349','input','number');app.change({setting:'gravity'},'.349','change','number');
+  assert.equal(app.state().settings.gravity,.3);
+  app.change({setting:'gravity'},'.349','focusout','number');assert.equal(app.state().settings.gravity,.3);
 });

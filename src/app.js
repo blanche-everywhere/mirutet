@@ -34,6 +34,7 @@
     { key: 'are', title: 'ARE', note: '次の出現まで ms', unit: 'ms', step: 1 },
     { key: 'gravity', title: '重力 G', note: 'マス/フレーム · 0：フィネス編はなし／フリーは毎秒1マス', unit: 'G', step: .1 }
   ];
+  const numericDrafts = new WeakSet();
   let settings = { ...E.DEFAULT_SETTINGS }, ui = { ...UI_DEFAULTS }, bindings = copy(DEFAULT_KEYS);
   // 60 Hz reference timings, rounded to the editor's millisecond resolution.
   // Only researched, supported fields are patched; other preferences survive.
@@ -294,7 +295,7 @@
     for (const field of HANDLING) {
       const output = $(`[data-handling-value="${field.key}"]`);
       if (output) output.textContent = handlingValue(field);
-      for (const input of $$(`[data-setting="${field.key}"]`)) input.value = settings[field.key];
+      for (const input of $$(`[data-setting="${field.key}"]`)) { numericDrafts.delete(input); input.value = settings[field.key]; }
     }
     for (const input of $$('[data-engine-toggle]')) input.checked = settings[input.dataset.engineToggle];
   }
@@ -340,7 +341,7 @@
   }
   function updateNumericUI(key, value) {
     ui[key] = snapNumeric(value, ...UI_NUMERIC[key]);
-    for (const input of $$(`[data-ui="${key}"]`)) input.value = ui[key];
+    for (const input of $$(`[data-ui="${key}"]`)) { numericDrafts.delete(input); input.value = ui[key]; }
     if (key === 'pieceCueVolume' && $('#cue-volume')) $('#cue-volume').textContent = String(ui[key]);
     audio.configure(); save();
   }
@@ -943,9 +944,10 @@
     return input.type === 'number' && (input.dataset?.setting || UI_NUMERIC[input.dataset?.ui]);
   }
   function commitNumeric(input) {
+    if (!numericDrafts.delete(input)) return;
     const key = input.dataset.setting, uiKey = input.dataset.ui;
     if (!key && !UI_NUMERIC[uiKey]) return;
-    if (input.value.trim() && Number.isFinite(Number(input.value))) {
+    if (input.value.trim() && Number.isFinite(Number(input.value)) && Number(input.value) !== (key ? settings[key] : ui[uiKey])) {
       if (key) {
         const field = HANDLING.find(field => field.key === key);
         const value = snapNumeric(Number(input.value), ...E.SETTING_LIMITS[key], field.step);
@@ -964,7 +966,7 @@
   });
   document.addEventListener('input', event => {
     const input = event.target;
-    if (numericEditor(input)) return;
+    if (numericEditor(input)) { numericDrafts.add(input); return; }
     if (input.dataset.setting) {
       if (!input.value || !Number.isFinite(Number(input.value))) return;
       const key = input.dataset.setting, raw = input.value, value = Number(raw);
