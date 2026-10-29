@@ -124,15 +124,17 @@ for (const drill of E.SPIN_DRILLS) test(`real inputs solve and judge ${drill.id}
     assert.equal(session.lastResult.status, 'perfect');
     assert.equal(session.lastResult.lastMove, 'rotation');
     assert.equal(session.lastResult.lines, drill.lines);
-    assert.equal(session.awaitingNext, true); assert.equal(session.handler.active, null);
+    const next = E.SPIN_DRILLS[(E.SPIN_DRILLS.indexOf(drill) + 1) % E.SPIN_DRILLS.length];
+    assert.equal(session.drill.id, next.id); assert.equal(session.handler.active.type, next.type);
+    assert.deepEqual(session.handler.board.rows, E.spinBoard(next).rows);
     assert.equal(session.stats.perfect, 1); assert.equal(totals.perfect, 1);
     assert.equal(events.filter(e => e.kind === 'result').length, 1);
     session.retry(t + 1);
-    assert.equal(session.drill.id, drill.id); assert.equal(session.lastResult, null);
-    assert.deepEqual(session.handler.board.rows, E.spinBoard(drill).rows);
+    assert.equal(session.drill.id, next.id); assert.equal(session.lastResult, null);
+    assert.deepEqual(session.handler.board.rows, E.spinBoard(next).rows);
     assert.equal(session.combo.count, 0);
-    session.skip(t + 2); assert.notEqual(session.drill.id, drill.id);
-    assert.deepEqual(events.filter(e => e.kind === 'spawn').map(e => e.queueDrawn), [true, false, true], 'Retry does not advance the audio cue');
+    session.skip(t + 2); assert.notEqual(session.drill.id, next.id);
+    assert.deepEqual(events.filter(e => e.kind === 'spawn').map(e => e.queueDrawn), [true, true, false, true], 'Retry does not advance the audio cue');
   }
 });
 
@@ -190,4 +192,139 @@ test('mini presets have three occupied pivot corners and one front corner; full 
     assert.ok(occupied.filter(Boolean).length >= 3, drill.id);
     assert.equal(fronts.filter(i => occupied[i]).length, drill.id.startsWith('t-mini') ? 1 : 2, drill.id);
   }
+});
+
+function spinSession(options = {}) {
+  return new E.SpinSession({ time: 0, clock: () => 0, ...options,
+    settings: { are: 80, sdf: 1, allow180: false, ...options.settings } }).start(0);
+}
+
+test('spin success mirrors finesse: result, target, ARE only, then spawn; feedback survives', () => {
+  for (const are of [0, 80, 500]) {
+    const events = [], s = spinSession({ settings: { are }, onEvent: e => events.push(e) });
+    s.update(are);
+    const t = playSolution(s, are), lock = s.lastResult;
+    assert.equal(lock.status, 'perfect'); assert.equal(s.drill.id, E.SPIN_DRILLS[1].id);
+    assert.deepEqual(events.filter(e => ['result', 'target', 'are'].includes(e.kind)).slice(-3).map(e => e.kind), ['result', 'target', 'are']);
+    assert.equal(events.find(e => e.kind === 'target' && e.automatic).t, lock.t);
+    const f = new E.DrillSession({ time: 0, settings: { are }, pieces: ['O'] });
+    f.start(0, { rot: 0, x: 4 }); f.update(are); f.keyDown('hardDrop', lock.t);
+    if (are) {
+      assert.equal(s.handler.pending.at, f.handler.pending.at);
+      s.update(lock.t + are - 1); assert.equal(s.handler.active, null);
+    }
+    s.update(Math.max(t, lock.t + are));
+    assert.ok(s.handler.active); assert.equal(s.lastResult, lock);
+    assert.equal(s.stats.attempts, 1); assert.equal(s.stats.retries, 0); assert.equal(s.stats.skips, 0);
+    assert.ok(t >= lock.t);
+  }
+});
+
+test('spin success crosses every set boundary and retains consecutive success combo', () => {
+  const s = spinSession({ settings: { are: 0 } });
+  let t = 0;
+  for (let index = 0; index < E.SPIN_DRILLS.length; index++) {
+    assert.equal(s.drill.id, E.SPIN_DRILLS[index].id);
+    t = playSolution(s, t);
+    assert.equal(s.lastResult.status, 'perfect'); assert.equal(s.combo.count, index + 1);
+    assert.equal(s.lastResult.allClear, index === E.SPIN_DRILLS.length - 1 ? true : undefined);
+  }
+  assert.equal(s.drill.id, E.SPIN_DRILLS[0].id);
+  assert.equal(s.stats.perfect, E.SPIN_DRILLS.length); assert.equal(s.totalStats.attempts, E.SPIN_DRILLS.length);
+  for (let index = 0; index < E.SPIN_DRILLS.length; index++) {
+    t = playSolution(s, t); assert.equal(s.lastResult.allClear, undefined, 'All-clear appears only once per session');
+  }
+});
+
+test('end of list selects the first unfinished saved drill; manual next uses the same ordering', () => {
+  const unfinished = E.SPIN_DRILLS[9];
+  const completedDrills = E.SPIN_DRILLS.filter(d => d !== unfinished && d !== E.SPIN_DRILLS.at(-1)).map(d => d.id);
+  const s = spinSession({ drillId: E.SPIN_DRILLS.at(-1).id, completedDrills, settings: { are: 0 } });
+  playSolution(s);
+  assert.equal(s.drill.id, unfinished.id); assert.equal(s.lastResult.allClear, undefined);
+  assert.ok(s.completedDrills.has(E.SPIN_DRILLS.at(-1).id));
+  const manual = spinSession({ drillId: E.SPIN_SETS[0].drills.at(-1).id, settings: { are: 0 } });
+  manual.skip(1); assert.equal(manual.drill.id, E.SPIN_SETS[1].drills[0].id);
+  const tail = spinSession({ drillId: E.SPIN_DRILLS.at(-1).id, completedDrills, settings: { are: 0 } });
+  tail.skip(1); assert.equal(tail.drill.id, unfinished.id);
+});
+
+test('loaded all-clear profiles show one small completion notification on success', () => {
+  const s = spinSession({ completedDrills: E.SPIN_DRILLS.map(d => d.id), settings: { are: 0 } });
+  const t = playSolution(s); assert.equal(s.lastResult.allClear, true);
+  playSolution(s, t); assert.equal(s.lastResult.allClear, undefined);
+});
+
+test('miss resets the same board immediately, retains feedback, and ignores finesse repeat policies', () => {
+  for (const repeatOnMiss of [false, true]) for (const repeatOnFault of [false, true]) {
+    const events = [], s = spinSession({ repeatOnMiss, repeatOnFault, zeroFault: true,
+      onEvent: e => events.push(e), settings: { are: 0 } });
+    s.keyDown('hardDrop', 1); s.keyUp('hardDrop', 2);
+    assert.equal(s.lastResult.reason, 'position'); assert.equal(s.drill.id, E.SPIN_DRILLS[0].id);
+    assert.ok(s.handler.active); assert.deepEqual(s.handler.board.rows, E.spinBoard(s.drill).rows);
+    assert.equal(s.round.serial, 2); assert.equal(s.combo.count, 0);
+    assert.equal(s.stats.misses, 1); assert.equal(s.totalStats.attempts, 1);
+    assert.equal(s.stats.retries, 0); assert.equal(s.stats.skips, 0); assert.equal(s.completedDrills.size, 0);
+    assert.deepEqual(events.filter(e => e.kind === 'spawn').map(e => e.queueDrawn), [true, false]);
+  }
+});
+
+test('missing rotation finish automatically retries with its distinct failure feedback', () => {
+  const s = spinSession({ settings: { are: 0 } });
+  // All presets require a rotation arrival. Isolate the defensive judge branch
+  // with an exact-cell nonrotation lock; real wrong-place inputs are above.
+  s._onLock({ t: 0, type: s.drill.type, state: s.drill.target, cells: s.drill.cells,
+    used: 0, inputs: [], flags: {}, lastMove: 'fall' });
+  assert.equal(s.lastResult.status, 'miss'); assert.equal(s.lastResult.reason, 'rotation');
+  assert.equal(s.drill.id, E.SPIN_DRILLS[0].id); assert.ok(s.handler.active);
+  assert.deepEqual(s.handler.board.rows, E.spinBoard(s.drill).rows);
+  assert.equal(s.stats.misses, 1); assert.equal(s.stats.retries, 0);
+});
+
+test('spin automatic spawn deadlines are frame-rate independent and exclude pauses', () => {
+  for (const success of [false, true]) {
+    const snapshots = [];
+    for (const step of [1, 7, 16, 33, 1000]) {
+      const events = [], s = spinSession({ onEvent: e => events.push(e) }); s.update(80);
+      if (success) playSolution(s, 80); else s.keyDown('hardDrop', 81);
+      const lock = s.lastResult, pauseAt = lock.t + 20;
+      s.pause(pauseAt); s.handler.releaseAll(pauseAt); s.update(pauseAt + 2000);
+      assert.equal(s.handler.active, null); assert.equal(s.retry(pauseAt + 2000), false);
+      assert.equal(s.skip(pauseAt + 2000), false);
+      s.resume(pauseAt + 2000);
+      const deadline = lock.t + 80 + 2000;
+      for (let t = pauseAt + 2000 + step; t < deadline; t += step) s.update(t);
+      s.update(deadline - 1); assert.equal(s.handler.active, null);
+      s.update(deadline + 10);
+      assert.equal(events.filter(e => e.kind === 'spawn').at(-1).t, deadline);
+      assert.equal(s.lastResult, lock);
+      snapshots.push({ drillId: s.drill.id, active: s.handler.active, stats: s.stats.snapshot(), combo: s.combo.snapshot() });
+    }
+    for (const snapshot of snapshots) assert.deepEqual(snapshot, snapshots[0]);
+  }
+});
+
+test('manual retry/next replaces automatic ARE without stale spawns or extra statistics', () => {
+  for (const command of ['retry', 'skip']) {
+    const s = spinSession(); s.update(80); playSolution(s, 80);
+    const lock = s.lastResult, current = s.drill.id;
+    s.keyDown(command, lock.t + 10); s.keyUp(command, lock.t + 11);
+    assert.equal(s.lastResult, null); assert.equal(s.combo.count, 0);
+    assert.equal(s.stats.perfect, 1); assert.equal(s.stats.attempts, 1);
+    assert.equal(s.stats[command === 'retry' ? 'retries' : 'skips'], 1);
+    assert.equal(s.drill.id === current, command === 'retry');
+    s.update(lock.t + 80); assert.equal(s.handler.active, null);
+    s.update(lock.t + 90); assert.ok(s.handler.active);
+  }
+});
+
+test('automatic rounds retain buffered IRS and live ARE edits share pause-aware input timers', () => {
+  const events = [], s = spinSession({ onEvent: e => events.push(e) }); s.update(80);
+  playSolution(s, 80); const lock = s.lastResult;
+  s.keyDown('cw', lock.t + 5);
+  s.pause(lock.t + 20); s.setSettings({ are: 120 }, lock.t + 1000);
+  s.resume(lock.t + 1020); s.update(lock.t + 1120);
+  assert.ok(s.handler.inputs.some(i => i.irs)); assert.equal(s.handler.lastMove, 'rotation');
+  assert.equal(events.filter(e => e.kind === 'spawn').at(-1).t, lock.t + 1120);
+  assert.equal(s.lastResult, lock);
 });

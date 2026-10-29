@@ -1228,7 +1228,9 @@
       this.index = Math.max(0, this.set.drills.findIndex(d => d.id === options.drillId));
       this.stats = new Stats();
       this.totalStats = options.totalStats instanceof Stats ? options.totalStats : new Stats(options.totalStats);
-      this.completed = 0; this.serial = 0; this.awaitingNext = false; this.cueDrawPending = false;
+      this.completed = 0; this.serial = 0; this.cueDrawPending = false;
+      this.completedDrills = new Set(normalizeSpinProgress({ completed: options.completedDrills }).completed);
+      this.allClearShown = false;
       this.handler = new InputHandler({ clock: this.clock, time: options.time, settings: this.settings,
         autoNext: false, holdEnabled: false,
         onInput: () => this._touch(this.handler.time), onAction: (action, t) => this._touch(t),
@@ -1248,14 +1250,16 @@
       });
     }
     get drill() { return this.set.drills[this.index]; }
-    _schedule(t, queueDrawn = true) {
+    _schedule(t, queueDrawn = true, automatic = false) {
       this.cueDrawPending = queueDrawn;
       const drill = this.drill;
-      this.awaitingNext = false; this.lastResult = null;
-      this.handler.releaseAll(t); this.handler.board = spinBoard(drill);
+      // Like finesse, automatic rounds retain feedback and held inputs (IRS,
+      // DAS). Manual retry/next clears them. ARE is the only spawn delay.
+      if (!automatic) { this.lastResult = null; this.handler.releaseAll(t); }
+      this.handler.board = spinBoard(drill);
       this.round = { type: drill.type, drillId: drill.id, target: { type: drill.type,
         cells: drill.cells, state: drill.target, key: cellsKey(drill.cells) }, serial: ++this.serial };
-      this._emit('target', { round: this.round });
+      this._emit('target', { t, round: this.round, automatic });
       this.handler.scheduleSpawn(drill.type, t, this.settings.are);
     }
     start(t = this.clock()) {
@@ -1268,9 +1272,25 @@
       result.lines = this.handler.board.clone().clearLines();
       result.combo = this.combo.next(result);
       this.stats.record(result); this.totalStats.record(result);
-      if (result.status === 'perfect') this.completed++;
-      this.lastResult = result; this.awaitingNext = true;
+      if (result.status === 'perfect') {
+        this.completed++; this.completedDrills.add(this.drill.id);
+        if (!this.allClearShown && this.completedDrills.size === SPIN_DRILLS.length) {
+          result.allClear = true; this.allClearShown = true;
+        }
+      }
+      this.lastResult = result;
       this._emit('result', { result });
+      if (result.status === 'perfect') this._nextDrill();
+      this._schedule(lock.t, result.status === 'perfect', true);
+    }
+    _followingDrill(drill) {
+      return SPIN_DRILLS[SPIN_DRILLS.indexOf(drill) + 1] ||
+        SPIN_DRILLS.find(d => !this.completedDrills.has(d.id)) || SPIN_DRILLS[0];
+    }
+    _nextDrill() {
+      const next = this._followingDrill(this.drill);
+      this.set = SPIN_SETS.find(s => s.drills.includes(next));
+      this.index = this.set.drills.indexOf(next);
     }
     retry(t = this.clock()) {
       this.update(t);
@@ -1280,18 +1300,18 @@
     skip(t = this.clock()) {
       this.update(t);
       if (!this.running || this.pausedAt !== null) return false;
-      if (!this.awaitingNext || this.lastResult?.status !== 'perfect') {
-        this.stats.skips++; this.totalStats.skips++; this.combo.reset();
-      }
-      this.index = (this.index + 1) % this.set.drills.length; this._schedule(t); return true;
+      this.stats.skips++; this.totalStats.skips++; this.combo.reset();
+      this._nextDrill(); this._schedule(t); return true;
     }
     setSettings(patch, t = this.clock()) {
       this.update(t); this.settings = normalizeSettings(patch, this.settings);
       this.handler.setSettings(patch, t); return this;
     }
     nextQueue(count = 5) {
-      return Array.from({ length: Math.min(count, this.set.drills.length - 1) }, (_, n) =>
-        this.set.drills[(this.index + n + 1) % this.set.drills.length].type);
+      let drill = this.drill;
+      return Array.from({ length: Math.min(count, SPIN_DRILLS.length - 1) }, () => {
+        drill = this._followingDrill(drill); return drill.type;
+      });
     }
     snapshot(t = this.clock()) {
       const elapsed = this.elapsed(t);

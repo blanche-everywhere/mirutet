@@ -44,7 +44,7 @@ async function runSpinChecks(browser, root) {
       localStorage.setItem('mirutet-finesse.v1', JSON.stringify(profile));
       history.replaceState(null, '', location.href.split('#')[0]);
     }, {
-      settings: { das: 137, arr: 17, sdf: 1, are: 0, gravity: 0, allow180: false }, bindings,
+      settings: { das: 137, arr: 17, sdf: 1, are: 80, gravity: 0, allow180: false }, bindings,
       ui: { sound: false, zeroFault: true, repeatOnMiss: false }, progress: { current: 3, completed: [1, 3] },
       stats: { attempts: 5, perfect: 3 }
     });
@@ -76,24 +76,42 @@ async function runSpinChecks(browser, root) {
     assert.equal(await page.locator('.spin-set').count(), E.SPIN_SETS.length);
     assert.equal(await page.locator('[data-act=spin-drill]').count(), E.SPIN_DRILLS.length);
     await layout('spin selection');
+    await page.locator('[data-act=spin-drill][data-id=t-single-left]').click();
     for (const drill of E.SPIN_DRILLS) {
-      await page.locator(`[data-act=spin-drill][data-id="${drill.id}"]`).click(); await ready();
+      await ready();
       assert.equal((await state()).mode, 'spin');
       assert.equal((await state()).round.drillId, drill.id);
       assert.equal((await state()).settings.das, 137); assert.equal((await state()).settings.arr, 17);
       await tap('hold'); assert.equal((await state()).heldPiece, null);
-      await tap('hint'); assert.equal(await page.locator('#hint-route').isVisible(), true);
+      if (!(await state()).hint) await tap('hint');
+      assert.equal(await page.locator('#hint-route').isVisible(), true);
       assert.doesNotMatch(await page.locator('#result-panel').innerText(), /最短|フォルト/);
       if (drill === E.SPIN_DRILLS[0]) {
-        await tap('hardDrop'); assert.equal((await state()).lastResult.status, 'miss');
+        const serial = (await state()).round.serial;
+        await page.locator('#board').focus();
+        await page.evaluate(() => {
+          for (const action of ['hardDrop', 'pause']) {
+            const code = window.__mirutet.getState().bindings[action][0];
+            window.__mirutet.dispatch(code, true); window.__mirutet.dispatch(code, false);
+          }
+        });
+        assert.equal((await state()).lastResult.status, 'miss');
         assert.equal((await state()).round.drillId, drill.id);
         assert.equal((await state()).spinProgress.completed.length, 0);
         assert.equal((await state()).expression, 'thinking');
+        assert.equal((await state()).round.serial, serial + 1, 'Miss restores the same drill automatically');
+        await page.waitForTimeout(120);
+        assert.equal((await state()).active, null, 'Retry ARE freezes under pause');
+        await click('resume'); await ready();
+        assert.match(await page.locator('#result-panel').innerText(), /置き場所を確認/);
+        assert.equal((await state()).lastResult.status, 'miss', 'Retry feedback remains after automatic spawn');
+        assert.equal((await state()).stats.retries, 0);
+        assert.equal(await page.locator('#board').evaluate(el => el === document.activeElement), true);
         await tap('retry'); await ready(); assert.equal((await state()).lastResult, null);
       }
       const solution = E.solveSpinDrill(drill);
       // One browser evaluation avoids frame timing changing one-cell soft drops.
-      await page.evaluate(({ solution, bindings }) => {
+      await page.evaluate(({ solution, bindings, pauseAfter }) => {
         const tap = action => { window.__mirutet.dispatch(bindings[action][0], true); window.__mirutet.dispatch(bindings[action][0], false); };
         for (const action of solution) {
           if (action === 'floor') {
@@ -105,22 +123,39 @@ async function runSpinChecks(browser, root) {
           } else tap(action);
         }
         tap('hardDrop');
-      }, { solution, bindings });
+        if (pauseAfter) tap('pause');
+      }, { solution, bindings, pauseAfter: drill === E.SPIN_DRILLS[0] });
       const solved = await state();
       assert.equal(solved.lastResult.status, 'perfect', drill.id);
       assert.equal(solved.lastResult.lastMove, 'rotation'); assert.equal(solved.lastResult.lines, drill.lines);
-      assert.equal(solved.active, null, 'Feedback waits for retry/next');
+      const next = E.SPIN_DRILLS[(E.SPIN_DRILLS.indexOf(drill) + 1) % E.SPIN_DRILLS.length];
+      assert.equal(solved.round.drillId, next.id, 'Success selects the next drill automatically');
+      assert.equal(solved.spinProgress.current, next.id);
+      if (drill === E.SPIN_DRILLS[0]) {
+        assert.equal(solved.paused, true);
+        await page.waitForTimeout(120);
+        assert.equal((await state()).active, null, 'Automatic advance ARE freezes under pause');
+        await page.locator('.overlay [data-act=settings]').click(); assert.equal((await state()).paused, true);
+        await click('close-settings'); assert.equal(await page.locator('.overlay').count(), 1);
+        await click('resume');
+      }
+      await ready();
+      assert.equal((await state()).active.type, next.type);
+      assert.equal((await state()).lastResult.drillId, drill.id, 'Success feedback survives the next spawn');
       assert.equal(solved.expression, 'happy'); assert.ok(solved.spinProgress.completed.includes(drill.id));
       assert.match(await page.locator('#result-panel').innerText(), /回転入れ成功/);
       await layout(drill.id);
-      if (drill === E.SPIN_DRILLS[0]) {
-        await tap('skip'); await ready(); assert.equal((await state()).round.drillId, 't-single-right');
-        await click('settings'); assert.equal((await state()).paused, true);
-        await click('close-settings'); assert.equal(await page.locator('.overlay').count(), 1);
-        await click('resume'); await ready();
-      }
-      await click('spins');
     }
+    assert.match(await page.locator('#result-panel').innerText(), new RegExp(`全${E.SPIN_DRILLS.length}問達成`));
+    await layout('all clear');
+    await page.screenshot({ path: path.join(root, 'screens', 'spin-auto-advance.png') });
+    // Buttons and rebound keys still replace the current target manually.
+    await tap('retry'); await ready(); assert.equal((await state()).lastResult, null);
+    assert.doesNotMatch(await page.locator('#result-panel').innerText(), /全\d+問達成/);
+    await tap('skip'); await ready(); assert.equal((await state()).round.drillId, 't-single-right');
+    await click('retry'); await ready(); assert.equal((await state()).round.drillId, 't-single-right');
+    await click('skip'); await ready(); assert.equal((await state()).round.drillId, 't-double-left');
+    await click('spins');
     const completed = await state();
     assert.equal(completed.spinProgress.completed.length, E.SPIN_DRILLS.length); assert.equal(completed.spinStats.perfect, E.SPIN_DRILLS.length);
     assert.equal(completed.spinStats.attempts, E.SPIN_DRILLS.length + 1); assert.deepEqual(completed.totalStats, finesseBefore);
@@ -129,7 +164,7 @@ async function runSpinChecks(browser, root) {
     assert.deepEqual((await state()).spinProgress, completed.spinProgress);
     assert.deepEqual((await state()).spinStats, completed.spinStats);
     await click('mode-spin'); await click('spin-continue'); await ready();
-    assert.equal((await state()).round.drillId, E.SPIN_DRILLS.at(-1).id);
+    assert.equal((await state()).round.drillId, 't-double-left');
     await click('spins'); assert.equal(await page.locator('.lesson-card.done').count(), E.SPIN_DRILLS.length);
     for (const [width, height] of [[1920, 1080], [1280, 720], [800, 600]]) {
       await page.setViewportSize({ width, height }); await layout(`selection ${width}`);
@@ -183,7 +218,7 @@ async function runSpinChecks(browser, root) {
     assert.deepEqual(fallbackState.spinProgress.completed, ['t-single-left']);
     await fallback.close();
     assert.deepEqual(errors, []); assert.deepEqual(requests, []);
-    console.log('Spin browser checks passed: 36 drill solutions, 8 sets, 3 viewport sizes; miss/retry/next, hints, custom bindings/handling, settings pause, reload/progress, preference import/reset, isolated finesse records, storage/audio fallback, no network.');
+    console.log(`Spin browser checks passed: ${E.SPIN_DRILLS.length} drill solutions, ${E.SPIN_SETS.length} sets, 3 viewport sizes; automatic success/next-set/wrap, automatic miss reset with retained feedback, manual retry/next, hints, custom bindings/handling, settings pause, reload/progress and legacy 14-drill migration, preference import/reset, isolated finesse records, storage/audio fallback, no network.`);
   } finally { await context.close(); }
 }
 module.exports = { runSpinChecks };
