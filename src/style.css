@@ -2026,22 +2026,10 @@ body[data-screen=spins] #app { height:100%; display:flex; flex-direction:column;
 }
 body[data-screen=spins] { min-width:800px; }
 
-/* BL-145: six quiet entrances; practice gets the larger cards. */
-body:is([data-screen=menu],[data-screen=free],[data-screen=finesse]) { min-width:800px; height:100vh; }
+/* Category pages retain the dress-up-aware SVG companion. */
+body:is([data-screen=free],[data-screen=finesse]) { min-width:800px; height:100vh; }
 body:is([data-screen=free],[data-screen=finesse]) #app { height:100%; display:flex; flex-direction:column; }
 .menu-copy { min-width:0; }
-.home-categories { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
-.category-card { display:flex; align-items:center; justify-content:space-between; gap:10px; text-align:left; min-width:0; }
-.category-card b { display:block; font-size:21px; line-height:1.2; letter-spacing:.04em; }
-.category-card small { display:block; margin-top:4px; font-size:13px; line-height:1.4; white-space:nowrap; }
-.category-practice { grid-column:1 / -1; min-height:72px; padding:12px 18px; border-color:#d6c4e7; background:linear-gradient(115deg,#f0e5fa,#fffafd); box-shadow:var(--shadow); }
-.category-practice:first-child { background:linear-gradient(115deg,#e5f4ee,#fbfffd); border-color:#c5dfd5; }
-.category-practice:nth-child(3) { background:linear-gradient(115deg,#fbeaf1,#fffbfd); border-color:#eed3df; }
-.category-icon { color:#9b80b8; font-size:23px; }
-.category-secondary { min-height:78px; padding:10px; justify-content:center; background:#fffdfec9; }
-.category-secondary b { font-size:16px; }
-.category-secondary small { font-size:12px; color:var(--muted); }
-.category-secondary .category-icon { display:none; }
 .menu-shortcuts { color:var(--muted); margin-top:12px!important; }
 .category-title { font-size:32px; margin:12px 0; }
 .category-page .menu-buttons { grid-template-columns:minmax(0,1fr); }
@@ -2054,11 +2042,150 @@ body:is([data-screen=free],[data-screen=finesse]) #app { height:100%; display:fl
   .menu { grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr); gap:24px; padding:16px 24px; }
   .menu .logo { font-size:48px; margin:6px 0; }
   .menu-intro { font-size:14px; margin-bottom:12px; }
-  .category-practice { min-height:66px; padding:8px 15px; }
-  .category-secondary { padding:8px; min-height:72px; }
-  .home-categories { gap:8px; }
   .menu-art .speech { font-size:14px; }
   .mascot-caption { font-size:11px; }
   .spin-page .page-heading { align-items:flex-start; }
   .spin-page .page-heading .row { flex-wrap:wrap; justify-content:flex-end; }
+}
+
+/* BL-152: an illustrated home, with a compact desktop height budget. */
+body[data-screen=menu] {
+  min-width:0;
+  background:radial-gradient(ellipse at 4% 10%,#fce6f0,transparent 48%),
+    radial-gradient(ellipse at 92% 70%,#e1f3ef,transparent 46%),#f7f4fc;
+}
+body[data-screen=menu] .topbar { background:#ffffff50; border-color:#ffffff90; }
+body[data-screen=menu] .footer { align-items:center; color:var(--muted); font-size:11px; }
+.menu-home {
+  max-width:1180px;
+  grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);
+  gap:clamp(24px,4vw,56px);
+  padding:20px 32px;
+}
+.menu-home .menu-copy { animation:home-enter .45s ease-out backwards; }
+.menu-home .eyebrow { color:#80668f; font-size:12px; line-height:1.4; letter-spacing:.14em; }
+.menu-home .logo { font-size:64px; margin:10px 0 12px; color:#806599; letter-spacing:.06em; }
+.menu-home .logo span { color:#bf7296; }
+.menu-home .menu-intro { color:var(--muted); font-size:15px; line-height:1.7; margin-bottom:18px; }
+.menu-home .menu-shortcuts { line-height:1.5; }
+.home-categories { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.category-card {
+  --card-accent:#8b71ac;
+  --card-tint:#f1eafaed;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-width:0;
+  text-align:left;
+  border:1px solid #dfd4e8;
+  border-radius:16px;
+  background:linear-gradient(115deg,var(--card-tint),#ffffffd9);
+  box-shadow:0 6px 20px #72588d0d,inset 0 1px #ffffffc9;
+  backdrop-filter:blur(14px);
+  transition:background .18s,border-color .18s,transform .18s,box-shadow .18s;
+  animation:home-enter .45s ease-out .06s backwards;
+}
+.category-card:nth-child(2) { animation-delay:.10s; }
+.category-card:nth-child(3) { animation-delay:.14s; }
+.category-card:nth-child(4) { animation-delay:.18s; }
+.category-card:nth-child(5) { animation-delay:.22s; }
+.category-card:nth-child(6) { animation-delay:.26s; }
+.category-card:hover { background:#fffffff0; border-color:var(--card-accent); box-shadow:0 10px 24px #72588d1c; transform:translateY(-2px); }
+.category-card:focus-visible { outline:3px solid #806599; outline-offset:3px; border-color:var(--card-accent); box-shadow:0 8px 24px #72588d22; }
+.category-card:active { transform:translateY(1px); }
+.category-card b { display:block; font-size:22px; line-height:1.2; letter-spacing:.04em; }
+.category-card small { display:block; margin-top:5px; color:#71677f; font-size:13px; line-height:1.4; white-space:nowrap; }
+.category-practice { grid-column:1 / -1; min-height:72px; padding:12px 18px; }
+.category-practice:first-child { --card-accent:#568873; --card-tint:#e7f5efed; border-color:#c8dfd6; }
+.category-practice:nth-child(3) { --card-accent:#b16b8a; --card-tint:#fbeaf1ed; border-color:#ebd1de; }
+.category-icon { display:grid; place-items:center; flex:0 0 34px; height:34px; border-radius:11px; background:#ffffffb3; color:var(--card-accent); font-size:23px; }
+.category-secondary { --card-tint:#ffffffa6; min-height:76px; padding:12px 10px; justify-content:center; }
+.category-secondary b { font-size:16px; }
+.category-secondary small { font-size:12px; }
+.category-secondary .category-icon { display:none; }
+.menu-hero {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+  isolation:isolate;
+  animation:home-enter .6s ease-out backwards;
+}
+.menu-hero:before {
+  inset:100px 4% 24px;
+  border:1px solid #ffffffa6;
+  border-radius:48% 48% 42% 42%;
+  background:linear-gradient(155deg,#ede1f6b3,#ffffff66 50%,#dbf0eb99);
+  z-index:-1;
+}
+.menu-hero:after {
+  content:"";
+  position:absolute;
+  top:35%;
+  right:9%;
+  width:15px;
+  height:15px;
+  border-radius:4px;
+  background:#d2c0e4;
+  box-shadow:18px 0 #d2c0e4,18px -18px #d2c0e4;
+  transform:rotate(12deg);
+  opacity:.6;
+  z-index:-1;
+}
+.menu-hero .speech { width:100%; max-width:380px; margin:0; background:#fffffff0; border-color:#e2d6eb; box-shadow:0 8px 28px #72588d0a; }
+.menu-hero .speaker { color:#846497; }
+.menu-hero .mirufi-hero {
+  width:auto;
+  height:min(62vh,480px,calc(100vh - 280px));
+  max-width:100%;
+  object-fit:contain;
+  filter:drop-shadow(0 14px 18px #85699a1a);
+  animation:home-float 6s ease-in-out infinite;
+}
+.menu-hero .mascot-caption { margin:0; color:#796787; font-size:11px; line-height:1.5; letter-spacing:.12em; }
+@keyframes home-enter {
+  from { opacity:0; transform:translateY(8px); }
+  to { opacity:1; transform:translateY(0); }
+}
+@keyframes home-float {
+  0%,100% { transform:translateY(0); }
+  50% { transform:translateY(-5px); }
+}
+/* The shared reduced-motion rule above also disables both home animations. */
+@media(max-width:999px) {
+  .menu-home { grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr); gap:24px; padding-inline:24px; }
+}
+@media(max-height:680px) and (min-width:721px) {
+  .menu-home { padding-block:14px; }
+  .menu-home .eyebrow { font-size:11px; }
+  .menu-home .logo { font-size:52px; margin:6px 0 8px; }
+  .menu-home .menu-intro { font-size:14px; line-height:1.65; margin-bottom:14px; }
+  .home-categories { gap:8px; }
+  .category-practice { min-height:64px; padding:9px 16px; }
+  .category-practice b { font-size:20px; }
+  .category-card small { margin-top:4px; }
+  .category-secondary { min-height:68px; padding:9px 8px; }
+}
+@media(max-width:720px) {
+  body[data-screen=menu] { height:auto; min-height:100vh; }
+  body[data-screen=menu] #app { height:auto; min-height:100vh; }
+  body[data-screen=menu] .topbar { height:56px; flex-basis:56px; padding:0 20px; }
+  body[data-screen=menu] .footer { flex:0 0 auto; flex-direction:column; gap:4px; padding:14px 18px; text-align:center; }
+  .menu-home { display:flex; flex-direction:column; gap:28px; padding:22px 18px 28px; }
+  .menu-home .menu-copy { width:100%; max-width:500px; }
+  .menu-home .logo { font-size:52px; margin:8px 0 10px; }
+  .menu-home .eyebrow { font-size:11px; }
+  .menu-home .menu-intro { font-size:13px; }
+  .menu-hero { order:-1; width:100%; max-width:380px; }
+  .menu-hero .mirufi-hero { height:clamp(200px,34vh,270px); }
+  .menu-hero:before { inset:70px 12% 18px; }
+  .category-practice { min-height:72px; padding:12px 14px; }
+  .category-card small { font-size:12px; }
+  .category-secondary { min-height:72px; padding:10px 5px; }
+  .category-secondary small { font-size:11px; }
+}
+@media(max-width:380px) {
+  .home-categories { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }

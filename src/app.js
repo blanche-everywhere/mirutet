@@ -365,6 +365,10 @@
   function menuArtHTML() {
     return `<section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section>`;
   }
+  function menuHeroHTML() {
+    // build.js embeds the WebP here; direct-source Node tests can keep the token.
+    return `<section class="menu-art menu-hero">${speech('おかえりなさいっ♪ 今日は何を練習しましょうか？')}<img class="mirufi mirufi-hero" src="__MIRUFI_HERO_WAVE_SRC__" width="544" height="816" alt="手を振るミルフィ"><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section>`;
+  }
   function menuHTML() {
     const entries = [
       ['mode-free', 'フリー', '自由に積んでラインを消そう', '→'],
@@ -374,7 +378,7 @@
       ['records', '記録', '成績と進捗を見る', '↗'],
       ['settings', '設定', '操作や音を整える', '⚙']
     ];
-    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="home-categories" aria-label="メインメニュー">${entries.map(([act, label, description, icon], i) => `<button class="category-card ${i < 3 ? 'category-practice' : 'category-secondary'}" data-act="${act}"><span><b>${label}</b><small>${description}</small></span><span class="category-icon" aria-hidden="true">${icon}</span></button>`).join('')}</nav><p class="tiny menu-shortcuts">↑ ↓ ← → で選ぶ · Enter で決定</p></section>${menuArtHTML()}</main>${footer()}`;
+    return `<main class="menu menu-home"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="home-categories" aria-label="メインメニュー">${entries.map(([act, label, description, icon], i) => `<button class="category-card ${i < 3 ? 'category-practice' : 'category-secondary'}" data-act="${act}"><span><b>${label}</b><small>${description}</small></span><span class="category-icon" aria-hidden="true">${icon}</span></button>`).join('')}</nav><p class="tiny menu-shortcuts">↑ ↓ ← → で選ぶ · Enter で決定</p></section>${menuHeroHTML()}</main>${footer()}`;
   }
   function practiceCategoryHTML() {
     const free = screen === 'free';

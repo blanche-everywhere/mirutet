@@ -22,9 +22,11 @@ function assertOfflineHTML(html) {
 }
 function build() {
   let html = read('index.template.html');
+  const heroSrc = 'data:image/webp;base64,' + fs.readFileSync(path.join(root, 'src/assets/mirufi-hero-wave.webp')).toString('base64');
   const replacements = {
     APP_STYLES: read('style.css').replace('/* MASCOT_CSS */', MASCOT_CSS) + '\n' + read('dressup.css'),
-    ENGINE_SCRIPT: read('engine.js'), AUDIO_SCRIPT: read('audio.js'), MASCOT_SCRIPT: read('mascot.js'), APP_SCRIPT: read('app.js')
+    ENGINE_SCRIPT: read('engine.js'), AUDIO_SCRIPT: read('audio.js'), MASCOT_SCRIPT: read('mascot.js'),
+    APP_SCRIPT: read('app.js').replace('__MIRUFI_HERO_WAVE_SRC__', () => heroSrc)
   };
   for (const [key, value] of Object.entries(replacements)) {
     // A literal closing script in a future dialogue must not break the bundle.

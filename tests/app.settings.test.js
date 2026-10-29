@@ -178,8 +178,9 @@ test('merged settings events, JSON round-trip and reset keep cues and appearance
   assert.deepEqual(app.state().totalStats, originalRecords);
   assert.deepEqual(app.state().progress, originalProgress);
   app.click('close-settings');
-  assert.match(app.nodes['#app'].innerHTML, /data-hair-skin="intake" data-outfit-skin="cape"/);
   assert.equal(app.state().screen, 'menu');
+  app.click('mode-free');
+  assert.match(app.nodes['#app'].innerHTML, /data-hair-skin="intake" data-outfit-skin="cape"/);
 });
 
 test('appearance choices and cues remain usable when saving fails', () => {
@@ -194,6 +195,7 @@ test('appearance choices and cues remain usable when saving fails', () => {
   assert.match(app.nodes['#appearance-storage'].textContent, /起動中/);
   assert.equal(app.state().ui.pieceCueTiming, 'off'); assert.equal(app.state().ui.pieceCueVolume, 0);
   app.click('close-settings');
+  app.click('mode-free');
   assert.match(app.nodes['#app'].innerHTML, /data-hair-skin="side" data-outfit-skin="cape"/);
 });
 

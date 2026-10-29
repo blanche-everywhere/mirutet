@@ -190,7 +190,7 @@ async function main() {
     await page.evaluate(() => localStorage.clear()); await page.reload();
     await waitScreen('menu'); await checkViewport('menu', ['.home-categories', '.category-card', '.menu-art .speech', '.menu-art .mirufi', '.mascot-caption', '.footer']);
     assert.equal(await page.locator('.menu-art .speaker').innerText(), 'ミルフィ');
-    assert.match(await page.locator('.menu-art .bubble-text').innerText(), /あなたの先輩、ミルフィですっ/);
+    assert.match(await page.locator('.menu-art .bubble-text').innerText(), /おかえりなさいっ♪ 今日は何を練習しましょうか？/);
     await checkText(); await shot('menu'); clean();
 
     // Select Finesse with arrows, then start the focused lesson button.
