@@ -274,6 +274,20 @@ test('BL-145 top has exactly six ordered entrances, Japanese descriptions and Mi
   });
   assert.match(app.app.innerHTML, /ミルフィ/);
   assert.doesNotMatch(app.app.innerHTML, /data-act="(?:tutorial|lessons|drill|sprint|spins)"|チャレンジを達成|2 \/ 12/);
+  const icons = [...app.app.innerHTML.matchAll(/<svg class="category-tetromino" data-mino="([^"]+)"[^>]*>(.*?)<\/svg>/g)];
+  assert.deepEqual(icons.map(icon => icon[1]), ['O', 'I', 'T']);
+  for (const [, type, svg] of icons) {
+    const cells = [...svg.matchAll(/<rect x="(\d+)" y="(\d+)" width="(\d+)" height="(\d+)"[^>]*fill="([^"]+)"/g)];
+    assert.equal(cells.length, 4);
+    const minX = Math.min(...E.SHAPES[type][0].map(([x]) => x));
+    const maxY = Math.max(...E.SHAPES[type][0].map(([, y]) => y));
+    assert.deepEqual(cells.map(([, x, y]) => [(Number(x) - 2) / 24, (Number(y) - 2) / 24]),
+      E.SHAPES[type][0].map(([x, y]) => [x - minX, maxY - y]));
+    for (const cell of cells) {
+      assert.equal(cell[3], cell[4], 'Cells are square');
+      assert.equal(cell[5], E.COLORS[type], 'Use the exact engine color');
+    }
+  }
 });
 
 test('BL-145 finesse contains former lesson, list, drill and sprint entries; all twelve lessons open', () => {

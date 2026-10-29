@@ -17,7 +17,7 @@ async function main() {
     const click=act=>page.locator(`[data-act="${act}"]`).first().click();
     const state=()=>page.evaluate(()=>window.__mirutet.getState());
     let outfit = 'uniform';
-    const check=async skin=>{const found=await page.locator('svg.mirufi').evaluateAll(es=>es.map(e=>e.dataset.hairSkin));assert(found.length>0);assert(found.every(v=>v===skin));assert((await page.locator('svg.mirufi').evaluateAll(es=>es.map(e=>e.dataset.outfitSkin))).every(v=>v===outfit));};
+    const check=async skin=>{if((await state()).screen==='menu'){assert.equal(await page.locator('img.mirufi-hero').count(),1);await page.locator('[data-act=mode-free]').click();await check(skin);await page.keyboard.press('Escape');assert.equal((await state()).screen,'menu');return;}const found=await page.locator('svg.mirufi').evaluateAll(es=>es.map(e=>e.dataset.hairSkin));assert(found.length>0);assert(found.every(v=>v===skin));assert((await page.locator('svg.mirufi').evaluateAll(es=>es.map(e=>e.dataset.outfitSkin))).every(v=>v===outfit));};
     await page.goto(url);await check('center');
     await click('settings');
     const sharedAppearance = page.locator('[role=group][aria-labelledby=shared-appearance]');
@@ -171,7 +171,7 @@ async function main() {
     const blocked=await browser.newContext();await blocked.addInitScript(()=>{Object.defineProperty(window,'localStorage',{get(){throw new Error('blocked');}});});
     const p=await blocked.newPage();await p.goto(url);await p.locator('[data-act=settings]').first().click();await p.selectOption('#hair-skin','intake');await p.selectOption('#outfit-skin','cape');
     assert((await p.locator('#appearance-storage').textContent()).includes('起動中'));
-    await p.locator('[data-act=close-settings]').click();assert.equal(await p.locator('svg.mirufi').getAttribute('data-hair-skin'),'intake');assert.equal(await p.locator('svg.mirufi').getAttribute('data-outfit-skin'),'cape');await p.reload();assert.equal(await p.locator('svg.mirufi').getAttribute('data-outfit-skin'),'uniform');assert.equal(await p.locator('svg.mirufi').getAttribute('data-hair-skin'),'center');await blocked.close();
+    await p.locator('[data-act=close-settings]').click();await p.locator('[data-act=mode-free]').click();assert.equal(await p.locator('svg.mirufi').getAttribute('data-hair-skin'),'intake');assert.equal(await p.locator('svg.mirufi').getAttribute('data-outfit-skin'),'cape');await p.reload();await p.locator('[data-act=mode-free]').click();assert.equal(await p.locator('svg.mirufi').getAttribute('data-outfit-skin'),'uniform');assert.equal(await p.locator('svg.mirufi').getAttribute('data-hair-skin'),'center');await blocked.close();
     assert.deepEqual(errors,[]);assert.deepEqual(requests,[]);
     console.log('Appearance browser checks passed: two outfits x three hair skins, every lesson, menu/drill/sprint/result, live handling in all play modes at desktop/800x600 (all 12 challenges), persistence, import/export, invalid/legacy values, records preserved, keyboard, blocked storage, zero errors/network.');
   } finally {await browser.close();}

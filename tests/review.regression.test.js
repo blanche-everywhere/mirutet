@@ -89,6 +89,6 @@ test('built artifact is a self-contained classic-script HTML and both outputs ma
   assert.match(description, /^ミルテトは、.*ブラウザゲームシリーズです。現在.*「フィネス編」/);
   assert.equal(html.match(/<meta property="og:description" content="([^"]+)">/)[1], description);
   assert.match(html, /<h1 class="logo">ミル<span>テト<\/span><\/h1>/);
-  assert.match(html, /WELCOME TO MIRUTET ACADEMY/);
+  assert.match(html, /ブロック配置トレーニングゲーム/);
   assert.doesNotMatch(html, /type=["']module|APP_STYLES|ENGINE_SCRIPT|AUDIO_SCRIPT|MASCOT_SCRIPT|APP_SCRIPT/);
 });
