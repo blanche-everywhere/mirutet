@@ -387,6 +387,13 @@
     '…そこじゃない。落とす前に、ひと呼吸。',
     '…目標と違う。そこまでの道順、見直して。'
   ]);
+  const ANGRY_LINES = Object.freeze([
+    'むぅ……3回目ですっ。ちょっとだけ、怒ってますからね？',
+    'むー。あわてて押してませんか？ひと呼吸ですっ。',
+    '……むっ。手数、また多いですよ。道順を思い出しましょうね。',
+    'むぅ、わたし見てましたからね？次は最短でお願いしますっ。',
+    'ぷくー……。焦らなくていいんですっ。一手ずつ、ですよ？'
+  ]);
   const ENCOURAGEMENT_LINES = Object.freeze([
     '速さはあとからですっ。まずは正確に置いてみましょうね♪',
     'ひとつ覚えたら、それだけで前進ですっ！',
@@ -467,6 +474,15 @@
     const extra = Math.max(0, used - optimal);
     return `…${piece}ミノ、今の${used}回。最短は${optimal}回。${extra ? `${extra}回多い。遠回りしないで。` : '道順を確認して。'}\n${route}`;
   }
+  // Count attempts, including retries of the same target. Other statuses leave
+  // the streak unchanged; only a Perfect clears consecutive failures.
+  function nextFailStreak(prev, status) {
+    if (status === 'perfect') return 0;
+    return status === 'fault' || status === 'miss' ? prev + 1 : prev;
+  }
+  function shouldAngry(streak) {
+    return streak >= 3;
+  }
   function sprintComment(accuracy, pps) {
     if (!Number.isFinite(accuracy) || accuracy < 0 || accuracy > 100 || !Number.isFinite(pps) || pps < 0) {
       throw new RangeError('Accuracy must be 0..100 and PPS must be nonnegative');
@@ -475,7 +491,7 @@
       ' ' + SPRINT_COMMENTS.pps.find(tier => pps >= tier.min).text;
   }
   const DIALOGUE = deepFreeze({ welcome: WELCOME_LINES, praise: PRAISE_LINES, streak: STREAK_LINES, combo: COMBO_LINES,
-    perPiece: PIECE_PRAISE, miss: MISS_LINES, encouragement: ENCOURAGEMENT_LINES,
+    perPiece: PIECE_PRAISE, miss: MISS_LINES, angry: ANGRY_LINES, encouragement: ENCOURAGEMENT_LINES,
     tips: TIPS, sprint: SPRINT_COMMENTS });
 
   /** All DISTINCT empty-board landings grouped by the engine's canonical
@@ -641,7 +657,7 @@
   return Object.freeze({ name: 'ミルフィ', EXPRESSIONS, EXPRESSION_LABELS, MASCOT_CSS, mascotSVG,
     HAIR_SKINS, DEFAULT_HAIR_SKIN, HAIR_SKIN_LABELS, normalizeHairSkin,
     OUTFIT_SKINS, DEFAULT_OUTFIT_SKIN, OUTFIT_SKIN_LABELS, normalizeOutfitSkin,
-    DIALOGUE, PRAISE_LINES, STREAK_LINES, COMBO_LINES, PIECE_PRAISE, MISS_LINES, ENCOURAGEMENT_LINES,
-    WELCOME_LINES, TIPS, SPRINT_COMMENTS, hintText, sprintComment,
+    DIALOGUE, PRAISE_LINES, STREAK_LINES, COMBO_LINES, PIECE_PRAISE, MISS_LINES, ANGRY_LINES, ENCOURAGEMENT_LINES,
+    WELCOME_LINES, TIPS, SPRINT_COMMENTS, hintText, nextFailStreak, shouldAngry, sprintComment,
     LESSONS, createLessons, lessonPlacementGroups });
 });

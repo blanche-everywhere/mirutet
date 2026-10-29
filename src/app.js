@@ -151,7 +151,7 @@
   const isSpin = () => session instanceof E.SpinSession;
   let lessons = M.createLessons(settings), tryMode = false, tryIndex = 0, tryDone = false;
   let lessonMessage = '', sessionEventQueue = [], trace = [], irsUntil = 0, irsCount = 0;
-  let hint = false, lastResult = null, resultActions = [];
+  let hint = false, lastResult = null, resultActions = [], failStreak = 0;
   let expression = 'normal', bubble = '', tipIndex = 0, particles = [];
   let feedbackAt = 0, lastTipAttempt = 0;
   let gameOverInputUntil = 0;
@@ -354,6 +354,7 @@
   function openDressup() {
     if(screen === 'dressup') return;
     if(screen === 'settings' && settingsReturn === 'dressup') { closeSettings(); return; }
+    failStreak = 0;
     dressupReturn = screen; dressupFace = 'normal'; resetCombo(); pauseSession(); demo = null;
     screen = 'dressup'; window.scrollTo(0,0); render();
   }
@@ -570,6 +571,7 @@
     session.pause(now()); releaseAll();
   }
   function go(screenName) {
+    failStreak = 0;
     resetCombo();
     audio.stopCues();
     releaseAll(); demo = null; selectedDemo = null;
@@ -583,6 +585,7 @@
     if (screen === 'settings') return;
     // Settings → dress-up → settings goes back instead of nesting, so Back/Esc cannot loop.
     if (screen === 'dressup' && dressupReturn === 'settings') { closeDressup(); return; }
+    failStreak = 0;
     resetCombo();
     settingsReturn = screen; pauseSession(); demo = null; screen = 'settings'; window.scrollTo(0, 0); render();
   }
@@ -607,6 +610,7 @@
     save();
   }
   function newSession(options, Session = E.DrillSession) {
+    failStreak = 0;
     const s = new Session({ clock: now, time: now(), settings, totalStats, ...options,
       onEvent: (event, source) => sessionEventQueue.push({ event, source }) });
     return s;
@@ -789,9 +793,12 @@
           fitLessonBoard();
           save();
         } else {
+          if (!isFree()) failStreak = M.nextFailStreak(failStreak, r.status);
           if (r.status === 'perfect') {
             setCoach(isFree() ? 'きれいな操作ですっ♪' : source.stats.streak % 3 === 0 ? pick(M.PIECE_PRAISE[r.type]) : pick(M.PRAISE_LINES), 'happy');
             if (!reducedMotion) for (let i = 0; i < 28; i++) particles.push({ x: 5, y: 2, vx: (Math.random() - .5) * 10, vy: 2 + Math.random() * 9, start: now(), color: ['#d9a6ce','#b5ddc8','#c5ade1','#efcf95'][i % 4] });
+          } else if (!isFree() && M.shouldAngry(failStreak) && (r.status === 'fault' || r.status === 'miss')) {
+            setCoach(pick(M.ANGRY_LINES), 'angry');
           } else if (r.status === 'fault') {
             setCoach(isFree() ? `…${r.extra}入力多い。` : M.hintText(r.type, r.used, r.optimal, resultActions.map(actionLabel)), 'thinking');
           } else if (r.status === 'miss') setCoach(pick(M.MISS_LINES), 'sorry');
@@ -804,6 +811,7 @@
         updateCombo(r.combo, true);
       }
       if (event.kind === 'finish') {
+        failStreak = 0;
         resetCombo();
         audio.stopCues();
         sprintResult = event.result; save(); releaseAll(); screen = 'result'; render();
@@ -844,6 +852,7 @@
   }
 
   function startLesson(index) {
+    failStreak = 0;
     resetCombo();
     audio.stopCues();
     releaseAll(); session = null; sessionEventQueue = []; tryMode = false; tryDone = false; lessonMessage = '';
@@ -1095,6 +1104,7 @@
     else if (act === 'skip') { releaseAll(); session.skip(now()); processEvents(); }
     else if (act === 'hint') { hint = !hint; updateHint(); if (hint && isSpin()) setCoach(session.drill.tip, 'thinking'); else if (hint) setCoach(`この目標は${session.round.optimal}入力ですっ♪ ` + session.round.target.actions.map(actionLabel).join(' → '), 'thinking'); }
     else if (act === 'records' || act === 'records-session') {
+      failStreak = 0;
       resetCombo();
       pauseSession(); statsScope = act === 'records-session' ? 'session' : 'total'; screen = 'records'; render();
     } else if (act === 'stats-scope') { statsScope = statsScope === 'total' ? 'session' : 'total'; render(); }
@@ -1375,7 +1385,7 @@
     getState() {
       const handler = screen === 'tutorial' && !tryMode ? demo?.handler : session?.handler;
       return copy({ screen, menuMode, mode: session ? isFree() ? 'free' : isSpin() ? 'spin' : 'finesse' : null, settings, ui, bindings, practice, progress, spinProgress, spinStats: spinStats.snapshot(), lessonIndex, tryMode, tryIndex, tryDone,
-        expression, bubble, irsCount, storageOK, hint, lastResult, trace, combo: session?.combo.snapshot(),
+        expression, bubble, irsCount, storageOK, hint, lastResult, failStreak, trace, combo: session?.combo.snapshot(),
         round: session?.round, stats: session?.snapshot(), totalStats: totalStats.snapshot(),
         active: handler?.active, pending: handler?.pending, inputs: handler?.inputs, inputCount: handler?.inputCount,
         held: handler ? [...handler.held.keys()] : [], heldPiece: handler?.heldPiece, flags: handler?.flags, lastMove: handler?.lastMove,
