@@ -9,7 +9,8 @@
     "test:browser": "node tests/browser.check.js",
     "test:appearance": "node tests/appearance.browser.check.js",
     "test:dressup": "node tests/dressup.browser.check.js",
-    "test:settings": "node tests/settings.browser.check.js"
+    "test:settings": "node tests/settings.browser.check.js",
+    "test:angry": "node tests/angry.browser.check.js"
   },
   "keywords": [],
   "author": "",

@@ -10,7 +10,8 @@ const sampleLines = {
   happy: mascot.STREAK_LINES[10][0],
   surprised: mascot.ENCOURAGEMENT_LINES[1],
   thinking: mascot.hintText('T', 4, 2, ['180', 'DAS←']),
-  sorry: mascot.MISS_LINES[0]
+  sorry: mascot.MISS_LINES[0],
+  angry: '…むっ。もう一回。'
 };
 function html(text) {
   return String(text).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;',
@@ -42,7 +43,7 @@ function renderMascotPreview() {
     .intro { margin: 8px 0 0; font-size: 13px; color: #928398; }
     .badge { background: #fffafc; border: 1px solid #e6dae9; padding: 8px 13px; border-radius: 20px;
       font-size: 12px; white-space: nowrap; }
-    .gallery { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+    .gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
     .card { background: #fffdfede; border: 1px solid #e9dfea; border-radius: 22px;
       padding: 17px 10px 14px; box-shadow: 0 8px 24px #8e6c9c0a; min-width: 0; }
     .caption { display: flex; align-items: center; justify-content: space-between; padding: 0 8px; }
@@ -66,7 +67,7 @@ function renderMascotPreview() {
         <p class="intro">${html(mascot.WELCOME_LINES[0])}</p></div>
       <span class="badge">ミルテト</span>
     </header>
-    <section class="gallery" aria-label="ミルフィの5つの表情">${cards}
+    <section class="gallery" aria-label="ミルフィの${mascot.EXPRESSIONS.length}つの表情">${cards}
     </section>
     <footer>オリジナルキャラクター「ミルフィ」 · ミントとライラックのツインテール／ブロックの髪飾り<br />
       インラインSVGのみ・外部リソースなし。静止画の撮影は「動きを減らす」設定でアニメーションを停止できます。</footer>
