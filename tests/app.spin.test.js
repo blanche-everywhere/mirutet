@@ -66,7 +66,7 @@ function loadApp(profile = {}) {
 
 test('spin automatic rounds retain result, coach reaction and hints while sharing finesse audio timing', () => {
   const r = loadApp({ ui: { repeatOnMiss: false, repeatOnFault: true, zeroFault: true } });
-  r.click('spin-continue'); r.advance(80); r.tap('hint');
+  r.click('mode-spin'); r.click('spin-continue'); r.advance(80); r.tap('hint');
   assert.equal(r.state().hint, true);
   const beforeCues = r.cues.length;
   r.solve();
@@ -93,7 +93,7 @@ test('spin automatic rounds retain result, coach reaction and hints while sharin
 });
 
 test('spin pending automatic spawn and feedback survive settings/pause; manual keys replace it', () => {
-  const r = loadApp(); r.click('spin-continue'); r.advance(80); r.solve();
+  const r = loadApp(); r.click('mode-spin'); r.click('spin-continue'); r.advance(80); r.solve();
   r.advance(20); r.click('settings'); r.advance(2000);
   assert.equal(r.state().paused, true); assert.equal(r.state().active, null);
   r.click('close-settings'); assert.equal(r.state().paused, true);
@@ -109,7 +109,7 @@ test('spin pending automatic spawn and feedback survive settings/pause; manual k
 test('spin end-of-list saves first unfinished target, then all-clear wraps with one inline message', () => {
   const completed = E.SPIN_DRILLS.slice(1, -1).map(d => d.id);
   const r = loadApp({ spin: { current: E.SPIN_DRILLS.at(-1).id, completed } });
-  r.click('spin-continue'); r.advance(80); r.solve();
+  r.click('mode-spin'); r.click('spin-continue'); r.advance(80); r.solve();
   assert.equal(r.saved().spin.current, E.SPIN_DRILLS[0].id);
   assert.doesNotMatch(r.nodes.get('#result-panel').innerHTML, /全\d+問達成/);
   r.advance(80); r.solve();
@@ -122,7 +122,7 @@ test('spin end-of-list saves first unfinished target, then all-clear wraps with 
 
 for (const are of [0, 80]) test(`spin app advances through all 36 drills and 8 sets with ARE ${are}`, () => {
   const r = loadApp({ settings: { are, sdf: 1 } });
-  r.click('spin-continue'); r.advance(are);
+  r.click('mode-spin'); r.click('spin-continue'); r.advance(are);
   const sets = new Set();
   for (const [index, drill] of E.SPIN_DRILLS.entries()) {
     const set = E.SPIN_SETS.find(s => s.drills.includes(drill));
@@ -156,7 +156,7 @@ for (const are of [0, 80]) test(`spin app advances through all 36 drills and 8 s
 test('legacy 14-drill completion continues into the new sets without an early all-clear', () => {
   const completed = require('./spin-legacy.json').flatMap(s => s.drills.map(d => d.id));
   const r = loadApp({ spin: { current: completed.at(-1), completed, stats: { attempts: 14, perfect: 14 } } });
-  r.click('spin-continue'); r.advance(80); r.solve();
+  r.click('mode-spin'); r.click('spin-continue'); r.advance(80); r.solve();
   assert.equal(r.saved().spin.current, E.SPIN_SETS[4].drills[0].id);
   assert.deepEqual(r.saved().spin.completed, completed);
   assert.equal(r.saved().spin.stats.perfect, 15);

@@ -310,7 +310,9 @@
     else updateSettingTooltip();
   }, { passive: true });
   function header() {
-    return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ミルテト</span></button><div class="top-actions">${screen !== 'menu' ? '<button class="quiet small" data-act="menu">タイトル</button>' : ''}${screen !== 'dressup' ? '<button class="quiet small" data-act="dressup">きせかえ</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
+    const brand = '<span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ミルテト</span>';
+    if (screen === 'menu') return `<header class="topbar"><div class="brand">${brand}</div></header>`;
+    return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ">${brand}</button><div class="top-actions"><button class="quiet small" data-act="menu">タイトルへ</button>${screen !== 'dressup' ? '<button class="quiet small" data-act="dressup">きせかえ</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
   }
   function footer() { return '<footer class="footer"><span>ミルテト学園 · 小さな一手で、もっと楽しく。</span><span>ORIGINAL ART & SYNTHESIZED SOUND · NO NETWORK</span></footer>'; }
 
@@ -360,8 +362,31 @@
     // Returning to an active lesson/drill keeps the existing pause overlay.
   }
 
+  function menuArtHTML() {
+    return `<section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section>`;
+  }
   function menuHTML() {
-    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="menu-mode" aria-label="モード"><button data-act="mode-finesse" aria-pressed="${menuMode === 'finesse'}">フィネス編</button><button data-act="mode-free" aria-pressed="${menuMode === 'free'}">フリーモード</button><button data-act="mode-spin" aria-pressed="${menuMode === 'spin'}">回転入れ編</button></nav>${menuMode === 'spin' ? `<nav class="menu-buttons" aria-label="回転入れ編"><button class="primary" data-act="spin-continue"><span><b>ドリルをつづける</b><small>SPIN INSERTION PRACTICE</small></span><span>→</span></button><button data-act="spins"><b>問題一覧</b><span>◇</span></button><button data-act="settings"><b>設定</b><span>⚙</span></button></nav><p class="first-note">✧ ${spinProgress.completed.length} / ${E.SPIN_DRILLS.length}問達成 · 基本のTスピンから、少しずつ。</p>` : menuMode === 'free' ? '<nav class="menu-buttons" aria-label="フリーモード"><button class="primary" data-act="free"><b>はじめる</b><span>→</span></button><button data-act="settings"><b>設定</b><span>⚙</span></button></nav>' : `<nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>TARGET PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="dressup"><span><b>ミルフィのきせかえ</b><small>DRESS-UP ROOM</small></span><span>✧</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p>`}<p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
+    const entries = [
+      ['mode-free', 'フリー', '自由に積んでラインを消そう', '→'],
+      ['mode-finesse', 'フィネス', '最短の操作をレッスンとドリルで', '◇'],
+      ['mode-spin', '回転入れ', 'くぼみへ回して入れる練習をしよう', '↻'],
+      ['dressup', 'きせかえ', '髪型と衣装を選ぶ', '✧'],
+      ['records', '記録', '成績と進捗を見る', '↗'],
+      ['settings', '設定', '操作や音を整える', '⚙']
+    ];
+    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="home-categories" aria-label="メインメニュー">${entries.map(([act, label, description, icon], i) => `<button class="category-card ${i < 3 ? 'category-practice' : 'category-secondary'}" data-act="${act}"><span><b>${label}</b><small>${description}</small></span><span class="category-icon" aria-hidden="true">${icon}</span></button>`).join('')}</nav><p class="tiny menu-shortcuts">↑ ↓ ← → で選ぶ · Enter で決定</p></section>${menuArtHTML()}</main>${footer()}`;
+  }
+  function practiceCategoryHTML() {
+    const free = screen === 'free';
+    const buttons = free ? [['free', 'はじめる', '自由に積んで、あなたのペースで。']] : [
+      ['tutorial', 'はじめてのレッスン', '実演を見て、最短操作を少しずつ。'],
+      ['lessons', 'レッスン一覧', '全12レッスンを好きなところから。'],
+      ['drill', 'ドリル', 'ミノとエリアを選んで、繰り返し練習。'],
+      ['sprint', 'スプリント', '40・100・好きな数で自己ベストに挑戦。']
+    ];
+    const note = free ? '目標数や制限時間なし。ホールドとNEXTを使って遊べます。' :
+      progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪';
+    return `<main class="menu category-page"><section class="menu-copy"><div class="eyebrow">${free ? 'FREE PLAY' : 'FINESSE CLASSROOM'}</div><h1 class="category-title">${free ? 'フリー' : 'フィネス'}</h1><p class="menu-intro">${free ? '自由に積んで、ラインを消しましょう。' : '最短の一手を、ミルフィといっしょに。'}</p><nav class="menu-buttons" aria-label="${free ? 'フリー' : 'フィネス'}">${buttons.map(([act, label, description], i) => `<button class="${i === 0 ? 'primary' : ''}" data-act="${act}"><span><b>${label}</b><small>${description}</small></span><span aria-hidden="true">→</span></button>`).join('')}</nav><p class="first-note">✧ ${note}</p><p class="tiny menu-shortcuts">↑ ↓ ← → で選ぶ · Enter で決定 · Esc でタイトルへ</p></section>${menuArtHTML()}</main>${footer()}`;
   }
   function mini(type, extra = '') { return `<canvas class="mini-piece" data-piece="${type || ''}" width="144" height="108" aria-label="${type || '空'}ミノ" ${extra}></canvas>`; }
   function boardHTML() {
@@ -418,7 +443,7 @@
       <div class="play-footer" id="play-footer"></div></main>`;
   }
   function spinsHTML() {
-    return `<main class="page spin-page"><div class="page-heading"><div><div class="eyebrow">SPIN INSERTION PRACTICE</div><h2>回転入れ編 · ドリル</h2><p>くぼみへ回して、ぴたり。好きな問題から練習できます。</p></div><span class="tag mint-tag">${spinProgress.completed.length} / ${E.SPIN_DRILLS.length} 達成</span></div><p class="tiny">通算 ${spinStats.perfect} 成功 / ${spinStats.attempts} 試行 · 最後の移動を回転にして固定しましょう。入力回数は自由ですっ。</p><div class="spin-set-list" tabindex="0" aria-label="回転入れの問題一覧">${E.SPIN_SETS.map(set => `<section class="spin-set"><div class="row spread"><h3>${set.grade} · ${escape(set.title)}</h3><span class="tiny">${set.drills.filter(d => spinProgress.completed.includes(d.id)).length} / ${set.drills.length} 達成</span></div><div class="lesson-list">${set.drills.map(d => `<button class="lesson-card${spinProgress.completed.includes(d.id) ? ' done' : ''}" data-act="spin-drill" data-id="${d.id}"><span class="eyebrow">${spinProgress.completed.includes(d.id) ? '✔ 達成' : '◇ チャレンジ'}</span><b>${escape(d.title)}</b><span>${d.type}ミノ · ${d.lines}ライン</span></button>`).join('')}</div></section>`).join('')}</div></main>${footer()}`;
+    return `<main class="page spin-page"><div class="page-heading"><div><div class="eyebrow">SPIN INSERTION PRACTICE</div><h1 class="category-title">回転入れ</h1><p>くぼみへ回して、ぴたり。好きな問題から練習できます。</p></div><div class="row"><span class="tag mint-tag">${spinProgress.completed.length} / ${E.SPIN_DRILLS.length} 達成</span><button class="primary" data-act="spin-continue">ドリルをつづける →</button></div></div><h2 class="spin-list-title">問題一覧</h2><p class="tiny">通算 ${spinStats.perfect} 成功 / ${spinStats.attempts} 試行 · 最後の移動を回転にして固定しましょう。入力回数は自由ですっ。</p><div class="spin-set-list" tabindex="0" aria-label="回転入れの問題一覧">${E.SPIN_SETS.map(set => `<section class="spin-set"><div class="row spread"><h3>${set.grade} · ${escape(set.title)}</h3><span class="tiny">${set.drills.filter(d => spinProgress.completed.includes(d.id)).length} / ${set.drills.length} 達成</span></div><div class="lesson-list">${set.drills.map(d => `<button class="lesson-card${spinProgress.completed.includes(d.id) ? ' done' : ''}" data-act="spin-drill" data-id="${d.id}"><span class="eyebrow">${spinProgress.completed.includes(d.id) ? '✔ 達成' : '◇ チャレンジ'}</span><b>${escape(d.title)}</b><span>${d.type}ミノ · ${d.lines}ライン</span></button>`).join('')}</div></section>`).join('')}</div></main>${footer()}`;
   }
   function spinInfoHTML() {
     const s = session, done = s.set.drills.filter(d => spinProgress.completed.includes(d.id)).length;
@@ -485,7 +510,7 @@
   }
   function statsHTML() {
     const stats = statsScope === 'session' && session ? session.stats.snapshot() : totalStats.snapshot();
-    return `<main class="page"><div class="page-heading"><div><div class="eyebrow">A LITTLE BETTER EVERY DAY</div><h2 style="margin-top:5px">練習の記録</h2><p>${statsScope === 'session' ? 'このセッションの記録です。' : 'このブラウザに保存した、これまでの練習です。'} フォルトと置き場所のミスは別々に集計します。</p></div><div class="row">${session ? `<button class="small" data-act="stats-scope">${statsScope === 'session' ? '通算記録へ' : 'セッション記録へ'}</button><button class="primary small" data-act="return-play">練習に戻る</button>` : ''}<button class="small danger" data-act="reset-stats">記録をリセット</button></div></div><section class="panel big-stats">${[['試行数',stats.attempts,'回'],['正確率',stats.accuracy.toFixed(1),'%'],['最高連続',stats.bestStreak,'回'],['フォルト',stats.faults,'回'],['置き場所ミス',stats.misses,'回'],['平均入力 / 最短',stats.averageInputs.toFixed(2) + ' / ' + stats.averageOptimal.toFixed(2),'']].map(([label,value,unit]) => `<div class="stat"><label>${label}</label><strong class="accent">${value}</strong><small> ${unit}</small></div>`).join('')}</section><div class="stats-full" style="margin-top:20px"><section class="panel"><h3>ミノごとの記録</h3><table class="full-table"><thead><tr><th>ミノ</th><th>試行</th><th>最短成功</th><th>フォルト</th><th>ミス</th></tr></thead><tbody>${E.PIECE_TYPES.map(type => { const p=stats.byPiece[type]; return `<tr><td>${type}</td><td>${p.attempts}</td><td>${p.perfect}</td><td>${p.faults}</td><td>${p.misses}</td></tr>`; }).join('')}</tbody></table></section><section class="panel"><h3>スプリントのベストタイム</h3><table class="full-table"><thead><tr><th>目標数</th><th>ベストタイム</th></tr></thead><tbody>${Object.entries(totalStats.bestTimes).map(([length, time]) => `<tr><td>${length} 個</td><td>${timeText(time)}</td></tr>`).join('') || '<tr><td colspan="2">まだ記録がありません。スプリントに挑戦しましょう♪</td></tr>'}</tbody></table><p class="handling-note">正確率 = Perfect ÷ 全試行。PPS = 成功した配置数 ÷ 秒数。<br>ゼロフォルトでは余分な入力のあった配置は進捗に入りません。</p></section></div></main>${footer()}`;
+    return `<main class="page"><div class="page-heading"><div><div class="eyebrow">A LITTLE BETTER EVERY DAY</div><h2 style="margin-top:5px">練習の記録</h2><p>${statsScope === 'session' ? 'このセッションの記録です。' : 'このブラウザに保存した、これまでの練習です。'} フォルトと置き場所のミスは別々に集計します。</p></div><div class="row">${session ? `<button class="small" data-act="stats-scope">${statsScope === 'session' ? '通算記録へ' : 'セッション記録へ'}</button><button class="primary small" data-act="return-play">練習に戻る</button>` : ''}<button class="small danger" data-act="reset-stats">記録をリセット</button></div></div><section class="panel progress-summary" aria-label="学習の進捗"><h3>学習の進捗</h3><p>レッスン <b>${progress.completed.length} / 12</b> チャレンジ達成 · 回転入れ <b>${spinProgress.completed.length} / ${E.SPIN_DRILLS.length}</b> 問達成</p><p>回転入れの通算 ${spinStats.perfect} 成功 / ${spinStats.attempts} 試行</p><div class="row"><button class="small" data-act="lessons">レッスン一覧へ</button><button class="small" data-act="spins">回転入れの問題一覧へ</button></div></section><section class="panel big-stats">${[['試行数',stats.attempts,'回'],['正確率',stats.accuracy.toFixed(1),'%'],['最高連続',stats.bestStreak,'回'],['フォルト',stats.faults,'回'],['置き場所ミス',stats.misses,'回'],['平均入力 / 最短',stats.averageInputs.toFixed(2) + ' / ' + stats.averageOptimal.toFixed(2),'']].map(([label,value,unit]) => `<div class="stat"><label>${label}</label><strong class="accent">${value}</strong><small> ${unit}</small></div>`).join('')}</section><div class="stats-full" style="margin-top:20px"><section class="panel"><h3>ミノごとの記録</h3><table class="full-table"><thead><tr><th>ミノ</th><th>試行</th><th>最短成功</th><th>フォルト</th><th>ミス</th></tr></thead><tbody>${E.PIECE_TYPES.map(type => { const p=stats.byPiece[type]; return `<tr><td>${type}</td><td>${p.attempts}</td><td>${p.perfect}</td><td>${p.faults}</td><td>${p.misses}</td></tr>`; }).join('')}</tbody></table></section><section class="panel"><h3>スプリントのベストタイム</h3><table class="full-table"><thead><tr><th>目標数</th><th>ベストタイム</th></tr></thead><tbody>${Object.entries(totalStats.bestTimes).map(([length, time]) => `<tr><td>${length} 個</td><td>${timeText(time)}</td></tr>`).join('') || '<tr><td colspan="2">まだ記録がありません。スプリントに挑戦しましょう♪</td></tr>'}</tbody></table><p class="handling-note">正確率 = Perfect ÷ 全試行。PPS = 成功した配置数 ÷ 秒数。<br>ゼロフォルトでは余分な入力のあった配置は進捗に入りません。</p></section></div></main>${footer()}`;
   }
   function sprintHTML() {
     return `<main class="page"><div class="page-heading"><div><div class="eyebrow">FIND YOUR RHYTHM</div><h2 style="margin-top:5px">スプリント</h2></div><span class="tag">タイマーは最初の操作から</span></div><div class="sprint-setup"><div>${speech('正確さとリズムが大切ですっ♪ 目標の数だけ置いて、あなたの自己ベストに挑戦しましょうね。')}<div class="mascot-wrap">${mascot('surprised','sprint')}</div></div><section class="panel"><h2>今日は何個、置きますか？</h2><p class="handling-note">正しい場所への配置が目標数に達するとゴールです。<br>操作・ミノ・列の設定はドリルと共通です。</p><div class="sprint-choices"><button data-act="start-sprint" data-length="40">40<small class="tiny"> 個</small></button><button data-act="start-sprint" data-length="100">100<small class="tiny"> 個</small></button></div><div class="custom-sprint"><label for="custom-length">カスタム</label><input id="custom-length" type="number" min="1" max="9999" value="20"><button class="primary small" data-act="custom-sprint">スタート →</button></div><p class="best-line">40個 ${totalStats.bestTimes[40] === undefined ? '—' : timeText(totalStats.bestTimes[40])} / 100個 ${totalStats.bestTimes[100] === undefined ? '—' : timeText(totalStats.bestTimes[100])}</p>${toggle('zeroFault','ゼロフォルト：最短成功だけで進む')}</section></div></main>${footer()}`;
@@ -501,7 +526,7 @@
     const previous = document.activeElement;
     const focusKey = previous?.dataset ? { ...previous.dataset } : {};
     const previousId = previous?.id;
-    const content = header() + ({ menu: menuHTML, play: isSpin() ? spinPlayHTML : playHTML, spins: spinsHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
+    const content = header() + ({ menu: menuHTML, free: practiceCategoryHTML, finesse: practiceCategoryHTML, play: isSpin() ? spinPlayHTML : playHTML, spins: spinsHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
       dressup: dressupHTML, settings: settingsHTML, records: statsHTML, sprint: sprintHTML, result: resultHTML }[screen])();
     app.innerHTML = content + settingTooltipsHTML(content);
     setupSettingHelp();
@@ -548,7 +573,7 @@
     resetCombo();
     audio.stopCues();
     releaseAll(); demo = null; selectedDemo = null;
-    if (screenName === 'menu' || screenName === 'sprint' || screenName === 'lessons' || screenName === 'spins') {
+    if (['menu', 'free', 'finesse', 'sprint', 'lessons', 'spins'].includes(screenName)) {
       if (session?.running) session.pause(now());
       session = null; tryMode = false; particles = []; sessionEventQueue = [];
     }
@@ -1023,7 +1048,7 @@
       save(); updateDressup();
     } else if (act === 'dressup-face') { dressupFace = M.EXPRESSIONS.includes(button.dataset.value) ? button.dataset.value : 'normal'; updateDressup(); }
     else if (act === 'dressup-motion') { dressupPaused = !dressupPaused; dressupMotion(); }
-    else if (act === 'mode-finesse' || act === 'mode-free' || act === 'mode-spin') { menuMode = act === 'mode-free' ? 'free' : act === 'mode-spin' ? 'spin' : 'finesse'; render(); }
+    else if (act === 'mode-finesse' || act === 'mode-free' || act === 'mode-spin') { menuMode = act === 'mode-free' ? 'free' : act === 'mode-spin' ? 'spin' : 'finesse'; go(menuMode === 'spin' ? 'spins' : menuMode); }
     else if (act === 'spin-continue' || act === 'spin-drill') startSpin(button.dataset.id);
     else if (act === 'spins') go('spins');
     else if (act === 'free') startPlay(0, true);
@@ -1205,7 +1230,9 @@
   document.addEventListener('keydown', event => {
     audio.unlock();
     if (event.code === 'Escape' && activeHelp) {
-      event.preventDefault(); dismissSettingTooltip(); return;
+      event.preventDefault(); dismissSettingTooltip();
+      // Hover-only help must not consume the settings page's back shortcut.
+      if (screen !== 'settings' || helpOwner(event.target)) return;
     }
     if (capture) {
       if (event.code === 'Escape') { event.preventDefault(); if (!event.repeat) endCapture(); return; }

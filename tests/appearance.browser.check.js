@@ -40,11 +40,11 @@ async function main() {
       assert.equal((await state()).ui.pieceCueTiming, 'current');
       assert.equal((await state()).ui.pieceCueVolume, 37);
       // Every lesson expression and the other mascot-bearing screens use the selection.
-      await click('tutorial');
+      await click('mode-finesse');await click('tutorial');
       for(let i=0;i<12;i++){await page.locator(`[data-act="lesson"][data-index="${i}"]`).click();await check(skin);}
-      await click('menu');await click('lessons');
+      await click('menu');await click('mode-finesse');await click('lessons');
       if(await page.locator('svg.mirufi').count())await check(skin);
-      await click('menu');await click('drill');await check(skin);
+      await click('menu');await click('mode-finesse');await click('drill');await check(skin);
       await page.evaluate(()=>window.__mirutet.chooseTarget('O',{rot:0,x:4},{delay:0}));
       await page.waitForFunction(()=>!!window.__mirutet.getState().active);
       await page.locator('#board').focus();await page.keyboard.press('Space');
@@ -60,7 +60,7 @@ async function main() {
       await page.locator('#coach-mascot svg').evaluate(svg => svg.getAnimations({subtree:true}).forEach(a=>{a.currentTime=0;a.play();}));
 
       await click('hint');await check(skin);
-      await click('menu');await click('sprint');await check(skin);
+      await click('menu');await click('mode-finesse');await click('sprint');await check(skin);
       await page.locator('#custom-length').fill('1');await click('custom-sprint');
       await page.evaluate(()=>window.__mirutet.chooseTarget('O',{rot:0,x:4},{delay:0}));
       await page.waitForFunction(()=>!!window.__mirutet.getState().active);await page.locator('#board').focus();await page.keyboard.press('Space');
@@ -156,11 +156,11 @@ async function main() {
     await page.setViewportSize({width:800,height:600});await captureHandling('handling-drill-small');
     await captureHandling('drill-small',false);
     assert.equal(await page.locator('#play-stats').isVisible(),true);
-    await page.setViewportSize({width:1280,height:720});await click('menu');await click('sprint');await page.locator('[data-act=start-sprint][data-length="40"]').click();
+    await page.setViewportSize({width:1280,height:720});await click('menu');await click('mode-finesse');await click('sprint');await page.locator('[data-act=start-sprint][data-length="40"]').click();
     await captureHandling('handling-sprint');
     await page.setViewportSize({width:800,height:600});await captureHandling('handling-sprint-small');
     await captureHandling('sprint-small',false);
-    await page.setViewportSize({width:1280,height:720});await click('menu');await click('tutorial');await page.locator('[data-act=lesson][data-index="1"]').click();await click('try-it');
+    await page.setViewportSize({width:1280,height:720});await click('menu');await click('mode-finesse');await click('tutorial');await page.locator('[data-act=lesson][data-index="1"]').click();await click('try-it');
     await captureHandling('handling-lesson');
     await page.setViewportSize({width:800,height:600});await captureHandling('handling-lesson-small');
     for(let i=0;i<12;i++){

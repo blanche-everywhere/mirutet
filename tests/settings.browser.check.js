@@ -156,10 +156,10 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
     await p.locator('#settings-json').fill(JSON.stringify({settings:{are:0,sdf:41,lockDelay:100,lockDelayOn:false}}));
     await c('import'); await c('close-settings');
     if (mode==='free') { await c('mode-free'); await c('free'); }
-    else if (mode==='sprint') { await c('sprint'); await c('start-sprint'); }
+    else if (mode==='sprint') { await c('mode-finesse'); await c('sprint'); await c('start-sprint'); }
     else if (mode==='spin') { await c('mode-spin'); await c('spin-continue'); }
-    else if (mode==='lesson') { await c('tutorial'); await c('try-it'); }
-    else await c('drill');
+    else if (mode==='lesson') { await c('mode-finesse'); await c('tutorial'); await c('try-it'); }
+    else { await c('mode-finesse'); await c('drill'); }
     await p.waitForFunction(()=>!!window.__mirutet.getState().active);
     await c('toggle-handling');
     const auto=p.locator('[data-live-handling] [data-engine-toggle=lockDelayOn]');

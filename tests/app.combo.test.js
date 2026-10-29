@@ -86,7 +86,7 @@ function loadApp(bubbles = true, are = 0) {
 }
 
 test('app shows COMBO from two real Perfects and speaks only at 5/10/20/50', () => {
-  const r = loadApp(); r.click('drill');
+  const r = loadApp(); r.click('menu'); r.click('mode-finesse'); r.click('drill');
   assert.equal(r.display.hidden, true);
   const visualMarkup = r.app.innerHTML.match(/<div class="finesse-combo"[\s\S]*?<\/div>/)[0];
   assert.doesNotMatch(visualMarkup, /role="status"|aria-live="polite"|aria-atomic/);
@@ -123,7 +123,7 @@ test('app shows COMBO from two real Perfects and speaks only at 5/10/20/50', () 
 });
 
 test('IRS corrective and lesson-completion feedback take priority over milestone bubbles', () => {
-  const r = loadApp(); r.click('tutorial');
+  const r = loadApp(); r.click('menu'); r.click('mode-finesse'); r.click('tutorial');
   for (let i = 0; i < 3; i++) r.click('next-lesson');
   r.click('try-it');
   for (let count = 1; count <= 9; count++) {
@@ -150,7 +150,7 @@ test('IRS corrective and lesson-completion feedback take priority over milestone
 });
 
 test('inline zero-fault changes in either direction reset combo and cancel its audio', () => {
-  const r = loadApp(); r.click('drill');
+  const r = loadApp(); r.click('menu'); r.click('mode-finesse'); r.click('drill');
   for (const checked of [true, false]) {
     for (let count = 1; count <= 5; count++) r.perfect();
     const before = r.state(), stops = r.stopped.length;
@@ -176,7 +176,7 @@ test('inline zero-fault changes in either direction reset combo and cancel its a
 });
 
 test('retry/restart, practice changes and leaving play clear combo; pause alone preserves it', () => {
-  const r = loadApp(); r.click('drill'); r.perfect(); r.perfect();
+  const r = loadApp(); r.click('menu'); r.click('mode-finesse'); r.click('drill'); r.perfect(); r.perfect();
   r.click('pause'); assert.equal(r.state().combo.count, 2);
   r.click('resume'); assert.equal(r.state().combo.count, 2);
   r.click('retry'); assert.equal(r.state().combo.count, 0); assert.equal(r.display.hidden, true);
@@ -188,7 +188,8 @@ test('retry/restart, practice changes and leaving play clear combo; pause alone 
   r.perfect(); r.perfect(); r.area('left');
   assert.equal(r.state().combo.count, 0); assert.equal(r.display.hidden, true);
   for (const destination of ['settings', 'records-session', 'drill', 'tutorial', 'sprint', 'menu']) {
-    r.click('drill'); r.perfect(); r.perfect();
+    r.click('menu'); r.click('mode-finesse'); r.click('drill'); r.perfect(); r.perfect();
+    if (['drill', 'tutorial', 'sprint'].includes(destination)) { r.click('menu'); r.click('mode-finesse'); }
     r.click(destination);
     assert.equal(r.state().combo?.count || 0, 0, destination);
     if (destination !== 'drill') assert.doesNotMatch(r.app.innerHTML, /id="combo-display"/);
@@ -197,7 +198,7 @@ test('retry/restart, practice changes and leaving play clear combo; pause alone 
       assert.equal(r.state().combo.count, 0, 'returning does not restore an old combo');
     }
   }
-  r.click('tutorial'); r.click('try-it');
+  r.click('menu'); r.click('mode-finesse'); r.click('tutorial'); r.click('try-it');
   assert.equal(r.state().combo.count, 0);
   assert.match(r.app.innerHTML, /id="combo-display"/);
   r.perfect(); assert.equal(r.state().combo.count, 1);
@@ -210,12 +211,12 @@ test('combo milestone feedback respects bubbles off in drill and lesson challeng
   for (const challenge of [false, true]) {
     const r = loadApp(false);
     if (challenge) {
-      r.click('tutorial');
+      r.click('menu'); r.click('mode-finesse'); r.click('tutorial');
       // The IRS lesson allows finesse-perfect placements without IRS to be
       // retried, so its live challenge can reach a five-placement combo.
       for (let i = 0; i < 3; i++) r.click('next-lesson');
       r.click('try-it');
-    } else r.click('drill');
+    } else { r.click('menu'); r.click('mode-finesse'); r.click('drill'); }
     for (let count = 1; count <= 5; count++) r.perfect();
     assert.equal(r.state().combo.count, 5);
     assert.doesNotMatch(r.state().bubble, /COMBO/);

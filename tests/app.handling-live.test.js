@@ -85,12 +85,16 @@ function loadApp(profile = {}, blocked = false) {
   };
 }
 
+function enterMode(app, mode) {
+  app.click(mode === 'free' ? 'mode-free' : mode === 'spin' ? 'mode-spin' : 'mode-finesse');
+  if (mode === 'sprint') { app.click('sprint'); app.click('start-sprint', { length: '40' }); }
+  else if (mode === 'lesson') { app.click('tutorial'); app.click('try-it'); }
+  else app.click(mode === 'spin' ? 'spin-continue' : mode);
+}
+
 for (const mode of ['free', 'drill', 'sprint', 'lesson']) test(`${mode}: handling edits save immediately without pausing, replacing the piece or losing held keys`, () => {
   const app = loadApp();
-  if (mode === 'free') app.click('free');
-  else if (mode === 'sprint') app.click('start-sprint', { length: '40' });
-  else if (mode === 'lesson') { app.click('tutorial'); app.click('try-it'); }
-  else app.click('drill');
+  enterMode(app, mode);
   assert.match(app.app.innerHTML, /data-live-handling/);
   assert.match(app.app.innerHTML, /tabindex="-1" aria-expanded="false"/);
   assert.equal((app.app.innerHTML.match(/data-handling-value=/g) || []).length, 7);
@@ -122,11 +126,7 @@ for (const mode of ['free', 'drill', 'sprint', 'lesson']) test(`${mode}: handlin
 
 for (const mode of ['free', 'drill', 'sprint', 'spin', 'lesson']) test(`${mode}: shared live lock controls apply OFF/ON and duration changes immediately`, () => {
   const app = loadApp({ settings: { are: 0, sdf: 41 } });
-  if (mode === 'free') app.click('free');
-  else if (mode === 'spin') app.click('spin-continue');
-  else if (mode === 'sprint') app.click('start-sprint', { length: '40' });
-  else if (mode === 'lesson') { app.click('tutorial'); app.click('try-it'); }
-  else app.click('drill');
+  enterMode(app, mode);
   app.click('toggle-handling');
   assert.match(app.app.innerHTML, /data-engine-toggle="lockDelayOn"/);
   assert.equal(app.get('[data-handling-value="lockDelay"]').textContent, '500 ms');
@@ -145,7 +145,7 @@ test('panel and full settings round-trip through the same validation, persistenc
   const app = loadApp({ settings });
   assert.deepEqual(app.state().settings, E.normalizeSettings(settings));
   assert.deepEqual(app.saved().settings, app.state().settings);
-  app.click('free'); app.click('toggle-handling');
+  enterMode(app, 'free'); app.click('toggle-handling');
   app.adjust('das', -1); app.adjust('arr'); app.adjust('sdf', -1); app.adjust('dcd'); app.adjust('are', -1); app.adjust('gravity');
   assert.deepEqual(app.state().settings, E.normalizeSettings(settings));
   app.adjust('arr', -1); app.click('settings');
@@ -169,7 +169,7 @@ test('panel and full settings round-trip through the same validation, persistenc
 
 test('steppers preserve fractional imported values using the existing normalization rules', () => {
   const app = loadApp({ settings: { are: 0, das: 110.25, gravity: .25 } });
-  app.click('free'); app.click('toggle-handling'); app.adjust('das'); app.adjust('gravity');
+  enterMode(app, 'free'); app.click('toggle-handling'); app.adjust('das'); app.adjust('gravity');
   assert.equal(app.state().settings.das, 111.25); assert.equal(app.saved().settings.das, 111.25);
   assert.equal(app.state().settings.gravity, .35); assert.equal(app.saved().settings.gravity, .35);
 });
@@ -177,7 +177,7 @@ test('steppers preserve fractional imported values using the existing normalizat
 test('pointer controls and even assistive focus route rebound arrows, Space and letter keys to gameplay', () => {
   const defaults = loadApp().state().bindings;
   const bindings = E.rebindKeys(E.rebindKeys(defaults, 'left', 0, 'KeyQ'), 'cw', 0, 'Space');
-  const app = loadApp({ bindings }); app.click('free'); app.click('toggle-handling');
+  const app = loadApp({ bindings }); enterMode(app, 'free'); app.click('toggle-handling');
   const { el } = app.adjust('arr'), settings = app.state().settings;
   el.focus(); const x = app.state().active.x;
   assert.equal(app.tap('KeyQ', el).defaultPrevented, true); assert.equal(app.state().active.x, x - 1);
@@ -189,7 +189,7 @@ test('pointer controls and even assistive focus route rebound arrows, Space and 
 
 test('lesson player handling follows saved preferences rather than slow demonstration overrides; failed storage stays usable', () => {
   const app = loadApp({ settings: { das: 210, arr: 30, are: 300, sdf: 8, gravity: .01 } }, true);
-  app.click('tutorial'); app.click('next-lesson');
+  app.click('mode-finesse'); app.click('tutorial'); app.click('next-lesson');
   assert.doesNotMatch(app.app.innerHTML, /data-live-handling/);
   app.click('try-it'); assert.equal(app.state().pending.at, 300);
   app.click('toggle-handling'); app.adjust('are'); assert.equal(app.state().pending.at, 301);
@@ -201,7 +201,7 @@ test('lesson player handling follows saved preferences rather than slow demonstr
 
 test('the IRS challenge keeps its ARE window even with saved ARE 0, and shows the value in effect', () => {
   const app = loadApp({ settings: { are: 0, irs: false } });
-  app.click('tutorial'); for (let i = 0; i < 3; i++) app.click('next-lesson');
+  app.click('mode-finesse'); app.click('tutorial'); for (let i = 0; i < 3; i++) app.click('next-lesson');
   app.click('try-it');
   assert.equal(app.state().pending.at, 350); assert.equal(app.state().settings.are, 0);
   assert.equal(app.get('[data-handling-value="are"]').textContent, '350 ms');
@@ -216,7 +216,7 @@ test('the IRS challenge keeps its ARE window even with saved ARE 0, and shows th
 test('unbound arrows and Space on the board are consumed instead of walking focus onto buttons', () => {
   const defaults = loadApp().state().bindings;
   const app = loadApp({ bindings: { ...E.rebindKeys(defaults, 'softDrop', 0, 'KeyS') } });
-  app.click('free'); app.click('toggle-handling'); app.adjust('arr');
+  enterMode(app, 'free'); app.click('toggle-handling'); app.adjust('arr');
   const board = app.document.activeElement, pieces = app.state().stats.pieces;
   assert.equal(app.tap('ArrowDown', board).defaultPrevented, true);
   assert.equal(app.document.activeElement, board); assert.equal(app.state().stats.pieces, pieces);
@@ -224,7 +224,7 @@ test('unbound arrows and Space on the board are consumed instead of walking focu
 
 test('compact values: SDF 41 is ∞ and imported fractions stay readable', () => {
   const app = loadApp({ settings: { sdf: 41, gravity: 1 / 60 } });
-  app.click('free');
+  enterMode(app, 'free');
   assert.equal(app.get('[data-handling-value="sdf"]').textContent, '∞');
   assert.match(app.app.innerHTML, /data-handling-value="gravity"[^>]*>0\.017 G</);
   assert.equal(app.state().settings.gravity, 1 / 60);
