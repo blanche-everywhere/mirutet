@@ -371,14 +371,14 @@
   }
   function menuHTML() {
     const entries = [
-      ['mode-free', 'フリー', '自由に積んでラインを消そう', '→'],
-      ['mode-finesse', 'フィネス', '最短の操作をレッスンとドリルで', '◇'],
-      ['mode-spin', '回転入れ', 'くぼみへ回して入れる練習をしよう', '↻'],
-      ['dressup', 'きせかえ', '髪型と衣装を選ぶ', '✧'],
-      ['records', '記録', '成績と進捗を見る', '↗'],
-      ['settings', '設定', '操作や音を整える', '⚙']
+      ['mode-free', 'フリー', '自由に積んでラインを消そう'],
+      ['mode-finesse', 'フィネス', '最短の操作をレッスンとドリルで'],
+      ['mode-spin', '回転入れ', 'くぼみへ回して入れる練習をしよう'],
+      ['dressup', 'きせかえ', '髪型と衣装を選ぶ'],
+      ['records', '記録', '成績と進捗を見る'],
+      ['settings', '設定', '操作や音を整える']
     ];
-    return `<main class="menu menu-home"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="home-categories" aria-label="メインメニュー">${entries.map(([act, label, description, icon], i) => `<button class="category-card ${i < 3 ? 'category-practice' : 'category-secondary'}" data-act="${act}"><span><b>${label}</b><small>${description}</small></span><span class="category-icon" aria-hidden="true">${icon}</span></button>`).join('')}</nav><p class="tiny menu-shortcuts">↑ ↓ ← → で選ぶ · Enter で決定</p></section>${menuHeroHTML()}</main>${footer()}`;
+    return `<main class="menu menu-home"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィと、あなたのペースで。</p><nav class="home-categories" aria-label="メインメニュー">${entries.map(([act, label, description], i) => `<button class="category-card ${i < 3 ? 'category-practice' : 'category-secondary'}" data-act="${act}"><span><b>${label}</b><small>${description}</small></span>${i < 3 ? `<span class="category-number" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><span class="category-icon" aria-hidden="true">→</span>` : ''}</button>`).join('')}</nav><p class="tiny menu-shortcuts">↑ ↓ ← → で選ぶ · Enter で決定</p></section>${menuHeroHTML()}</main>${footer()}`;
   }
   function practiceCategoryHTML() {
     const free = screen === 'free';
