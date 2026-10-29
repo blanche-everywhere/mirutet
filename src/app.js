@@ -316,7 +316,7 @@
 
   // Dress-up choices use existing saved cosmetic IDs; expressions stay local.
   let dressupReturn = 'menu', dressupFace = 'normal', dressupPaused = reducedMotion;
-  const dressupHairNames = {side:'そよ風サイド',center:'おすましセンター',intake:'ふんわりフェザー'},dressupHairHints={side:'7:3でふんわり横流し',center:'真ん中分けのやさしいカーブ',intake:'控えめインテークの立体感'},dressupOutfitNames={uniform:'放課後フィネス',cape:'月夜のワルツ'},dressupFaceNames={normal:'いつもの',happy:'にっこり',surprised:'びっくり',thinking:'考え中',sorry:'しょんぼり'};
+  const dressupHairNames = {side:'そよ風サイド',center:'おすましセンター',intake:'ふんわりフェザー'},dressupHairHints={side:'7:3でふんわり横流し',center:'真ん中分けのやさしいカーブ',intake:'控えめインテークの立体感'},dressupOutfitNames={uniform:'放課後フィネス',cape:'月夜のワルツ'},dressupFaceNames={normal:'いつもの',happy:'にっこり',surprised:'びっくり',thinking:'考え中',sorry:'しょんぼり',angry:'むっ'};
   function dressupStorageText() { return storageOK ? '髪型と衣装は自動保存されます。' : '保存できないため、この起動中だけ選択を保持します。'; }
   function dressupCombination() { return dressupHairNames[ui.hairSkin] + ' × ' + dressupOutfitNames[ui.outfitSkin]; }
   function dressupAvatar() { return M.mascotSVG(dressupFace, {idPrefix:'dressup', hairSkin:ui.hairSkin, outfitSkin:ui.outfitSkin, halo:false}); }

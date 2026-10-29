@@ -80,8 +80,8 @@ function parseXML(source) {
   return elements;
 }
 
-test('all five expressions are well-formed standalone SVGs with self-contained paints and swappable faces', () => {
-  assert.deepEqual(M.EXPRESSIONS, ['normal', 'happy', 'surprised', 'thinking', 'sorry']);
+test('all six expressions are well-formed standalone SVGs with self-contained paints and swappable faces', () => {
+  assert.deepEqual(M.EXPRESSIONS, ['normal', 'happy', 'surprised', 'thinking', 'sorry', 'angry']);
   const seenIDs = new Set(), faces = new Set();
   for (const expression of M.EXPRESSIONS) {
     const svg = M.mascotSVG(expression);
@@ -119,7 +119,18 @@ test('all five expressions are well-formed standalone SVGs with self-contained p
     assert.equal(elements.find(el => el.attrs.class === 'mirufi-eyes-closed').attrs.opacity, '0',
       'closed blink layer stays hidden even before CSS loads');
   }
-  assert.equal(faces.size, 5, 'different mouths for every expression');
+  assert.equal(faces.size, 5, 'five original mouths; angry intentionally shares sorry mouth');
+});
+
+test('angry keeps the original sad mouth and adds its own four-stroke mark only', () => {
+  const mouth = svg => svg.match(/<g data-part="mouth">([\s\S]*?)<\/g>/)[1];
+  assert.equal(mouth(M.mascotSVG('angry')), mouth(M.mascotSVG('sorry')));
+  assert.equal(M.EXPRESSION_LABELS.angry, 'むっ');
+  for (const expression of M.EXPRESSIONS) {
+    const svg = M.mascotSVG(expression), mark = svg.match(/<g class="anger-mark"[^>]*>([\s\S]*?)<\/g>/);
+    assert.equal(Boolean(mark), expression === 'angry');
+    if (mark) assert.equal((mark[1].match(/<path /g) || []).length, 4);
+  }
 });
 
 for (const expression of M.EXPRESSIONS) {
@@ -366,12 +377,12 @@ test('IRS and IHS lesson demos replay using the real InputHandler and ARE, inclu
   }
 });
 
-test('preview tool writes all five inline SVGs with no external resources at the repository path', () => {
+test('preview tool writes all six inline SVGs with no external resources at the repository path', () => {
   const { renderMascotPreview } = require('../tools/render-mascot.js');
   const outputPath = renderMascotPreview();
   assert.equal(outputPath, path.resolve(__dirname, '../screens/mascot-preview.html'));
   const preview = fs.readFileSync(outputPath, 'utf8');
-  assert.equal((preview.match(/<svg\b/g) || []).length, 5);
+  assert.equal((preview.match(/<svg\b/g) || []).length, 6);
   assert.match(preview, /<html lang="ja">/);
   assert.doesNotMatch(preview, /案内役|ガイド/);
   assert.ok(!/<(?:link|script|img|iframe)\b/i.test(preview));
@@ -379,7 +390,7 @@ test('preview tool writes all five inline SVGs with no external resources at the
   for (const expression of M.EXPRESSIONS) assert.ok(preview.includes(`data-expression="${expression}"`));
 });
 
-test('outfit choices cover all 30 combinations without changing hair or face', () => {
+test('outfit choices cover all 36 combinations without changing hair or face', () => {
   const normalize = s => s.replace(/mirufi-outfit-\d+/g, 'mirufi-outfit')
     .replace(/ data-outfit-skin="[^"]+"/, '').replace(/<desc[^>]*>[\s\S]*?<\/desc>/, '')
     .replace(/<g data-part="outfit"[\s\S]*?<\/g>/, '');

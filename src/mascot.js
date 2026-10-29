@@ -26,9 +26,9 @@
     return value;
   }
 
-  const EXPRESSIONS = Object.freeze(['normal', 'happy', 'surprised', 'thinking', 'sorry']);
+  const EXPRESSIONS = Object.freeze(['normal', 'happy', 'surprised', 'thinking', 'sorry', 'angry']);
   const EXPRESSION_LABELS = Object.freeze({ normal: 'にっこり', happy: '大喜び',
-    surprised: '応援', thinking: 'ヒント', sorry: 'もう一度' });
+    surprised: '応援', thinking: 'ヒント', sorry: 'もう一度', angry: 'むっ' });
 
   // Include this string once in the app's stylesheet or a <style> element.
   // Every expression keeps an open-eye layer and the same natural blink timing.
@@ -193,14 +193,20 @@
     const title = opts.title ?? `ミルフィ：${EXPRESSION_LABELS[expression]}`;
     const happy = expression === 'happy', thinking = expression === 'thinking';
     const surprised = expression === 'surprised', sorry = expression === 'sorry';
+    const angry = expression === 'angry';
+
+    // Approved A: half-lidded eyes; the same outline clips the iris and paints the sclera.
+    const angryLid = side => side === 'right' ? 'M169 153 Q192 150 213 147' : 'M87 147 Q108 150 131 153';
+    const angryEyeShape = (cx, side) => angryLid(side) +
+      ` Q${cx + 24} 176 ${cx} 179 Q${cx - 23} 176 ${cx - 22} ${side === 'right' ? 153 : 147}Z`;
 
     function eye(cx, side) {
       const cy = surprised ? 155 : sorry ? 160 : 157;
       const ry = surprised ? 29 : thinking && side === 'right' ? 23 : 26;
       const pupilX = cx + (thinking ? 4 : 0);
       return `<g class="mirufi-eye mirufi-eye--${side}">
-        <path d="M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14}
-          Q${cx + 24} ${cy + (happy ? 17 : 21)} ${cx} ${cy + (happy ? 21 : 25)} Q${cx - 23} ${cy + (happy ? 17 : 21)} ${cx - 22} ${cy - 15}Z"
+        <path d="${angry ? angryEyeShape(cx, side) : `M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14}
+          Q${cx + 24} ${cy + (happy ? 17 : 21)} ${cx} ${cy + (happy ? 21 : 25)} Q${cx - 23} ${cy + (happy ? 17 : 21)} ${cx - 22} ${cy - 15}Z`}"
           fill="#fffafa"/>
         <g clip-path="${paint('eye-' + side)}">
           <ellipse cx="${pupilX}" cy="${cy}" rx="18" ry="${ry}" fill="${paint('iris')}"/>
@@ -213,12 +219,12 @@
           <path d="M${pupilX + 9} ${cy - 18} l1.3 3.2 3.2 1.3-3.2 1.3-1.3 3.2-1.3-3.2-3.2-1.3 3.2-1.3Z"
             fill="#e5fff7"/>
         </g>
-        <path d="M${cx - 23} ${cy - 15} Q${cx - 4} ${cy - ry - 9} ${cx + 22} ${cy - 14}"
-          fill="none" stroke="#57465f" stroke-width="5" stroke-linecap="round"/>
-        <path d="M${cx - 19} ${cy - 18} l-7-7 M${cx - 12} ${cy - 22} l-3-6"
+        <path d="${angry ? angryLid(side) : `M${cx - 23} ${cy - 15} Q${cx - 4} ${cy - ry - 9} ${cx + 22} ${cy - 14}`}"
+          fill="none" stroke="#57465f" stroke-width="${angry ? 4.7 : 5}" stroke-linecap="round"/>
+        <path d="${angry ? (side === 'right' ? 'M210 147 l7 -5 M205 150 l6 -6' : 'M90 147 l-7 -5 M95 150 l-6 -6') : `M${cx - 19} ${cy - 18} l-7-7 M${cx - 12} ${cy - 22} l-3-6`}"
           fill="none" stroke="#57465f" stroke-width="3.1" stroke-linecap="round"
-          ${side === 'right' ? `transform="translate(${cx * 2} 0) scale(-1 1)"` : ''}/>
-        <path d="M${cx - 14} ${cy + (happy ? 19 : 23)} Q${cx} ${cy + (happy ? 23 : 29)} ${cx + 13} ${cy + (happy ? 19 : 23)}"
+          ${!angry && side === 'right' ? `transform="translate(${cx * 2} 0) scale(-1 1)"` : ''}/>
+        <path d="${angry ? `M${cx - 14} 177 Q${cx} 182 ${cx + 13} 177` : `M${cx - 14} ${cy + (happy ? 19 : 23)} Q${cx} ${cy + (happy ? 23 : 29)} ${cx + 13} ${cy + (happy ? 19 : 23)}`}"
           fill="none" stroke="#bb8d9e" stroke-width="1.5" stroke-linecap="round"/>
       </g>`;
     }
@@ -227,19 +233,22 @@
       ? 'M93 118 Q107 110 121 117 M179 117 Q193 110 207 118'
       : surprised ? 'M92 116 Q105 104 121 112 M179 112 Q195 104 208 116'
       : thinking ? 'M93 124 Q108 119 122 121 M179 115 Q195 111 207 119'
+      : angry ? 'M94 130 Q109 131 126 140 M174 140 Q191 131 206 130'
       : sorry ? 'M93 125 Q110 126 123 116 M177 116 Q190 126 207 125'
       : 'M93 120 Q107 113 122 119 M178 119 Q193 113 207 120';
     const mouth = happy
       ? '<path d="M137 194 Q150 199 163 194 C160 203 156 208 150 208 C144 208 140 203 137 194Z" fill="#a9607b"/><path d="M144 204 Q150 201 156 204 Q150 210 144 204Z" fill="#f9a9b8"/>'
       : surprised ? '<ellipse cx="150" cy="202" rx="7" ry="9" fill="#b66d85"/><ellipse cx="150" cy="206" rx="4" ry="3" fill="#ffc0c7"/>'
       : thinking ? '<path d="M144 201 Q149 198 155 201" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/>'
-      : sorry ? '<path d="M141 205 Q150 197 159 205" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/>'
+      : (sorry || angry) ? '<path d="M141 205 Q150 197 159 205" fill="none" stroke="#a96d83" stroke-width="2.5" stroke-linecap="round"/>'
       : '<path d="M140 198 Q150 208 160 198" fill="none" stroke="#a96780" stroke-width="2.5" stroke-linecap="round"/>';
 
-    const closedEyes = `<path d="M91 160 Q109 171 128 160 M172 160 Q191 171 209 160"
+    const closedEyes = angry ? '<path d="M89 157 Q108 166 129 163 M171 163 Q192 166 211 157" fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>' : `<path d="M91 160 Q109 171 128 160 M172 160 Q191 171 209 160"
       fill="none" stroke="#57465f" stroke-width="4" stroke-linecap="round"/>
       <path d="M93 158 l-5-4 M207 158 l5-4" fill="none" stroke="#57465f" stroke-width="2.5" stroke-linecap="round"/>`;
+    // All accents live inside mirufi-bob, so the temple mark follows the head.
     const accents = [
+      angry ? '<path d="M78 190 Q74 196 80 200 M222 190 Q226 196 220 200" stroke="#d3a0b1" stroke-width="1.5"/><g class="anger-mark" aria-label="怒りマーク" stroke="#bf496c" stroke-width="3.2" fill="none"><path d="M200 110 H204 Q210 110 210 104 V100"/><path d="M218 100 V104 Q218 110 224 110 H228"/><path d="M200 118 H204 Q210 118 210 124 V128"/><path d="M218 128 V124 Q218 118 224 118 H228"/></g>' : '',
       happy ? '<g class="mirufi-sparkle" fill="#fff0bc" stroke="#d6b7c2" stroke-width="1.1"><path d="M32 166 l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z"/></g>' : '',
       happy || surprised ? '<g class="mirufi-sparkle" fill="#e2d2fa" stroke="#b3a1cf" stroke-width="1.1"><path d="M263 46 l3 8 8 3-8 3-3 8-3-8-8-3 8-3Z"/></g>' : '',
       surprised ? '<path d="M29 161 l1 14 M30 183 v1" stroke="#d6b7c2" stroke-width="3.5"/>' : '',
@@ -276,7 +285,7 @@
         ${['left', 'right'].map((side, i) => {
           const cx = i ? 191 : 109, cy = surprised ? 155 : sorry ? 160 : 157;
           const ry = surprised ? 29 : thinking && side === 'right' ? 23 : 26;
-          return `<clipPath id="${id}-eye-${side}"><path d="M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14} Q${cx + 24} ${cy + (happy ? 17 : 21)} ${cx} ${cy + (happy ? 21 : 25)} Q${cx - 23} ${cy + (happy ? 17 : 21)} ${cx - 22} ${cy - 15}Z"/></clipPath>`;
+          return `<clipPath id="${id}-eye-${side}"><path d="${angry ? angryEyeShape(cx, side) : `M${cx - 22} ${cy - 15} Q${cx} ${cy - ry - 12} ${cx + 22} ${cy - 14} Q${cx + 24} ${cy + (happy ? 17 : 21)} ${cx} ${cy + (happy ? 21 : 25)} Q${cx - 23} ${cy + (happy ? 17 : 21)} ${cx - 22} ${cy - 15}Z`}"/></clipPath>`;
         }).join('')}
       </defs>
       ${opts.halo === false ? '' : `<ellipse cx="150" cy="180" rx="144" ry="171" fill="${paint('halo')}"/>`}
@@ -307,12 +316,12 @@
           <path data-part="hairline-shadow" d="${HAIR_DESIGNS[hairSkin].shadow}" fill="#e7c6cb" opacity=".24"/>
         </g>
         <g class="mirufi-expression" data-expression="${expression}">
-          <g data-part="eyebrows"><path d="${brows}" fill="none" stroke="#a092b3" stroke-width="2.8" stroke-linecap="round"/></g>
+          <g data-part="eyebrows"><path d="${brows}" fill="none" stroke="${angry ? '#806780' : '#a092b3'}" stroke-width="${angry ? 3.6 : 2.8}" stroke-linecap="round"/></g>
           <g data-part="eyes">
             <g class="mirufi-eyes-open">${eye(109, 'left')}${eye(191, 'right')}</g><g class="mirufi-eyes-closed" opacity="0">${closedEyes}</g>
           </g>
           <g data-part="cheeks"${happy ? ' transform="translate(0 -3)"' : ''}>
-            <ellipse cx="92" cy="187" rx="${happy ? 21 : 23}" ry="${happy ? 12 : 13}" fill="${paint('blush')}"/><ellipse cx="208" cy="187" rx="${happy ? 21 : 23}" ry="${happy ? 12 : 13}" fill="${paint('blush')}"/>
+            <ellipse cx="92" cy="187" rx="${angry ? 24 : happy ? 21 : 23}" ry="${angry ? 17 : happy ? 12 : 13}" fill="${paint('blush')}"/><ellipse cx="208" cy="187" rx="${angry ? 24 : happy ? 21 : 23}" ry="${angry ? 17 : happy ? 12 : 13}" fill="${paint('blush')}"/>
             <path d="M83 186 l-1 4 M90 187 l-1 4 M97 187 l-1 4 M203 187 l-1 4 M210 187 l-1 4 M217 186 l-1 4" stroke="#e7a3b4" stroke-width="1.4" stroke-linecap="round"/>
           </g>
           <path d="M149 182 q-3 4 1 4" fill="none" stroke="#ddb7b8" stroke-width="1.4" stroke-linecap="round"/>
