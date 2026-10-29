@@ -50,12 +50,31 @@ async function runSpinChecks(browser, root) {
     });
     await page.goto(pathToFileURL(path.join(root, 'dist/mirutet.html')).href + '#spin-seed');
     await page.reload(); await page.waitForFunction(() => !!window.__mirutet);
+    // An existing 14/14 profile must remain 14/36 after this content update.
+    const legacyContext = await browser.newContext();
+    const legacyPage = await legacyContext.newPage();
+    const legacyIds = E.SPIN_DRILLS.slice(0, 14).map(d => d.id);
+    const legacyProfile = await page.evaluate(() => JSON.parse(localStorage.getItem('mirutet-finesse.v1')));
+    legacyProfile.spin = { current: legacyIds.at(-1), completed: legacyIds, stats: { attempts: 14, perfect: 14 } };
+    await legacyPage.addInitScript(profile => {
+      localStorage.setItem('mirutet-finesse.v1', JSON.stringify(profile));
+    }, legacyProfile);
+    await legacyPage.goto(pathToFileURL(path.join(root, 'dist/mirutet.html')).href);
+    await legacyPage.locator('[data-act=mode-spin]').click();
+    await legacyPage.locator('[data-act=spins]').click();
+    assert.equal(await legacyPage.locator('.lesson-card.done').count(), 14);
+    assert.equal(await legacyPage.locator('[data-act=spin-drill]').count(), 36);
+    assert.match(await legacyPage.locator('.mint-tag').innerText(), /14 \/ 36/);
+    await legacyPage.locator('[data-id=i-lift-right]').click();
+    await legacyPage.waitForFunction(() => window.__mirutet.getState().active);
+    assert.equal((await legacyPage.evaluate(() => window.__mirutet.getState())).round.drillId, 'i-lift-right');
+    await legacyContext.close();
     const finesseBefore = (await state()).totalStats;
     await click('mode-spin');
     assert.equal(await page.locator('[data-act=tutorial],[data-act=lessons],[data-act=sprint]').count(), 0, 'Drills only');
     await click('spins');
-    assert.equal(await page.locator('.spin-set').count(), 4);
-    assert.equal(await page.locator('[data-act=spin-drill]').count(), 14);
+    assert.equal(await page.locator('.spin-set').count(), E.SPIN_SETS.length);
+    assert.equal(await page.locator('[data-act=spin-drill]').count(), E.SPIN_DRILLS.length);
     await layout('spin selection');
     await page.locator('[data-act=spin-drill][data-id=t-single-left]').click();
     for (const drill of E.SPIN_DRILLS) {
@@ -127,29 +146,32 @@ async function runSpinChecks(browser, root) {
       assert.match(await page.locator('#result-panel').innerText(), /回転入れ成功/);
       await layout(drill.id);
     }
-    assert.match(await page.locator('#result-panel').innerText(), /全14問達成/);
+    assert.match(await page.locator('#result-panel').innerText(), new RegExp(`全${E.SPIN_DRILLS.length}問達成`));
     await layout('all clear');
     await page.screenshot({ path: path.join(root, 'screens', 'spin-auto-advance.png') });
     // Buttons and rebound keys still replace the current target manually.
     await tap('retry'); await ready(); assert.equal((await state()).lastResult, null);
-    assert.doesNotMatch(await page.locator('#result-panel').innerText(), /全14問達成/);
+    assert.doesNotMatch(await page.locator('#result-panel').innerText(), /全\d+問達成/);
     await tap('skip'); await ready(); assert.equal((await state()).round.drillId, 't-single-right');
     await click('retry'); await ready(); assert.equal((await state()).round.drillId, 't-single-right');
     await click('skip'); await ready(); assert.equal((await state()).round.drillId, 't-double-left');
     await click('spins');
     const completed = await state();
-    assert.equal(completed.spinProgress.completed.length, 14); assert.equal(completed.spinStats.perfect, 14);
-    assert.equal(completed.spinStats.attempts, 15); assert.deepEqual(completed.totalStats, finesseBefore);
+    assert.equal(completed.spinProgress.completed.length, E.SPIN_DRILLS.length); assert.equal(completed.spinStats.perfect, E.SPIN_DRILLS.length);
+    assert.equal(completed.spinStats.attempts, E.SPIN_DRILLS.length + 1); assert.deepEqual(completed.totalStats, finesseBefore);
     assert.deepEqual(completed.progress, { current: 3, completed: [1, 3] });
     await page.reload(); await page.waitForFunction(() => !!window.__mirutet);
     assert.deepEqual((await state()).spinProgress, completed.spinProgress);
     assert.deepEqual((await state()).spinStats, completed.spinStats);
     await click('mode-spin'); await click('spin-continue'); await ready();
     assert.equal((await state()).round.drillId, 't-double-left');
-    await click('spins'); assert.equal(await page.locator('.lesson-card.done').count(), 14);
+    await click('spins'); assert.equal(await page.locator('.lesson-card.done').count(), E.SPIN_DRILLS.length);
     for (const [width, height] of [[1920, 1080], [1280, 720], [800, 600]]) {
       await page.setViewportSize({ width, height }); await layout(`selection ${width}`);
-      await page.locator('[data-id=t-triple-right]').click(); await ready();
+      await page.locator('[data-id=i-lift-right]').scrollIntoViewIfNeeded();
+      await layout(`last set ${width}`);
+      await page.screenshot({ path: path.join(root, 'screens', `spin-selection-${width}.png`) });
+      await page.locator('[data-id=i-lift-right]').click(); await ready();
       await tap('hint'); await layout(`play hint ${width}`);
       await click('toggle-handling'); await layout(`handling ${width}`);
       await click('toggle-handling');
@@ -196,7 +218,7 @@ async function runSpinChecks(browser, root) {
     assert.deepEqual(fallbackState.spinProgress.completed, ['t-single-left']);
     await fallback.close();
     assert.deepEqual(errors, []); assert.deepEqual(requests, []);
-    console.log('Spin browser checks passed: 14 drill solutions, 4 sets, 3 viewport sizes; automatic success/next-set/wrap, automatic miss reset with retained feedback, manual retry/next, hints, custom bindings/handling, settings pause, reload/progress, preference import/reset, isolated finesse records, storage/audio fallback, no network.');
+    console.log(`Spin browser checks passed: ${E.SPIN_DRILLS.length} drill solutions, ${E.SPIN_SETS.length} sets, 3 viewport sizes; automatic success/next-set/wrap, automatic miss reset with retained feedback, manual retry/next, hints, custom bindings/handling, settings pause, reload/progress and legacy 14-drill migration, preference import/reset, isolated finesse records, storage/audio fallback, no network.`);
   } finally { await context.close(); }
 }
 module.exports = { runSpinChecks };

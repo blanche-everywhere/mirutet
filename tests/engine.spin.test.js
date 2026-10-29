@@ -4,9 +4,47 @@ const assert = require('node:assert/strict');
 const E = require('../src/engine');
 const stateKey = s => [s.x, s.y, s.rot].join(',');
 
+test('expanded catalog preserves the original four sets and all saved progress', () => {
+  const legacy = require('./spin-legacy.json');
+  assert.deepEqual(E.SPIN_SETS.slice(0, 4), legacy);
+  assert.equal(E.SPIN_DRILLS.length, 36);
+  assert.equal(E.SPIN_SETS.length, 8);
+  assert.equal(new Set(E.SPIN_DRILLS.map(d => d.id)).size, 36);
+  const completed = legacy.flatMap(s => s.drills.map(d => d.id));
+  for (const current of completed) assert.deepEqual(E.normalizeSpinProgress({ current, completed }), { current, completed });
+  const layouts = new Set();
+  for (const d of E.SPIN_DRILLS) {
+    assert.ok(d.rows.every(r => /^[.#]{10}$/.test(r)), d.id);
+    const layout = JSON.stringify([d.type, d.rows, d.cells]);
+    assert.ok(!layouts.has(layout), `Duplicate board/target: ${d.id}`);
+    layouts.add(layout);
+  }
+});
+
+test('new hint routes exercise downward, sideways and upward kicks, without 180', () => {
+  const entries = {};
+  for (const d of E.SPIN_DRILLS.slice(14)) {
+    const board = E.spinBoard(d), route = E.solveSpinDrill(d, { allow180: false });
+    let state = E.spawnPiece(d.type), before;
+    for (const action of route) {
+      before = state;
+      state = action === 'floor' ? E.hardDrop(board, state) : action === 'softDrop' ?
+        E.movePiece(board, state, 0, -1) : E.applyAction(board, state, action, { allow180: false });
+    }
+    assert.ok(E.sameCells(E.cells(state), d.cells), d.id);
+    entries[d.id] = { dx: state.x - before.x, dy: state.y - before.y };
+    assert.ok(entries[d.id].dx || entries[d.id].dy, `${d.id}: hint must demonstrate a kick`);
+  }
+  for (const id of ['s-pocket', 'z-pocket', 's-triple', 'z-triple']) assert.equal(entries[id].dy, -2, id);
+  for (const id of ['l-shelf', 'j-shelf', 'i-shelf-left', 'i-shelf-right']) {
+    assert.equal(entries[id].dy, 0, id); assert.equal(Math.abs(entries[id].dx), 1, id);
+  }
+  for (const id of ['i-lift-left', 'i-lift-right']) assert.ok(entries[id].dy > 0, id);
+});
+
 // Exhaust the complete reachable graph, including deliberate descent, hard
 // drops, both directions, and optionally 180. Do not use the hint solver here.
-function audit(drill, options) {
+function audit(drill, options, forbid = () => false) {
   const board = E.spinBoard(drill), start = E.spawnPiece(drill.type, { board, ...options });
   const queue = [start], seen = new Set([stateKey(start)]);
   let rotations = 0, translations = 0, kicks = 0, fifthKicks = 0;
@@ -16,6 +54,7 @@ function audit(drill, options) {
     for (const action of actions) {
       const next = action === 'down' ? E.movePiece(board, state, 0, -1) : action === 'drop' ? E.hardDrop(board, state) : E.applyAction(board, state, action, options);
       if (!next || stateKey(state) === stateKey(next)) continue;
+      if (forbid(state, next, action)) continue;
       if (E.sameCells(E.cells(next), drill.cells)) {
         if (['cw', 'ccw', 'rotate180'].includes(action)) {
           rotations++;
@@ -30,6 +69,21 @@ function audit(drill, options) {
   }
   return { rotations, translations, kicks, fifthKicks };
 }
+
+for (const drill of E.SPIN_DRILLS.slice(14)) test(`${drill.id}: intended kick direction is required in every route`, () => {
+  const direction = drill.id.includes('lift') ? 'up' : drill.id.includes('shelf') ? 'sideways' : 'down';
+  // Matrix origins use y-up. Remove the intended class of rotation edges
+  // anywhere in a route, including 180 kicks. Keep translations and descent.
+  const forbidDirection = (before, after, action) =>
+    ['cw', 'ccw', 'rotate180'].includes(action) && (direction === 'up' ? after.y > before.y :
+      direction === 'down' ? after.y < before.y : after.x !== before.x);
+  for (const allow180 of [false, true]) for (const spawnDrop of [false, true]) {
+    const options = { allow180, spawnDrop };
+    assert.ok(audit(drill, options).rotations > 0, 'Control: ordinary SRS reaches target');
+    const restricted = audit(drill, options, forbidDirection);
+    assert.equal(restricted.rotations + restricted.translations, 0, `No route without a ${direction} kick`);
+  }
+});
 
 for (const drill of E.SPIN_DRILLS) test(`SRS insertion: ${drill.id} — rotation required in every reachable path`, () => {
   const board = E.spinBoard(drill);
@@ -176,7 +230,7 @@ test('spin success crosses every set boundary and retains consecutive success co
     assert.equal(s.lastResult.allClear, index === E.SPIN_DRILLS.length - 1 ? true : undefined);
   }
   assert.equal(s.drill.id, E.SPIN_DRILLS[0].id);
-  assert.equal(s.stats.perfect, 14); assert.equal(s.totalStats.attempts, 14);
+  assert.equal(s.stats.perfect, E.SPIN_DRILLS.length); assert.equal(s.totalStats.attempts, E.SPIN_DRILLS.length);
   for (let index = 0; index < E.SPIN_DRILLS.length; index++) {
     t = playSolution(s, t); assert.equal(s.lastResult.allClear, undefined, 'All-clear appears only once per session');
   }

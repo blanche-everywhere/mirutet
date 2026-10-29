@@ -545,7 +545,7 @@
     if (isSpin()) {
       const r = lastResult;
       panel.className = 'panel result-panel' + (r ? ' ' + r.status : '');
-      panel.innerHTML = r ? `<div class="result-head"><strong>${r.status === 'perfect' ? '✔ 回転入れ成功！' : r.reason === 'rotation' ? '◇ 最後に回転してみよう' : '◇ 置き場所を確認しよう'}</strong></div><p class="tiny">${r.status === 'perfect' ? `${r.lines}ライン！花まるですっ♪ 次の問題へ進みます。` : r.reason === 'rotation' ? '目標の場所はぴったり。最後の移動を回転にして、もう一度ですっ。' : '破線の4マスへ、下げてから回してみましょうね。'}<br>${r.status === 'perfect' ? '同じ問題は一覧から復習できます。' : '同じ問題をもう一度どうぞ。'}</p>${r.allClear ? '<p class="tiny">✧ 全14問達成ですっ！花まるですっ♪</p>' : ''}<div id="hint-route" class="hint-route" hidden></div>` : '<div class="result-head"><strong>くぼみへ、くるり</strong></div><p class="tiny">破線の目標へ回して入れ、固定しましょう。<br>入力回数は自由ですっ。</p><div id="hint-route" class="hint-route" hidden></div>';
+      panel.innerHTML = r ? `<div class="result-head"><strong>${r.status === 'perfect' ? '✔ 回転入れ成功！' : r.reason === 'rotation' ? '◇ 最後に回転してみよう' : '◇ 置き場所を確認しよう'}</strong></div><p class="tiny">${r.status === 'perfect' ? `${r.lines}ライン！花まるですっ♪ 次の問題へ進みます。` : r.reason === 'rotation' ? '目標の場所はぴったり。最後の移動を回転にして、もう一度ですっ。' : '破線の4マスへ、下げてから回してみましょうね。'}<br>${r.status === 'perfect' ? '同じ問題は一覧から復習できます。' : '同じ問題をもう一度どうぞ。'}</p>${r.allClear ? `<p class="tiny">✧ 全${E.SPIN_DRILLS.length}問達成ですっ！花まるですっ♪</p>` : ''}<div id="hint-route" class="hint-route" hidden></div>` : '<div class="result-head"><strong>くぼみへ、くるり</strong></div><p class="tiny">破線の目標へ回して入れ、固定しましょう。<br>入力回数は自由ですっ。</p><div id="hint-route" class="hint-route" hidden></div>';
       updateHint(); return;
     }
     if (isFree()) {

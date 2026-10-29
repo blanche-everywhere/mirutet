@@ -111,11 +111,58 @@ test('spin end-of-list saves first unfinished target, then all-clear wraps with 
   const r = loadApp({ spin: { current: E.SPIN_DRILLS.at(-1).id, completed } });
   r.click('spin-continue'); r.advance(80); r.solve();
   assert.equal(r.saved().spin.current, E.SPIN_DRILLS[0].id);
-  assert.doesNotMatch(r.nodes.get('#result-panel').innerHTML, /全14問達成/);
+  assert.doesNotMatch(r.nodes.get('#result-panel').innerHTML, /全\d+問達成/);
   r.advance(80); r.solve();
   assert.equal(r.state().lastResult.allClear, true);
-  assert.match(r.nodes.get('#result-panel').innerHTML, /全14問達成/);
+  assert.match(r.nodes.get('#result-panel').innerHTML, new RegExp(`全${E.SPIN_DRILLS.length}問達成`));
   r.advance(80); r.solve();
-  assert.doesNotMatch(r.nodes.get('#result-panel').innerHTML, /全14問達成/);
-  assert.equal(r.saved().spin.completed.length, 14);
+  assert.doesNotMatch(r.nodes.get('#result-panel').innerHTML, /全\d+問達成/);
+  assert.equal(r.saved().spin.completed.length, E.SPIN_DRILLS.length);
+});
+
+for (const are of [0, 80]) test(`spin app advances through all 36 drills and 8 sets with ARE ${are}`, () => {
+  const r = loadApp({ settings: { are, sdf: 1 } });
+  r.click('spin-continue'); r.advance(are);
+  const sets = new Set();
+  for (const [index, drill] of E.SPIN_DRILLS.entries()) {
+    const set = E.SPIN_SETS.find(s => s.drills.includes(drill));
+    sets.add(set.id);
+    assert.equal(r.state().round.drillId, drill.id);
+    assert.equal(r.state().active.type, drill.type);
+    r.solve();
+    const next = E.SPIN_DRILLS[(index + 1) % E.SPIN_DRILLS.length];
+    const nextSet = E.SPIN_SETS.find(s => s.drills.includes(next));
+    assert.equal(r.state().lastResult.drillId, drill.id);
+    assert.equal(r.state().lastResult.status, 'perfect');
+    assert.equal(r.state().lastResult.allClear, index === E.SPIN_DRILLS.length - 1 ? true : undefined);
+    assert.equal(r.state().round.drillId, next.id);
+    assert.ok(r.nodes.get('#spin-info').innerHTML.includes(nextSet.grade));
+    assert.ok(r.nodes.get('#spin-info').innerHTML.includes(next.title));
+    assert.equal(r.saved().spin.current, next.id);
+    assert.equal(r.saved().spin.completed.length, index + 1);
+    if (are) {
+      r.advance(are - 1); assert.equal(r.state().active, null);
+      r.advance(1);
+    }
+    assert.equal(r.state().active.type, next.type);
+    assert.equal(r.state().lastResult.drillId, drill.id, 'Feedback survives automatic spawn');
+  }
+  assert.equal(sets.size, 8);
+  assert.equal(r.saved().spin.stats.perfect, 36);
+  assert.equal(r.saved().spin.stats.attempts, 36);
+  assert.equal(r.saved().stats.attempts, 0);
+});
+
+test('legacy 14-drill completion continues into the new sets without an early all-clear', () => {
+  const completed = require('./spin-legacy.json').flatMap(s => s.drills.map(d => d.id));
+  const r = loadApp({ spin: { current: completed.at(-1), completed, stats: { attempts: 14, perfect: 14 } } });
+  r.click('spin-continue'); r.advance(80); r.solve();
+  assert.equal(r.saved().spin.current, E.SPIN_SETS[4].drills[0].id);
+  assert.deepEqual(r.saved().spin.completed, completed);
+  assert.equal(r.saved().spin.stats.perfect, 15);
+  assert.equal(r.state().lastResult.allClear, undefined);
+  assert.doesNotMatch(r.nodes.get('#result-panel').innerHTML, /全\d+問達成/);
+  r.advance(80); r.solve();
+  assert.equal(r.saved().spin.current, E.SPIN_SETS[4].drills[1].id);
+  assert.equal(r.saved().spin.completed.length, 15);
 });
