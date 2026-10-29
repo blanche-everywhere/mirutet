@@ -252,6 +252,41 @@ test('combo milestones are warm polite lines; mistake feedback keeps the blunt v
   }
 });
 
+test('angry dialogue exports exactly the five specified lines', () => {
+  assert.deepEqual(M.ANGRY_LINES, [
+    'むぅ……3回目ですっ。ちょっとだけ、怒ってますからね？',
+    'むー。あわてて押してませんか？ひと呼吸ですっ。',
+    '……むっ。手数、また多いですよ。道順を思い出しましょうね。',
+    'むぅ、わたし見てましたからね？次は最短でお願いしますっ。',
+    'ぷくー……。焦らなくていいんですっ。一手ずつ、ですよ？'
+  ]);
+  assert.ok(Object.isFrozen(M.ANGRY_LINES));
+  assert.equal(M.DIALOGUE.angry, M.ANGRY_LINES);
+});
+
+test('consecutive fault and miss attempts become angry at three and Perfect resets them', () => {
+  for (const statuses of [
+    ['fault', 'fault', 'fault', 'fault'],
+    ['miss', 'miss', 'miss', 'miss'],
+    ['fault', 'miss', 'fault', 'miss'],
+    ['miss', 'fault', 'miss', 'fault']
+  ]) {
+    let streak = 0;
+    assert.equal(M.shouldAngry(streak), false);
+    statuses.forEach((status, index) => {
+      streak = M.nextFailStreak(streak, status);
+      assert.equal(streak, index + 1);
+      assert.equal(M.shouldAngry(streak), index >= 2);
+    });
+    streak = M.nextFailStreak(streak, 'perfect');
+    assert.equal(streak, 0);
+    assert.equal(M.shouldAngry(streak), false);
+    assert.equal(M.nextFailStreak(streak, 'miss'), 1);
+  }
+  assert.equal(M.nextFailStreak(2, 'perfect'), 0);
+  assert.equal(M.nextFailStreak(2, 'unjudged'), 2);
+});
+
 test('sprint comments respond independently to accuracy and PPS, including exact tier boundaries', () => {
   for (const accuracyTier of M.SPRINT_COMMENTS.accuracy) for (const ppsTier of M.SPRINT_COMMENTS.pps) {
     const comment = M.sprintComment(accuracyTier.min, ppsTier.min);

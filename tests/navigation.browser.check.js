@@ -133,7 +133,7 @@ async function runNavigationChecks(browser, root = path.resolve(__dirname, '..')
     await click('dressup'); await screen('dressup');
     assert.equal(await page.locator('[data-act=dressup-select][data-kind=hair]').count(), 3);
     assert.equal(await page.locator('[data-act=dressup-select][data-kind=outfit]').count(), 2);
-    assert.equal(await page.locator('[data-act=dressup-face]').count(), 5);
+    assert.equal(await page.locator('[data-act=dressup-face]').count(), 6);
     assert.equal(await page.locator('[data-act=dressup-motion]').count(), 1);
     await click('close-dressup'); await screen('menu');
     await click('settings'); await screen('settings');
