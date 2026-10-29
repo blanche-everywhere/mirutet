@@ -135,6 +135,8 @@ Clean cute pastel UI (soft pink/lavender/mint, rounded corners, subtle gradients
 ## Settings screen
 Handling: DAS, ARR, SDF, DCD, ARE (each slider + number input synced, min/max/step displayed, reset), gravity (optional), toggles: IRS (default ON), IHS (default OFF), 180° rotation enabled, kick table choice not needed, zero-fault mode, show target outline, show optimal sequence, show key-caps, ghost piece (landing shadow) on/off, sound on/off (WebAudio tiny synthesized blips only, default ON volume slider; must not error if AudioContext unavailable), mascot voice bubbles on/off. Key bindings editor. Export/import settings JSON (textarea copy/paste; no file APIs needed). Reset all.
 
+BL-142: Every handling, display, sound, appearance and practice preference has a short plain-Japanese custom tooltip, shared by the full settings screen and compact in-play panel. Show on hover, keyboard focus and touch tap; dismiss with Escape or an outside tap. Use `role="tooltip"` and `aria-describedby`, keep tooltips inside the viewport and above scrolling panels, and keep text in one source (`HANDLING.help` / `SETTING_HELP`). Browser checks cover hover/focus text parity, touch, dismissal and control behavior; save the DAS example as `screens/bl142-tooltip.png`.
+
 ## Quality gates
 - `npm test` passes; no console errors in browser; works from file://.
 - Code is readable, commented, deterministic where tested.

@@ -414,8 +414,11 @@ async function main() {
     assert.match(await page.locator('#import-status').innerText(), /保存しました/);
     await page.locator('.settings-content').evaluate(el => { el.scrollTop = 0; });
     await checkSettings('settings after import');
-    // Esc also exits while a native number field has focus.
+    // Esc dismisses the focused field's help; a second Esc exits settings.
     await page.locator('#setting-das').focus(); await page.keyboard.press('Escape');
+    assert.equal(await page.locator('[role=tooltip]:visible').count(), 0);
+    assert.equal((await state()).screen, 'settings');
+    await page.keyboard.press('Escape');
     assert.equal((await state()).screen, 'play'); await click('resume');
     await page.reload(); await waitScreen('menu');
     s = await state(); assert.equal(s.settings.das, 300); assert.equal(s.settings.arr, 0); assert.equal(s.settings.are, 400);
