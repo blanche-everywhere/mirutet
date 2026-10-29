@@ -526,7 +526,7 @@ async function main() {
     // neither may constrain the full seven-bag or end this session.
     assert.equal(await page.locator('[data-act=mode-free]').innerText(), 'フリーモード');
     assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'tutorial');
-    await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowUp');
     assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'mode-finesse');
     await page.keyboard.press('ArrowRight');
     assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'mode-free');
@@ -615,6 +615,8 @@ async function main() {
     assert.equal((await state()).stats.pieces, 0); assert.equal((await state()).stats.lines, 0);
     assert.deepEqual((await state()).totalStats, freeTotal, 'free placements do not change practice records');
     await click('menu'); await click('mode-finesse'); clean();
+
+    await require('./spin.browser.check').runSpinChecks(browser, root);
 
     // Capture defaults from a genuinely fresh profile, isolated from all the
     // edits/reloads above. Resetting the persistence profile would hide leaks.

@@ -48,6 +48,7 @@
   }
   let practice = copy(PRACTICE_DEFAULTS), progress = { current: 0, completed: [] };
   let totalStats = new E.Stats(), storageOK = true;
+  let spinProgress = E.normalizeSpinProgress(), spinStats = new E.Stats();
 
   // Import and disk loading share strict validation. A malformed import never
   // partially updates preferences or steals a binding from another action.
@@ -90,6 +91,7 @@
       const saved = JSON.parse(raw), checked = validatePreferences(saved);
       ({ settings, ui, bindings } = checked);
       totalStats = new E.Stats(saved.stats);
+      spinProgress = E.normalizeSpinProgress(saved.spin); spinStats = new E.Stats(saved.spin?.stats);
       if (saved.practice) {
         const p = saved.practice;
         if (Array.isArray(p.pieces) && p.pieces.length && p.pieces.every(t => E.PIECE_TYPES.includes(t))) practice.pieces = [...new Set(p.pieces)];
@@ -109,13 +111,14 @@
   } catch (_) { storageOK = false; }
   function save() {
     try {
-      localStorage.setItem(STORAGE, JSON.stringify({ version: 1, settings, ui, bindings, practice, progress, stats: totalStats.toJSON() }));
+      localStorage.setItem(STORAGE, JSON.stringify({ version: 1, settings, ui, bindings, practice, progress, stats: totalStats.toJSON(), spin: { ...spinProgress, stats: spinStats.toJSON() } }));
       storageOK = true;
     } catch (_) { storageOK = false; }
   }
   let screen = 'menu', session = null, demo = null, lessonIndex = progress.current;
   let menuMode = 'finesse';
   const isFree = () => session instanceof E.FreeSession;
+  const isSpin = () => session instanceof E.SpinSession;
   let lessons = M.createLessons(settings), tryMode = false, tryIndex = 0, tryDone = false;
   let lessonMessage = '', sessionEventQueue = [], trace = [], irsUntil = 0, irsCount = 0;
   let hint = false, lastResult = null, resultActions = [];
@@ -136,6 +139,8 @@
     return labels[code] || code.replace(/^Key|^Digit/, '');
   }
   function actionLabel(action) {
+    if (action === 'floor') return friendly(bindings.softDrop[0]) + ' 床まで';
+    if (action === 'softDrop' && isSpin()) return friendly(bindings.softDrop[0]) + ' 1マス';
     const base = action === 'dasLeft' ? 'left' : action === 'dasRight' ? 'right' : action;
     const key = friendly(bindings[base]?.[0] || action);
     return key + (action.startsWith('das') ? ' 長押し' : ['cw', 'ccw', 'rotate180'].includes(action) ? ' ' + E.ACTION_LABELS[action] : '');
@@ -253,7 +258,7 @@
   }
 
   function menuHTML() {
-    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="menu-mode" aria-label="モード"><button data-act="mode-finesse" aria-pressed="${menuMode === 'finesse'}">フィネス編</button><button data-act="mode-free" aria-pressed="${menuMode === 'free'}">フリーモード</button></nav>${menuMode === 'free' ? '<nav class="menu-buttons" aria-label="フリーモード"><button class="primary" data-act="free"><b>はじめる</b><span>→</span></button><button data-act="settings"><b>設定</b><span>⚙</span></button></nav>' : `<nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>TARGET PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="dressup"><span><b>ミルフィのきせかえ</b><small>DRESS-UP ROOM</small></span><span>✧</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p>`}<p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
+    return `<main class="menu"><section class="menu-copy"><div class="eyebrow">WELCOME TO MIRUTET ACADEMY</div><h1 class="logo">ミル<span>テト</span></h1><p class="menu-intro">テトリミノの操作を、少しずつ。<br>ミルフィといっしょに、やさしく操作を磨きましょう。</p><nav class="menu-mode" aria-label="モード"><button data-act="mode-finesse" aria-pressed="${menuMode === 'finesse'}">フィネス編</button><button data-act="mode-free" aria-pressed="${menuMode === 'free'}">フリーモード</button><button data-act="mode-spin" aria-pressed="${menuMode === 'spin'}">回転入れ編</button></nav>${menuMode === 'spin' ? `<nav class="menu-buttons" aria-label="回転入れ編"><button class="primary" data-act="spin-continue"><span><b>ドリルをつづける</b><small>SPIN INSERTION PRACTICE</small></span><span>→</span></button><button data-act="spins"><b>問題一覧</b><span>◇</span></button><button data-act="settings"><b>設定</b><span>⚙</span></button></nav><p class="first-note">✧ ${spinProgress.completed.length} / ${E.SPIN_DRILLS.length}問達成 · 基本のTスピンから、少しずつ。</p>` : menuMode === 'free' ? '<nav class="menu-buttons" aria-label="フリーモード"><button class="primary" data-act="free"><b>はじめる</b><span>→</span></button><button data-act="settings"><b>設定</b><span>⚙</span></button></nav>' : `<nav class="menu-buttons" aria-label="メインメニュー"><button class="primary" data-act="tutorial"><span><b>はじめてのレッスン</b><small>LEARN FINESSE · 12 LESSONS</small></span><span class="button-arrow">→</span></button><button data-act="drill"><span><b>ドリル</b><small>TARGET PRACTICE</small></span><span>◇</span></button><button data-act="sprint"><span><b>スプリント</b><small>40 / 100 / CUSTOM</small></span><span>◷</span></button><button data-act="dressup"><span><b>ミルフィのきせかえ</b><small>DRESS-UP ROOM</small></span><span>✧</span></button><button data-act="settings"><span><b>設定</b><small>HANDLING & KEYS</small></span><span>⚙</span></button><button data-act="records"><span><b>記録</b><small>YOUR PROGRESS</small></span><span>↗</span></button></nav><p class="first-note">✧ ${progress.completed.length ? `${progress.completed.length} / 12 レッスンのチャレンジを達成しました` : 'はじめての方は、レッスンからどうぞ♪'}<button class="quiet small" data-act="lessons">一覧 ↗</button></p>`}<p class="tiny" style="margin-top:12px">↑ ↓ ← → で選ぶ · Enter で決定 · すべてキーボードで操作できます</p></section><section class="menu-art">${speech(M.WELCOME_LINES[0] + '\nわたしと、少しずつ練習しましょうね。')}<div class="mascot-wrap">${mascot('normal', 'menu')}</div><span class="float-block" aria-hidden="true"></span><span class="float-block two" aria-hidden="true"></span><p class="mascot-caption">YOUR PRACTICE COMPANION / ミルフィ</p></section></main>${footer()}`;
   }
   function mini(type, extra = '') { return `<canvas class="mini-piece" data-piece="${type || ''}" width="144" height="108" aria-label="${type || '空'}ミノ" ${extra}></canvas>`; }
   function boardHTML() {
@@ -308,6 +313,29 @@
       <aside class="right-stack"><div class="play-tools">${handlingPanelHTML()}<div id="play-stats" class="play-stats" ${handlingOpen ? 'hidden' : ''}>${free ? freeStatsHTML() : practiceStatsHTML(sprint)}</div></div><section id="result-panel" class="panel result-panel" aria-live="polite"></section><div class="play-buttons">${free ? `<button data-act="restart">↻ もう一度 ${escape(friendly(bindings.retry[0]))}</button><button data-act="menu">タイトルへ</button>` : `<button data-act="retry">↻ 同じ目標</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の目標 →</button><button data-act="settings">操作の設定</button>`}</div></aside></div>
       <div class="play-footer" id="play-footer"></div></main>`;
   }
+  function spinsHTML() {
+    return `<main class="page spin-page"><div class="page-heading"><div><div class="eyebrow">SPIN INSERTION PRACTICE</div><h2>回転入れ編 · ドリル</h2><p>くぼみへ回して、ぴたり。好きな問題から練習できます。</p></div><span class="tag mint-tag">${spinProgress.completed.length} / ${E.SPIN_DRILLS.length} 達成</span></div><p class="tiny">通算 ${spinStats.perfect} 成功 / ${spinStats.attempts} 試行 · 最後の移動を回転にして固定しましょう。入力回数は自由ですっ。</p><div class="spin-set-list" tabindex="0" aria-label="回転入れの問題一覧">${E.SPIN_SETS.map(set => `<section class="spin-set"><div class="row spread"><h3>${set.grade} · ${escape(set.title)}</h3><span class="tiny">${set.drills.filter(d => spinProgress.completed.includes(d.id)).length} / ${set.drills.length} 達成</span></div><div class="lesson-list">${set.drills.map(d => `<button class="lesson-card${spinProgress.completed.includes(d.id) ? ' done' : ''}" data-act="spin-drill" data-id="${d.id}"><span class="eyebrow">${spinProgress.completed.includes(d.id) ? '✔ 達成' : '◇ チャレンジ'}</span><b>${escape(d.title)}</b><span>${d.type}ミノ · ${d.lines}ライン</span></button>`).join('')}</div></section>`).join('')}</div></main>${footer()}`;
+  }
+  function spinInfoHTML() {
+    const s = session, done = s.set.drills.filter(d => spinProgress.completed.includes(d.id)).length;
+    return `<section class="panel practice-options"><div class="eyebrow">${s.set.grade} · ${s.index + 1} / ${s.set.drills.length}</div><h3>${escape(s.drill.title)}</h3><p class="tiny">${escape(s.set.title)} · ${done}問達成</p><p class="tiny spin-rule">最後に回転して、破線の4マスへ固定。<br>回転後の落下・横移動に注意ですっ。</p><button class="small" data-act="spins">問題一覧へ</button></section>`;
+  }
+  function spinStatsHTML() {
+    return `<section class="panel stats-panel"><div class="panel-label">SESSION / この練習</div><div class="stats-main"><div class="stat"><label>回転入れ成功</label><strong class="accent" id="completed">0</strong></div><div class="stat"><label>成功率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>試行 <b id="spin-attempts">0</b></span><span>ミス <b id="misses">0</b></span><span>連続 <b id="streak">0</b></span></div></section>`;
+  }
+  function spinPlayHTML() {
+    return `<main class="play-page spin-play"><div class="row spread play-topline"><h1 class="play-title">回転入れ編<span class="tag">SPIN PRACTICE</span></h1><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div><div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div id="spin-info">${spinInfoHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">今回のミノ</div>${mini(session.drill.type)}</div><p class="hold-note">この問題は<br>ホールドなし</p><div class="key-help">${['left','right','cw','ccw','rotate180'].map(a => `<kbd data-live-key="${a}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><p class="hold-note">${escape(friendly(bindings.softDrop[0]))} で下げる<br>${escape(friendly(bindings.hardDrop[0]))} で固定</p>${comboHTML()}</aside></section><aside class="right-stack"><div class="play-tools">${handlingPanelHTML()}<div id="play-stats" class="play-stats" ${handlingOpen ? 'hidden' : ''}>${spinStatsHTML()}</div></div><section id="result-panel" class="panel result-panel" aria-live="polite"></section><div class="play-buttons"><button data-act="retry">↻ 同じ問題 ${escape(friendly(bindings.retry[0]))}</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の問題 ${escape(friendly(bindings.skip[0]))} →</button><button data-act="spins">問題一覧</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
+  }
+  function startSpin(id = spinProgress.current) {
+    resetCombo(); audio.stopCues(); releaseAll(); sessionEventQueue = []; demo = null;
+    tryMode = false; tryDone = false; menuMode = 'spin'; hint = false; lastResult = null;
+    particles = []; irsUntil = 0; irsCount = 0;
+    session = newSession({ drillId: id, totalStats: spinStats }, E.SpinSession);
+    spinProgress.current = session.drill.id; save();
+    setCoach('くぼみの手前まで下げて、最後にくるりですっ♪');
+    screen = 'play'; session.start(now()); window.scrollTo(0, 0); render(); processEvents();
+  }
+
   function lessonsHTML() {
     return `<main class="page"><div class="page-heading"><div><div class="eyebrow">FINESSE CLASSROOM</div><h2 style="margin-top:6px">レッスン一覧</h2><p>実演を見て、3つの目標で練習。好きなところから復習できます。</p></div><span class="tag mint-tag">${progress.completed.length} / 12 チャレンジ達成</span></div><div class="lesson-list">${lessons.map((lesson, i) => `<button class="lesson-card" data-act="lesson" data-index="${i}"><span class="eyebrow">LESSON ${String(i + 1).padStart(2, '0')} ${progress.completed.includes(i) ? ' · ✔' : ''}</span><b>${escape(lesson.title)}</b><span>${i >= 4 && i <= 10 ? 'ミノ別の最短表・実演・3つの目標' : '実演とミニチャレンジ'}</span></button>`).join('')}</div></main>${footer()}`;
   }
@@ -349,7 +377,7 @@
     return `<div class="cue-settings"><h3>ミノを音でお知らせ</h3><label class="filter-line">鳴らすタイミング<select data-ui="pieceCueTiming" aria-label="ミノの音のタイミング">${[['next', 'NEXT（次のミノ）'], ['current', '現在のミノ'], ['off', 'オフ']].map(([value, label]) => `<option value="${value}" ${ui.pieceCueTiming === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p class="tiny">出現時に、NEXTの先頭に来たミノをお知らせします♪<br>現在のミノにも切替できます。同じ目標のリトライやホールド交換では鳴りません。</p>${uiNumeric('pieceCueVolume', 'ミノの音量')}<output id="cue-volume" hidden>${ui.pieceCueVolume}</output><div class="cue-preview" role="group" aria-label="ミノの音を試聴">${E.PIECE_TYPES.map(type => `<button class="small" data-act="preview-cue" data-piece="${type}" aria-label="${type}ミノの音を試聴">${type}</button>`).join('')}</div><p class="tiny">ミノを選んで試聴できます。効果音のオン・オフと全体の音量も反映します。</p></div>`;
   }
   function settingsHTML() {
-    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">ゲーム設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目">${appearanceHTML()}<div class="settings-grid"><section class="panel"><h3>共通のハンドリング</h3>${presetsHTML()}${HANDLING.map(field => handlingRow(field.key, field.title, field.note, field.step)).join('')}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}</div><div class="settings-group" role="group" aria-labelledby="shared-display-sound"><h3 id="shared-display-sound">共通の表示・サウンド</h3><div class="toggle-grid">${toggle('ghost','着地の影を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div>${uiNumeric('volume', '音量')}${cueSettingsHTML()}</div><div class="settings-group" role="group" aria-labelledby="finesse-settings"><h3 id="finesse-settings">フィネス編の練習</h3><div class="toggle-grid">${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('showOptimal','最短手順を表示')}</div></div></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">移動・回転などは共通です。リトライはフリーモードでは再スタート。<br>次の目標・ヒントはフィネス編の操作です。<br>キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
+    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">ゲーム設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目">${appearanceHTML()}<div class="settings-grid"><section class="panel"><h3>共通のハンドリング</h3>${presetsHTML()}${HANDLING.map(field => handlingRow(field.key, field.title, field.note, field.step)).join('')}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}</div><div class="settings-group" role="group" aria-labelledby="shared-display-sound"><h3 id="shared-display-sound">共通の表示・サウンド</h3><div class="toggle-grid">${toggle('ghost','着地の影を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div>${uiNumeric('volume', '音量')}${cueSettingsHTML()}</div><div class="settings-group" role="group" aria-labelledby="finesse-settings"><h3 id="finesse-settings">フィネス編の練習</h3><div class="toggle-grid">${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('showOptimal','最短手順を表示')}</div></div></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">移動・回転などは共通です。リトライはフリーモードでは再スタート。<br>次の目標・ヒントはフィネス編と回転入れ編の操作です。<br>キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
   }
   function statsHTML() {
     const stats = statsScope === 'session' && session ? session.stats.snapshot() : totalStats.snapshot();
@@ -368,10 +396,10 @@
     const previous = document.activeElement;
     const focusKey = previous?.dataset ? { ...previous.dataset } : {};
     const previousId = previous?.id;
-    app.innerHTML = header() + ({ menu: menuHTML, play: playHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
+    app.innerHTML = header() + ({ menu: menuHTML, play: isSpin() ? spinPlayHTML : playHTML, spins: spinsHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
       dressup: dressupHTML, settings: settingsHTML, records: statsHTML, sprint: sprintHTML, result: resultHTML }[screen])();
     document.body.dataset.screen = screen;
-    document.body.dataset.mode = isFree() ? 'free' : 'finesse';
+    document.body.dataset.mode = isFree() ? 'free' : isSpin() ? 'spin' : 'finesse';
     document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
     lastQueue = ''; lastHUD = 0;
     updateCombo();
@@ -413,7 +441,7 @@
     resetCombo();
     audio.stopCues();
     releaseAll(); demo = null; selectedDemo = null;
-    if (screenName === 'menu' || screenName === 'sprint' || screenName === 'lessons') {
+    if (screenName === 'menu' || screenName === 'sprint' || screenName === 'lessons' || screenName === 'spins') {
       if (session?.running) session.pause(now());
       session = null; tryMode = false; particles = []; sessionEventQueue = [];
     }
@@ -440,7 +468,7 @@
   function updateOptions() {
     audio.configure();
     document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
-    if (session && !isFree()) {
+    if (session && !isFree() && !isSpin()) {
       session.zeroFault = ui.zeroFault; session.repeatOnFault = ui.repeatOnFault;
       session.repeatOnMiss = ui.repeatOnMiss;
     }
@@ -512,6 +540,12 @@
   }
   function updateResult() {
     const panel = $('#result-panel'); if (!panel) return;
+    if (isSpin()) {
+      const r = lastResult;
+      panel.className = 'panel result-panel' + (r ? ' ' + r.status : '');
+      panel.innerHTML = r ? `<div class="result-head"><strong>${r.status === 'perfect' ? '✔ 回転入れ成功！' : r.reason === 'rotation' ? '◇ 最後に回転してみよう' : '◇ 置き場所を確認しよう'}</strong></div><p class="tiny">${r.status === 'perfect' ? `${r.lines}ライン！花まるですっ♪ 次の問題へどうぞ。` : r.reason === 'rotation' ? '目標の場所はぴったり。最後の移動を回転にして、もう一度ですっ。' : '破線の4マスへ、下げてから回してみましょうね。'}<br>同じ問題で復習もできます。</p><div id="hint-route" class="hint-route" hidden></div>` : '<div class="result-head"><strong>くぼみへ、くるり</strong></div><p class="tiny">破線の目標へ回して入れ、固定しましょう。<br>入力回数は自由ですっ。</p><div id="hint-route" class="hint-route" hidden></div>';
+      updateHint(); return;
+    }
     if (isFree()) {
       const r = lastResult;
       panel.className = 'panel result-panel' + (r ? ' ' + r.status : '');
@@ -530,6 +564,11 @@
   }
   function updateHint() {
     const el = $('#hint-route');
+    if (el && isSpin()) {
+      el.hidden = !(hint && ui.showOptimal);
+      if (!el.hidden) el.innerHTML = `<p class="tiny">${escape(session.drill.tip)}<br>↓ 1マスは落下距離の目安です。床まで下げるときは長押しできます。</p><div class="sequence">${route(E.solveSpinDrill(session.drill, settings))}</div>`;
+      return;
+    }
     if (el && session?.round) {
       el.hidden = !(hint && ui.showOptimal);
       el.innerHTML = `<div class="route-label">今の目標 · ${session.round.optimal}入力</div><div class="sequence">${route(session.round.target.actions)}</div>`;
@@ -543,7 +582,13 @@
       if (source !== session) continue;
       trace.push({ kind: event.kind, t: event.t, type: event.type, status: event.result?.status });
       if (trace.length > 150) trace.shift();
-      if (event.kind === 'target') { updateHint(); updateCombo(); }
+      if (event.kind === 'target') {
+        if (isSpin()) {
+          lastResult = null; hint = false; spinProgress.current = source.drill.id;
+          setCoach('くぼみの手前まで下げて、最後にくるりですっ♪'); save(); render();
+        }
+        updateHint(); updateCombo();
+      }
       if (event.kind === 'spawn' && source.running && source.pausedAt === null && !tryDone &&
           (screen === 'play' || screen === 'tutorial' && tryMode)) {
         const type = A.selectCue(event, ui.pieceCueTiming);
@@ -569,7 +614,11 @@
         const r = event.result;
         lastResult = r; feedbackAt = now();
         resultActions = r.optimalSequence.map(label => Object.keys(E.ACTION_LABELS).find(key => E.ACTION_LABELS[key] === label));
-        if (screen === 'tutorial' && tryMode) {
+        if (isSpin()) {
+          if (r.status === 'perfect' && !spinProgress.completed.includes(r.drillId)) spinProgress.completed.push(r.drillId);
+          setCoach(r.status === 'perfect' ? 'くるり、ぴたり！回転入れ成功ですっ♪' : r.reason === 'rotation' ? 'あと一歩ですっ。最後の移動を回転にしてみましょうね。' : 'くぼみの形を見て、もう一度いっしょにどうぞ。', r.status === 'perfect' ? 'happy' : 'thinking');
+          $('#spin-info').innerHTML = spinInfoHTML(); updateResult(); save();
+        } else if (screen === 'tutorial' && tryMode) {
           const requiresIRS = lessons[lessonIndex].tryIt.requireIRS;
           if (r.status === 'perfect' && (!requiresIRS || r.inputs.some(i => i.irs))) {
             tryIndex++;
@@ -623,6 +672,14 @@
   function updateHUD(t) {
     if (screen !== 'play' || !session) return;
     const stats = session.snapshot(t), handler = session.handler;
+    if (isSpin()) {
+      for (const [id, value] of Object.entries({ completed: stats.perfect, accuracy: stats.accuracy.toFixed(0), 'spin-attempts': stats.attempts, misses: stats.misses, streak: stats.streak })) {
+        const el = $('#' + id); if (el) el.textContent = value;
+      }
+      $('.key-help').hidden = !ui.showKeys;
+      $('#play-footer').textContent = '✧ 回転のあと、落下や横移動をせずに固定。動かないキー入力は判定に影響しません。';
+      return;
+    }
     const values = isFree() ? freeStatsValues(stats) :
       { streak: stats.streak, accuracy: stats.accuracy.toFixed(0), 'best-streak': stats.bestStreak,
       pps: stats.pps.toFixed(2), completed: stats.completed + (session.sprintLength ? '/' + session.sprintLength : ''),
@@ -850,7 +907,9 @@
       save(); updateDressup();
     } else if (act === 'dressup-face') { dressupFace = M.EXPRESSIONS.includes(button.dataset.value) ? button.dataset.value : 'normal'; updateDressup(); }
     else if (act === 'dressup-motion') { dressupPaused = !dressupPaused; dressupMotion(); }
-    else if (act === 'mode-finesse' || act === 'mode-free') { menuMode = act === 'mode-free' ? 'free' : 'finesse'; render(); }
+    else if (act === 'mode-finesse' || act === 'mode-free' || act === 'mode-spin') { menuMode = act === 'mode-free' ? 'free' : act === 'mode-spin' ? 'spin' : 'finesse'; render(); }
+    else if (act === 'spin-continue' || act === 'spin-drill') startSpin(button.dataset.id);
+    else if (act === 'spins') go('spins');
     else if (act === 'free') startPlay(0, true);
     else if (act === 'restart') restartFree();
     else if (act === 'drill') startPlay();
@@ -893,7 +952,7 @@
     else if (act === 'resume') resumePlay();
     else if (act === 'retry') { releaseAll(); session.retry(now()); processEvents(); }
     else if (act === 'skip') { releaseAll(); session.skip(now()); processEvents(); }
-    else if (act === 'hint') { hint = !hint; updateHint(); if (hint) setCoach(`この目標は${session.round.optimal}入力ですっ♪ ` + session.round.target.actions.map(actionLabel).join(' → '), 'thinking'); }
+    else if (act === 'hint') { hint = !hint; updateHint(); if (hint && isSpin()) setCoach(session.drill.tip, 'thinking'); else if (hint) setCoach(`この目標は${session.round.optimal}入力ですっ♪ ` + session.round.target.actions.map(actionLabel).join(' → '), 'thinking'); }
     else if (act === 'records' || act === 'records-session') {
       resetCombo();
       pauseSession(); statsScope = act === 'records-session' ? 'session' : 'total'; screen = 'records'; render();
@@ -1149,7 +1208,7 @@
     if (screen === 'play' && t - lastHUD > 90) {
       lastHUD = t; updateHUD(t);
       const attempts = session.stats?.attempts;
-      if (attempts && attempts % 7 === 0 && attempts !== lastTipAttempt && t - feedbackAt > 3200) {
+      if (!isSpin() && attempts && attempts % 7 === 0 && attempts !== lastTipAttempt && t - feedbackAt > 3200) {
         lastTipAttempt = attempts; setCoach(M.TIPS[tipIndex++ % M.TIPS.length], 'normal');
       }
     }
@@ -1162,16 +1221,16 @@
   window.__mirutet = Object.freeze({
     getState() {
       const handler = screen === 'tutorial' && !tryMode ? demo?.handler : session?.handler;
-      return copy({ screen, menuMode, mode: session ? isFree() ? 'free' : 'finesse' : null, settings, ui, bindings, practice, progress, lessonIndex, tryMode, tryIndex, tryDone,
+      return copy({ screen, menuMode, mode: session ? isFree() ? 'free' : isSpin() ? 'spin' : 'finesse' : null, settings, ui, bindings, practice, progress, spinProgress, spinStats: spinStats.snapshot(), lessonIndex, tryMode, tryIndex, tryDone,
         expression, bubble, irsCount, storageOK, hint, lastResult, trace, combo: session?.combo.snapshot(),
         round: session?.round, stats: session?.snapshot(), totalStats: totalStats.snapshot(),
         active: handler?.active, pending: handler?.pending, inputs: handler?.inputs, inputCount: handler?.inputCount,
-        held: handler ? [...handler.held.keys()] : [], heldPiece: handler?.heldPiece, flags: handler?.flags,
+        held: handler ? [...handler.held.keys()] : [], heldPiece: handler?.heldPiece, flags: handler?.flags, lastMove: handler?.lastMove,
         paused: session?.pausedAt !== null && !!session,
         demo: demo ? { type: demo.variant.type, actions: demo.actions, target: demo.target } : null, sprintResult });
     },
     chooseTarget(type, target, { delay } = {}) {
-      if (!session?.running || isFree() || session.pausedAt !== null) throw new Error('Open a running drill first');
+      if (!session?.running || isFree() || isSpin() || session.pausedAt !== null) throw new Error('Open a running drill first');
       const optimal = E.finesseFor(type, target, session.settings);
       if (!optimal) throw new Error('Unreachable debug target');
       releaseAll(); session._newRound(type, optimal); session.handler.board = session.boardTemplate.clone();

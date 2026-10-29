@@ -36,7 +36,7 @@ function load(entries = {}, failure = '') {
   // initial snapshot separate so migration failures can be checked before save.
   vm.runInNewContext(source.slice(0, startupEnd) + `
     globalThis.inspect = () => JSON.stringify({ storageKey: STORAGE, settings, ui,
-      bindings, practice, progress, totalStats: totalStats.snapshot(), storageOK });
+      bindings, practice, progress, spinProgress, spinStats: spinStats.snapshot(), totalStats: totalStats.snapshot(), storageOK });
     globalThis.persist = save;
     globalThis.validate = data => JSON.stringify(validatePreferences(data));
   })();`, context);
@@ -324,4 +324,41 @@ test('invalid or missing outfit uses uniform without losing the profile or selec
       assert.deepEqual(loaded.validate(saved).ui, state.ui);
     }
   }
+});
+
+
+test('spin progress and independent statistics survive current/legacy profiles and reload', () => {
+  for (const key of [storageKey, legacyKey]) {
+    const saved = profile();
+    saved.spin = { current: 't-triple-right', completed: ['t-single-left', 's-spin'], stats: { attempts: 4, perfect: 2, misses: 2 } };
+    const loaded = load({ [key]: JSON.stringify(saved) });
+    assertProfile(loaded.state, saved);
+    assert.deepEqual(loaded.state.spinProgress, { current: saved.spin.current, completed: saved.spin.completed });
+    assert.equal(loaded.state.spinStats.attempts, 4); assert.equal(loaded.state.spinStats.perfect, 2);
+    loaded.save();
+    const persisted = JSON.parse(loaded.values.get(storageKey));
+    assert.deepEqual(persisted.spin.completed, saved.spin.completed);
+    assert.equal(persisted.spin.stats.attempts, 4);
+    assert.deepEqual(load(Object.fromEntries(loaded.values)).state, loaded.state);
+  }
+});
+
+test('old profiles get spin defaults; stale spin IDs do not discard existing records', () => {
+  for (const spin of [undefined, null, {}, { current: 'removed', completed: ['s-spin', 'removed', 's-spin'] }]) {
+    const saved = { ...profile(), spin }, loaded = load({ [storageKey]: JSON.stringify(saved) });
+    assertProfile(loaded.state, saved); assert.equal(loaded.state.storageOK, true);
+    assert.equal(loaded.state.spinProgress.current, 't-single-left');
+    assert.deepEqual(loaded.state.spinProgress.completed, spin?.completed ? ['s-spin'] : []);
+    assert.equal(loaded.state.spinStats.attempts, 0);
+  }
+});
+
+test('failed spin persistence keeps in-memory progress and original recoverable profile', () => {
+  const saved = { ...profile(), spin: { current: 'i-spin-right', completed: ['s-spin'], stats: { attempts: 1, perfect: 1 } } };
+  const raw = JSON.stringify(saved), loaded = load({ [storageKey]: raw }, 'set');
+  assert.equal(loaded.state.storageOK, false);
+  assert.equal(loaded.state.spinProgress.current, 'i-spin-right');
+  assert.deepEqual(loaded.state.spinProgress.completed, ['s-spin']);
+  assert.equal(loaded.state.spinStats.perfect, 1);
+  loaded.save(); assert.equal(loaded.values.get(storageKey), raw);
 });

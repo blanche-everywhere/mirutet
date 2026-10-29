@@ -513,7 +513,7 @@
         const entry = this._record(key.action, key, { initial });
         if (automatic) { entry.slide = true; entry.label = delta < 0 ? 'DAS←' : 'DAS→'; }
       }
-      if (moved) { this.active = next; this._grounded(true); this._emit('move', { action: key.action, automatic, state: { ...next } }); this._wakeFall(); }
+      if (moved) { this.active = next; this.lastMove = 'shift'; this._grounded(true); this._emit('move', { action: key.action, automatic, state: { ...next } }); this._wakeFall(); }
       if (automatic) key.nextAt = this.settings.arr === 0 ? Infinity : this.time + this.settings.arr;
     }
     _fall(instant = false) {
@@ -524,6 +524,7 @@
       if (moved) {
         if (key) this._record('softDrop', key, { initial: true });
         this.active = next;
+        this.lastMove = 'fall';
         this._emit('fall', { soft: !!key, state: { ...next } });
         this._wakeHorizontal();
       }
@@ -536,6 +537,7 @@
       this.pending = null; this.pieceId++;
       this.lockAt = this.lockDeadline = Infinity; this.lockResets = 0;
       this.active = spawnPiece(type, { board: this.board });
+      this.lastMove = null;
       this.holdUsed = holdUsed; this.inputs = []; this.inputCount = 0;
       this.flags = { ihs, softDrop: false }; this.blocked = false;
       if (initialHold && this.settings.ihs && (bufferedHold || this._latest(k => k.action === 'hold')) && this.holdEnabled) {
@@ -544,13 +546,17 @@
       const rotateKey = this.settings.irs && this._rotation();
       if (rotateKey) {
         this._record(rotateKey.action, rotateKey, { initial: true, irs: true });
-        this.active = rotatePiece(this.board, this.active, ROTATE_ACTIONS[rotateKey.action], this.settings) || this.active;
+        const rotated = rotatePiece(this.board, this.active, ROTATE_ACTIONS[rotateKey.action], this.settings);
+        if (rotated) { this.active = rotated; this.lastMove = 'rotation'; }
       }
       if (!this.board.fits(this.active)) {
         this.active = null; this.blocked = true; this.fallAt = Infinity;
         this._emit('blockout'); return;
       }
-      if (this.settings.spawnDrop) this.active = movePiece(this.board, this.active, 0, -1) || this.active;
+      if (this.settings.spawnDrop) {
+        const dropped = movePiece(this.board, this.active, 0, -1);
+        if (dropped) { this.active = dropped; this.lastMove = 'fall'; }
+      }
       this._cut();
       this._emit('spawn', { type, state: { ...this.active }, ihs, queueDrawn });
       if (this.callbacks.onSpawn) this.callbacks.onSpawn(this.active, this);
@@ -575,8 +581,9 @@
     _lock() {
       const state = hardDrop(this.board, this.active);
       if (!state) return;
+      if (state.y !== this.active.y) this.lastMove = 'drop';
       const result = { t: this.time, type: state.type, state, cells: cells(state),
-        used: this.inputCount, inputs: this.inputs.map(e => ({ ...e })), flags: { ...this.flags } };
+        lastMove: this.lastMove, used: this.inputCount, inputs: this.inputs.map(e => ({ ...e })), flags: { ...this.flags } };
       if (this.lockToBoard) this.board.lock(state);
       this.active = null; this.fallAt = this.lockAt = this.lockDeadline = Infinity; this._cut();
       this._emit('lock', result);
@@ -645,7 +652,7 @@
         else if (action in ROTATE_ACTIONS) {
           this._record(action, key);
           const next = rotatePiece(this.board, this.active, ROTATE_ACTIONS[action], this.settings);
-          if (next) { this.active = next; this._grounded(true); this._cut(); this._wakeFall(); this._emit('rotate', { action, state: { ...next } }); }
+          if (next) { this.active = next; this.lastMove = 'rotation'; this._grounded(true); this._cut(); this._wakeFall(); this._emit('rotate', { action, state: { ...next } }); }
         } else if (action === 'softDrop') {
           this._record(action, key);
           if (this.settings.sdf === 41) this._fall(true); else { this._fall(); this._resetFall(); }
@@ -1065,10 +1072,180 @@
     }
   }
 
+  // Preset insertion practice. Rows are TOP first; targets use SRS matrix origins.
+  // Mirrored pairs reflect cells, then recover the correct piece/orientation.
+  function spinDrill(id, title, type, rows, state, lines, tip) {
+    const target = { type, ...state };
+    return { id, title, type, rows, target, lines, tip, cells: cells(target) };
+  }
+  function mirrorSpin(drill, id, title, type = drill.type) {
+    const reflected = drill.cells.map(([x, y]) => [WIDTH - 1 - x, y]);
+    let target;
+    for (let rot = 0; rot < 4 && !target; rot++) {
+      const shape = SHAPES[type][rot];
+      const x = Math.min(...reflected.map(c => c[0])) - Math.min(...shape.map(c => c[0]));
+      const y = Math.min(...reflected.map(c => c[1])) - Math.min(...shape.map(c => c[1]));
+      const candidate = { type, rot, x, y };
+      if (sameCells(cells(candidate), reflected)) target = candidate;
+    }
+    if (!target) throw new Error('Invalid mirrored spin drill');
+    return spinDrill(id, title, type, drill.rows.map(r => [...r].reverse().join('')), target, drill.lines, drill.tip);
+  }
+  const tSingle = spinDrill('t-single-left', 'Tスピンシングル・左', 'T',
+    ['###..#####', '###...####', '.###.#####'], { x: 3, y: 0, rot: 2 }, 1,
+    '縦向きでくぼみの手前まで下げて、最後に回転ですっ。');
+  const tDouble = spinDrill('t-double-left', 'Tスピンダブル・左', 'T',
+    ['###..#####', '###...####', '####.#####'], { x: 3, y: 0, rot: 2 }, 2, tSingle.tip);
+  const tMini = spinDrill('t-mini-left', 'Tスピンミニ・左', 'T',
+    ['###..#####', '###...####', '####.#####'], { x: 3, y: 0, rot: 0 }, 1,
+    'ミニの小さなくぼみも、下げてからくるりですっ♪');
+  const tTriple = spinDrill('t-triple-right', 'Tスピントリプル（TST）・右', 'T',
+    ['#####.....', '####......', '####.#####', '####..####', '####.#####'], { x: 3, y: 0, rot: 1 }, 3,
+    'ひさしを回り込んで横向きに。穴の上で回すと、キックで2段下へ入れますっ。');
+  const sSpin = spinDrill('s-spin', 'Sスピン', 'S',
+    ['####..####', '###..#####'], { x: 3, y: 0, rot: 2 }, 2,
+    '縦向きで下げてから、床のキックで横向きに収めましょうね。');
+  const lSpin = spinDrill('l-spin', 'Lスピン', 'L',
+    ['#####.####', '###...####'], { x: 3, y: -1, rot: 0 }, 2, sSpin.tip);
+  const iSpin = spinDrill('i-spin-right', 'Iスピン・右', 'I',
+    ['.......###', '####...###', '######.###', '###....###'], { x: 3, y: -2, rot: 0 }, 1,
+    '縦のIを細い通路へ。床まで下げて回すと、I専用のキックで横穴に入りますっ。');
+  const SPIN_SETS = deepFreeze([
+    { id: 'basic-t', title: '基本のTスピン', grade: 'STEP 1', drills: [tSingle,
+      mirrorSpin(tSingle, 't-single-right', 'Tスピンシングル・右'), tDouble,
+      mirrorSpin(tDouble, 't-double-right', 'Tスピンダブル・右')] },
+    { id: 'advanced-t', title: 'ミニとトリプル', grade: 'STEP 2', drills: [tMini,
+      mirrorSpin(tMini, 't-mini-right', 'Tスピンミニ・右'), tTriple,
+      mirrorSpin(tTriple, 't-triple-left', 'Tスピントリプル（TST）・左')] },
+    { id: 'other-spins', title: 'S・Z・L・Jの回転入れ', grade: 'STEP 3', drills: [sSpin,
+      mirrorSpin(sSpin, 'z-spin', 'Zスピン', 'Z'), lSpin, mirrorSpin(lSpin, 'j-spin', 'Jスピン', 'J')] },
+    { id: 'i-spins', title: 'Iミノの回転入れ', grade: 'STEP 4', drills: [iSpin,
+      mirrorSpin(iSpin, 'i-spin-left', 'Iスピン・左')] }
+  ]);
+  const SPIN_DRILLS = Object.freeze(SPIN_SETS.flatMap(set => set.drills));
+  function spinBoard(drill) {
+    const board = new Board();
+    drill.rows.slice().reverse().forEach((row, y) => [...row].forEach((cell, x) => {
+      if (cell === '#') board.set(x, y);
+    }));
+    return board;
+  }
+  function normalizeSpinProgress(saved = {}) {
+    const ids = SPIN_DRILLS.map(d => d.id);
+    return { current: ids.includes(saved?.current) ? saved.current : ids[0],
+      completed: [...new Set((Array.isArray(saved?.completed) ? saved.completed : []).filter(id => ids.includes(id)))] };
+  }
+  // Full descent-aware BFS for hints. Each softDrop edge is exactly ONE cell;
+  // floor is a drop without locking. Quarter-turn solutions work with 180 off.
+  function solveSpinDrill(drill, options = {}) {
+    const board = spinBoard(drill), start = spawnPiece(drill.type, options);
+    const key = s => [s.x, s.y, s.rot].join(',');
+    const queue = [{ state: start, actions: [] }], seen = new Set([key(start)]);
+    for (let head = 0; head < queue.length; head++) {
+      const { state, actions } = queue[head];
+      for (const action of ['cw', 'ccw', 'left', 'right', 'floor', 'softDrop']) {
+        const next = action === 'floor' ? hardDrop(board, state) : action === 'softDrop' ?
+          movePiece(board, state, 0, -1) : applyAction(board, state, action, { allow180: false });
+        if (!next || key(next) === key(state)) continue;
+        const path = actions.concat(action);
+        if ((action === 'cw' || action === 'ccw') && sameCells(cells(next), drill.cells)) return path;
+        if (!seen.has(key(next))) { seen.add(key(next)); queue.push({ state: next, actions: path }); }
+      }
+    }
+    throw new Error('Unreachable spin drill: ' + drill.id);
+  }
+  function judgeSpinPlacement(lock, drill) {
+    const correct = lock.type === drill.type && sameCells(lock.cells, drill.cells);
+    const rotated = lock.lastMove === 'rotation';
+    return { ...lock, drillId: drill.id, status: correct && rotated ? 'perfect' : 'miss',
+      reason: !correct ? 'position' : !rotated ? 'rotation' : null, correct, rotated,
+      optimal: 0, extra: 0, targetKey: drill.id, targetCells: drill.cells.map(c => c.slice()), optimalSequence: [] };
+  }
+  class SpinSession extends PlaySession {
+    constructor(options = {}) {
+      super(options);
+      this.settings = normalizeSettings(options.settings);
+      this.set = SPIN_SETS.find(s => s.drills.some(d => d.id === options.drillId)) || SPIN_SETS[0];
+      this.index = Math.max(0, this.set.drills.findIndex(d => d.id === options.drillId));
+      this.stats = new Stats();
+      this.totalStats = options.totalStats instanceof Stats ? options.totalStats : new Stats(options.totalStats);
+      this.completed = 0; this.serial = 0; this.awaitingNext = false; this.cueDrawPending = false;
+      this.handler = new InputHandler({ clock: this.clock, time: options.time, settings: this.settings,
+        autoNext: false, holdEnabled: false,
+        onInput: () => this._touch(this.handler.time), onAction: (action, t) => this._touch(t),
+        onLock: lock => this._onLock(lock),
+        onCommand: (action, t) => {
+          if (action === 'retry') this.retry(t);
+          else if (action === 'skip') this.skip(t);
+          else if (action === 'pause') this.pausedAt === null ? this.pause(t) : this.resume(t);
+          else this._emit(action, { t });
+        },
+        onEvent: event => {
+          if (event.kind === 'spawn') {
+            const queueDrawn = this.cueDrawPending; this.cueDrawPending = false;
+            this._emit('spawn', { ...event, queueDrawn, nextType: this.nextQueue(1)[0] });
+          } else this._emit(event.kind, event);
+        }
+      });
+    }
+    get drill() { return this.set.drills[this.index]; }
+    _schedule(t, queueDrawn = true) {
+      this.cueDrawPending = queueDrawn;
+      const drill = this.drill;
+      this.awaitingNext = false; this.lastResult = null;
+      this.handler.releaseAll(t); this.handler.board = spinBoard(drill);
+      this.round = { type: drill.type, drillId: drill.id, target: { type: drill.type,
+        cells: drill.cells, state: drill.target, key: cellsKey(drill.cells) }, serial: ++this.serial };
+      this._emit('target', { round: this.round });
+      this.handler.scheduleSpawn(drill.type, t, this.settings.are);
+    }
+    start(t = this.clock()) {
+      if (this.running) throw new Error('Session already started');
+      this.running = true; this._schedule(t); return this;
+    }
+    _onLock(lock) {
+      const result = judgeSpinPlacement(lock, this.drill);
+      this.handler.board.lock(lock.state);
+      result.lines = this.handler.board.clone().clearLines();
+      result.combo = this.combo.next(result);
+      this.stats.record(result); this.totalStats.record(result);
+      if (result.status === 'perfect') this.completed++;
+      this.lastResult = result; this.awaitingNext = true;
+      this._emit('result', { result });
+    }
+    retry(t = this.clock()) {
+      this.update(t);
+      if (!this.running || this.pausedAt !== null) return false;
+      this.stats.retries++; this.totalStats.retries++; this.combo.reset(); this._schedule(t, false); return true;
+    }
+    skip(t = this.clock()) {
+      this.update(t);
+      if (!this.running || this.pausedAt !== null) return false;
+      if (!this.awaitingNext || this.lastResult?.status !== 'perfect') {
+        this.stats.skips++; this.totalStats.skips++; this.combo.reset();
+      }
+      this.index = (this.index + 1) % this.set.drills.length; this._schedule(t); return true;
+    }
+    setSettings(patch, t = this.clock()) {
+      this.update(t); this.settings = normalizeSettings(patch, this.settings);
+      this.handler.setSettings(patch, t); return this;
+    }
+    nextQueue(count = 5) {
+      return Array.from({ length: Math.min(count, this.set.drills.length - 1) }, (_, n) =>
+        this.set.drills[(this.index + n + 1) % this.set.drills.length].type);
+    }
+    snapshot(t = this.clock()) {
+      const elapsed = this.elapsed(t);
+      return { ...this.stats.snapshot(), completed: this.completed, elapsed,
+        pps: elapsed ? this.completed * 1000 / elapsed : 0, running: this.running };
+    }
+  }
+
   return Object.freeze({ WIDTH, HEIGHT, VISIBLE_HEIGHT, PIECE_TYPES, ROTATIONS, COLORS,
     SHAPES, KICKS_JLSTZ, KICKS_I, KICKS_180, KICKS_I_180, kickTests, rotation,
     cells, cellsKey, sameCells, bounds, Board, spawnPiece, movePiece, rotatePiece,
     slidePiece, hardDrop, createRNG, Bag, ACTION_LABELS, applyAction, placementFor,
     finesseFor, allPlacements, DEFAULT_SETTINGS, SETTING_LIMITS, normalizeSettings,
-    INPUT_ACTIONS, validateBindings, rebindKeys, InputHandler, COMBO_MILESTONES, ComboTracker, Stats, DrillSession, FreeSession });
+    INPUT_ACTIONS, validateBindings, rebindKeys, InputHandler, COMBO_MILESTONES, ComboTracker, Stats, DrillSession, FreeSession,
+    SPIN_SETS, SPIN_DRILLS, spinBoard, normalizeSpinProgress, solveSpinDrill, judgeSpinPlacement, SpinSession });
 });
