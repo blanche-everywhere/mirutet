@@ -13,7 +13,7 @@ function loadApp(profile = {}) {
   let time = 0, frame, markup = '', overlay = '';
   const listeners = new Map(), windowListeners = new Map(), nodes = new Map(), cues = [], sounds = [];
   const node = () => ({ innerHTML: '', textContent: '', dataset: {}, style: {}, hidden: true,
-    classList: { add() {}, remove() {} }, focus() {}, getBoundingClientRect: () => ({ width: 0, height: 0 }) });
+    classList: { add() {}, remove() {} }, getAnimations: () => [], setAttribute() {}, focus() {}, getBoundingClientRect: () => ({ width: 0, height: 0 }) });
   const app = node();
   Object.defineProperty(app, 'innerHTML', {
     get: () => markup, set(value) { markup = value; overlay = ''; nodes.clear(); }
@@ -39,9 +39,12 @@ function loadApp(profile = {}) {
     }
   };
   const button = act => ({ dataset: { act }, disabled: false,
-    closest(selector) { return selector === '.gameover' ? overlay.includes('overlay gameover') ? get('.overlay') : null : this; }
+    closest(selector) {
+      if (selector === '.gameover') return overlay.includes('overlay gameover') ? get('.overlay') : null;
+      return ['button', 'button[data-act]'].includes(selector) ? this : null;
+    }
   });
-  const window = { addEventListener: (name, callback) => windowListeners.set(name, callback), scrollTo() {} };
+  const window = { innerWidth: 1280, innerHeight: 720, addEventListener: (name, callback) => windowListeners.set(name, callback), scrollTo() {} };
   vm.runInNewContext(fs.readFileSync(require.resolve('../src/app.js'), 'utf8'), {
     MiruTet: { ...E, mascot: M, FreeSession: class extends E.FreeSession {
       constructor(options) { super({ ...options, rng: () => .99999 }); }
@@ -61,13 +64,14 @@ function loadApp(profile = {}) {
   return {
     app, cues, sounds, get,
     state: () => JSON.parse(JSON.stringify(window.__mirutet.getState())),
+    dispatch(event) { document.dispatchEvent(event); return event; },
     get overlay() { return overlay; },
     get frameScheduled() { return !!frame; },
     blur() { windowListeners.get('blur')(); },
     visibility(hidden) { document.hidden = hidden; document.dispatchEvent({ type: 'visibilitychange' }); },
     pagehide() { windowListeners.get('pagehide')(); },
     pageshow() { windowListeners.get('pageshow')(); },
-    click(act) { listeners.get('click')({ target: button(act) }); },
+    click(act, data = {}) { const target = button(act); Object.assign(target.dataset, data); listeners.get('click')({ target }); },
     key(code, down = true, repeat = false, act) {
       const event = { type: down ? 'keydown' : 'keyup', code, repeat, target: act ? button(act) : document };
       time++; document.dispatchEvent(event); return event;
@@ -83,11 +87,11 @@ function topOut(app) {
   assert.equal(app.state().stats.gameOver, true);
 }
 
-test('top-level mode selection exposes free play alongside finesse, then renders only four stats', () => {
+test('category navigation exposes free play alongside finesse, then renders only four stats', () => {
   const app = loadApp({ practice: { pieces: ['O'], area: 'left' }, ui: { zeroFault: true } });
-  assert.match(app.app.innerHTML, /aria-label="モード"/);
-  assert.match(app.app.innerHTML, /data-act="mode-finesse"[^>]*>フィネス編/);
-  assert.match(app.app.innerHTML, /data-act="mode-free"[^>]*>フリーモード/);
+  assert.match(app.app.innerHTML, /aria-label="メインメニュー"/);
+  assert.match(app.app.innerHTML, /data-act="mode-finesse"[^>]*><span><b>フィネス<\/b>/);
+  assert.match(app.app.innerHTML, /data-act="mode-free"[^>]*><span><b>フリー<\/b>/);
   app.enter();
   const s = app.state(); assert.equal(s.screen, 'play'); assert.equal(s.mode, 'free');
   assert.match(app.app.innerHTML, /data-live-handling/);
@@ -101,7 +105,7 @@ test('top-level mode selection exposes free play alongside finesse, then renders
   assert.match(s.bubble, /あなた.*わたし.*ですっ/);
   app.click('menu'); app.click('mode-finesse');
   assert.match(app.app.innerHTML, /data-act="drill"/); assert.doesNotMatch(app.app.innerHTML, /data-act="free"/);
-  assert.match(app.app.innerHTML, /<small>TARGET PRACTICE<\/small>/);
+  assert.match(app.app.innerHTML, /ミノとエリアを選んで/);
   app.click('drill'); assert.match(app.app.innerHTML, /<span class="tag">TARGET PRACTICE<\/span>/);
 });
 
@@ -254,4 +258,113 @@ for (const event of ['blur', 'hidden', 'pagehide']) test(`${event} pauses free p
   app.click('resume'); assert.equal(app.overlay, ''); assert.equal(app.state().paused, false);
   assert.deepEqual(app.state().active, before.active); assert.deepEqual(app.state().held, []);
   app.advance(100); assert.ok(app.state().stats.elapsed > before.stats.elapsed);
+});
+
+
+test('BL-145 top has exactly six ordered entrances, Japanese descriptions and Mirufi without progress clutter', () => {
+  const app = loadApp({ progress: { current: 3, completed: [1, 3] } });
+  const entries = [...app.app.innerHTML.matchAll(/<button class="category-card ([^"]+)" data-act="([^"]+)"><span><b>([^<]+)<\/b><small>([^<]+)<\/small>/g)];
+  assert.deepEqual(entries.map(m => m[2]), ['mode-free', 'mode-finesse', 'mode-spin', 'dressup', 'records', 'settings']);
+  assert.deepEqual(entries.map(m => m[3]), ['フリー', 'フィネス', '回転入れ', 'きせかえ', '記録', '設定']);
+  assert.equal((app.app.innerHTML.match(/<button\b/g) || []).length, 6);
+  entries.forEach((entry, i) => {
+    assert.equal(entry[1], i < 3 ? 'category-practice' : 'category-secondary');
+    assert.match(entry[4], /[ぁ-んァ-ン一-龠]/);
+    assert.doesNotMatch(entry[4], /[\r\n]/);
+  });
+  assert.match(app.app.innerHTML, /ミルフィ/);
+  assert.doesNotMatch(app.app.innerHTML, /data-act="(?:tutorial|lessons|drill|sprint|spins)"|チャレンジを達成|2 \/ 12/);
+});
+
+test('BL-145 finesse contains former lesson, list, drill and sprint entries; all twelve lessons open', () => {
+  const app = loadApp({ progress: { current: 3, completed: [1, 3] } });
+  const category = () => { app.click('menu'); app.click('mode-finesse'); assert.equal(app.state().screen, 'finesse'); };
+  category();
+  for (const action of ['tutorial', 'lessons', 'drill', 'sprint']) assert.match(app.app.innerHTML, new RegExp(`data-act="${action}"`));
+  assert.match(app.app.innerHTML, /2 \/ 12 レッスン/);
+  app.click('tutorial'); assert.equal(app.state().screen, 'tutorial'); assert.equal(app.state().lessonIndex, 3);
+  for (let i = 0; i < 12; i++) {
+    category(); app.click('lessons'); assert.equal(app.state().screen, 'lessons');
+    assert.equal((app.app.innerHTML.match(/data-act="lesson"/g) || []).length, 12);
+    app.click('lesson', { index: String(i) }); assert.equal(app.state().screen, 'tutorial'); assert.equal(app.state().lessonIndex, i);
+    app.tap('Escape'); assert.equal(app.state().screen, 'menu');
+  }
+  category(); app.click('drill'); assert.equal(app.state().mode, 'finesse');
+  assert.match(app.app.innerHTML, /data-piece-filter="I"/);
+  app.tap('Escape'); assert.match(app.overlay, /data-act="menu"/); app.click('menu');
+  category(); app.click('sprint'); assert.equal(app.state().screen, 'sprint');
+  for (const length of [40, 100]) assert.match(app.app.innerHTML, new RegExp(`data-length="${length}"`));
+  assert.match(app.app.innerHTML, /id="custom-length"/);
+  app.tap('Escape'); assert.equal(app.state().screen, 'menu');
+});
+
+test('BL-145 spin category contains continue, all eight sets and every selectable drill', () => {
+  const app = loadApp({ spin: { current: 't-single-right', completed: ['t-single-left'] } });
+  const category = () => { app.click('menu'); app.click('mode-spin'); assert.equal(app.state().screen, 'spins'); };
+  category();
+  assert.match(app.app.innerHTML, /data-act="spin-continue"/);
+  assert.match(app.app.innerHTML, /問題一覧/);
+  assert.equal((app.app.innerHTML.match(/class="spin-set"/g) || []).length, 8);
+  assert.equal((app.app.innerHTML.match(/data-act="spin-drill"/g) || []).length, 36);
+  assert.match(app.app.innerHTML, /1 \/ 36 達成/);
+  app.click('spin-continue'); assert.equal(app.state().round.drillId, 't-single-right');
+  for (const drill of E.SPIN_DRILLS) {
+    category(); assert.ok(app.app.innerHTML.includes(`data-id="${drill.id}"`));
+    app.click('spin-drill', { id: drill.id }); assert.equal(app.state().round.drillId, drill.id);
+    assert.equal(app.state().mode, 'spin');
+  }
+});
+
+test('BL-145 records holds lesson/spin progress and all existing statistics', () => {
+  const app = loadApp({ progress: { current: 3, completed: [1, 3] }, spin: { completed: ['t-single-left'], stats: { attempts: 4, perfect: 1 } } });
+  app.click('records'); assert.equal(app.state().screen, 'records');
+  for (const text of ['学習の進捗', '2 / 12', '1 / 36', '1 成功 / 4 試行', '試行数', '正確率', '最高連続', 'フォルト', '置き場所ミス', '平均入力 / 最短', 'ミノごとの記録', 'スプリントのベストタイム']) assert.ok(app.app.innerHTML.includes(text), text);
+  for (const action of ['reset-stats', 'lessons', 'spins']) assert.match(app.app.innerHTML, new RegExp(`data-act="${action}"`));
+  app.click('lessons'); assert.equal(app.state().screen, 'lessons'); app.tap('Escape'); assert.equal(app.state().screen, 'menu');
+  app.click('records'); app.click('spins'); assert.equal(app.state().screen, 'spins');
+});
+
+test('BL-145 category back buttons, Esc and settings shortcut preserve the navigation context', () => {
+  const app = loadApp();
+  for (const [act, screen] of [['mode-free', 'free'], ['mode-finesse', 'finesse'], ['mode-spin', 'spins'], ['records', 'records'], ['dressup', 'dressup'], ['settings', 'settings']]) {
+    app.click(act); assert.equal(app.state().screen, screen);
+    assert.match(app.app.innerHTML.match(/<header[\s\S]*?<\/header>/)[0], /data-act="menu">タイトルへ/);
+    app.tap('Escape'); assert.equal(app.state().screen, 'menu');
+    app.click(act); app.click('menu'); assert.equal(app.state().screen, 'menu');
+  }
+  for (const [act, screen] of [['mode-free', 'free'], ['mode-finesse', 'finesse'], ['mode-spin', 'spins']]) {
+    app.click(act); app.tap('Comma'); assert.equal(app.state().screen, 'settings');
+    app.tap('Escape'); assert.equal(app.state().screen, screen);
+    app.click('dressup'); app.tap('Escape'); assert.equal(app.state().screen, screen);
+    app.click('menu');
+  }
+});
+
+test('BL-145 Esc returns past hovered settings help while focused help only dismisses', () => {
+  for (const origin of ['menu', 'free']) for (const type of ['pointerover', 'focusin']) {
+    const app = loadApp();
+    if (origin === 'free') { app.click('mode-free'); app.tap('Comma'); }
+    else app.click('settings');
+    assert.equal(app.state().screen, 'settings');
+    const settings = app.state().settings;
+    const control = {
+      dataset: { setting: 'das', settingHelp: 'das' }, isConnected: true,
+      closest(selector) { return selector === '[data-setting-help]' ? this : null; },
+      getBoundingClientRect: () => ({ left: 100, right: 200, top: 100, bottom: 140 })
+    };
+    const tooltip = app.get('#setting-help-das');
+    app.dispatch({ type, pointerType: 'mouse', target: control });
+    assert.equal(tooltip.hidden, false);
+    const event = type === 'focusin'
+      ? app.dispatch({ type: 'keydown', code: 'Escape', repeat: false, target: control })
+      : app.tap('Escape', 'close-settings');
+    assert.equal(event.defaultPrevented, true);
+    assert.equal(tooltip.hidden, true);
+    assert.deepEqual(app.state().settings, settings);
+    assert.equal(app.state().screen, type === 'focusin' ? 'settings' : origin, `${origin}: ${type}`);
+    if (type === 'focusin') {
+      app.tap('Escape', 'close-settings');
+      assert.equal(app.state().screen, origin);
+    }
+  }
 });

@@ -72,7 +72,7 @@ async function checkSettingTooltips(browser) {
     await page.screenshot({path:path.join(root, 'screens/bl142-tooltip.png')});
     await click('close-settings');
     assert.equal(await page.locator('[role=tooltip]:visible').count(), 0);
-    await click('drill'); await click('toggle-handling');
+    await click('mode-finesse'); await click('drill'); await click('toggle-handling');
     const liveKeys = ['das','arr','sdf','dcd','are','gravity','lockDelay','lockDelayOn'];
     for (const key of liveKeys) {
       const control = page.locator(`[data-live-handling] [data-setting="${key}"][type=number],[data-live-handling] [data-engine-toggle="${key}"]`);
@@ -105,6 +105,7 @@ async function checkSettingTooltips(browser) {
         assert.equal(await toggle.isChecked(), false, 'touch help does not swallow the checkbox tap');
         assert(await touch.locator('#setting-help-lockDelayOn').isVisible()); touchChecks++;
         await touch.locator('[data-act=close-settings]').tap();
+        await touch.locator('[data-act=mode-finesse]').tap();
         await touch.locator('[data-act=drill]').tap();
         await touch.locator('[data-act=toggle-handling]').tap();
         await touch.locator('[data-live-handling] [data-setting-help=das]>span').tap();

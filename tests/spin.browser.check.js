@@ -61,7 +61,6 @@ async function runSpinChecks(browser, root) {
     }, legacyProfile);
     await legacyPage.goto(pathToFileURL(path.join(root, 'dist/mirutet.html')).href);
     await legacyPage.locator('[data-act=mode-spin]').click();
-    await legacyPage.locator('[data-act=spins]').click();
     assert.equal(await legacyPage.locator('.lesson-card.done').count(), 14);
     assert.equal(await legacyPage.locator('[data-act=spin-drill]').count(), 36);
     assert.match(await legacyPage.locator('.mint-tag').innerText(), /14 \/ 36/);
@@ -72,7 +71,6 @@ async function runSpinChecks(browser, root) {
     const finesseBefore = (await state()).totalStats;
     await click('mode-spin');
     assert.equal(await page.locator('[data-act=tutorial],[data-act=lessons],[data-act=sprint]').count(), 0, 'Drills only');
-    await click('spins');
     assert.equal(await page.locator('.spin-set').count(), E.SPIN_SETS.length);
     assert.equal(await page.locator('[data-act=spin-drill]').count(), E.SPIN_DRILLS.length);
     await layout('spin selection');

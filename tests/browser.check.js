@@ -188,13 +188,13 @@ async function main() {
     await page.waitForFunction(() => !!window.__mirutet);
     // Keep subsequent reloads intact: do not use an init script that clears data.
     await page.evaluate(() => localStorage.clear()); await page.reload();
-    await waitScreen('menu'); await checkViewport('menu', ['.menu-buttons', '.first-note', '.menu-art .speech', '.menu-art .mirufi', '.mascot-caption', '.footer']);
+    await waitScreen('menu'); await checkViewport('menu', ['.home-categories', '.category-card', '.menu-art .speech', '.menu-art .mirufi', '.mascot-caption', '.footer']);
     assert.equal(await page.locator('.menu-art .speaker').innerText(), 'ミルフィ');
     assert.match(await page.locator('.menu-art .bubble-text').innerText(), /あなたの先輩、ミルフィですっ/);
     await checkText(); await shot('menu'); clean();
 
-    // Start the first lesson using the focused menu button, then use genuine
-    // engine inputs to finish its zero-input mini-drill.
+    // Select Finesse with arrows, then start the focused lesson button.
+    await page.keyboard.press('ArrowRight'); await page.keyboard.press('Enter'); await waitScreen('finesse');
     await page.keyboard.press('Enter'); await waitScreen('tutorial');
     assert.equal((await state()).lessonIndex, 0);
     await page.waitForTimeout(800); await checkLesson(); await shot('tutorial');
@@ -277,7 +277,7 @@ async function main() {
     clean();
 
     await page.keyboard.press('Escape'); await waitScreen('menu');
-    await click('drill'); await waitScreen('play'); await ready();
+    await click('mode-finesse'); await click('drill'); await waitScreen('play'); await ready();
     await checkHandling('drill');
     await checkDrill();
     assert.equal(await page.locator('#next-preview canvas').count(), 5);
@@ -425,7 +425,7 @@ async function main() {
     assert.equal(s.ui.pieceCueTiming, 'current'); assert.equal(s.ui.pieceCueVolume, 61);
     assert.equal(s.ui.hairSkin, 'side'); assert.equal(s.ui.outfitSkin, 'cape');
     assert.equal(s.bindings.cw[0], 'KeyQ'); assert.ok(s.progress.completed.includes(4)); assert.ok(s.totalStats.faults >= 1);
-    await click('drill'); await ready();
+    await click('mode-finesse'); await click('drill'); await ready();
 
     // No repeat from the OS can create extra inputs; a synthetic normal event
     // uses exactly the same listener as the real page.keyboard events.
@@ -492,7 +492,7 @@ async function main() {
 
     // Finish a short custom sprint with actual optimal key sequences. The
     // screenshot and saved best time exercise the same result path as 40/100.
-    await click('menu'); await click('sprint');
+    await click('menu'); await click('mode-finesse'); await click('sprint');
     await checkViewport('sprint setup', ['.sprint-setup .speech', '.sprint-setup .mirufi']);
     assert.equal(await page.locator('[data-act=start-sprint][data-length="40"]').count(), 1);
     assert.equal(await page.locator('[data-act=start-sprint][data-length="100"]').count(), 1);
@@ -512,9 +512,11 @@ async function main() {
     await tabTo('[data-act=records]'); await page.keyboard.press('Enter'); await waitScreen('records');
     await tabTo('[data-act=reset-stats]');
     await page.keyboard.press('Escape'); await waitScreen('menu');
+    await tabTo('[data-act=mode-finesse]'); await page.keyboard.press('Enter'); await waitScreen('finesse');
     await tabTo('[data-act=lessons]'); await page.keyboard.press('Enter'); await waitScreen('lessons');
     await tabTo('[data-act=lesson][data-index="3"]'); await page.keyboard.press('Enter'); await waitScreen('tutorial');
     await checkLesson(); await page.keyboard.press('Escape'); await waitScreen('menu');
+    await tabTo('[data-act=mode-finesse]'); await page.keyboard.press('Enter'); await waitScreen('finesse');
     await tabTo('[data-act=sprint]'); await page.keyboard.press('Enter'); await waitScreen('sprint');
     await tabTo('#custom-length'); await page.keyboard.press('ArrowUp');
     await page.keyboard.press('Escape'); await waitScreen('menu');
@@ -522,16 +524,16 @@ async function main() {
     await tabTo('[data-act=reset-settings]');
     await checkSettings('settings keyboard scroll');
     await page.keyboard.press('Escape'); await waitScreen('menu');
-    await checkViewport('menu after keyboard tour', ['.menu-buttons', '.footer']); clean();
+    await checkViewport('menu after keyboard tour', ['.home-categories', '.footer']); clean();
 
     // Free play uses the shared physical inputs on an accumulating board.
     // The saved drill profile has a singleton filter and zero-fault preferences;
     // neither may constrain the full seven-bag or end this session.
-    assert.equal(await page.locator('[data-act=mode-free]').innerText(), 'フリーモード');
-    assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'tutorial');
-    await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowUp'); await page.keyboard.press('ArrowUp');
-    assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'mode-finesse');
+    assert.equal(await page.locator('[data-act=mode-free] b').innerText(), 'フリー');
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'mode-free');
     await page.keyboard.press('ArrowRight');
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'mode-finesse');
+    await page.keyboard.press('ArrowLeft');
     assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'mode-free');
     await page.keyboard.press('Enter');
     assert.equal(await page.evaluate(() => document.activeElement.dataset.act), 'free');
@@ -619,6 +621,7 @@ async function main() {
     assert.deepEqual((await state()).totalStats, freeTotal, 'free placements do not change practice records');
     await click('menu'); await click('mode-finesse'); clean();
 
+    await require('./navigation.browser.check').runNavigationChecks(browser, root);
     await require('./spin.browser.check').runSpinChecks(browser, root);
 
     // Capture defaults from a genuinely fresh profile, isolated from all the
@@ -630,9 +633,9 @@ async function main() {
       await defaultPage.goto(pathToFileURL(path.join(root, 'dist', 'mirutet.html')).href);
       await defaultPage.waitForFunction(() => !!window.__mirutet);
       assert.equal(await defaultPage.evaluate(() => localStorage.getItem(window.__mirutet.storageKey)), null);
-      await checkViewport('clean title', ['.menu-buttons', '.menu-buttons button', '.first-note', '.menu-art .speech', '.menu-art .mirufi', '.mascot-caption', '.footer'], defaultPage);
+      await checkViewport('clean title', ['.home-categories', '.category-card', '.menu-art .speech', '.menu-art .mirufi', '.mascot-caption', '.footer'], defaultPage);
       await checkText(defaultPage); await shot('title', defaultPage);
-      await defaultPage.locator('.topbar [data-act=settings]').click();
+      await defaultPage.locator('main [data-act=settings]').click();
       await defaultPage.waitForFunction(() => window.__mirutet.getState().screen === 'settings');
       const defaults = await defaultPage.evaluate(() => window.__mirutet.getState());
       assert.deepEqual(defaults.bindings.cw, ['ArrowUp', 'KeyX']);
@@ -750,6 +753,7 @@ async function main() {
       Object.defineProperty(window, 'webkitAudioContext', { value: undefined });
     });
     await fallback.goto(pathToFileURL(path.join(root, 'dist', 'mirutet.html')).href);
+    await fallback.locator('[data-act=mode-finesse]').click();
     await fallback.locator('[data-act=drill]').click();
     await fallback.waitForFunction(() => !!window.__mirutet.getState().active);
     await fallback.evaluate(() => window.__mirutet.chooseTarget('O', { rot: 0, x: 4 }, { delay: 0 }));
@@ -757,7 +761,7 @@ async function main() {
     assert.equal(await fallback.evaluate(() => window.__mirutet.getState().lastResult.status), 'perfect');
     clean();
     console.log('Browser checks passed: all 12 lessons, drill/sprint, combo, handling/IRS/pause, settings/storage, free-mode stats/top-out/restart/desktop/800x600, offline fallbacks.');
-    console.log('Screenshots: screens/{title,menu,tutorial,tutorial-irs,tutorial-t,drill-target,drill-1080,drill-perfect,combo,drill-fault,settings,sprint-result}.png');
+    console.log('Screenshots: screens/{bl145-top-1280,bl145-top-800,bl145-finesse,title,menu,tutorial,tutorial-irs,tutorial-t,drill-target,drill-1080,drill-perfect,combo,drill-fault,settings,sprint-result}.png');
   } finally { await browser.close(); }
 }
 main().catch(error => { console.error(error); process.exitCode = 1; });
