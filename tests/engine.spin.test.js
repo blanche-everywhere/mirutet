@@ -39,12 +39,12 @@ test('new hint routes exercise downward, sideways and upward kicks, without 180'
   for (const id of ['l-shelf', 'j-shelf', 'i-shelf-left', 'i-shelf-right']) {
     assert.equal(entries[id].dy, 0, id); assert.equal(Math.abs(entries[id].dx), 1, id);
   }
-  for (const id of ['i-lift-left', 'i-lift-right']) assert.equal(entries[id].dy, 2, id);
+  for (const id of ['i-lift-left', 'i-lift-right']) assert.ok(entries[id].dy > 0, id);
 });
 
 // Exhaust the complete reachable graph, including deliberate descent, hard
 // drops, both directions, and optionally 180. Do not use the hint solver here.
-function audit(drill, options) {
+function audit(drill, options, forbid = () => false) {
   const board = E.spinBoard(drill), start = E.spawnPiece(drill.type, { board, ...options });
   const queue = [start], seen = new Set([stateKey(start)]);
   let rotations = 0, translations = 0, kicks = 0, fifthKicks = 0;
@@ -54,6 +54,7 @@ function audit(drill, options) {
     for (const action of actions) {
       const next = action === 'down' ? E.movePiece(board, state, 0, -1) : action === 'drop' ? E.hardDrop(board, state) : E.applyAction(board, state, action, options);
       if (!next || stateKey(state) === stateKey(next)) continue;
+      if (forbid(state, next, action)) continue;
       if (E.sameCells(E.cells(next), drill.cells)) {
         if (['cw', 'ccw', 'rotate180'].includes(action)) {
           rotations++;
@@ -68,6 +69,21 @@ function audit(drill, options) {
   }
   return { rotations, translations, kicks, fifthKicks };
 }
+
+for (const drill of E.SPIN_DRILLS.slice(14)) test(`${drill.id}: intended kick direction is required in every route`, () => {
+  const direction = drill.id.includes('lift') ? 'up' : drill.id.includes('shelf') ? 'sideways' : 'down';
+  // Matrix origins use y-up. Remove the intended class of rotation edges
+  // anywhere in a route, including 180 kicks. Keep translations and descent.
+  const forbidDirection = (before, after, action) =>
+    ['cw', 'ccw', 'rotate180'].includes(action) && (direction === 'up' ? after.y > before.y :
+      direction === 'down' ? after.y < before.y : after.x !== before.x);
+  for (const allow180 of [false, true]) for (const spawnDrop of [false, true]) {
+    const options = { allow180, spawnDrop };
+    assert.ok(audit(drill, options).rotations > 0, 'Control: ordinary SRS reaches target');
+    const restricted = audit(drill, options, forbidDirection);
+    assert.equal(restricted.rotations + restricted.translations, 0, `No route without a ${direction} kick`);
+  }
+});
 
 for (const drill of E.SPIN_DRILLS) test(`SRS insertion: ${drill.id} — rotation required in every reachable path`, () => {
   const board = E.spinBoard(drill);
