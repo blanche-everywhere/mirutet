@@ -1991,3 +1991,22 @@ body[data-screen=play],body[data-screen=tutorial] { min-width:800px; }
 .handling-stepper { padding:0; row-gap:0; grid-template-rows:26px 18px; }
 .handling-stepper .live-number { height:18px; padding:0 4px; font-size:12px; }
 .handling-stepper .live-range { height:14px; }
+
+/* Spin drills share the practice viewport, controls and mascot. */
+.menu-mode { flex-wrap:wrap; }
+body[data-screen=spins] { height:100vh; }
+body[data-screen=spins] #app { height:100%; display:flex; flex-direction:column; }
+.spin-page { flex:1; min-height:0; width:100%; max-width:1450px; display:flex; flex-direction:column; padding:16px 24px 0; }
+.spin-page .page-heading { margin-bottom:10px; }
+.spin-set-list { flex:1; min-height:0; overflow:auto; padding:12px 8px 18px 0; scrollbar-width:thin; }
+.spin-set + .spin-set { margin-top:20px; }
+.spin-set .lesson-list { grid-template-columns:repeat(4,minmax(0,1fr)); margin-top:10px; }
+.spin-set .lesson-card { min-height:96px; padding:14px; }
+.spin-set .lesson-card.done { border-color:#9fc9b6; background:#f1faf6; }
+.spin-rule { line-height:1.9; margin:12px 0; }
+.spin-play .practice-options h3 { margin-top:10px; }
+.spin-play .play-title { flex-wrap:wrap; }
+@media(max-width:999px) {
+  .spin-set .lesson-list { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+body[data-screen=spins] { min-width:800px; }

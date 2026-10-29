@@ -1,7 +1,7 @@
 {
   "name": "mirutet",
   "version": "2.0.0",
-  "description": "Offline Japanese tetromino practice series with ミルフィ; フィネス編 and endless フリーモード",
+  "description": "Offline Japanese tetromino practice series with ミルフィ; フィネス編, endless フリーモード, and 回転入れ編 drills",
   "main": "src/engine.js",
   "scripts": {
     "build": "node build.js",

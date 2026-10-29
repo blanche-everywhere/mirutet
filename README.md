@@ -1,6 +1,6 @@
 # ミルテト
 
-ミルテト学園のミルフィと、テトリミノの操作を学ぶデスクトップ向けのブラウザゲームシリーズです。「フィネス編」では最短操作を練習でき、「フリーモード」では自由に積んでラインを消せます。日本語UI・キーボード操作対応。オリジナルSVGイラストと合成効果音を使用します。
+ミルテト学園のミルフィと、テトリミノの操作を学ぶデスクトップ向けのブラウザゲームシリーズです。「フィネス編」では最短操作を練習でき、「フリーモード」では自由に積んでラインを消せます。「回転入れ編」は、決まったくぼみにSRSのキックで入れるドリルです。日本語UI・キーボード操作対応。オリジナルSVGイラストと合成効果音を使用します。
 
 v2（2.0.0）でシリーズ名を「ミルテト」に改称しました。旧版の設定・キー・進捗・通算記録は、新しい保存先にデータ形式を変えず自動移行します（新しい保存先にデータがある場合はそちらを優先します）。保存キーのデータ形式は引き続き `.v1` です。
 
@@ -16,6 +16,19 @@ npm run test:browser
 レッスンは12ステップ。実演は実際の `InputHandler` で再生し、DASの長押しやIRS/IHSの出現時操作に合わせてキーが光ります。各ミノの最短表はエンジンのソルバーから生成します。チャレンジの成績は通常の練習記録に混ぜず、達成したレッスンを保存します。
 
 ドリルでは破線が目標、薄いミノが着地点です。ホールドはスキップ扱いで、1種類だけ選んだ練習では無効です。最短入力で置くとPerfect、余分な入力があるとフォルト、違う場所ならミスです。ゼロフォルトでは最短成功するまで同じ目標に再挑戦します。スプリントは40・100・任意の配置数に対応します。タイマーは最初の操作から開始し、一時停止時間は除きます。ベストタイムは配置数ごとに保存します（練習条件による区分はありません）。
+
+回転入れ編はタイトルのモード選択から「ドリルをつづける」または「問題一覧」で開始します。レッスンはなく、次の4セット・14問を好きな順に練習できます。
+
+| セット | 問題 |
+| --- | --- |
+| STEP 1 基本のTスピン（4問） | Tスピンシングル・左／右、Tスピンダブル・左／右 |
+| STEP 2 ミニとトリプル（4問） | Tスピンミニ・左／右、Tスピントリプル（TST）・右／左 |
+| STEP 3 S・Z・L・Jの回転入れ（4問） | Sスピン、Zスピン、Lスピン、Jスピン |
+| STEP 4 Iミノの回転入れ（2問） | Iスピン・右／左 |
+
+成功条件は「指定ミノを破線の4マスに固定し、最後に成功した移動が回転であること」です。入力回数は自由です。成功した横移動・重力／ソフト落下・距離のあるハードドロップは回転の判定を取り消します。動かなかった入力と、距離0のハードドロップによる固定は判定を保ちます。回転失敗だけでは成功になりません。結果を表示して待ち、R／同じ問題で初期盤面から再挑戦、N／次の問題でセット内の次へ進みます（最後は先頭へ）。固定した形を残してライン数を表示し、次の試行では盤面を復元します。ミルフィが成功を祝い、ミスには場所や回転のヒントを伝えます。Hの手順は現在のキー設定で表示し、「1マス」は落下距離、「床まで」は固定しないソフト落下を表します。
+
+DAS・ARR・SDF・DCD・ARE・重力・IRS・180度回転とキー設定は共通です。ホールドは使いません。回転入れ編はフィネス用のゼロフォルト・自動再挑戦設定から独立し、回転入れ成功でCOMBOが続きます。達成ID・最後に選んだ問題・通算記録を同じ保存キーの `spin: { current, completed, stats }` に保存し、フィネス編のレッスン進捗・成績には加えません。旧プロフィールには初期値を補い、未知の問題IDは除外します。設定JSONのインポートや設定初期化でも進捗は保持します。
 
 フィネス編のドリル・スプリント・レッスンのチャレンジとフリーモードでは、Perfectが2回続くとCOMBOが表示されます。5・10・20・50回で彩りと弾みが増え、ドリル・スプリントではミルフィもひとことお祝いします。レッスンでは説明・達成のフィードバックを優先し、IRSなどの追加条件を満たさなくてもフィネスのPerfectはCOMBOに数えます。スクリーンリーダーへのCOMBO通知は5・10・20・50回だけです。柔らかいマレット音は回数とともに上がり、12回で音程が上限になります（約195 ms、ミノの合図と重ねて再生）。効果音・全体音量・吹き出しの設定を反映し、動きを減らす設定では静かに表示します。フォルト・ミス、リトライ、練習条件の変更、再スタート、別画面への移動でCOMBOはリセットされ、一時停止中は保たれます。COMBO自体は保存しません。
 
@@ -45,7 +58,11 @@ npm run test:browser
 
 実装は `src/engine.js`（DOMなし）、`src/audio.js`（合成音とキュー選択）、`src/mascot.js`（SVGと教材）、`src/app.js`（画面・入力・描画）、`src/style.css` に分離しています。ビルド時にマスコットの `MASCOT_CSS` をCSSへ組み込みます。内部座標はyが上向き、40行で、画面には20行と出現位置の2行を表示します。CanvasはDPR対応で、描画と入力には同じ `performance.now()` 時計を使います。OSキーリピートを無視し、一時停止やフォーカス喪失時にキーを解放します。
 
-ソルバーは回転・タップ・DASを同じ1入力として幅優先探索します。着地セルの一致で対称形を同一視し、同点なら回転を先に選びます。空フィールドの配置数はI=17、O=9、T/J/L=34、S/Z=17。180°有効時の空フィールド全配置では最大3入力です（I/Oは最大2）。180°無効時はT/J/Lで最大4入力になり、両設定を独立参照テストで検証します。スタック上の意図的な下降を必要とする潜り込みはソルバーの探索対象外です。全表は `tests/finesse-table.txt` を参照してください。
+フィネス用のソルバーは回転・タップ・DASを同じ1入力として幅優先探索します。着地セルの一致で対称形を同一視し、同点なら回転を先に選びます。空フィールドの配置数はI=17、O=9、T/J/L=34、S/Z=17。180°有効時の空フィールド全配置では最大3入力です（I/Oは最大2）。180°無効時はT/J/Lで最大4入力になり、両設定を独立参照テストで検証します。スタック上の意図的な下降を必要とする潜り込みはソルバーの探索対象外です。全表は `tests/finesse-table.txt` を参照してください。
+
+`tests/engine.spin.test.js` は全14問について、エンジンのSRSで全到達状態をBFS探索します。下降・横移動・ハードドロップを含め、180度と出現時落下それぞれオン／オフの4条件（計56グラフ）で、回転による到達が存在し、最後が回転以外の到達が存在しないことを検証します。ライン数・TSTの5番目のキック・実入力での成功・成功移動の履歴・進捗の正規化も検証します。ヒント用BFSはフィネスの探索とは別に下降を含みます。
+
+`npm run test:browser` は `tests/spin.browser.check.js` も実行します。全14問を通常のキーイベントで解き、再挑戦・次へ・ヒント・変更済みキー・ハンドリング・設定時の一時停止・再読込後の14問達成・既存成績の保持・外部通信なしを検査します。1920×1080、1280×720、800×600で一覧／練習／ヒント／操作設定の表示を確認し、`screens/spin-{1920,1280,800}.png` を保存します。単独実行は `node tests/spin.browser.check.js` です。
 
 `tests/browser.check.js` はplaywright-coreと `/usr/bin/google-chrome`（headless、`--no-sandbox`）を使用します。file://で起動し、コンソールエラー・ページ例外・外部通信を検出します。レッスン実演と練習、通常キー入力、Perfect/フォルト/ミス、DAS/ARR、実キー長押しによるARE・IRSの1入力判定、設定保存とJSON、キー競合のキーボード決定、一時停止、フィルター、短いスプリントと保存禁止時の動作を確認します。1280×720のタイトル・全12レッスン・ドリル・設定で文書全体のはみ出しを検査します。各レッスンの全実演とチャレンジで前後ボタンの矩形を測り、説明パネルをスクロールしてもボタン・盤面・マスコットが画面内に残ることを確認します。ドリルの各操作ボタン、設定の保存して戻るボタン、盤面下の列番号・説明の切れと文字サイズも確認します。ドリルは1920×1080での拡大も検査します。`screens/` にタイトル（title/menu）、通常レッスン、IRSレッスン、Tミノの最短表、固定前の目標、1080pドリル、成功、5 COMBO、フォルト＋ヒント、設定、スプリント結果の12枚を保存します。外見テストはフリーモードの `free.png`（1280×720）と `free-small.png`（800×600）も保存します。title.pngとsettings.pngは保存テストとは別の新しいブラウザコンテキストで撮影し、CWの↑/X、ホールドの左Shift/C、DAS 110、ARE 80を確認します。トーストの自動消去と画面切替時の消去も検査します。ビルドのURL検査はSVG名前空間以外を拒否します。Chromeが起動できないサンドボックスでは、起動エラーを表示して失敗します。
 
@@ -67,6 +84,6 @@ Idea: pre-show a target shadow and place the piece there with the optimal input 
 
 ## English
 
-An offline, Japanese tetromino practice game series with original mascot ミルフィ. The current mode, フィネス編, teaches minimum-input placement. Run `npm run build`, then open `dist/mirutet.html` directly. Everything is inlined; no server or network is required. `npm test` runs the independent engine/mascot checks. `npm run test:browser` runs system Chrome through playwright-core and saves screenshots in `screens/`. The current mode includes engine-driven lessons, filtered drills, sprint, handling/key settings, persistent statistics, and synthesized audio with graceful fallbacks.
+An offline, Japanese tetromino practice game series with original mascot ミルフィ. フィネス編 teaches minimum-input placement; フリーモード offers endless play; 回転入れ編 offers 14 SRS insertion drills in four graded sets, without lessons. Success requires exact target cells and a rotation as the last successful move. Spin progress is persisted separately within the existing profile. Run `npm run build`, then open `dist/mirutet.html` directly. Everything is inlined; no server or network is required. `npm test` runs the independent engine/mascot checks. `npm run test:browser` runs system Chrome through playwright-core and saves screenshots in `screens/`. The current mode includes engine-driven lessons, filtered drills, sprint, handling/key settings, persistent statistics, and synthesized audio with graceful fallbacks.
 
 Consecutive Perfects show COMBO from two placements, with milestone visuals and screen-reader announcements at 5/10/20/50 and a quiet rising mallet cue. Milestone dialogue appears in drills and sprints; lesson feedback takes priority in challenges, while finesse-Perfect still counts even without required IRS. Mistakes, retries, practice-condition changes and leaving play reset it. The browser check saves a deterministic five-COMBO view to `screens/combo.png`.
