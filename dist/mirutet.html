@@ -3316,6 +3316,40 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   const iSpin = spinDrill('i-spin-right', 'Iスピン・右', 'I',
     ['.......###', '####...###', '######.###', '###....###'], { x: 3, y: -2, rot: 0 }, 1,
     '縦のIを細い通路へ。床まで下げて回すと、I専用のキックで横穴に入りますっ。');
+  // BL-140: distinct entrances and kick directions; mirrors train both hands.
+  const tFloor = spinDrill('t-mini-floor-left', 'Tミニ・床のくぼみ・左', 'T',
+    ["###..#####","###...####"], { x: 3, y: -1, rot: 0 }, 1,
+    '縦向きで床まで下げ、斜め下へのキックで上向きのTを収めましょう。');
+  const sPocket = spinDrill('s-pocket', 'S・縦のポケット', 'S',
+    ["###...####","###..#####","####..####","#####.####"], { x: 3, y: 0, rot: 1 }, 2,
+    '横向きで入口に乗せ、2段下へのキックで縦のくぼみに入れましょう。');
+  const sTriple = spinDrill('s-triple', 'S・細い縦穴3ライン', 'S',
+    ["####..####","####.#####","####..####","#####.####"], { x: 3, y: 0, rot: 1 }, 3,
+    '1マスの首を通る形です。入口で横向きにしてから回すのがポイント。');
+  const sRoof = spinDrill('s-roof', 'S・ひさしの下', 'S',
+    ["###..#####","####..####","###..#####"], { x: 3, y: 0, rot: 2 }, 2,
+    '入口のひさしが縦の直降りを防ぎます。上で寝かせてから向きを作りましょう。');
+  const lRoof = spinDrill('l-roof', 'L・広間の奥', 'L',
+    ["###..#####","###...####","###...####"], { x: 3, y: -1, rot: 0 }, 1,
+    '縦向きで広間へ。床の斜めキックで奥の横穴に収めましょう。');
+  const lShelf = spinDrill('l-shelf', 'L・足場への横キック', 'L',
+    ["####..####","###...####","#####.####"], { x: 3, y: 0, rot: 0 }, 1,
+    '穴の底まで下げてから横キック。1段上の足場に横向きで乗せましょう。');
+  const lInverted = spinDrill('l-inverted-narrow', 'L・逆さ入れ・細い入口', 'L',
+    ["#####.####","###...####","###.######"], { x: 3, y: 0, rot: 2 }, 2,
+    '細い入口に縦向きで下げ、足が下を向く形へ回しましょう。');
+  const lOpposite = spinDrill('l-inverted-wide', 'L・逆さ入れ・反対の入口', 'L',
+    ["###..#####","###...####","###.######"], { x: 3, y: 0, rot: 2 }, 2,
+    '今度は反対側から入ります。出っ張りの向きを合わせて斜め下へ。');
+  const iShallow = spinDrill('i-shallow-right', 'I・浅い横穴・右', 'I',
+    ["######.###","######.###","###....###"], { x: 3, y: -2, rot: 0 }, 1,
+    '浅い入口で縦向きを作り、I専用の斜めキックを使いましょう。');
+  const iShelf = spinDrill('i-shelf-left', 'I・中段の横穴・左', 'I',
+    ["###.######","###.######","###....###","###.######","###.######"], { x: 3, y: 0, rot: 0 }, 1,
+    '縦穴の底から横キックで中段へ。最後に下げず、その位置で固定しましょう。');
+  const iLift = spinDrill('i-lift-left', 'I・せり上がり・左', 'I',
+    ['...#######', '...#######', '..#....###', '..#.######', '.#..######', '....######'], { x: 3, y: 1, rot: 0 }, 0,
+    '横の通路から底へ。足場で回転を重ね、上向きキックで横穴へせり上がりましょう。ラインを消さずに収める練習です。');
   const SPIN_SETS = deepFreeze([
     { id: 'basic-t', title: '基本のTスピン', grade: 'STEP 1', drills: [tSingle,
       mirrorSpin(tSingle, 't-single-right', 'Tスピンシングル・右'), tDouble,
@@ -3326,7 +3360,22 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     { id: 'other-spins', title: 'S・Z・L・Jの回転入れ', grade: 'STEP 3', drills: [sSpin,
       mirrorSpin(sSpin, 'z-spin', 'Zスピン', 'Z'), lSpin, mirrorSpin(lSpin, 'j-spin', 'Jスピン', 'J')] },
     { id: 'i-spins', title: 'Iミノの回転入れ', grade: 'STEP 4', drills: [iSpin,
-      mirrorSpin(iSpin, 'i-spin-left', 'Iスピン・左')] }
+      mirrorSpin(iSpin, 'i-spin-left', 'Iスピン・左')] },
+    { id: 'floor-t', title: '床で仕上げるTミニ', grade: 'STEP 5', drills: [tFloor,
+      mirrorSpin(tFloor, 't-mini-floor-right', 'Tミニ・床のくぼみ・右')] },
+    { id: 'sz-pockets', title: 'S・Zの縦穴とひさし', grade: 'STEP 6', drills: [sPocket,
+      mirrorSpin(sPocket, 'z-pocket', 'Z・縦のポケット', 'Z'), sTriple,
+      mirrorSpin(sTriple, 'z-triple', 'Z・細い縦穴3ライン', 'Z'), sRoof,
+      mirrorSpin(sRoof, 'z-roof', 'Z・ひさしの下', 'Z')] },
+    { id: 'jl-pockets', title: 'L・Jの足場と逆さ入れ', grade: 'STEP 7', drills: [lRoof,
+      mirrorSpin(lRoof, 'j-roof', 'J・広間の奥', 'J'), lShelf,
+      mirrorSpin(lShelf, 'j-shelf', 'J・足場への横キック', 'J'), lInverted,
+      mirrorSpin(lInverted, 'j-inverted-narrow', 'J・逆さ入れ・細い入口', 'J'), lOpposite,
+      mirrorSpin(lOpposite, 'j-inverted-wide', 'J・逆さ入れ・反対の入口', 'J')] },
+    { id: 'i-kicks', title: 'Iの横キックとせり上がり', grade: 'STEP 8', drills: [iShallow,
+      mirrorSpin(iShallow, 'i-shallow-left', 'I・浅い横穴・左'), iShelf,
+      mirrorSpin(iShelf, 'i-shelf-right', 'I・中段の横穴・右'), iLift,
+      mirrorSpin(iLift, 'i-lift-right', 'I・せり上がり・右')] }
   ]);
   const SPIN_DRILLS = Object.freeze(SPIN_SETS.flatMap(set => set.drills));
   function spinBoard(drill) {
@@ -3375,7 +3424,9 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       this.index = Math.max(0, this.set.drills.findIndex(d => d.id === options.drillId));
       this.stats = new Stats();
       this.totalStats = options.totalStats instanceof Stats ? options.totalStats : new Stats(options.totalStats);
-      this.completed = 0; this.serial = 0; this.awaitingNext = false; this.cueDrawPending = false;
+      this.completed = 0; this.serial = 0; this.cueDrawPending = false;
+      this.completedDrills = new Set(normalizeSpinProgress({ completed: options.completedDrills }).completed);
+      this.allClearShown = false;
       this.handler = new InputHandler({ clock: this.clock, time: options.time, settings: this.settings,
         autoNext: false, holdEnabled: false,
         onInput: () => this._touch(this.handler.time), onAction: (action, t) => this._touch(t),
@@ -3395,14 +3446,16 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       });
     }
     get drill() { return this.set.drills[this.index]; }
-    _schedule(t, queueDrawn = true) {
+    _schedule(t, queueDrawn = true, automatic = false) {
       this.cueDrawPending = queueDrawn;
       const drill = this.drill;
-      this.awaitingNext = false; this.lastResult = null;
-      this.handler.releaseAll(t); this.handler.board = spinBoard(drill);
+      // Like finesse, automatic rounds retain feedback and held inputs (IRS,
+      // DAS). Manual retry/next clears them. ARE is the only spawn delay.
+      if (!automatic) { this.lastResult = null; this.handler.releaseAll(t); }
+      this.handler.board = spinBoard(drill);
       this.round = { type: drill.type, drillId: drill.id, target: { type: drill.type,
         cells: drill.cells, state: drill.target, key: cellsKey(drill.cells) }, serial: ++this.serial };
-      this._emit('target', { round: this.round });
+      this._emit('target', { t, round: this.round, automatic });
       this.handler.scheduleSpawn(drill.type, t, this.settings.are);
     }
     start(t = this.clock()) {
@@ -3415,9 +3468,25 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       result.lines = this.handler.board.clone().clearLines();
       result.combo = this.combo.next(result);
       this.stats.record(result); this.totalStats.record(result);
-      if (result.status === 'perfect') this.completed++;
-      this.lastResult = result; this.awaitingNext = true;
+      if (result.status === 'perfect') {
+        this.completed++; this.completedDrills.add(this.drill.id);
+        if (!this.allClearShown && this.completedDrills.size === SPIN_DRILLS.length) {
+          result.allClear = true; this.allClearShown = true;
+        }
+      }
+      this.lastResult = result;
       this._emit('result', { result });
+      if (result.status === 'perfect') this._nextDrill();
+      this._schedule(lock.t, result.status === 'perfect', true);
+    }
+    _followingDrill(drill) {
+      return SPIN_DRILLS[SPIN_DRILLS.indexOf(drill) + 1] ||
+        SPIN_DRILLS.find(d => !this.completedDrills.has(d.id)) || SPIN_DRILLS[0];
+    }
+    _nextDrill() {
+      const next = this._followingDrill(this.drill);
+      this.set = SPIN_SETS.find(s => s.drills.includes(next));
+      this.index = this.set.drills.indexOf(next);
     }
     retry(t = this.clock()) {
       this.update(t);
@@ -3427,18 +3496,18 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     skip(t = this.clock()) {
       this.update(t);
       if (!this.running || this.pausedAt !== null) return false;
-      if (!this.awaitingNext || this.lastResult?.status !== 'perfect') {
-        this.stats.skips++; this.totalStats.skips++; this.combo.reset();
-      }
-      this.index = (this.index + 1) % this.set.drills.length; this._schedule(t); return true;
+      this.stats.skips++; this.totalStats.skips++; this.combo.reset();
+      this._nextDrill(); this._schedule(t); return true;
     }
     setSettings(patch, t = this.clock()) {
       this.update(t); this.settings = normalizeSettings(patch, this.settings);
       this.handler.setSettings(patch, t); return this;
     }
     nextQueue(count = 5) {
-      return Array.from({ length: Math.min(count, this.set.drills.length - 1) }, (_, n) =>
-        this.set.drills[(this.index + n + 1) % this.set.drills.length].type);
+      let drill = this.drill;
+      return Array.from({ length: Math.min(count, SPIN_DRILLS.length - 1) }, () => {
+        drill = this._followingDrill(drill); return drill.type;
+      });
     }
     snapshot(t = this.clock()) {
       const elapsed = this.elapsed(t);
@@ -4723,19 +4792,19 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   }
   function spinInfoHTML() {
     const s = session, done = s.set.drills.filter(d => spinProgress.completed.includes(d.id)).length;
-    return `<section class="panel practice-options"><div class="eyebrow">${s.set.grade} · ${s.index + 1} / ${s.set.drills.length}</div><h3>${escape(s.drill.title)}</h3><p class="tiny">${escape(s.set.title)} · ${done}問達成</p><p class="tiny spin-rule">最後に回転して、破線の4マスへ固定。<br>回転後の落下・横移動に注意ですっ。</p><button class="small" data-act="spins">問題一覧へ</button></section>`;
+    return `<section class="panel practice-options"><div class="eyebrow">${s.set.grade} · ${s.index + 1} / ${s.set.drills.length}</div><h3>${escape(s.drill.title)}</h3><p class="tiny">${escape(s.set.title)} · ${done}問達成</p><p class="tiny spin-rule">最後に回転して、破線の4マスへ固定。<br>回転後の落下・横移動に注意ですっ。</p><p class="tiny">成功すると次の問題へ。<br>ミスは同じ問題ですぐ再挑戦。</p><button class="small" data-act="spins">問題一覧へ</button></section>`;
   }
   function spinStatsHTML() {
     return `<section class="panel stats-panel"><div class="panel-label">SESSION / この練習</div><div class="stats-main"><div class="stat"><label>回転入れ成功</label><strong class="accent" id="completed">0</strong></div><div class="stat"><label>成功率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>試行 <b id="spin-attempts">0</b></span><span>ミス <b id="misses">0</b></span><span>連続 <b id="streak">0</b></span></div></section>`;
   }
   function spinPlayHTML() {
-    return `<main class="play-page spin-play"><div class="row spread play-topline"><h1 class="play-title">回転入れ編<span class="tag">SPIN PRACTICE</span></h1><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div><div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div id="spin-info">${spinInfoHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">今回のミノ</div>${mini(session.drill.type)}</div><p class="hold-note">この問題は<br>ホールドなし</p><div class="key-help">${['left','right','cw','ccw','rotate180'].map(a => `<kbd data-live-key="${a}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><p class="hold-note">${escape(friendly(bindings.softDrop[0]))} で下げる<br>${escape(friendly(bindings.hardDrop[0]))} で固定</p>${comboHTML()}</aside></section><aside class="right-stack"><div class="play-tools">${handlingPanelHTML()}<div id="play-stats" class="play-stats" ${handlingOpen ? 'hidden' : ''}>${spinStatsHTML()}</div></div><section id="result-panel" class="panel result-panel" aria-live="polite"></section><div class="play-buttons"><button data-act="retry">↻ 同じ問題 ${escape(friendly(bindings.retry[0]))}</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の問題 ${escape(friendly(bindings.skip[0]))} →</button><button data-act="spins">問題一覧</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
+    return `<main class="play-page spin-play"><div class="row spread play-topline"><h1 class="play-title">回転入れ編<span class="tag">SPIN PRACTICE</span></h1><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div><div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div id="spin-info">${spinInfoHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">今回のミノ</div><div id="spin-piece">${mini(session.drill.type)}</div></div><p class="hold-note">この問題は<br>ホールドなし</p><div class="key-help">${['left','right','cw','ccw','rotate180'].map(a => `<kbd data-live-key="${a}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><p class="hold-note">${escape(friendly(bindings.softDrop[0]))} で下げる<br>${escape(friendly(bindings.hardDrop[0]))} で固定</p>${comboHTML()}</aside></section><aside class="right-stack"><div class="play-tools">${handlingPanelHTML()}<div id="play-stats" class="play-stats" ${handlingOpen ? 'hidden' : ''}>${spinStatsHTML()}</div></div><section id="result-panel" class="panel result-panel" aria-live="polite"></section><div class="play-buttons"><button data-act="retry">↻ 同じ問題 ${escape(friendly(bindings.retry[0]))}</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の問題 ${escape(friendly(bindings.skip[0]))} →</button><button data-act="spins">問題一覧</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
   }
   function startSpin(id = spinProgress.current) {
     resetCombo(); audio.stopCues(); releaseAll(); sessionEventQueue = []; demo = null;
     tryMode = false; tryDone = false; menuMode = 'spin'; hint = false; lastResult = null;
     particles = []; irsUntil = 0; irsCount = 0;
-    session = newSession({ drillId: id, totalStats: spinStats }, E.SpinSession);
+    session = newSession({ drillId: id, completedDrills: spinProgress.completed, totalStats: spinStats }, E.SpinSession);
     spinProgress.current = session.drill.id; save();
     setCoach('くぼみの手前まで下げて、最後にくるりですっ♪');
     screen = 'play'; session.start(now()); window.scrollTo(0, 0); render(); processEvents();
@@ -4951,7 +5020,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     if (isSpin()) {
       const r = lastResult;
       panel.className = 'panel result-panel' + (r ? ' ' + r.status : '');
-      panel.innerHTML = r ? `<div class="result-head"><strong>${r.status === 'perfect' ? '✔ 回転入れ成功！' : r.reason === 'rotation' ? '◇ 最後に回転してみよう' : '◇ 置き場所を確認しよう'}</strong></div><p class="tiny">${r.status === 'perfect' ? `${r.lines}ライン！花まるですっ♪ 次の問題へどうぞ。` : r.reason === 'rotation' ? '目標の場所はぴったり。最後の移動を回転にして、もう一度ですっ。' : '破線の4マスへ、下げてから回してみましょうね。'}<br>同じ問題で復習もできます。</p><div id="hint-route" class="hint-route" hidden></div>` : '<div class="result-head"><strong>くぼみへ、くるり</strong></div><p class="tiny">破線の目標へ回して入れ、固定しましょう。<br>入力回数は自由ですっ。</p><div id="hint-route" class="hint-route" hidden></div>';
+      panel.innerHTML = r ? `<div class="result-head"><strong>${r.status === 'perfect' ? '✔ 回転入れ成功！' : r.reason === 'rotation' ? '◇ 最後に回転してみよう' : '◇ 置き場所を確認しよう'}</strong></div><p class="tiny">${r.status === 'perfect' ? `${r.lines}ライン！花まるですっ♪ 次の問題へ進みます。` : r.reason === 'rotation' ? '目標の場所はぴったり。最後の移動を回転にして、もう一度ですっ。' : '破線の4マスへ、下げてから回してみましょうね。'}<br>${r.status === 'perfect' ? '同じ問題は一覧から復習できます。' : '同じ問題をもう一度どうぞ。'}</p>${r.allClear ? `<p class="tiny">✧ 全${E.SPIN_DRILLS.length}問達成ですっ！花まるですっ♪</p>` : ''}<div id="hint-route" class="hint-route" hidden></div>` : '<div class="result-head"><strong>くぼみへ、くるり</strong></div><p class="tiny">破線の目標へ回して入れ、固定しましょう。<br>入力回数は自由ですっ。</p><div id="hint-route" class="hint-route" hidden></div>';
       updateHint(); return;
     }
     if (isFree()) {
@@ -4992,8 +5061,17 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       if (trace.length > 150) trace.shift();
       if (event.kind === 'target') {
         if (isSpin()) {
-          lastResult = null; hint = false; spinProgress.current = source.drill.id;
-          setCoach('くぼみの手前まで下げて、最後にくるりですっ♪'); save(); render();
+          spinProgress.current = event.round.drillId;
+          if (event.automatic) {
+            // Preserve judgement, coach reaction and focus through the next
+            // round, just as finesse does. Hints follow the current target.
+            $('#spin-info').innerHTML = spinInfoHTML();
+            $('#spin-piece').innerHTML = mini(source.drill.type); drawMinis();
+          } else {
+            lastResult = null; hint = false;
+            setCoach('くぼみの手前まで下げて、最後にくるりですっ♪'); render();
+          }
+          save();
         }
         updateHint(); updateCombo();
       }

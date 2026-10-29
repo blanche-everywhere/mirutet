@@ -1120,6 +1120,40 @@
   const iSpin = spinDrill('i-spin-right', 'Iスピン・右', 'I',
     ['.......###', '####...###', '######.###', '###....###'], { x: 3, y: -2, rot: 0 }, 1,
     '縦のIを細い通路へ。床まで下げて回すと、I専用のキックで横穴に入りますっ。');
+  // BL-140: distinct entrances and kick directions; mirrors train both hands.
+  const tFloor = spinDrill('t-mini-floor-left', 'Tミニ・床のくぼみ・左', 'T',
+    ["###..#####","###...####"], { x: 3, y: -1, rot: 0 }, 1,
+    '縦向きで床まで下げ、斜め下へのキックで上向きのTを収めましょう。');
+  const sPocket = spinDrill('s-pocket', 'S・縦のポケット', 'S',
+    ["###...####","###..#####","####..####","#####.####"], { x: 3, y: 0, rot: 1 }, 2,
+    '横向きで入口に乗せ、2段下へのキックで縦のくぼみに入れましょう。');
+  const sTriple = spinDrill('s-triple', 'S・細い縦穴3ライン', 'S',
+    ["####..####","####.#####","####..####","#####.####"], { x: 3, y: 0, rot: 1 }, 3,
+    '1マスの首を通る形です。入口で横向きにしてから回すのがポイント。');
+  const sRoof = spinDrill('s-roof', 'S・ひさしの下', 'S',
+    ["###..#####","####..####","###..#####"], { x: 3, y: 0, rot: 2 }, 2,
+    '入口のひさしが縦の直降りを防ぎます。上で寝かせてから向きを作りましょう。');
+  const lRoof = spinDrill('l-roof', 'L・広間の奥', 'L',
+    ["###..#####","###...####","###...####"], { x: 3, y: -1, rot: 0 }, 1,
+    '縦向きで広間へ。床の斜めキックで奥の横穴に収めましょう。');
+  const lShelf = spinDrill('l-shelf', 'L・足場への横キック', 'L',
+    ["####..####","###...####","#####.####"], { x: 3, y: 0, rot: 0 }, 1,
+    '穴の底まで下げてから横キック。1段上の足場に横向きで乗せましょう。');
+  const lInverted = spinDrill('l-inverted-narrow', 'L・逆さ入れ・細い入口', 'L',
+    ["#####.####","###...####","###.######"], { x: 3, y: 0, rot: 2 }, 2,
+    '細い入口に縦向きで下げ、足が下を向く形へ回しましょう。');
+  const lOpposite = spinDrill('l-inverted-wide', 'L・逆さ入れ・反対の入口', 'L',
+    ["###..#####","###...####","###.######"], { x: 3, y: 0, rot: 2 }, 2,
+    '今度は反対側から入ります。出っ張りの向きを合わせて斜め下へ。');
+  const iShallow = spinDrill('i-shallow-right', 'I・浅い横穴・右', 'I',
+    ["######.###","######.###","###....###"], { x: 3, y: -2, rot: 0 }, 1,
+    '浅い入口で縦向きを作り、I専用の斜めキックを使いましょう。');
+  const iShelf = spinDrill('i-shelf-left', 'I・中段の横穴・左', 'I',
+    ["###.######","###.######","###....###","###.######","###.######"], { x: 3, y: 0, rot: 0 }, 1,
+    '縦穴の底から横キックで中段へ。最後に下げず、その位置で固定しましょう。');
+  const iLift = spinDrill('i-lift-left', 'I・せり上がり・左', 'I',
+    ['...#######', '...#######', '..#....###', '..#.######', '.#..######', '....######'], { x: 3, y: 1, rot: 0 }, 0,
+    '横の通路から底へ。足場で回転を重ね、上向きキックで横穴へせり上がりましょう。ラインを消さずに収める練習です。');
   const SPIN_SETS = deepFreeze([
     { id: 'basic-t', title: '基本のTスピン', grade: 'STEP 1', drills: [tSingle,
       mirrorSpin(tSingle, 't-single-right', 'Tスピンシングル・右'), tDouble,
@@ -1130,7 +1164,22 @@
     { id: 'other-spins', title: 'S・Z・L・Jの回転入れ', grade: 'STEP 3', drills: [sSpin,
       mirrorSpin(sSpin, 'z-spin', 'Zスピン', 'Z'), lSpin, mirrorSpin(lSpin, 'j-spin', 'Jスピン', 'J')] },
     { id: 'i-spins', title: 'Iミノの回転入れ', grade: 'STEP 4', drills: [iSpin,
-      mirrorSpin(iSpin, 'i-spin-left', 'Iスピン・左')] }
+      mirrorSpin(iSpin, 'i-spin-left', 'Iスピン・左')] },
+    { id: 'floor-t', title: '床で仕上げるTミニ', grade: 'STEP 5', drills: [tFloor,
+      mirrorSpin(tFloor, 't-mini-floor-right', 'Tミニ・床のくぼみ・右')] },
+    { id: 'sz-pockets', title: 'S・Zの縦穴とひさし', grade: 'STEP 6', drills: [sPocket,
+      mirrorSpin(sPocket, 'z-pocket', 'Z・縦のポケット', 'Z'), sTriple,
+      mirrorSpin(sTriple, 'z-triple', 'Z・細い縦穴3ライン', 'Z'), sRoof,
+      mirrorSpin(sRoof, 'z-roof', 'Z・ひさしの下', 'Z')] },
+    { id: 'jl-pockets', title: 'L・Jの足場と逆さ入れ', grade: 'STEP 7', drills: [lRoof,
+      mirrorSpin(lRoof, 'j-roof', 'J・広間の奥', 'J'), lShelf,
+      mirrorSpin(lShelf, 'j-shelf', 'J・足場への横キック', 'J'), lInverted,
+      mirrorSpin(lInverted, 'j-inverted-narrow', 'J・逆さ入れ・細い入口', 'J'), lOpposite,
+      mirrorSpin(lOpposite, 'j-inverted-wide', 'J・逆さ入れ・反対の入口', 'J')] },
+    { id: 'i-kicks', title: 'Iの横キックとせり上がり', grade: 'STEP 8', drills: [iShallow,
+      mirrorSpin(iShallow, 'i-shallow-left', 'I・浅い横穴・左'), iShelf,
+      mirrorSpin(iShelf, 'i-shelf-right', 'I・中段の横穴・右'), iLift,
+      mirrorSpin(iLift, 'i-lift-right', 'I・せり上がり・右')] }
   ]);
   const SPIN_DRILLS = Object.freeze(SPIN_SETS.flatMap(set => set.drills));
   function spinBoard(drill) {
@@ -1179,7 +1228,9 @@
       this.index = Math.max(0, this.set.drills.findIndex(d => d.id === options.drillId));
       this.stats = new Stats();
       this.totalStats = options.totalStats instanceof Stats ? options.totalStats : new Stats(options.totalStats);
-      this.completed = 0; this.serial = 0; this.awaitingNext = false; this.cueDrawPending = false;
+      this.completed = 0; this.serial = 0; this.cueDrawPending = false;
+      this.completedDrills = new Set(normalizeSpinProgress({ completed: options.completedDrills }).completed);
+      this.allClearShown = false;
       this.handler = new InputHandler({ clock: this.clock, time: options.time, settings: this.settings,
         autoNext: false, holdEnabled: false,
         onInput: () => this._touch(this.handler.time), onAction: (action, t) => this._touch(t),
@@ -1199,14 +1250,16 @@
       });
     }
     get drill() { return this.set.drills[this.index]; }
-    _schedule(t, queueDrawn = true) {
+    _schedule(t, queueDrawn = true, automatic = false) {
       this.cueDrawPending = queueDrawn;
       const drill = this.drill;
-      this.awaitingNext = false; this.lastResult = null;
-      this.handler.releaseAll(t); this.handler.board = spinBoard(drill);
+      // Like finesse, automatic rounds retain feedback and held inputs (IRS,
+      // DAS). Manual retry/next clears them. ARE is the only spawn delay.
+      if (!automatic) { this.lastResult = null; this.handler.releaseAll(t); }
+      this.handler.board = spinBoard(drill);
       this.round = { type: drill.type, drillId: drill.id, target: { type: drill.type,
         cells: drill.cells, state: drill.target, key: cellsKey(drill.cells) }, serial: ++this.serial };
-      this._emit('target', { round: this.round });
+      this._emit('target', { t, round: this.round, automatic });
       this.handler.scheduleSpawn(drill.type, t, this.settings.are);
     }
     start(t = this.clock()) {
@@ -1219,9 +1272,25 @@
       result.lines = this.handler.board.clone().clearLines();
       result.combo = this.combo.next(result);
       this.stats.record(result); this.totalStats.record(result);
-      if (result.status === 'perfect') this.completed++;
-      this.lastResult = result; this.awaitingNext = true;
+      if (result.status === 'perfect') {
+        this.completed++; this.completedDrills.add(this.drill.id);
+        if (!this.allClearShown && this.completedDrills.size === SPIN_DRILLS.length) {
+          result.allClear = true; this.allClearShown = true;
+        }
+      }
+      this.lastResult = result;
       this._emit('result', { result });
+      if (result.status === 'perfect') this._nextDrill();
+      this._schedule(lock.t, result.status === 'perfect', true);
+    }
+    _followingDrill(drill) {
+      return SPIN_DRILLS[SPIN_DRILLS.indexOf(drill) + 1] ||
+        SPIN_DRILLS.find(d => !this.completedDrills.has(d.id)) || SPIN_DRILLS[0];
+    }
+    _nextDrill() {
+      const next = this._followingDrill(this.drill);
+      this.set = SPIN_SETS.find(s => s.drills.includes(next));
+      this.index = this.set.drills.indexOf(next);
     }
     retry(t = this.clock()) {
       this.update(t);
@@ -1231,18 +1300,18 @@
     skip(t = this.clock()) {
       this.update(t);
       if (!this.running || this.pausedAt !== null) return false;
-      if (!this.awaitingNext || this.lastResult?.status !== 'perfect') {
-        this.stats.skips++; this.totalStats.skips++; this.combo.reset();
-      }
-      this.index = (this.index + 1) % this.set.drills.length; this._schedule(t); return true;
+      this.stats.skips++; this.totalStats.skips++; this.combo.reset();
+      this._nextDrill(); this._schedule(t); return true;
     }
     setSettings(patch, t = this.clock()) {
       this.update(t); this.settings = normalizeSettings(patch, this.settings);
       this.handler.setSettings(patch, t); return this;
     }
     nextQueue(count = 5) {
-      return Array.from({ length: Math.min(count, this.set.drills.length - 1) }, (_, n) =>
-        this.set.drills[(this.index + n + 1) % this.set.drills.length].type);
+      let drill = this.drill;
+      return Array.from({ length: Math.min(count, SPIN_DRILLS.length - 1) }, () => {
+        drill = this._followingDrill(drill); return drill.type;
+      });
     }
     snapshot(t = this.clock()) {
       const elapsed = this.elapsed(t);

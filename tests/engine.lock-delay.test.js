@@ -118,5 +118,7 @@ for (const d of E.SPIN_DRILLS) test(`spin ${d.id}: auto-lock preserves the final
   s.update(deadline);
   assert.equal(s.lastResult.status, 'perfect'); assert.equal(s.lastResult.lastMove, 'rotation');
   assert.equal(s.lastResult.lines, d.lines); assert.equal(s.lastResult.used, used);
-  assert.equal(s.stats.perfect, 1); assert.equal(s.awaitingNext, true);
+  assert.equal(s.stats.perfect, 1);
+  assert.notEqual(s.drill.id, d.id, 'The same judged auto-lock also advances the drill');
+  assert.ok(s.handler.active, 'ARE 0 spawns the next drill immediately');
 });

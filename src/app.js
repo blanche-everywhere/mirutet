@@ -422,19 +422,19 @@
   }
   function spinInfoHTML() {
     const s = session, done = s.set.drills.filter(d => spinProgress.completed.includes(d.id)).length;
-    return `<section class="panel practice-options"><div class="eyebrow">${s.set.grade} · ${s.index + 1} / ${s.set.drills.length}</div><h3>${escape(s.drill.title)}</h3><p class="tiny">${escape(s.set.title)} · ${done}問達成</p><p class="tiny spin-rule">最後に回転して、破線の4マスへ固定。<br>回転後の落下・横移動に注意ですっ。</p><button class="small" data-act="spins">問題一覧へ</button></section>`;
+    return `<section class="panel practice-options"><div class="eyebrow">${s.set.grade} · ${s.index + 1} / ${s.set.drills.length}</div><h3>${escape(s.drill.title)}</h3><p class="tiny">${escape(s.set.title)} · ${done}問達成</p><p class="tiny spin-rule">最後に回転して、破線の4マスへ固定。<br>回転後の落下・横移動に注意ですっ。</p><p class="tiny">成功すると次の問題へ。<br>ミスは同じ問題ですぐ再挑戦。</p><button class="small" data-act="spins">問題一覧へ</button></section>`;
   }
   function spinStatsHTML() {
     return `<section class="panel stats-panel"><div class="panel-label">SESSION / この練習</div><div class="stats-main"><div class="stat"><label>回転入れ成功</label><strong class="accent" id="completed">0</strong></div><div class="stat"><label>成功率</label><strong id="accuracy">0</strong><small> %</small></div></div><div class="stats-strip"><span>試行 <b id="spin-attempts">0</b></span><span>ミス <b id="misses">0</b></span><span>連続 <b id="streak">0</b></span></div></section>`;
   }
   function spinPlayHTML() {
-    return `<main class="play-page spin-play"><div class="row spread play-topline"><h1 class="play-title">回転入れ編<span class="tag">SPIN PRACTICE</span></h1><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div><div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div id="spin-info">${spinInfoHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">今回のミノ</div>${mini(session.drill.type)}</div><p class="hold-note">この問題は<br>ホールドなし</p><div class="key-help">${['left','right','cw','ccw','rotate180'].map(a => `<kbd data-live-key="${a}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><p class="hold-note">${escape(friendly(bindings.softDrop[0]))} で下げる<br>${escape(friendly(bindings.hardDrop[0]))} で固定</p>${comboHTML()}</aside></section><aside class="right-stack"><div class="play-tools">${handlingPanelHTML()}<div id="play-stats" class="play-stats" ${handlingOpen ? 'hidden' : ''}>${spinStatsHTML()}</div></div><section id="result-panel" class="panel result-panel" aria-live="polite"></section><div class="play-buttons"><button data-act="retry">↻ 同じ問題 ${escape(friendly(bindings.retry[0]))}</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の問題 ${escape(friendly(bindings.skip[0]))} →</button><button data-act="spins">問題一覧</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
+    return `<main class="play-page spin-play"><div class="row spread play-topline"><h1 class="play-title">回転入れ編<span class="tag">SPIN PRACTICE</span></h1><button class="small" data-act="pause">一時停止 ${escape(friendly(bindings.pause[0]))}</button></div><div class="play-grid"><aside class="coach">${ui.bubbles ? speech(bubble, 'coach-speech') : ''}<div id="coach-mascot" class="mascot-wrap" data-expression="${expression}">${mascot(expression, 'coach')}</div><div id="spin-info">${spinInfoHTML()}</div></aside><section class="board-stage"><aside class="side-queue"><div class="queue-box"><div class="queue-title">今回のミノ</div><div id="spin-piece">${mini(session.drill.type)}</div></div><p class="hold-note">この問題は<br>ホールドなし</p><div class="key-help">${['left','right','cw','ccw','rotate180'].map(a => `<kbd data-live-key="${a}">${escape(friendly(bindings[a][0]))}</kbd>`).join('')}</div></aside><div class="board-column">${boardHTML()}<p class="board-note">破線：目標 · 半透明：着地の影</p></div><aside class="side-queue"><p class="hold-note">${escape(friendly(bindings.softDrop[0]))} で下げる<br>${escape(friendly(bindings.hardDrop[0]))} で固定</p>${comboHTML()}</aside></section><aside class="right-stack"><div class="play-tools">${handlingPanelHTML()}<div id="play-stats" class="play-stats" ${handlingOpen ? 'hidden' : ''}>${spinStatsHTML()}</div></div><section id="result-panel" class="panel result-panel" aria-live="polite"></section><div class="play-buttons"><button data-act="retry">↻ 同じ問題 ${escape(friendly(bindings.retry[0]))}</button><button data-act="hint">✧ ヒント ${escape(friendly(bindings.hint[0]))}</button><button data-act="skip">次の問題 ${escape(friendly(bindings.skip[0]))} →</button><button data-act="spins">問題一覧</button></div></aside></div><div class="play-footer" id="play-footer"></div></main>`;
   }
   function startSpin(id = spinProgress.current) {
     resetCombo(); audio.stopCues(); releaseAll(); sessionEventQueue = []; demo = null;
     tryMode = false; tryDone = false; menuMode = 'spin'; hint = false; lastResult = null;
     particles = []; irsUntil = 0; irsCount = 0;
-    session = newSession({ drillId: id, totalStats: spinStats }, E.SpinSession);
+    session = newSession({ drillId: id, completedDrills: spinProgress.completed, totalStats: spinStats }, E.SpinSession);
     spinProgress.current = session.drill.id; save();
     setCoach('くぼみの手前まで下げて、最後にくるりですっ♪');
     screen = 'play'; session.start(now()); window.scrollTo(0, 0); render(); processEvents();
@@ -650,7 +650,7 @@
     if (isSpin()) {
       const r = lastResult;
       panel.className = 'panel result-panel' + (r ? ' ' + r.status : '');
-      panel.innerHTML = r ? `<div class="result-head"><strong>${r.status === 'perfect' ? '✔ 回転入れ成功！' : r.reason === 'rotation' ? '◇ 最後に回転してみよう' : '◇ 置き場所を確認しよう'}</strong></div><p class="tiny">${r.status === 'perfect' ? `${r.lines}ライン！花まるですっ♪ 次の問題へどうぞ。` : r.reason === 'rotation' ? '目標の場所はぴったり。最後の移動を回転にして、もう一度ですっ。' : '破線の4マスへ、下げてから回してみましょうね。'}<br>同じ問題で復習もできます。</p><div id="hint-route" class="hint-route" hidden></div>` : '<div class="result-head"><strong>くぼみへ、くるり</strong></div><p class="tiny">破線の目標へ回して入れ、固定しましょう。<br>入力回数は自由ですっ。</p><div id="hint-route" class="hint-route" hidden></div>';
+      panel.innerHTML = r ? `<div class="result-head"><strong>${r.status === 'perfect' ? '✔ 回転入れ成功！' : r.reason === 'rotation' ? '◇ 最後に回転してみよう' : '◇ 置き場所を確認しよう'}</strong></div><p class="tiny">${r.status === 'perfect' ? `${r.lines}ライン！花まるですっ♪ 次の問題へ進みます。` : r.reason === 'rotation' ? '目標の場所はぴったり。最後の移動を回転にして、もう一度ですっ。' : '破線の4マスへ、下げてから回してみましょうね。'}<br>${r.status === 'perfect' ? '同じ問題は一覧から復習できます。' : '同じ問題をもう一度どうぞ。'}</p>${r.allClear ? `<p class="tiny">✧ 全${E.SPIN_DRILLS.length}問達成ですっ！花まるですっ♪</p>` : ''}<div id="hint-route" class="hint-route" hidden></div>` : '<div class="result-head"><strong>くぼみへ、くるり</strong></div><p class="tiny">破線の目標へ回して入れ、固定しましょう。<br>入力回数は自由ですっ。</p><div id="hint-route" class="hint-route" hidden></div>';
       updateHint(); return;
     }
     if (isFree()) {
@@ -691,8 +691,17 @@
       if (trace.length > 150) trace.shift();
       if (event.kind === 'target') {
         if (isSpin()) {
-          lastResult = null; hint = false; spinProgress.current = source.drill.id;
-          setCoach('くぼみの手前まで下げて、最後にくるりですっ♪'); save(); render();
+          spinProgress.current = event.round.drillId;
+          if (event.automatic) {
+            // Preserve judgement, coach reaction and focus through the next
+            // round, just as finesse does. Hints follow the current target.
+            $('#spin-info').innerHTML = spinInfoHTML();
+            $('#spin-piece').innerHTML = mini(source.drill.type); drawMinis();
+          } else {
+            lastResult = null; hint = false;
+            setCoach('くぼみの手前まで下げて、最後にくるりですっ♪'); render();
+          }
+          save();
         }
         updateHint(); updateCombo();
       }
