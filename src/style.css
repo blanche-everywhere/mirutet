@@ -1936,6 +1936,8 @@ body[data-screen=play],body[data-screen=tutorial] { min-width:800px; }
 .handling-toggle span { color:var(--purple); }
 #live-handling-controls { padding:0 0 8px; }
 .handling-stepper { display:grid; grid-template-columns:minmax(33px,1fr) 26px minmax(54px,70px) 26px; gap:3px; align-items:center; min-height:34px; border-top:1px solid #f0eaf5; font-size:13px; }
+.handling-stepper .checkline { margin:0; gap:3px; font-size:13px; white-space:nowrap; }
+.handling-stepper .checkline input { width:14px; height:14px; margin:0; }
 .handling-stepper>span { color:#887794; font-weight:600; }
 .handling-stepper output { text-align:center; white-space:nowrap; font-variant-numeric:tabular-nums; }
 .handling-stepper button { padding:0; width:26px; height:26px; border-radius:7px; color:#9278b3; }
@@ -1991,6 +1993,13 @@ body[data-screen=play],body[data-screen=tutorial] { min-width:800px; }
 .handling-stepper { padding:0; row-gap:0; grid-template-rows:26px 18px; }
 .handling-stepper .live-number { height:18px; padding:0 4px; font-size:12px; }
 .handling-stepper .live-range { height:14px; }
+
+@media(max-height:680px) {
+  .handling-stepper { grid-template-rows:24px 18px; }
+  .handling-stepper button { height:24px; }
+  .handling-toggle { padding:4px 0; }
+  #live-handling-controls { padding-bottom:4px; }
+}
 
 /* Spin drills share the practice viewport, controls and mascot. */
 .menu-mode { flex-wrap:wrap; }

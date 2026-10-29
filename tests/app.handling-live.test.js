@@ -74,6 +74,10 @@ function loadApp(profile = {}, blocked = false) {
     key(code, target = document.activeElement, down = true) { time++; return event(down ? 'keydown' : 'keyup', target, { code, repeat: false }); },
     tap(code, target = document.activeElement) { const e = this.key(code, target); this.key(code, target, false); return e; },
     advance(ms) { time += ms; frame(); },
+    toggleLock(checked) {
+      const input = new Element({ engineToggle: 'lockDelayOn' }); input.input = input.live = true; input.checked = checked;
+      event('change', input); return input;
+    },
     set(key, value) {
       const input = new Element({ setting: key }); input.input = true; input.value = String(value);
       event('input', input); event('change', input); return input;
@@ -89,13 +93,13 @@ for (const mode of ['free', 'drill', 'sprint', 'lesson']) test(`${mode}: handlin
   else app.click('drill');
   assert.match(app.app.innerHTML, /data-live-handling/);
   assert.match(app.app.innerHTML, /tabindex="-1" aria-expanded="false"/);
-  assert.equal((app.app.innerHTML.match(/data-handling-value=/g) || []).length, 6);
+  assert.equal((app.app.innerHTML.match(/data-handling-value=/g) || []).length, 7);
   const before = app.state();
   app.key('ArrowRight');
   const count = app.state().inputCount;
   const opened = app.click('toggle-handling'); assert.equal(opened.down.defaultPrevented, true);
   assert.equal(app.get('#live-handling-controls').hidden, false);
-  for (const [key, expected] of [['das',111], ['arr',1], ['sdf',41], ['dcd',1], ['are',1], ['gravity',.1]]) {
+  for (const [key, expected] of [['das',111], ['arr',1], ['sdf',41], ['dcd',1], ['are',1], ['gravity',.1], ['lockDelay',510]]) {
     app.adjust(key);
     assert.equal(app.state().settings[key], expected); assert.equal(app.saved().settings[key], expected);
     assert.equal(app.document.activeElement, app.get('#board'));
@@ -114,6 +118,26 @@ for (const mode of ['free', 'drill', 'sprint', 'lesson']) test(`${mode}: handlin
   assert.equal(app.tap('Space').defaultPrevented, true);
   assert.equal(app.state().settings.arr, arr);
   assert.ok(app.state().lastResult);
+});
+
+for (const mode of ['free', 'drill', 'sprint', 'spin', 'lesson']) test(`${mode}: shared live lock controls apply OFF/ON and duration changes immediately`, () => {
+  const app = loadApp({ settings: { are: 0, sdf: 41 } });
+  if (mode === 'free') app.click('free');
+  else if (mode === 'spin') app.click('spin-continue');
+  else if (mode === 'sprint') app.click('start-sprint', { length: '40' });
+  else if (mode === 'lesson') { app.click('tutorial'); app.click('try-it'); }
+  else app.click('drill');
+  app.click('toggle-handling');
+  assert.match(app.app.innerHTML, /data-engine-toggle="lockDelayOn"/);
+  assert.equal(app.get('[data-handling-value="lockDelay"]').textContent, '500 ms');
+  app.toggleLock(false); app.tap('ArrowDown');
+  const piece = app.state().active;
+  app.advance(2000); assert.deepEqual(app.state().active, piece); assert.equal(app.state().lastResult, null);
+  assert.equal(app.get('[data-handling-value="lockDelay"]').textContent, 'OFF');
+  app.set('lockDelay', 1000); app.adjust('lockDelay');
+  assert.equal(app.saved().settings.lockDelayOn, false); assert.equal(app.saved().settings.lockDelay, 1010);
+  app.toggleLock(true); app.advance(900); assert.equal(app.state().lastResult, null);
+  app.set('lockDelay', 100); assert.ok(app.state().lastResult, 'shortening an elapsed lock deadline judges now');
 });
 
 test('panel and full settings round-trip through the same validation, persistence, JSON and reset', () => {

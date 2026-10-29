@@ -40,7 +40,7 @@ test('live ARR restarts the charged repeat phase once, switches to instant, and 
   assert.equal(h.inputCount, 2);
 });
 
-test('live finite/instant SDF and gravity update a held soft drop without a new input or manual lock', () => {
+test('live finite/instant SDF and gravity update a held soft drop without a new input, then auto-locks on the shared deadline', () => {
   const h = rig({ sdf: 2 }); h.spawn('T', 0); h.keyDown('softDrop', 0);
   assert.equal(h.active.y, 18);
   h.setSettings({ sdf: 10 }, 100);
@@ -53,7 +53,8 @@ test('live finite/instant SDF and gravity update a held soft drop without a new 
   assert.equal(E.bounds(h.active).minY, 0); assert.equal(h.inputCount, 1);
   assert.equal(h.flags.softDrop, true); assert.ok(h.active);
   h.setSettings({ sdf: 1, gravity: 0 }, 412);
-  h.update(2000); assert.ok(h.active, 'practice remains manually locked');
+  h.update(910); assert.ok(h.active);
+  h.update(911); assert.equal(h.active, null, 'ground contact starts the default 500ms lock delay');
 });
 
 test('live DCD recalculates the current gate from spawn/rotation while retaining charge', () => {

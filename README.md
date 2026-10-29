@@ -15,6 +15,8 @@ npm run test:browser
 
 レッスンは12ステップ。実演は実際の `InputHandler` で再生し、DASの長押しやIRS/IHSの出現時操作に合わせてキーが光ります。各ミノの最短表はエンジンのソルバーから生成します。チャレンジの成績は通常の練習記録に混ぜず、達成したレッスンを保存します。
 
+「ゲーム設定 → 共通のハンドリング」の「ロックディレイ（接地後に自動固定）」は、フリーモード・フィネス編・回転入れ編・スプリント・レッスンのチャレンジに共通です。初期値はON・500msで、100〜5000msを10ms刻みで調整できます。接地してから計時し、接地中の移動・回転で15回まで延長します。重力0ではソフト落下などで接地するまで始まりません。空中へ離れても期限と延長回数を保持し、一時停止時間は除外します。OFFではハードドロップだけで固定します。実演は教材の手順どおりに固定します。プレイ中のコンパクトなゲーム設定でもすぐ変更でき、OFF時は表示もOFFになります。JSON入出力・保存は `settings.lockDelayOn` と `settings.lockDelay` に対応し、旧保存にはON・500msを補います。プリセットはこの2値を保持し、既定値へのリセットではON・500msへ戻します。
+
 ドリルでは破線が目標、薄いミノが着地点です。ホールドはスキップ扱いで、1種類だけ選んだ練習では無効です。最短入力で置くとPerfect、余分な入力があるとフォルト、違う場所ならミスです。ゼロフォルトでは最短成功するまで同じ目標に再挑戦します。スプリントは40・100・任意の配置数に対応します。タイマーは最初の操作から開始し、一時停止時間は除きます。ベストタイムは配置数ごとに保存します（練習条件による区分はありません）。
 
 回転入れ編はタイトルのモード選択から「ドリルをつづける」または「問題一覧」で開始します。レッスンはなく、次の4セット・14問を好きな順に練習できます。
@@ -26,9 +28,9 @@ npm run test:browser
 | STEP 3 S・Z・L・Jの回転入れ（4問） | Sスピン、Zスピン、Lスピン、Jスピン |
 | STEP 4 Iミノの回転入れ（2問） | Iスピン・右／左 |
 
-成功条件は「指定ミノを破線の4マスに固定し、最後に成功した移動が回転であること」です。入力回数は自由です。成功した横移動・重力／ソフト落下・距離のあるハードドロップは回転の判定を取り消します。動かなかった入力と、距離0のハードドロップによる固定は判定を保ちます。回転失敗だけでは成功になりません。結果を表示して待ち、R／同じ問題で初期盤面から再挑戦、N／次の問題でセット内の次へ進みます（最後は先頭へ）。固定した形を残してライン数を表示し、次の試行では盤面を復元します。ミルフィが成功を祝い、ミスには場所や回転のヒントを伝えます。Hの手順は現在のキー設定で表示し、「1マス」は落下距離、「床まで」は固定しないソフト落下を表します。
+成功条件は「指定ミノを破線の4マスに固定し、最後に成功した移動が回転であること」です。入力回数は自由です。成功した横移動・重力／ソフト落下・距離のあるハードドロップは回転の判定を取り消します。動かなかった入力と、距離0のハードドロップと、回転後に移動しないままの自動固定は判定を保ちます。回転失敗だけでは成功になりません。結果を表示して待ち、R／同じ問題で初期盤面から再挑戦、N／次の問題でセット内の次へ進みます（最後は先頭へ）。固定した形を残してライン数を表示し、次の試行では盤面を復元します。ミルフィが成功を祝い、ミスには場所や回転のヒントを伝えます。Hの手順は現在のキー設定で表示し、「1マス」は落下距離、「床まで」は固定しないソフト落下を表します。
 
-DAS・ARR・SDF・DCD・ARE・重力・IRS・180度回転とキー設定は共通です。ホールドは使いません。回転入れ編はフィネス用のゼロフォルト・自動再挑戦設定から独立し、回転入れ成功でCOMBOが続きます。達成ID・最後に選んだ問題・通算記録を同じ保存キーの `spin: { current, completed, stats }` に保存し、フィネス編のレッスン進捗・成績には加えません。旧プロフィールには初期値を補い、未知の問題IDは除外します。設定JSONのインポートや設定初期化でも進捗は保持します。
+DAS・ARR・SDF・DCD・ARE・重力・ロックディレイ・IRS・180度回転とキー設定は共通です。ホールドは使いません。回転入れ編はフィネス用のゼロフォルト・自動再挑戦設定から独立し、回転入れ成功でCOMBOが続きます。達成ID・最後に選んだ問題・通算記録を同じ保存キーの `spin: { current, completed, stats }` に保存し、フィネス編のレッスン進捗・成績には加えません。旧プロフィールには初期値を補い、未知の問題IDは除外します。設定JSONのインポートや設定初期化でも進捗は保持します。
 
 フィネス編のドリル・スプリント・レッスンのチャレンジとフリーモードでは、Perfectが2回続くとCOMBOが表示されます。5・10・20・50回で彩りと弾みが増え、ドリル・スプリントではミルフィもひとことお祝いします。レッスンでは説明・達成のフィードバックを優先し、IRSなどの追加条件を満たさなくてもフィネスのPerfectはCOMBOに数えます。スクリーンリーダーへのCOMBO通知は5・10・20・50回だけです。柔らかいマレット音は回数とともに上がり、12回で音程が上限になります（約195 ms、ミノの合図と重ねて再生）。効果音・全体音量・吹き出しの設定を反映し、動きを減らす設定では静かに表示します。フォルト・ミス、リトライ、練習条件の変更、再スタート、別画面への移動でCOMBOはリセットされ、一時停止中は保たれます。COMBO自体は保存しません。
 
@@ -87,3 +89,5 @@ Idea: pre-show a target shadow and place the piece there with the optimal input 
 An offline, Japanese tetromino practice game series with original mascot ミルフィ. フィネス編 teaches minimum-input placement; フリーモード offers endless play; 回転入れ編 offers 14 SRS insertion drills in four graded sets, without lessons. Success requires exact target cells and a rotation as the last successful move. Spin progress is persisted separately within the existing profile. Run `npm run build`, then open `dist/mirutet.html` directly. Everything is inlined; no server or network is required. `npm test` runs the independent engine/mascot checks. `npm run test:browser` runs system Chrome through playwright-core and saves screenshots in `screens/`. The current mode includes engine-driven lessons, filtered drills, sprint, handling/key settings, persistent statistics, and synthesized audio with graceful fallbacks.
 
 Consecutive Perfects show COMBO from two placements, with milestone visuals and screen-reader announcements at 5/10/20/50 and a quiet rising mallet cue. Milestone dialogue appears in drills and sprints; lesson feedback takes priority in challenges, while finesse-Perfect still counts even without required IRS. Mistakes, retries, practice-condition changes and leaving play reset it. The browser check saves a deterministic five-COMBO view to `screens/combo.png`.
+
+Lock delay is shared by free play, finesse/spin drills, sprint and lesson challenges: ON/500 ms by default, configurable from 100–5000 ms in 10 ms editor steps. Grounded moves/rotations reset it up to 15 times; airborne deadlines/budgets survive and pauses are excluded. OFF requires hard drop. Lesson demonstrations keep scripted locks. Both settings editors, profile migration and JSON export/import support `lockDelayOn` and `lockDelay`.

@@ -13,7 +13,7 @@ function rig(settings={},options={}){
 }
 
 test('default handling and settings validation/clamping',()=>{
-  assert.deepEqual(E.DEFAULT_SETTINGS,{das:110,arr:0,sdf:40,dcd:0,are:80,gravity:0,irs:true,ihs:false,allow180:true,spawnDrop:false});
+  assert.deepEqual(E.DEFAULT_SETTINGS,{das:110,arr:0,sdf:40,dcd:0,are:80,gravity:0,lockDelayOn:true,lockDelay:500,irs:true,ihs:false,allow180:true,spawnDrop:false});
   assert.deepEqual(E.normalizeSettings({das:-1,arr:300,sdf:Infinity,are:900,gravity:80}),
     {...E.DEFAULT_SETTINGS,das:0,arr:200,sdf:41,are:500,gravity:20});
   assert.equal(E.normalizeSettings({sdf:'instant'}).sdf,41);
@@ -144,7 +144,7 @@ test('DCD gates only auto-shift after spawn/rotation, preserving DAS charge',()=
   assert.equal(E.bounds(h.active).minX,1);assert.equal(h.inputCount,3);
 });
 
-test('finite SDF works with gravity off; instant soft drop never locks; gravity uses G/60Hz',()=>{
+test('finite SDF works with gravity off; instant soft drop starts lock delay; gravity uses G/60Hz',()=>{
   const {h,locks}=rig({sdf:10});h.spawn('T',0);h.keyDown('softDrop',0);
   assert.equal(E.bounds(h.active).minY,19);h.update(350);assert.equal(E.bounds(h.active).minY,16);
   assert.equal(h.inputCount,1);h.keyUp('softDrop',351);h.update(2000);assert.equal(E.bounds(h.active).minY,16);
@@ -152,7 +152,7 @@ test('finite SDF works with gravity off; instant soft drop never locks; gravity 
   assert.equal(E.bounds(h.active).minY,0);assert.equal(locks.length,0);assert.ok(h.active);
   h.keyDown('cw',2003);assert.equal(E.bounds(h.active).minY,0);assert.equal(locks.length,0);
   h.keyDown('hardDrop',2004);assert.equal(locks.length,1);assert.equal(locks[0].flags.softDrop,true);
-  const b=rig({gravity:1,sdf:2}).h;b.spawn('O',0);b.update(50);assert.equal(E.bounds(b.active).minY,17);
+  const b=rig({gravity:1,sdf:2,lockDelayOn:false}).h;b.spawn('O',0);b.update(50);assert.equal(E.bounds(b.active).minY,17);
   b.keyDown('softDrop',51);b.update(76);assert.equal(E.bounds(b.active).minY,13);
   b.update(1000);assert.equal(E.bounds(b.active).minY,0);assert.ok(b.active);
 });

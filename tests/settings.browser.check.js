@@ -10,23 +10,23 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
   const click=act=>page.locator(`[data-act="${act}"]`).first().click();
   await page.goto(pathToFileURL(path.resolve(__dirname,'../dist/mirutet.html')).href);
   await click('settings'); assert.equal(await page.locator('.handling-presets>span').textContent(),'近い設定'); assert.equal(await page.locator('h2').textContent(),'ゲーム設定');
-  for(const key of ['das','arr','sdf','dcd','are','gravity']) {
+  for(const key of ['das','arr','sdf','dcd','are','gravity','lockDelay']) {
     const input=page.locator(`#setting-${key}`),range=page.locator(`[data-setting=${key}][type=range]`);
     await input.fill('');await input.blur();assert.notEqual(await input.inputValue(),'');
     await input.fill('9999');await input.blur();assert.equal(await input.inputValue(),await range.getAttribute('max'));
     await input.fill('-2');await input.blur();assert.equal(await input.inputValue(),await range.getAttribute('min'));
-    await input.fill(key==='gravity'?'1.2':'12');await input.blur();assert.equal(await input.inputValue(),await range.inputValue());
+    await input.fill(key==='gravity'?'1.2':key==='lockDelay'?'120':'12');await input.blur();assert.equal(await input.inputValue(),await range.inputValue());
     await range.focus();await page.keyboard.press('ArrowRight');assert.equal(await input.inputValue(),await range.inputValue());
     const before=(await state()).settings[key];
     await page.locator(`[data-act=adjust-handling][data-handling-key=${key}][data-step="1"]`).click();
-    assert(Math.abs((await state()).settings[key]-before-(key==='gravity'?.1:1))<1e-8);
+    assert(Math.abs((await state()).settings[key]-before-(key==='gravity'?.1:key==='lockDelay'?10:1))<1e-8);
     assert.equal(await input.inputValue(),await range.inputValue());
   }
   // Regression: browser range values must equal number fields and stored state.
   for (const [attribute,key,raw,expected] of [
     ['ui','volume','.33',.35], ['ui','volume','.325',.35], ['ui','pieceCueVolume','37.6',38],
     ['setting','das','12.6',13], ['setting','arr','12.5',13], ['setting','sdf','12.4',12],
-    ['setting','dcd','12.6',13], ['setting','are','12.6',13], ['setting','gravity','.35',.4]
+    ['setting','lockDelay','125',130], ['setting','dcd','12.6',13], ['setting','are','12.6',13], ['setting','gravity','.35',.4]
   ]) {
     const number=page.locator(`[data-${attribute}=${key}][type=number]`);
     const range=page.locator(`[data-${attribute}=${key}][type=range]`);
@@ -66,8 +66,8 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
   await page.locator('#setting-das').fill('173');
   for(let i=0;i<24;i++) await page.locator('[data-act=handling-preset]').nth(i%3).click();
   assert.equal((await state()).settings.das,173);
-  for(const key of ['das','arr','sdf','dcd','are','gravity']) assert.equal(await page.locator(`#setting-${key}`).inputValue(),String((await state()).settings[key]));
-  for(const key of ['irs','ihs','allow180']) assert.equal(await page.locator(`[data-engine-toggle=${key}]`).isChecked(),(await state()).settings[key]);
+  for(const key of ['das','arr','sdf','dcd','are','gravity','lockDelay']) assert.equal(await page.locator(`#setting-${key}`).inputValue(),String((await state()).settings[key]));
+  for(const key of ['irs','ihs','allow180','lockDelayOn']) assert.equal(await page.locator(`[data-engine-toggle=${key}]`).isChecked(),(await state()).settings[key]);
   await page.locator('#setting-are').fill('88');await page.locator('#setting-are').blur();
   await page.locator('#ui-volume').fill('.55');await page.locator('#ui-volume').blur();
   await page.locator('#ui-pieceCueVolume').fill('37');await page.locator('#ui-pieceCueVolume').blur();
@@ -78,6 +78,9 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
   await page.locator('.preset-notes').evaluate(e=>e.open=true);
   fs.mkdirSync(path.resolve(__dirname,'../screens'),{recursive:true});
   await page.screenshot({path:path.resolve(__dirname,'../screens/bl122-settings.png'),fullPage:false});
+  await page.locator('.preset-notes').evaluate(e=>e.open=false);
+  await page.locator('.settings-grid').evaluate(e=>e.scrollIntoView({block:'start'}));
+  await page.screenshot({path:path.resolve(__dirname,'../screens/bl137-settings.png'),fullPage:false});
   await page.setViewportSize({width:390,height:844});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   await page.locator('.preset-notes').evaluate(e=>e.open=false);
@@ -139,6 +142,47 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
   await precision.locator('[data-handling-key=das][data-step="1"]').click();assert.equal((await pstate()).settings.das,183);
   await liveDas.focus();await liveDas.blur();assert.equal((await pstate()).settings.das,183);
   await precision.close();
+  let lockScenarios = 0;
+  for (const mode of ['free','drill','sprint','spin','lesson']) {
+    const p = await browser.newPage({viewport:{width:1280,height:720}});
+    p.on('pageerror',e=>errors.push(e.message));
+    const c = act => p.locator(`[data-act="${act}"]`).first().click();
+    const s = () => p.evaluate(()=>window.__mirutet.getState());
+    await p.goto(pathToFileURL(path.resolve(__dirname,'../dist/mirutet.html')).href);
+    await c('settings');
+    assert.equal(await p.locator('[data-engine-toggle=lockDelayOn]').isChecked(),true);
+    assert.equal(await p.locator('#setting-lockDelay').inputValue(),'500');
+    await p.locator('#settings-json').fill(JSON.stringify({settings:{are:0,sdf:41,lockDelay:100,lockDelayOn:false}}));
+    await c('import'); await c('close-settings');
+    if (mode==='free') { await c('mode-free'); await c('free'); }
+    else if (mode==='sprint') { await c('sprint'); await c('start-sprint'); }
+    else if (mode==='spin') { await c('mode-spin'); await c('spin-continue'); }
+    else if (mode==='lesson') { await c('tutorial'); await c('try-it'); }
+    else await c('drill');
+    await p.waitForFunction(()=>!!window.__mirutet.getState().active);
+    await c('toggle-handling');
+    const auto=p.locator('[data-live-handling] [data-engine-toggle=lockDelayOn]');
+    assert.equal(await auto.isChecked(),false);
+    assert.equal(await p.locator('[data-handling-value=lockDelay]').textContent(),'OFF');
+    await p.locator('#board').focus(); await p.keyboard.press('ArrowDown');
+    const piece=(await s()).active;
+    await p.waitForTimeout(200); assert.deepEqual((await s()).active,piece);
+    const number=p.locator('[data-setting=lockDelay][type=number]');
+    await number.fill('500'); await number.press('Enter');
+    assert.equal(await p.locator('[data-setting=lockDelay][type=range]').inputValue(),'500');
+    await auto.check();
+    assert.equal(await p.locator('[data-handling-value=lockDelay]').textContent(),'500 ms');
+    assert.equal((await s()).paused,false); assert.equal((await s()).inputCount,1);
+    await auto.focus(); await p.keyboard.press('Space');
+    assert.equal(await auto.isChecked(),false,'checkbox keyboard input does not hard drop');
+    assert.deepEqual((await s()).active,piece);
+    await number.fill('100'); await number.press('Enter'); await auto.check();
+    await p.waitForFunction(()=>!!window.__mirutet.getState().lastResult);
+    assert.equal((await s()).lastResult.used,1);
+    await p.close(); lockScenarios++;
+  }
+  assert.equal(lockScenarios,5);
+  console.log('BL-137 browser checks passed: 5 player modes, OFF/ON auto-lock, synced numeric/slider, keyboard toggle isolation; screens/bl137-settings.png.');
   assert.deepEqual(errors,[]);console.log('BL-122 browser checks passed: bounds, empty input, synchronization, repeated presets, manual edits, audio, persistence, defaults, keyboard, mobile, dressup/free transitions, live editing.');
  } finally {await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

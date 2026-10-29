@@ -59,6 +59,19 @@ function profile() {
       streak: 2, bestStreak: 4, bestTimes: { 40: 65000 } } };
 }
 
+test('old current and legacy profiles migrate shared lock delay defaults; custom values survive reload', () => {
+  for (const key of [storageKey, legacyKey]) {
+    const saved = profile(), old = load({ [key]: JSON.stringify(saved) });
+    assert.equal(old.state.settings.lockDelayOn, true); assert.equal(old.state.settings.lockDelay, 500);
+    assertProfile(old.state, saved);
+    assert.deepEqual(JSON.parse(old.values.get(storageKey)).settings, old.state.settings);
+    saved.settings.lockDelayOn = false; saved.settings.lockDelay = 1230;
+    const custom = load({ [key]: JSON.stringify(saved) });
+    assert.equal(custom.state.settings.lockDelayOn, false); assert.equal(custom.state.settings.lockDelay, 1230);
+    assert.deepEqual(load(Object.fromEntries(custom.values)).state, custom.state);
+  }
+});
+
 function assertProfile(actual, expected) {
   for (const key of ['das', 'arr', 'are']) assert.equal(actual.settings[key], expected.settings[key], `settings.${key}`);
   assert.equal(actual.ui.sound, expected.ui.sound);

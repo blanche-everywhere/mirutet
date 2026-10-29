@@ -51,12 +51,50 @@ function loadApp(saved, storageBlocked = false) {
       const editorKey = JSON.stringify(dataset);
       const input = type === 'number' && editors.get(editorKey) || { dataset, value, type, hasAttribute: attr =>
         attr === 'data-hair-skin' && 'hairSkin' in dataset || attr === 'data-outfit-skin' && 'outfitSkin' in dataset };
-      input.value = value;
+      input.value = value; input.checked = value;
       if (type === 'number') editors.set(editorKey, input);
       listeners.get(event)({ target: input }); return input;
     }
   };
 }
+
+test('lock delay controls synchronize, persist, export/import atomically, preserve presets and reset defaults', () => {
+  const app = loadApp(); app.click('settings');
+  const markup = app.nodes['#app'].innerHTML;
+  assert.match(markup, /data-engine-toggle="lockDelayOn" checked>ロックディレイ（接地後に自動固定）/);
+  assert.match(markup, /for="setting-lockDelay">ロックディレイ/);
+  for (const type of ['number', 'range']) {
+    assert.match(markup, new RegExp(`data-setting="lockDelay" type="${type}" min="100" max="5000" step="10" value="500"`));
+  }
+  app.change({ engineToggle: 'lockDelayOn' }, false);
+  app.change({ setting: 'lockDelay' }, '1236', 'input');
+  assert.equal(app.state().settings.lockDelayOn, false); assert.equal(app.state().settings.lockDelay, 1240);
+  app.click('adjust-handling', { handlingKey: 'lockDelay', step: '-1' });
+  assert.equal(app.state().settings.lockDelay, 1230);
+  for (const preset of ['ppt2', 'tec', 'tgm3']) {
+    app.click('handling-preset', { preset });
+    assert.equal(app.state().settings.lockDelayOn, false); assert.equal(app.state().settings.lockDelay, 1230);
+  }
+  app.click('export'); const exported = app.nodes['#settings-json'].value;
+  assert.equal(JSON.parse(exported).settings.lockDelayOn, false); assert.equal(JSON.parse(exported).settings.lockDelay, 1230);
+  app.click('reset-handling'); assert.deepEqual(app.state().settings, E.DEFAULT_SETTINGS);
+  app.nodes['#settings-json'].value = exported; app.click('import');
+  assert.equal(app.state().settings.lockDelayOn, false); assert.equal(app.state().settings.lockDelay, 1230);
+  assert.deepEqual(loadApp(app.persisted()).state().settings, app.state().settings);
+  const saved = app.persisted();
+  for (const settings of [{ lockDelayOn: 1 }, { lockDelay: '500' }, { lockDelay: null }]) {
+    app.nodes['#settings-json'].value = JSON.stringify({ settings }); app.click('import');
+    assert.match(app.nodes['#import-status'].textContent, /読み込めません/);
+    assert.deepEqual(app.persisted(), saved);
+  }
+  for (const [raw, expected] of [[10, 100], [9999, 5000]]) {
+    app.nodes['#settings-json'].value = JSON.stringify({ settings: { lockDelay: raw } }); app.click('import');
+    assert.equal(app.state().settings.lockDelay, expected); assert.equal(app.state().settings.lockDelayOn, true);
+  }
+  app.nodes['#settings-json'].value = JSON.stringify({ settings: { das: 173 } }); app.click('import');
+  assert.equal(app.state().settings.lockDelayOn, true); assert.equal(app.state().settings.lockDelay, 500);
+  app.click('reset-settings'); assert.deepEqual(app.state().settings, E.DEFAULT_SETTINGS);
+});
 
 test('merged settings events, JSON round-trip and reset keep cues and appearance independent', () => {
   const app = loadApp({ settings: { das: 173 }, progress: { current: 4, completed: [0, 3] },
