@@ -332,9 +332,10 @@
   }
 
   const DEFAULT_SETTINGS = deepFreeze({ das: 110, arr: 0, sdf: 40, dcd: 0,
-    are: 80, gravity: 0, irs: true, ihs: false, allow180: true, spawnDrop: false });
+    are: 80, gravity: 0, lockDelayOn: true, lockDelay: 500,
+    irs: true, ihs: false, allow180: true, spawnDrop: false });
   const SETTING_LIMITS = deepFreeze({ das: [0, 500], arr: [0, 200], sdf: [1, 41],
-    dcd: [0, 200], are: [0, 500], gravity: [0, 20] });
+    dcd: [0, 200], are: [0, 500], gravity: [0, 20], lockDelay: [100, 5000] });
   function normalizeSettings(patch = {}, base = DEFAULT_SETTINGS) {
     const result = { ...base };
     for (const [key, [min, max]] of Object.entries(SETTING_LIMITS)) {
@@ -346,7 +347,7 @@
         result[key] = Math.max(min, Math.min(max, value));
       }
     }
-    for (const key of ['irs', 'ihs', 'allow180', 'spawnDrop']) {
+    for (const key of ['irs', 'ihs', 'allow180', 'spawnDrop', 'lockDelayOn']) {
       if (key in patch) {
         if (typeof patch[key] !== 'boolean') throw new TypeError(key + ' must be boolean');
         result[key] = patch[key];
@@ -423,8 +424,6 @@
       this.pieceProvider = options.pieceProvider || (() => this.bag.next());
       this.autoNext = options.autoNext !== false;
       this.lockToBoard = !!options.lockToBoard;
-      // Endless play opts into timed locking; practice keeps manual locking.
-      this.lockDelay = options.lockDelay ?? Infinity;
       this.lockAt = this.lockDeadline = Infinity; this.lockResets = 0;
       this.holdEnabled = options.holdEnabled !== false;
       this.callbacks = options;
@@ -492,16 +491,21 @@
       this._wakeHorizontal();
     }
     _grounded(reset = false) {
+      if (!this.settings.lockDelayOn) {
+        this.lockAt = this.lockDeadline = Infinity;
+        return;
+      }
+      const time = this.paused ? this.pauseStarted : this.time;
       if (!this.active || movePiece(this.board, this.active, 0, -1)) this.lockAt = Infinity;
       else {
         // Airborne time disables locking, but never erases the contact deadline
         // or replenishes the reset budget. An expired piece locks on recontact.
-        if (this.lockDeadline === Infinity) this.lockDeadline = this.time + this.lockDelay;
+        if (this.lockDeadline === Infinity) this.lockDeadline = time + this.settings.lockDelay;
         else if (reset && this.lockResets < 15) {
           this.lockResets++;
-          this.lockDeadline = this.time + this.lockDelay;
+          this.lockDeadline = time + this.settings.lockDelay;
         }
-        this.lockAt = Math.max(this.time, this.lockDeadline);
+        this.lockAt = Math.max(time, this.lockDeadline);
       }
     }
     _horizontal(key, automatic, initial = false) {
@@ -691,6 +695,12 @@
       // DCD/ARE keep their original trigger/start; elapsed deadlines fire now.
       // A changed fall rate starts a full interval now, or drops immediately.
       const effectiveTime = this.paused ? this.pauseStarted : t;
+      if (this.settings.lockDelayOn !== previous.lockDelayOn || this.settings.lockDelay !== previous.lockDelay) {
+        // Duration edits retain elapsed contact time and the reset budget.
+        // Re-enabling starts a new contact timer without replenishing resets.
+        if (this.lockDeadline !== Infinity) this.lockDeadline += this.settings.lockDelay - previous.lockDelay;
+        this._grounded();
+      }
       if (this.settings.das !== previous.das || this.settings.arr !== previous.arr) {
         for (const key of this.held.values()) key.nextAt = Math.max(effectiveTime, key.since + this.settings.das);
       }
@@ -855,7 +865,7 @@
       this.startedAt = this.endedAt = this.pausedAt = null; this.pausedDuration = 0;
       this.running = false; this.lastResult = null; this.cueDrawPending = false; this.combo.reset();
       this.handler = new InputHandler({ clock: this.clock, time: t, settings: this.settings,
-        bag: this.bag, autoNext: false, lockDelay: 500,
+        bag: this.bag, autoNext: false,
         onLock: lock => this._onLock(lock),
         onCommand: (action, time) => {
           if (action === 'retry') this.restart(time);

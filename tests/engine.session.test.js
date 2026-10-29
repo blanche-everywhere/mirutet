@@ -28,15 +28,15 @@ function optimalLock(session,waste=false){
   return {t,result:session.lastResult};
 }
 
-test('drill and sprint retain manual locking across repeated ledge recontacts',()=>{
+test('drill and sprint with lock delay OFF require hard drop across repeated ledge recontacts',()=>{
   for(const sprintLength of [0,40]){
     const board=new E.Board().set(5,0,'J');
-    const {s}=makeSession({pieces:['O'],board,sprintLength,settings:{are:0,sdf:41}});
+    const {s}=makeSession({pieces:['O'],board,sprintLength,settings:{are:0,sdf:41,lockDelayOn:false}});
     s.start(0);let t=tap(s,'softDrop',1);
     for(let i=0;i<20;i++){
       t=tap(s,'cw',t);t=tap(s,'left',t);t=tap(s,'right',t);
     }
-    assert.equal(s.handler.lockDelay,Infinity);assert.equal(s.handler.lockAt,Infinity);
+    assert.equal(s.settings.lockDelayOn,false);assert.equal(s.handler.lockAt,Infinity);
     s.update(10000);assert.ok(s.handler.active);assert.equal(s.stats.attempts,0);
     tap(s,'hardDrop',10001);assert.equal(s.stats.attempts,1);assert.equal(s.running,true);
   }

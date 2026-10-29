@@ -1979,6 +1979,8 @@ body[data-screen=play],body[data-screen=tutorial] { min-width:800px; }
 .handling-toggle span { color:var(--purple); }
 #live-handling-controls { padding:0 0 8px; }
 .handling-stepper { display:grid; grid-template-columns:minmax(33px,1fr) 26px minmax(54px,70px) 26px; gap:3px; align-items:center; min-height:34px; border-top:1px solid #f0eaf5; font-size:13px; }
+.handling-stepper .checkline { margin:0; gap:3px; font-size:13px; white-space:nowrap; }
+.handling-stepper .checkline input { width:14px; height:14px; margin:0; }
 .handling-stepper>span { color:#887794; font-weight:600; }
 .handling-stepper output { text-align:center; white-space:nowrap; font-variant-numeric:tabular-nums; }
 .handling-stepper button { padding:0; width:26px; height:26px; border-radius:7px; color:#9278b3; }
@@ -2034,6 +2036,13 @@ body[data-screen=play],body[data-screen=tutorial] { min-width:800px; }
 .handling-stepper { padding:0; row-gap:0; grid-template-rows:26px 18px; }
 .handling-stepper .live-number { height:18px; padding:0 4px; font-size:12px; }
 .handling-stepper .live-range { height:14px; }
+
+@media(max-height:680px) {
+  .handling-stepper { grid-template-rows:24px 18px; }
+  .handling-stepper button { height:24px; }
+  .handling-toggle { padding:4px 0; }
+  #live-handling-controls { padding-bottom:4px; }
+}
 
 /* Spin drills share the practice viewport, controls and mascot. */
 .menu-mode { flex-wrap:wrap; }
@@ -2503,9 +2512,10 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   }
 
   const DEFAULT_SETTINGS = deepFreeze({ das: 110, arr: 0, sdf: 40, dcd: 0,
-    are: 80, gravity: 0, irs: true, ihs: false, allow180: true, spawnDrop: false });
+    are: 80, gravity: 0, lockDelayOn: true, lockDelay: 500,
+    irs: true, ihs: false, allow180: true, spawnDrop: false });
   const SETTING_LIMITS = deepFreeze({ das: [0, 500], arr: [0, 200], sdf: [1, 41],
-    dcd: [0, 200], are: [0, 500], gravity: [0, 20] });
+    dcd: [0, 200], are: [0, 500], gravity: [0, 20], lockDelay: [100, 5000] });
   function normalizeSettings(patch = {}, base = DEFAULT_SETTINGS) {
     const result = { ...base };
     for (const [key, [min, max]] of Object.entries(SETTING_LIMITS)) {
@@ -2517,7 +2527,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
         result[key] = Math.max(min, Math.min(max, value));
       }
     }
-    for (const key of ['irs', 'ihs', 'allow180', 'spawnDrop']) {
+    for (const key of ['irs', 'ihs', 'allow180', 'spawnDrop', 'lockDelayOn']) {
       if (key in patch) {
         if (typeof patch[key] !== 'boolean') throw new TypeError(key + ' must be boolean');
         result[key] = patch[key];
@@ -2594,8 +2604,6 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       this.pieceProvider = options.pieceProvider || (() => this.bag.next());
       this.autoNext = options.autoNext !== false;
       this.lockToBoard = !!options.lockToBoard;
-      // Endless play opts into timed locking; practice keeps manual locking.
-      this.lockDelay = options.lockDelay ?? Infinity;
       this.lockAt = this.lockDeadline = Infinity; this.lockResets = 0;
       this.holdEnabled = options.holdEnabled !== false;
       this.callbacks = options;
@@ -2663,16 +2671,21 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       this._wakeHorizontal();
     }
     _grounded(reset = false) {
+      if (!this.settings.lockDelayOn) {
+        this.lockAt = this.lockDeadline = Infinity;
+        return;
+      }
+      const time = this.paused ? this.pauseStarted : this.time;
       if (!this.active || movePiece(this.board, this.active, 0, -1)) this.lockAt = Infinity;
       else {
         // Airborne time disables locking, but never erases the contact deadline
         // or replenishes the reset budget. An expired piece locks on recontact.
-        if (this.lockDeadline === Infinity) this.lockDeadline = this.time + this.lockDelay;
+        if (this.lockDeadline === Infinity) this.lockDeadline = time + this.settings.lockDelay;
         else if (reset && this.lockResets < 15) {
           this.lockResets++;
-          this.lockDeadline = this.time + this.lockDelay;
+          this.lockDeadline = time + this.settings.lockDelay;
         }
-        this.lockAt = Math.max(this.time, this.lockDeadline);
+        this.lockAt = Math.max(time, this.lockDeadline);
       }
     }
     _horizontal(key, automatic, initial = false) {
@@ -2862,6 +2875,12 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       // DCD/ARE keep their original trigger/start; elapsed deadlines fire now.
       // A changed fall rate starts a full interval now, or drops immediately.
       const effectiveTime = this.paused ? this.pauseStarted : t;
+      if (this.settings.lockDelayOn !== previous.lockDelayOn || this.settings.lockDelay !== previous.lockDelay) {
+        // Duration edits retain elapsed contact time and the reset budget.
+        // Re-enabling starts a new contact timer without replenishing resets.
+        if (this.lockDeadline !== Infinity) this.lockDeadline += this.settings.lockDelay - previous.lockDelay;
+        this._grounded();
+      }
       if (this.settings.das !== previous.das || this.settings.arr !== previous.arr) {
         for (const key of this.held.values()) key.nextAt = Math.max(effectiveTime, key.since + this.settings.das);
       }
@@ -3026,7 +3045,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       this.startedAt = this.endedAt = this.pausedAt = null; this.pausedDuration = 0;
       this.running = false; this.lastResult = null; this.cueDrawPending = false; this.combo.reset();
       this.handler = new InputHandler({ clock: this.clock, time: t, settings: this.settings,
-        bag: this.bag, autoNext: false, lockDelay: 500,
+        bag: this.bag, autoNext: false,
         onLock: lock => this._onLock(lock),
         onCommand: (action, time) => {
           if (action === 'retry') this.restart(time);
@@ -4298,7 +4317,8 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     { key: 'sdf', title: 'SDF', note: 'ソフト落下倍率 / 41 = ∞', unit: '×', step: 1 },
     { key: 'dcd', title: 'DCD', note: '自動移動の待機 ms', unit: 'ms', step: 1 },
     { key: 'are', title: 'ARE', note: '次の出現まで ms', unit: 'ms', step: 1 },
-    { key: 'gravity', title: '重力 G', note: 'マス/フレーム · 0：フィネス編はなし／フリーは毎秒1マス', unit: 'G', step: .1 }
+    { key: 'gravity', title: '重力 G', note: 'マス/フレーム · 0：練習はなし／フリーは毎秒1マス', unit: 'G', step: .1 },
+    { key: 'lockDelay', title: 'ロックディレイ', note: '接地後に自動固定 ms · 移動・回転で15回まで延長', unit: 'ms', step: 10 }
   ];
   const numericDrafts = new WeakSet();
   let settings = { ...E.DEFAULT_SETTINGS }, ui = { ...UI_DEFAULTS }, bindings = copy(DEFAULT_KEYS);
@@ -4556,11 +4576,12 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   function handlingValue(field) {
     const value = { ...settings, ...challengeOverrides(settings) }[field.key];
     // Imported fractions keep full precision in storage; show a compact value.
+    if (field.key === 'lockDelay' && !settings.lockDelayOn) return 'OFF';
     return field.key === 'sdf' && value === 41 ? '∞' : `${Number(value.toFixed(3))} ${field.unit}`;
   }
   // Stepper buttons retain board focus; native editors isolate typing from play.
   function handlingPanelHTML() {
-    return `<section class="panel handling-panel" data-live-handling aria-label="プレイ中のゲーム設定" aria-describedby="handling-access"><button class="handling-toggle" data-act="toggle-handling" tabindex="-1" aria-expanded="${handlingOpen}" aria-controls="live-handling-controls">ゲーム設定<span aria-hidden="true">${handlingOpen ? '−' : '＋'}</span></button><span id="handling-access" class="sr-only">入力中はゲームキーを停止。Enterで盤面に戻ります。</span><div id="live-handling-controls" ${handlingOpen ? '' : 'hidden'}>${HANDLING.map(field => `<div class="handling-stepper" title="${field.note}"><span>${field.key === 'gravity' ? '重力' : field.title}</span><button data-act="adjust-handling" data-handling-key="${field.key}" data-step="-1" tabindex="-1" aria-label="${field.title}を減らす">−</button><output data-handling-value="${field.key}" aria-live="off">${handlingValue(field)}</output><button data-act="adjust-handling" data-handling-key="${field.key}" data-step="1" tabindex="-1" aria-label="${field.title}を増やす">＋</button><input class="live-number" aria-label="${field.title}" data-setting="${field.key}" type="number" min="${E.SETTING_LIMITS[field.key][0]}" max="${E.SETTING_LIMITS[field.key][1]}" step="${field.step}" value="${settings[field.key]}"><input class="live-range" aria-label="${field.title} スライダー" data-setting="${field.key}" type="range" min="${E.SETTING_LIMITS[field.key][0]}" max="${E.SETTING_LIMITS[field.key][1]}" step="${field.step}" value="${settings[field.key]}"></div>`).join('')}</div></section>`;
+    return `<section class="panel handling-panel" data-live-handling aria-label="プレイ中のゲーム設定" aria-describedby="handling-access"><button class="handling-toggle" data-act="toggle-handling" tabindex="-1" aria-expanded="${handlingOpen}" aria-controls="live-handling-controls">ゲーム設定<span aria-hidden="true">${handlingOpen ? '−' : '＋'}</span></button><span id="handling-access" class="sr-only">入力中はゲームキーを停止。Enterで盤面に戻ります。</span><div id="live-handling-controls" ${handlingOpen ? '' : 'hidden'}>${HANDLING.map(field => `<div class="handling-stepper" title="${field.note}">${field.key === 'lockDelay' ? toggle('lockDelayOn','ロックディレイ（接地後に自動固定）',true,'ロック') : `<span>${field.key === 'gravity' ? '重力' : field.title}</span>`}<button data-act="adjust-handling" data-handling-key="${field.key}" data-step="-1" tabindex="-1" aria-label="${field.title}を減らす">−</button><output data-handling-value="${field.key}" aria-live="off">${handlingValue(field)}</output><button data-act="adjust-handling" data-handling-key="${field.key}" data-step="1" tabindex="-1" aria-label="${field.title}を増やす">＋</button><input class="live-number" aria-label="${field.title}" data-setting="${field.key}" type="number" min="${E.SETTING_LIMITS[field.key][0]}" max="${E.SETTING_LIMITS[field.key][1]}" step="${field.step}" value="${settings[field.key]}"><input class="live-range" aria-label="${field.title} スライダー" data-setting="${field.key}" type="range" min="${E.SETTING_LIMITS[field.key][0]}" max="${E.SETTING_LIMITS[field.key][1]}" step="${field.step}" value="${settings[field.key]}"></div>`).join('')}</div></section>`;
   }
   function syncHandlingPanel() {
     for (const field of HANDLING) {
@@ -4614,7 +4635,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     const [min, max] = E.SETTING_LIMITS[key];
     return `<div class="setting-row"><label for="setting-${key}">${title}<small>${note} · ${min}–${max}</small></label><input aria-label="${title} スライダー" data-setting="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${settings[key]}"><button class="setting-step" data-act="adjust-handling" data-handling-key="${key}" data-step="-1" aria-label="${title}を減らす">−</button><input id="setting-${key}" aria-label="${title}" data-setting="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${settings[key]}"><button class="setting-step" data-act="adjust-handling" data-handling-key="${key}" data-step="1" aria-label="${title}を増やす">＋</button></div>`;
   }
-  function toggle(key, label, engine = false) { return `<label class="checkline"><input type="checkbox" ${engine ? 'data-engine-toggle' : 'data-ui'}="${key}" ${(engine ? settings : ui)[key] ? 'checked' : ''}>${label}</label>`; }
+  function toggle(key, label, engine = false, shortLabel = label) { return `<label class="checkline"><input type="checkbox"${shortLabel === label ? '' : ` aria-label="${label}"`} ${engine ? 'data-engine-toggle' : 'data-ui'}="${key}" ${(engine ? settings : ui)[key] ? 'checked' : ''}>${shortLabel}</label>`; }
   function appearancePreview() {
     return mascot('normal', 'appearance-normal') + mascot('happy', 'appearance-happy');
   }
@@ -4643,7 +4664,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     return `<div class="cue-settings"><h3>ミノを音でお知らせ</h3><label class="filter-line">鳴らすタイミング<select data-ui="pieceCueTiming" aria-label="ミノの音のタイミング">${[['next', 'NEXT（次のミノ）'], ['current', '現在のミノ'], ['off', 'オフ']].map(([value, label]) => `<option value="${value}" ${ui.pieceCueTiming === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label><p class="tiny">出現時に、NEXTの先頭に来たミノをお知らせします♪<br>現在のミノにも切替できます。同じ目標のリトライやホールド交換では鳴りません。</p>${uiNumeric('pieceCueVolume', 'ミノの音量')}<output id="cue-volume" hidden>${ui.pieceCueVolume}</output><div class="cue-preview" role="group" aria-label="ミノの音を試聴">${E.PIECE_TYPES.map(type => `<button class="small" data-act="preview-cue" data-piece="${type}" aria-label="${type}ミノの音を試聴">${type}</button>`).join('')}</div><p class="tiny">ミノを選んで試聴できます。効果音のオン・オフと全体の音量も反映します。</p></div>`;
   }
   function settingsHTML() {
-    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">ゲーム設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目">${appearanceHTML()}<div class="settings-grid"><section class="panel"><h3>共通のハンドリング</h3>${presetsHTML()}${HANDLING.map(field => handlingRow(field.key, field.title, field.note, field.step)).join('')}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}</div><div class="settings-group" role="group" aria-labelledby="shared-display-sound"><h3 id="shared-display-sound">共通の表示・サウンド</h3><div class="toggle-grid">${toggle('ghost','着地の影を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div>${uiNumeric('volume', '音量')}${cueSettingsHTML()}</div><div class="settings-group" role="group" aria-labelledby="finesse-settings"><h3 id="finesse-settings">フィネス編の練習</h3><div class="toggle-grid">${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('showOptimal','最短手順を表示')}</div></div></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">移動・回転などは共通です。リトライはフリーモードでは再スタート。<br>次の目標・ヒントはフィネス編と回転入れ編の操作です。<br>キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
+    return `<main class="page settings-page"><div class="page-heading"><div><div class="eyebrow">MAKE YOURSELF COMFORTABLE</div><h2 style="margin-top:5px">ゲーム設定</h2><p>設定はすぐに反映・自動保存されます。練習中の時間は一時停止します。</p></div><button class="primary" data-act="close-settings">保存して戻る →</button></div><div class="settings-content" tabindex="0" aria-label="設定項目">${appearanceHTML()}<div class="settings-grid"><section class="panel"><h3>共通のハンドリング</h3>${presetsHTML()}${HANDLING.map(field => (field.key === 'lockDelay' ? toggle('lockDelayOn','ロックディレイ（接地後に自動固定）',true) : '') + handlingRow(field.key, field.title, field.note, field.step)).join('')}<p class="handling-note">ARR 0：DASがたまると壁まで移動します。SDF 41：固定せず床へ。<br>DCD：出現・回転・落下固定の後、自動横移動だけを待機します。<br>左右同時押しは後から押した方向が優先。古い方向のDASも保持します。</p><div class="toggle-grid">${toggle('irs','IRS / 出現時に先行回転',true)}${toggle('ihs','IHS / 出現時にホールド',true)}${toggle('allow180','180°回転を有効にする',true)}</div><div class="settings-group" role="group" aria-labelledby="shared-display-sound"><h3 id="shared-display-sound">共通の表示・サウンド</h3><div class="toggle-grid">${toggle('ghost','着地の影を表示')}${toggle('showKeys','キーキャップを表示')}${toggle('sound','効果音を鳴らす')}${toggle('bubbles','ミルフィの吹き出し')}</div>${uiNumeric('volume', '音量')}${cueSettingsHTML()}</div><div class="settings-group" role="group" aria-labelledby="finesse-settings"><h3 id="finesse-settings">フィネス編の練習</h3><div class="toggle-grid">${toggle('zeroFault','ゼロフォルトモード')}${toggle('repeatOnFault','フォルト時に同じ目標')}${toggle('repeatOnMiss','ミス時に同じ目標')}${toggle('showTarget','目標の輪郭を表示')}${toggle('showOptimal','最短手順を表示')}</div></div></section><section class="panel"><div class="row spread"><h3>キー設定</h3><button class="quiet small" data-act="reset-keys">キーを初期化</button></div><p class="tiny" style="margin:0 0 12px">移動・回転などは共通です。リトライはフリーモードでは再スタート。<br>次の目標・ヒントはフィネス編と回転入れ編の操作です。<br>キーを選んで押し直す・＋で追加・×で削除。重複は入れ替えできます。</p><div class="binding-list">${E.INPUT_ACTIONS.map(action => `<div class="binding-row"><span>${ACTION_NAMES[action]}</span><div class="binding-keys">${bindings[action].map((code, index) => `<button class="binding-key" data-act="capture" data-action="${action}" data-index="${index}" aria-label="${ACTION_NAMES[action]} ${escape(friendly(code))} を変更">${escape(friendly(code))}</button>${bindings[action].length > 1 ? `<button class="quiet" style="padding:0" data-act="remove-key" data-action="${action}" data-index="${index}" aria-label="${escape(friendly(code))} を削除">×</button>` : ''}`).join('')}<button class="binding-add" data-act="capture" data-action="${action}" aria-label="${ACTION_NAMES[action]} キーを追加">+</button></div></div>`).join('')}</div><p class="handling-note">Shift(左) と Shift(右) は別のキーです。<br>長押しのOSリピートは入力回数に数えません。<br>設定画面では矢印で数値調整、Tabで項目を移動。<br>盤面からはTab（割当時はShift+Tab）で操作欄へ移れます。</p></section></div><div class="settings-bottom"><section class="panel"><h3>JSONでエクスポート / インポート</h3><p class="tiny" style="margin-top:7px">操作・キー・表示設定をコピーして持ち運べます。記録とレッスン進捗は保持します。</p><textarea id="settings-json" aria-label="設定JSON" spellcheck="false" placeholder="エクスポート、または設定JSONをここに貼り付け"></textarea><div class="row"><button class="small" data-act="export">エクスポート</button><button class="small" data-act="import">インポートして適用</button></div><p id="import-status" class="storage-note" role="status"></p></section><section class="panel"><h3>初期化について</h3><p class="handling-note">すべての操作・キー・表示設定を初期値に戻せます。<br>成績の初期化は「記録」画面から行えます。<br>保存先：このブラウザのローカルストレージ。外部通信はありません。</p><button class="small danger" data-act="reset-settings">すべての設定を初期化</button><p class="storage-note">${storageOK ? '✓ このブラウザに保存されています。' : 'この環境では保存を利用できません。起動中の設定は保持されます。'}</p></section></div></div></main>${footer()}`;
   }
   function statsHTML() {
     const stats = statsScope === 'session' && session ? session.stats.snapshot() : totalStats.snapshot();
@@ -5002,7 +5023,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     const variant = selectedDemo || variants[demoVariant % variants.length];
     const target = variant.target || lesson.demo.targets?.[0];
     const type = variant.piece || lesson.demo.piece;
-    const t = now(), localSettings = { ...settings, ...lesson.demo.settings, gravity: 0, sdf: 40,
+    const t = now(), localSettings = { ...settings, ...lesson.demo.settings, gravity: 0, sdf: 40, lockDelayOn: false,
       das: 240, arr: 35, dcd: 0, are: lesson.demo.type === 'spawn-buffer' ? 650 : 450 };
     const events = [], handler = new E.InputHandler({ clock: now, time: t, settings: localSettings, autoNext: false,
       onEvent: event => { if (event.kind === 'spawn' && handler.inputs.some(i => i.irs)) irsUntil = now() + 850; } });
@@ -5259,10 +5280,10 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     } else if (act === 'remove-key') { bindings[button.dataset.action].splice(Number(button.dataset.index), 1); save(); render(false); }
   }
   document.addEventListener('mousedown', event => {
-    if (event.target.closest?.('[data-live-handling]') && !event.target.dataset?.setting) event.preventDefault();
+    if (event.target.closest?.('[data-live-handling]') && !event.target.dataset?.setting && !event.target.dataset?.engineToggle) event.preventDefault();
   });
   document.addEventListener('focusin', event => {
-    if (event.target.dataset?.setting && event.target.closest?.('[data-live-handling]')) releaseAll();
+    if ((event.target.dataset?.setting || event.target.dataset?.engineToggle) && event.target.closest?.('[data-live-handling]')) releaseAll();
   });
   document.addEventListener('click', event => { const button = event.target.closest('button[data-act]'); if (button && !button.disabled) clickAction(button); });
   function numericEditor(input) {
@@ -5317,7 +5338,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
       input.value = ui[key]; save();
       $('#appearance-preview').innerHTML = appearancePreview();
       $('#appearance-storage').textContent = storageOK ? '見た目の選択を保存しました。' : '保存できないため、この起動中だけ選択を保持します。';
-    } else if (input.dataset.engineToggle) updateSettings({ [input.dataset.engineToggle]: input.checked });
+    } else if (input.dataset.engineToggle) { updateSettings({ [input.dataset.engineToggle]: input.checked }); processEvents(); }
     else if (UI_NUMERIC[input.dataset.ui]) input.value = ui[input.dataset.ui];
     else if (input.dataset.ui === 'pieceCueTiming') { ui.pieceCueTiming = input.value; audio.stopCues(); save(); }
     else if (input.dataset.ui && !['volume', 'pieceCueVolume'].includes(input.dataset.ui)) {
@@ -5367,7 +5388,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     const action = Object.keys(bindings).find(name => bindings[name].includes(event.code));
     // Also guard programmatic/assistive focus on these pointer-only buttons:
     // bound keys, arrows and Space belong to play, never native activation.
-    if (event.target.dataset?.setting && event.target.closest?.('[data-live-handling]')) {
+    if ((event.target.dataset?.setting || event.target.dataset?.engineToggle) && event.target.closest?.('[data-live-handling]')) {
       if (['Escape', 'Enter'].includes(event.code)) { event.preventDefault(); event.target.blur(); $('#board')?.focus({ preventScroll: true }); }
       return;
     }

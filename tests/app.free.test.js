@@ -218,7 +218,7 @@ test('free mode shares pause, sound/cue preferences and rebinding with a shared 
   app.advance(500);
   app.tap('KeyQ'); assert.equal(app.state().stats.gameOver, false);
   app.click('settings'); assert.equal(app.state().screen, 'settings'); assert.equal(app.state().paused, true);
-  assert.match(app.app.innerHTML, /0：フィネス編はなし／フリーは毎秒1マス/);
+  assert.match(app.app.innerHTML, /0：練習はなし／フリーは毎秒1マス/);
   assert.doesNotMatch(app.app.innerHTML.match(/<header[\s\S]*?<\/header>/)[0], /フィネス編|フリーモード/);
   app.click('close-settings'); assert.equal(app.state().mode, 'free'); assert.match(app.overlay, /一時停止/);
   app.click('resume'); assert.equal(app.state().paused, false);
