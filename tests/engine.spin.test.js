@@ -4,6 +4,44 @@ const assert = require('node:assert/strict');
 const E = require('../src/engine');
 const stateKey = s => [s.x, s.y, s.rot].join(',');
 
+test('expanded catalog preserves the original four sets and all saved progress', () => {
+  const legacy = require('./spin-legacy.json');
+  assert.deepEqual(E.SPIN_SETS.slice(0, 4), legacy);
+  assert.equal(E.SPIN_DRILLS.length, 36);
+  assert.equal(E.SPIN_SETS.length, 8);
+  assert.equal(new Set(E.SPIN_DRILLS.map(d => d.id)).size, 36);
+  const completed = legacy.flatMap(s => s.drills.map(d => d.id));
+  for (const current of completed) assert.deepEqual(E.normalizeSpinProgress({ current, completed }), { current, completed });
+  const layouts = new Set();
+  for (const d of E.SPIN_DRILLS) {
+    assert.ok(d.rows.every(r => /^[.#]{10}$/.test(r)), d.id);
+    const layout = JSON.stringify([d.type, d.rows, d.cells]);
+    assert.ok(!layouts.has(layout), `Duplicate board/target: ${d.id}`);
+    layouts.add(layout);
+  }
+});
+
+test('new hint routes exercise downward, sideways and upward kicks, without 180', () => {
+  const entries = {};
+  for (const d of E.SPIN_DRILLS.slice(14)) {
+    const board = E.spinBoard(d), route = E.solveSpinDrill(d, { allow180: false });
+    let state = E.spawnPiece(d.type), before;
+    for (const action of route) {
+      before = state;
+      state = action === 'floor' ? E.hardDrop(board, state) : action === 'softDrop' ?
+        E.movePiece(board, state, 0, -1) : E.applyAction(board, state, action, { allow180: false });
+    }
+    assert.ok(E.sameCells(E.cells(state), d.cells), d.id);
+    entries[d.id] = { dx: state.x - before.x, dy: state.y - before.y };
+    assert.ok(entries[d.id].dx || entries[d.id].dy, `${d.id}: hint must demonstrate a kick`);
+  }
+  for (const id of ['s-pocket', 'z-pocket', 's-triple', 'z-triple']) assert.equal(entries[id].dy, -2, id);
+  for (const id of ['l-shelf', 'j-shelf', 'i-shelf-left', 'i-shelf-right']) {
+    assert.equal(entries[id].dy, 0, id); assert.equal(Math.abs(entries[id].dx), 1, id);
+  }
+  for (const id of ['i-lift-left', 'i-lift-right']) assert.equal(entries[id].dy, 2, id);
+});
+
 // Exhaust the complete reachable graph, including deliberate descent, hard
 // drops, both directions, and optionally 180. Do not use the hint solver here.
 function audit(drill, options) {
