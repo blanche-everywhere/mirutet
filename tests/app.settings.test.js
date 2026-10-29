@@ -41,6 +41,7 @@ function loadApp(saved, storageBlocked = false) {
   });
   return {
     nodes,
+    help: window.__mirutet.settingHelp,
     state: () => JSON.parse(JSON.stringify(window.__mirutet.getState())),
     persisted: () => JSON.parse(values.get('mirutet-finesse.v1')),
     click(act, dataset = {}) {
@@ -57,6 +58,34 @@ function loadApp(saved, storageBlocked = false) {
     }
   };
 }
+
+test('every exposed game preference has one Japanese tooltip with a stable accessible ID', () => {
+  const app = loadApp(); app.click('settings');
+  const state = app.state();
+  const keys = [...Object.keys(state.settings).filter(key => key !== 'spawnDrop'), ...Object.keys(state.ui)];
+  assert.equal(keys.length, 25);
+  assert.deepEqual(Object.keys(app.help).sort(), keys.sort());
+  assert(Object.isFrozen(app.help));
+  for (const key of keys) {
+    assert.match(app.help[key], /[ぁ-んァ-ン一-龯]/, key);
+    const tooltip = app.nodes['#app'].innerHTML.match(new RegExp(`<div id="setting-help-${key}" class="setting-tooltip" role="tooltip" hidden>([^<]+)</div>`, 'g'));
+    assert.equal(tooltip?.length, 1, `${key} has exactly one tooltip`);
+    assert(tooltip[0].includes(app.help[key]), `${key} renders its shared source text`);
+  }
+});
+
+test('handling help explains full terms and the instant drop and lock delay exceptions', () => {
+  const {help} = loadApp();
+  assert.equal(help.das, 'Delayed Auto Shift：横キーを長押ししたとき、自動で連続移動が始まるまでの待ち時間');
+  for (const [key, term] of [['arr','Auto Repeat Rate'], ['sdf','Soft Drop Factor'],
+    ['dcd','DAS Cut Delay'], ['irs','Initial Rotation System'], ['ihs','Initial Hold System']]) assert(help[key].startsWith(term));
+  assert.match(help.arr, /0.*壁/);
+  assert.match(help.sdf, /41（∞）.*固定せず/);
+  assert.match(help.gravity, /0.*フリーモード.*毎秒1マス/);
+  assert.match(help.lockDelay, /15回/);
+  assert.match(help.lockDelayOn, /オフ.*ハードドロップ/);
+  assert.notEqual(help.lockDelayOn, help.lockDelay);
+});
 
 test('lock delay controls synchronize, persist, export/import atomically, preserve presets and reset defaults', () => {
   const app = loadApp(); app.click('settings');

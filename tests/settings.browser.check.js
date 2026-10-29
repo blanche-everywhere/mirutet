@@ -4,6 +4,7 @@ const assert=require('node:assert/strict'),path=require('node:path'),fs=require(
 (async()=>{
  const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/google-chrome',headless:true});
  try {
+  await require('./tooltips.browser.check').checkSettingTooltips(browser);
   const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   const state=()=>page.evaluate(()=>window.__mirutet.getState());

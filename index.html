@@ -103,6 +103,22 @@ button:disabled {
   transform:none
 }
 
+.setting-tooltip {
+  position:fixed;
+  z-index:40;
+  width:max-content;
+  max-width:min(360px,calc(100vw - 16px));
+  padding:10px 14px;
+  border:1px solid #d2bfe7;
+  border-radius:12px;
+  background:#fffafd;
+  color:var(--ink);
+  box-shadow:0 5px 18px #72588d24;
+  font-size:13px;
+  line-height:1.7;
+  overflow-wrap:anywhere
+}
+
 .primary {
   color:#fff;
   background:linear-gradient(125deg,#bd9cda,#a48aca);
@@ -4312,14 +4328,43 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     hairSkin: M.DEFAULT_HAIR_SKIN, outfitSkin: M.DEFAULT_OUTFIT_SKIN };
   const PRACTICE_DEFAULTS = { pieces: [...E.PIECE_TYPES], area: 'all', minColumn: 1, maxColumn: 10, weakSpot: false };
   const HANDLING = [
-    { key: 'das', title: 'DAS', note: '長押しの待ち時間 ms', unit: 'ms', step: 1 },
-    { key: 'arr', title: 'ARR', note: '連続移動の間隔 ms', unit: 'ms', step: 1 },
-    { key: 'sdf', title: 'SDF', note: 'ソフト落下倍率 / 41 = ∞', unit: '×', step: 1 },
-    { key: 'dcd', title: 'DCD', note: '自動移動の待機 ms', unit: 'ms', step: 1 },
-    { key: 'are', title: 'ARE', note: '次の出現まで ms', unit: 'ms', step: 1 },
-    { key: 'gravity', title: '重力 G', note: 'マス/フレーム · 0：練習はなし／フリーは毎秒1マス', unit: 'G', step: .1 },
-    { key: 'lockDelay', title: 'ロックディレイ', note: '接地後に自動固定 ms · 移動・回転で15回まで延長', unit: 'ms', step: 10 }
+    { key: 'das', title: 'DAS', note: '長押しの待ち時間 ms', unit: 'ms', step: 1,
+      help: 'Delayed Auto Shift：横キーを長押ししたとき、自動で連続移動が始まるまでの待ち時間' },
+    { key: 'arr', title: 'ARR', note: '連続移動の間隔 ms', unit: 'ms', step: 1,
+      help: 'Auto Repeat Rate：DASの待ち時間の後、横に1マスずつ移動する間隔。0なら壁まで一気に移動します' },
+    { key: 'sdf', title: 'SDF', note: 'ソフト落下倍率 / 41 = ∞', unit: '×', step: 1,
+      help: 'Soft Drop Factor：下キーを押している間の落下速度の倍率。重力0では毎秒1マスを基準にし、41（∞）なら固定せず床まで落ちます' },
+    { key: 'dcd', title: 'DCD', note: '自動移動の待機 ms', unit: 'ms', step: 1,
+      help: 'DAS Cut Delay：ミノの出現・回転・落下固定の後、自動の横移動だけを待たせる時間。横キーを押した直後の1マス移動は待ちません' },
+    { key: 'are', title: 'ARE', note: '次の出現まで ms', unit: 'ms', step: 1,
+      help: 'ARE（出現待ち時間）：ミノを固定してから次のミノが出現するまでの時間' },
+    { key: 'gravity', title: '重力 G', note: 'マス/フレーム · 0：練習はなし／フリーは毎秒1マス', unit: 'G', step: .1,
+      help: 'ミノが自然に落ちる速さ。1Gは1フレーム（1/60秒）に1マス。0なら練習では落下せず、フリーモードでは毎秒1マス落ちます' },
+    { key: 'lockDelay', title: 'ロックディレイ', note: '接地後に自動固定 ms · 移動・回転で15回まで延長', unit: 'ms', step: 10,
+      help: 'ミノが接地してから自動で固定されるまでの時間。接地中の移動・回転で15回まで延長できます。オフの間は適用されません' }
   ];
+  // Both settings views and their accessible descriptions use these texts.
+  const SETTING_HELP = Object.freeze({
+    ...Object.fromEntries(HANDLING.map(field => [field.key, field.help])),
+    lockDelayOn: '接地後にミノを自動で固定する機能のオン・オフ。オフではハードドロップで固定します',
+    irs: 'Initial Rotation System：出現前から回転キーを押しておくと、次のミノが回転した状態で出現します',
+    ihs: 'Initial Hold System：次のミノの出現待ち中にホールドを入力すると、出現時にホールドします',
+    allow180: '1回のキー入力でミノを180度回転できるようにします',
+    ghost: 'ハードドロップしたときの着地位置を影で表示します',
+    showKeys: '操作キーや手順をキーキャップの形で表示します',
+    sound: '操作・判定の効果音と、ミノを知らせる音を鳴らします',
+    bubbles: '練習中にミルフィのアドバイスや応援の吹き出しを表示します',
+    volume: '効果音とミノを知らせる音に共通の全体音量を調整します',
+    pieceCueTiming: 'ミノの出現時に、NEXTの先頭または現在のミノを音で知らせます。オフでは自動で鳴りません',
+    pieceCueVolume: 'ミノを知らせる音の音量を調整します。全体の音量と効果音のオン・オフも反映されます',
+    zeroFault: '最短入力で成功した配置だけで練習を進めます。余分な入力があると同じ目標に再挑戦します',
+    repeatOnFault: '目標どおりに置けても入力が最短より多かったとき、同じ目標に再挑戦します',
+    repeatOnMiss: '目標と違う場所に置いたとき、同じ目標に再挑戦します',
+    showTarget: '練習でミノを置く目標の位置と向きを、破線の輪郭で表示します',
+    showOptimal: 'ヒントや判定結果に、最少の入力回数で置ける操作手順を表示します',
+    hairSkin: 'ミルフィの前髪を選びます。選んだ見た目はすべての画面に反映されます',
+    outfitSkin: 'ミルフィの衣装を選びます。選んだ見た目はすべての画面に反映されます'
+  });
   const numericDrafts = new WeakSet();
   let settings = { ...E.DEFAULT_SETTINGS }, ui = { ...UI_DEFAULTS }, bindings = copy(DEFAULT_KEYS);
   // 60 Hz reference timings, rounded to the editor's millisecond resolution.
@@ -4417,6 +4462,72 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const app = $('#app');
 
+  let hoveredHelp = null, focusedHelp = null, tappedHelp = null, activeHelp = null, helpHideTimer = null;
+  const helpOwner = node => node?.closest?.('[data-setting-help]') || null;
+  function settingTooltipsHTML(content) {
+    const keys = new Set([...content.matchAll(/(?:data-setting|data-engine-toggle|data-ui)="([^"]+)"/g)].map(match => match[1]));
+    if (content.includes('data-hair-skin>')) keys.add('hairSkin');
+    if (content.includes('data-outfit-skin>')) keys.add('outfitSkin');
+    return [...keys].filter(key => SETTING_HELP[key]).map(key => `<div id="setting-help-${key}" class="setting-tooltip" role="tooltip" hidden>${escape(SETTING_HELP[key])}</div>`).join('');
+  }
+  function setupSettingHelp() {
+    for (const control of $$('input[data-setting],input[data-engine-toggle],input[data-ui],select[data-ui],select[data-hair-skin],select[data-outfit-skin]')) {
+      const key = control.dataset.setting || control.dataset.engineToggle || control.dataset.ui ||
+        (control.hasAttribute('data-hair-skin') ? 'hairSkin' : 'outfitSkin');
+      if (!SETTING_HELP[key]) continue;
+      const owner = control.type === 'checkbox' ? control.closest('label') : control.closest('.setting-row,.handling-stepper');
+      (owner || control).dataset.settingHelp = key;
+      if (control.id) {
+        const label = $(`label[for="${control.id}"]`);
+        if (label) label.dataset.settingHelp = key;
+      }
+    }
+    for (const owner of $$('[data-setting-help]')) {
+      for (const target of [owner, ...$$('input,select,button', owner)]) {
+        if (helpOwner(target) !== owner) continue;
+        const ids = new Set((target.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean));
+        ids.add(`setting-help-${owner.dataset.settingHelp}`);
+        target.setAttribute('aria-describedby', [...ids].join(' '));
+      }
+    }
+  }
+  function updateSettingTooltip() {
+    if (helpHideTimer !== null) { clearTimeout(helpHideTimer); helpHideTimer = null; }
+    const owner = hoveredHelp || tappedHelp || focusedHelp;
+    const tooltip = owner?.isConnected ? $(`#setting-help-${owner.dataset.settingHelp}`) : null;
+    if (activeHelp && activeHelp !== tooltip) activeHelp.hidden = true;
+    activeHelp = tooltip;
+    if (!tooltip) return;
+    tooltip.hidden = false;
+    const anchor = (owner.closest('.setting-row,.handling-stepper') || owner).getBoundingClientRect(), box = tooltip.getBoundingClientRect();
+    // Prefer spare space beside the row so help does not mask nearby controls.
+    const side = anchor.right + box.width + 16 <= window.innerWidth ? 'right' : anchor.left >= box.width + 16 ? 'left' : null;
+    const left = side === 'right' ? anchor.right + 8 : side === 'left' ? anchor.left - box.width - 8 : anchor.left;
+    tooltip.style.left = `${Math.max(8, Math.min(left, window.innerWidth - box.width - 8))}px`;
+    const top = side ? anchor.top : anchor.top >= box.height + 16 ? anchor.top - box.height - 8 : anchor.bottom + 8;
+    tooltip.style.top = `${Math.max(8, Math.min(top, window.innerHeight - box.height - 8))}px`;
+  }
+  function dismissSettingTooltip() {
+    hoveredHelp = focusedHelp = tappedHelp = null;
+    updateSettingTooltip();
+  }
+  document.addEventListener('pointerover', event => {
+    if (event.pointerType === 'touch') return;
+    if (event.target.closest?.('.setting-tooltip')) {
+      if (helpHideTimer !== null) { clearTimeout(helpHideTimer); helpHideTimer = null; }
+      return;
+    }
+    hoveredHelp = helpOwner(event.target);
+    updateSettingTooltip();
+  });
+  document.addEventListener('pointerout', event => {
+    if (event.pointerType === 'touch' || event.relatedTarget?.closest?.('.setting-tooltip')) return;
+    hoveredHelp = helpOwner(event.relatedTarget);
+    // Keep the tooltip hoverable across the small gap from its setting row.
+    if (helpHideTimer !== null) clearTimeout(helpHideTimer);
+    helpHideTimer = setTimeout(updateSettingTooltip, 120);
+  });
+
   function friendly(code) {
     const labels = { ArrowLeft: '←', ArrowRight: '→', ArrowDown: '↓', ArrowUp: '↑', Space: 'Space',
       ShiftLeft: 'Shift(左)', ShiftRight: 'Shift(右)', ControlLeft: 'Ctrl(左)', ControlRight: 'Ctrl(右)',
@@ -4491,7 +4602,14 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     session?.combo.reset(); audio.stopCombo(); updateCombo();
   }
   // Unlock on the gesture itself, before an ARE timer or a preview's click.
-  document.addEventListener('pointerdown', () => audio.unlock(), { passive: true });
+  document.addEventListener('pointerdown', event => {
+    audio.unlock();
+    if (event.target.closest?.('.setting-tooltip')) return;
+    const owner = helpOwner(event.target);
+    if (event.pointerType === 'touch') tappedHelp = owner;
+    if (!owner) dismissSettingTooltip();
+    else updateSettingTooltip();
+  }, { passive: true });
   function header() {
     return `<header class="topbar"><button class="brand brand-button" data-act="menu" aria-label="タイトルへ"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>ミルテト</span></button><div class="top-actions">${screen !== 'menu' ? '<button class="quiet small" data-act="menu">タイトル</button>' : ''}${screen !== 'dressup' ? '<button class="quiet small" data-act="dressup">きせかえ</button>' : ''}<button class="small" data-act="settings">設定 <span class="tiny">${escape(friendly(bindings.settings[0]))}</span></button></div></header>`;
   }
@@ -4581,7 +4699,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   }
   // Stepper buttons retain board focus; native editors isolate typing from play.
   function handlingPanelHTML() {
-    return `<section class="panel handling-panel" data-live-handling aria-label="プレイ中のゲーム設定" aria-describedby="handling-access"><button class="handling-toggle" data-act="toggle-handling" tabindex="-1" aria-expanded="${handlingOpen}" aria-controls="live-handling-controls">ゲーム設定<span aria-hidden="true">${handlingOpen ? '−' : '＋'}</span></button><span id="handling-access" class="sr-only">入力中はゲームキーを停止。Enterで盤面に戻ります。</span><div id="live-handling-controls" ${handlingOpen ? '' : 'hidden'}>${HANDLING.map(field => `<div class="handling-stepper" title="${field.note}">${field.key === 'lockDelay' ? toggle('lockDelayOn','ロックディレイ（接地後に自動固定）',true,'ロック') : `<span>${field.key === 'gravity' ? '重力' : field.title}</span>`}<button data-act="adjust-handling" data-handling-key="${field.key}" data-step="-1" tabindex="-1" aria-label="${field.title}を減らす">−</button><output data-handling-value="${field.key}" aria-live="off">${handlingValue(field)}</output><button data-act="adjust-handling" data-handling-key="${field.key}" data-step="1" tabindex="-1" aria-label="${field.title}を増やす">＋</button><input class="live-number" aria-label="${field.title}" data-setting="${field.key}" type="number" min="${E.SETTING_LIMITS[field.key][0]}" max="${E.SETTING_LIMITS[field.key][1]}" step="${field.step}" value="${settings[field.key]}"><input class="live-range" aria-label="${field.title} スライダー" data-setting="${field.key}" type="range" min="${E.SETTING_LIMITS[field.key][0]}" max="${E.SETTING_LIMITS[field.key][1]}" step="${field.step}" value="${settings[field.key]}"></div>`).join('')}</div></section>`;
+    return `<section class="panel handling-panel" data-live-handling aria-label="プレイ中のゲーム設定" aria-describedby="handling-access"><button class="handling-toggle" data-act="toggle-handling" tabindex="-1" aria-expanded="${handlingOpen}" aria-controls="live-handling-controls">ゲーム設定<span aria-hidden="true">${handlingOpen ? '−' : '＋'}</span></button><span id="handling-access" class="sr-only">入力中はゲームキーを停止。Enterで盤面に戻ります。</span><div id="live-handling-controls" ${handlingOpen ? '' : 'hidden'}>${HANDLING.map(field => `<div class="handling-stepper">${field.key === 'lockDelay' ? toggle('lockDelayOn','ロックディレイ（接地後に自動固定）',true,'ロック') : `<span>${field.key === 'gravity' ? '重力' : field.title}</span>`}<button data-act="adjust-handling" data-handling-key="${field.key}" data-step="-1" tabindex="-1" aria-label="${field.title}を減らす">−</button><output data-handling-value="${field.key}" aria-live="off">${handlingValue(field)}</output><button data-act="adjust-handling" data-handling-key="${field.key}" data-step="1" tabindex="-1" aria-label="${field.title}を増やす">＋</button><input class="live-number" aria-label="${field.title}" data-setting="${field.key}" type="number" min="${E.SETTING_LIMITS[field.key][0]}" max="${E.SETTING_LIMITS[field.key][1]}" step="${field.step}" value="${settings[field.key]}"><input class="live-range" aria-label="${field.title} スライダー" data-setting="${field.key}" type="range" min="${E.SETTING_LIMITS[field.key][0]}" max="${E.SETTING_LIMITS[field.key][1]}" step="${field.step}" value="${settings[field.key]}"></div>`).join('')}</div></section>`;
   }
   function syncHandlingPanel() {
     for (const field of HANDLING) {
@@ -4680,11 +4798,14 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
 
   function render(focus = true) {
     dismissToast();
+    dismissSettingTooltip();
     const previous = document.activeElement;
     const focusKey = previous?.dataset ? { ...previous.dataset } : {};
     const previousId = previous?.id;
-    app.innerHTML = header() + ({ menu: menuHTML, play: isSpin() ? spinPlayHTML : playHTML, spins: spinsHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
+    const content = header() + ({ menu: menuHTML, play: isSpin() ? spinPlayHTML : playHTML, spins: spinsHTML, tutorial: tutorialHTML, lessons: lessonsHTML,
       dressup: dressupHTML, settings: settingsHTML, records: statsHTML, sprint: sprintHTML, result: resultHTML }[screen])();
+    app.innerHTML = content + settingTooltipsHTML(content);
+    setupSettingHelp();
     document.body.dataset.screen = screen;
     document.body.dataset.mode = isFree() ? 'free' : isSpin() ? 'spin' : 'finesse';
     document.body.dataset.keycaps = ui.showKeys ? 'on' : 'off';
@@ -5283,6 +5404,8 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     if (event.target.closest?.('[data-live-handling]') && !event.target.dataset?.setting && !event.target.dataset?.engineToggle) event.preventDefault();
   });
   document.addEventListener('focusin', event => {
+    focusedHelp = helpOwner(event.target);
+    updateSettingTooltip();
     if ((event.target.dataset?.setting || event.target.dataset?.engineToggle) && event.target.closest?.('[data-live-handling]')) releaseAll();
   });
   document.addEventListener('click', event => { const button = event.target.closest('button[data-act]'); if (button && !button.disabled) clickAction(button); });
@@ -5309,6 +5432,8 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   // .value during input destroys native intermediate text such as '.' or '0.'.
   document.addEventListener('focusout', event => {
     if (numericEditor(event.target)) commitNumeric(event.target);
+    focusedHelp = helpOwner(event.relatedTarget);
+    updateSettingTooltip();
   });
   document.addEventListener('input', event => {
     const input = event.target;
@@ -5371,6 +5496,9 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   }
   document.addEventListener('keydown', event => {
     audio.unlock();
+    if (event.code === 'Escape' && activeHelp) {
+      event.preventDefault(); dismissSettingTooltip(); return;
+    }
     if (capture) {
       if (event.code === 'Escape') { event.preventDefault(); if (!event.repeat) endCapture(); return; }
       const modal = $('.capture-overlay');
@@ -5473,6 +5601,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
     if (held) { event.preventDefault(); session.keyUp(held.action, now(), { code: event.code }); processEvents(); }
   });
   function blur() {
+    dismissSettingTooltip();
     // Freeze first, then release: releasing a newer direction cannot resume an
     // older charged direction beneath a pause overlay.
     if (session?.running) { pauseSession(); processEvents(); showPause(); }
@@ -5485,7 +5614,8 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   function startFrames() { if (!frameId) frameId = requestAnimationFrame(frame); }
   window.addEventListener('pagehide', () => { blur(); cancelAnimationFrame(frameId); frameId = 0; });
   window.addEventListener('pageshow', startFrames);
-  window.addEventListener('resize', () => { fitLessonBoard(); drawMinis(); });
+  document.addEventListener('scroll', updateSettingTooltip, true);
+  window.addEventListener('resize', () => { fitLessonBoard(); drawMinis(); updateSettingTooltip(); });
   function frame() {
     frameId = 0;
     const t = now();
@@ -5506,6 +5636,7 @@ body[data-screen=dressup]{min-width:0;overflow:auto;height:auto}body[data-screen
   // Public, serializable browser-test seam. Gameplay is always driven by normal
   // KeyboardEvent dispatch or page.keyboard; no helper changes counts/results.
   window.__mirutet = Object.freeze({
+    settingHelp: SETTING_HELP,
     getState() {
       const handler = screen === 'tutorial' && !tryMode ? demo?.handler : session?.handler;
       return copy({ screen, menuMode, mode: session ? isFree() ? 'free' : isSpin() ? 'spin' : 'finesse' : null, settings, ui, bindings, practice, progress, spinProgress, spinStats: spinStats.snapshot(), lessonIndex, tryMode, tryIndex, tryDone,

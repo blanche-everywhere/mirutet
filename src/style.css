@@ -60,6 +60,22 @@ button:disabled {
   transform:none
 }
 
+.setting-tooltip {
+  position:fixed;
+  z-index:40;
+  width:max-content;
+  max-width:min(360px,calc(100vw - 16px));
+  padding:10px 14px;
+  border:1px solid #d2bfe7;
+  border-radius:12px;
+  background:#fffafd;
+  color:var(--ink);
+  box-shadow:0 5px 18px #72588d24;
+  font-size:13px;
+  line-height:1.7;
+  overflow-wrap:anywhere
+}
+
 .primary {
   color:#fff;
   background:linear-gradient(125deg,#bd9cda,#a48aca);
